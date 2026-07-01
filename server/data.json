@@ -1,0 +1,253 @@
+{
+  "facilities": [
+    {
+      "id": "FAC-JUTH",
+      "name": "Jos University Teaching Hospital",
+      "type": "Tertiary Hospital",
+      "lga": "Jos North",
+      "level": "Referral",
+      "beds": 520,
+      "status": "Online",
+      "services": ["Emergency", "Surgery", "ICU", "Laboratory", "Radiology", "Pharmacy", "Maternity"]
+    },
+    {
+      "id": "FAC-PLSH",
+      "name": "Plateau State Specialist Hospital",
+      "type": "Specialist Hospital",
+      "lga": "Jos North",
+      "level": "Secondary",
+      "beds": 280,
+      "status": "Online",
+      "services": ["OPD", "Emergency", "Laboratory", "Radiology", "Pharmacy", "Maternity"]
+    },
+    {
+      "id": "FAC-WASE",
+      "name": "Federal Medical Centre Wase",
+      "type": "Federal Medical Centre",
+      "lga": "Wase",
+      "level": "Referral",
+      "beds": 180,
+      "status": "Online",
+      "services": ["OPD", "Emergency", "Surgery", "Laboratory", "Pharmacy"]
+    },
+    {
+      "id": "FAC-PHC-BARKIN",
+      "name": "Barkin Ladi Model PHC",
+      "type": "Primary Health Centre",
+      "lga": "Barkin Ladi",
+      "level": "Primary",
+      "beds": 24,
+      "status": "Online",
+      "services": ["ANC", "Immunization", "Malaria", "Delivery", "Outreach"]
+    },
+    {
+      "id": "FAC-PHC-MANGU",
+      "name": "Mangu Central PHC",
+      "type": "Primary Health Centre",
+      "lga": "Mangu",
+      "level": "Primary",
+      "beds": 18,
+      "status": "Online",
+      "services": ["ANC", "Immunization", "Malaria", "Nutrition", "Outreach"]
+    },
+    {
+      "id": "FAC-PHC-SHENDAM",
+      "name": "Shendam Community PHC",
+      "type": "Primary Health Centre",
+      "lga": "Shendam",
+      "level": "Primary",
+      "beds": 20,
+      "status": "Needs Sync",
+      "services": ["ANC", "Immunization", "Malaria", "Delivery"]
+    }
+  ],
+  "patients": [
+    {
+      "id": "PT-0001",
+      "name": "Amina Musa",
+      "sex": "Female",
+      "age": 29,
+      "phone": "08030000001",
+      "lga": "Barkin Ladi",
+      "community": "Ropp",
+      "facilityId": "FAC-PHC-BARKIN",
+      "insurance": "PLASCHEMA",
+      "risk": "Pregnancy",
+      "allergies": ["Sulfa"],
+      "lastVisit": "2026-06-18"
+    },
+    {
+      "id": "PT-0002",
+      "name": "Yakubu Pam",
+      "sex": "Male",
+      "age": 54,
+      "phone": "08030000002",
+      "lga": "Jos South",
+      "community": "Bukuru",
+      "facilityId": "FAC-PLSH",
+      "insurance": "NHIA",
+      "risk": "Hypertension",
+      "allergies": [],
+      "lastVisit": "2026-06-22"
+    },
+    {
+      "id": "PT-0003",
+      "name": "Grace Dung",
+      "sex": "Female",
+      "age": 7,
+      "phone": "Guardian: 08030000003",
+      "lga": "Mangu",
+      "community": "Panyam",
+      "facilityId": "FAC-PHC-MANGU",
+      "insurance": "Basic Health Care Provision Fund",
+      "risk": "Under-5",
+      "allergies": ["Penicillin"],
+      "lastVisit": "2026-06-20"
+    },
+    {
+      "id": "PT-0004",
+      "name": "Samuel Longji",
+      "sex": "Male",
+      "age": 37,
+      "phone": "08030000004",
+      "lga": "Wase",
+      "community": "Wase Town",
+      "facilityId": "FAC-WASE",
+      "insurance": "Private Pay",
+      "risk": "Trauma Follow-up",
+      "allergies": [],
+      "lastVisit": "2026-06-23"
+    }
+  ],
+  "encounters": [
+    {
+      "id": "ENC-1001",
+      "patientId": "PT-0001",
+      "facilityId": "FAC-PHC-BARKIN",
+      "unit": "ANC",
+      "date": "2026-06-18",
+      "chiefComplaint": "Routine antenatal visit, intermittent headache",
+      "vitals": {
+        "temperature": 36.8,
+        "bp": "142/94",
+        "pulse": 88,
+        "respiration": 18,
+        "spo2": 98,
+        "weight": 72
+      },
+      "assessment": "Pregnancy at 28 weeks with elevated blood pressure. Rule out pre-eclampsia.",
+      "plan": "Check urine protein, FBC, LFT, counsel danger signs, refer if severe features.",
+      "status": "Open"
+    },
+    {
+      "id": "ENC-1002",
+      "patientId": "PT-0002",
+      "facilityId": "FAC-PLSH",
+      "unit": "OPD",
+      "date": "2026-06-22",
+      "chiefComplaint": "Headache and dizziness for three days",
+      "vitals": {
+        "temperature": 37.1,
+        "bp": "168/104",
+        "pulse": 94,
+        "respiration": 20,
+        "spo2": 97,
+        "weight": 86
+      },
+      "assessment": "Poorly controlled hypertension.",
+      "plan": "Review adherence, renal function, ECG, adjust antihypertensive after clinician review.",
+      "status": "Open"
+    },
+    {
+      "id": "ENC-1003",
+      "patientId": "PT-0003",
+      "facilityId": "FAC-PHC-MANGU",
+      "unit": "PHC",
+      "date": "2026-06-20",
+      "chiefComplaint": "Fever, chills, vomiting",
+      "vitals": {
+        "temperature": 39.2,
+        "bp": "92/60",
+        "pulse": 124,
+        "respiration": 28,
+        "spo2": 96,
+        "weight": 21
+      },
+      "assessment": "Suspected malaria with dehydration. Under-5 high risk.",
+      "plan": "RDT, oral rehydration if tolerated, urgent referral if lethargy/persistent vomiting.",
+      "status": "Escalated"
+    }
+  ],
+  "orders": [
+    {
+      "id": "ORD-5001",
+      "patientId": "PT-0001",
+      "type": "Laboratory",
+      "item": "Urine Protein, FBC, LFT",
+      "priority": "Urgent",
+      "status": "Pending",
+      "facilityId": "FAC-PHC-BARKIN"
+    },
+    {
+      "id": "ORD-5002",
+      "patientId": "PT-0002",
+      "type": "Pharmacy",
+      "item": "Amlodipine review, adherence counselling",
+      "priority": "Routine",
+      "status": "In Progress",
+      "facilityId": "FAC-PLSH"
+    },
+    {
+      "id": "ORD-5003",
+      "patientId": "PT-0003",
+      "type": "Referral",
+      "item": "Refer to General Hospital Mangu if danger signs persist",
+      "priority": "Emergency",
+      "status": "Escalated",
+      "facilityId": "FAC-PHC-MANGU"
+    }
+  ],
+  "inventory": [
+    {
+      "item": "Artemisinin Combination Therapy",
+      "facilityId": "FAC-PHC-MANGU",
+      "quantity": 18,
+      "reorderLevel": 30
+    },
+    {
+      "item": "Oxytocin",
+      "facilityId": "FAC-PHC-BARKIN",
+      "quantity": 9,
+      "reorderLevel": 15
+    },
+    {
+      "item": "RDT Kits",
+      "facilityId": "FAC-PHC-SHENDAM",
+      "quantity": 45,
+      "reorderLevel": 50
+    }
+  ],
+  "surveillance": [
+    {
+      "condition": "Malaria",
+      "lga": "Mangu",
+      "cases7d": 43,
+      "trend": "Rising",
+      "signal": "PHC outreach recommended"
+    },
+    {
+      "condition": "Measles-like illness",
+      "lga": "Shendam",
+      "cases7d": 4,
+      "trend": "Watch",
+      "signal": "Verify immunization status"
+    },
+    {
+      "condition": "Maternal hypertension",
+      "lga": "Barkin Ladi",
+      "cases7d": 8,
+      "trend": "Rising",
+      "signal": "ANC clinical audit"
+    }
+  ]
+}
