@@ -652,6 +652,21 @@ function serveStatic(req, res, url) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
+  // Basic Auth Check
+  const authHeader = req.headers.authorization || "";
+  const b64auth = authHeader.split(" ")[1] || "";
+  const [login, password] = Buffer.from(b64auth, "base64").toString().split(":");
+  
+  const validUser = process.env.APP_USER || "guyestguy";
+  const validPass = process.env.APP_PASS || "guyestguygithub001";
+
+  if (login !== validUser || password !== validPass) {
+    res.statusCode = 401;
+    res.setHeader("WWW-Authenticate", 'Basic realm="Secure Area"');
+    res.end("Access denied");
+    return;
+  }
+
   try {
     if (url.pathname.startsWith("/api/")) {
       await handleApi(req, res, url);
