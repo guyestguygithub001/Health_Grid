@@ -274,8 +274,81 @@ function validateIcd11Cluster(expression) {
   };
 }
 
+const serviceCosts = {
+  "Triage": 500,
+  "Outpatient": 1000,
+  "Emergency": 3000,
+  "Wards": 5000,
+  "Laboratory": 2000,
+  "Pharmacy": 1200,
+  "Radiology": 4500,
+  "ANC and Maternity": 1000,
+  "Immunization": 300,
+  "Theatre": 15000,
+  "Claims": 200,
+  "Referrals": 800,
+  "Consultation": 1500
+};
+
+const unitToServiceMap = {
+  "OPD": "Outpatient",
+  "Emergency": "Emergency",
+  "Ward": "Wards",
+  "ANC": "ANC and Maternity",
+  "PHC": "Triage",
+  "Theatre": "Theatre",
+  "Triage": "Triage",
+  "Laboratory": "Laboratory",
+  "Pharmacy": "Pharmacy",
+  "Radiology": "Radiology",
+  "Immunization": "Immunization",
+  "Claims": "Claims",
+  "Referrals": "Referrals"
+};
+
+const insuranceCoverage = {
+  "PLASCHEMA": 0.7,
+  "NHIA": 0.6,
+  "Basic Health Care Provision Fund": 0.9,
+  "Private Pay": 0.0
+};
+
+function createAutoBill(data, patientId, serviceType, description) {
+  if (!data.billing) data.billing = [];
+  const patient = data.patients.find(p => p.id === patientId);
+  const patientName = patient ? patient.name : "Unknown Patient";
+  const insurance = patient ? patient.insurance : "Private Pay";
+  
+  const cost = serviceCosts[serviceType] || 1000;
+  const coveragePercent = insuranceCoverage[insurance] !== undefined ? insuranceCoverage[insurance] : 0.0;
+  
+  const totalAmount = cost;
+  const insuranceCovered = Math.round(cost * coveragePercent);
+  const patientPayable = totalAmount - insuranceCovered;
+  
+  const bill = {
+    id: nextId("BILL", data.billing),
+    patientId,
+    patientName,
+    service: serviceType,
+    description: description || `${serviceType} services rendered`,
+    totalAmount,
+    insuranceCovered,
+    patientPayable,
+    insurance,
+    status: "Pending",
+    date: new Date().toISOString().slice(0, 10)
+  };
+  
+  data.billing.unshift(bill);
+  return bill;
+}
+
 async function handleApi(req, res, url) {
   const data = readData();
+
+  if (!data.consultations) data.consultations = [];
+  if (!data.billing) data.billing = [];
 
   if (req.method === "OPTIONS") {
     sendJson(res, 200, { ok: true });
@@ -341,6 +414,11 @@ async function handleApi(req, res, url) {
       icd11Display: body.icd11Display || ""
     };
     data.encounters.unshift(encounter);
+    
+    // Auto-create bill for clinical encounter
+    const serviceType = unitToServiceMap[encounter.unit] || "Outpatient";
+    createAutoBill(data, encounter.patientId, serviceType, `${encounter.unit} encounter recorded: ${encounter.chiefComplaint || "Clinical services"}`);
+    
     writeData(data);
     sendJson(res, 201, encounter);
     return;
@@ -405,6 +483,67 @@ async function handleApi(req, res, url) {
   if (req.method === "POST" && url.pathname === "/api/icd11/validate") {
     const body = await collectBody(req);
     sendJson(res, 200, validateIcd11Cluster(body.expression));
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/consultations") {
+    sendJson(res, 200, data.consultations);
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/consultations") {
+    const body = await collectBody(req);
+    const consultation = {
+      id: nextId("CNS", data.consultations),
+      patientId: body.patientId,
+      facilityId: body.facilityId,
+      doctorName: body.doctorName || "Dr. Staff",
+      specialty: body.specialty || "General Medicine",
+      chiefComplaint: body.chiefComplaint || "",
+      historyOfPresentingComplaint: body.historyOfPresentingComplaint || "",
+      pastMedicalHistory: body.pastMedicalHistory || "",
+      allergies: body.allergies || "",
+      examinationFindings: body.examinationFindings || "",
+      assessment: body.assessment || "",
+      plan: body.plan || "",
+      icd11Code: body.icd11Code || "",
+      icd11Display: body.icd11Display || "",
+      prescriptions: body.prescriptions || [],
+      date: new Date().toISOString().slice(0, 10)
+    };
+    data.consultations.unshift(consultation);
+    
+    // Auto-create bill for consultation
+    createAutoBill(data, body.patientId, "Consultation", `Doctor Consultation (${consultation.specialty})`);
+    
+    writeData(data);
+    sendJson(res, 201, consultation);
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/billing") {
+    sendJson(res, 200, data.billing);
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/billing") {
+    const body = await collectBody(req);
+    const bill = createAutoBill(data, body.patientId, body.service, body.description);
+    writeData(data);
+    sendJson(res, 201, bill);
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/billing/status") {
+    const body = await collectBody(req);
+    const bill = data.billing.find(b => b.id === body.id);
+    if (bill) {
+      bill.status = body.status; // e.g. "Paid", "Claimed", "Waived"
+      writeData(data);
+      sendJson(res, 200, bill);
+    } else {
+      sendJson(res, 404, { error: `Bill not found: ${body.id}` });
+    }
     return;
   }
 

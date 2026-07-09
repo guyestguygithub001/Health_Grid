@@ -21,9 +21,11 @@
       <nav class="nav-menu" aria-label="Primary">
         <button class="nav-item active" data-view="dashboard">Dashboard</button>
         <button class="nav-item" data-view="patients">Patients</button>
+        <button class="nav-item" data-view="consultations">Consultations</button>
         <button class="nav-item" data-view="clinical">Clinical Units</button>
         <button class="nav-item" data-view="phc">PHC Network</button>
         <button class="nav-item" data-view="orders">Orders</button>
+        <button class="nav-item" data-view="billing">Billing Gateway</button>
         <button class="nav-item" data-view="ai">AI Medical Scrub</button>
         <button class="nav-item" data-view="reports">Reports</button>
       </nav>
@@ -143,6 +145,102 @@
               <label>Allergies<input name="allergies" placeholder="Comma-separated allergies" /></label>
               <button class="primary-btn" type="submit">Save Patient</button>
             </form>
+          </section>
+        </div>
+      </section>
+
+      <section id="consultations" class="view">
+        <div class="split-grid wide-left">
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Interactive Clinic Module</span>
+                <h2>New Consultation Entry</h2>
+              </div>
+            </div>
+            <form id="consultationForm" class="encounter-form">
+              <div class="form-row">
+                <label>Select Patient<select id="consultationPatient" name="patientId" required></select></label>
+                <label>Select Facility<select id="consultationFacility" name="facilityId" required></select></label>
+              </div>
+              <div class="form-row">
+                <label>Consulting Doctor<input name="doctorName" placeholder="Dr. Daniel Kingsley Ene" required /></label>
+                <label>Specialty
+                  <select name="specialty">
+                    <option>General Medicine</option>
+                    <option>Obstetrics & Gynecology</option>
+                    <option>Pediatrics</option>
+                    <option>Cardiology</option>
+                    <option>Orthopedics</option>
+                    <option>Surgery</option>
+                  </select>
+                </label>
+              </div>
+              
+              <label>Chief Complaint / Symptoms
+                <textarea name="chiefComplaint" rows="2" placeholder="Presenting symptoms and timeline" required></textarea>
+              </label>
+              <label>History of Presenting Illness
+                <textarea name="historyOfPresentingComplaint" rows="2" placeholder="Detailed history of symptoms"></textarea>
+              </label>
+              <label>Past Medical & Surgical History / Chronic Illnesses
+                <textarea name="pastMedicalHistory" rows="2" placeholder="PMH, drug history, past surgeries"></textarea>
+              </label>
+              <label>Clinical Examination & Findings
+                <textarea name="examinationFindings" rows="2" placeholder="Objective physical examination findings"></textarea>
+              </label>
+              
+              <!-- ICD-11 Diagnosis Builder (Integrated) -->
+              <div class="icd11-module">
+                <span class="eyebrow" style="color:var(--brand); font-weight:600; margin-bottom:8px; display:block;">ICD-11 Interoperability Standard</span>
+                <label>Search ICD-11 Diagnosis
+                  <input type="text" id="consultationIcd11Search" placeholder="Type to search (e.g. malaria, forearm fracture, pre-eclampsia)..." autocomplete="off" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:6px; margin-top:4px;" />
+                </label>
+                <div id="consultationIcd11Results" class="icd11-search-results"></div>
+                
+                <div id="consultationIcd11Builder" class="icd11-builder" style="display: none;">
+                  <h4 style="margin:10px 0; font-size:14px; color:var(--brand-dark);">Post-Coordination Builder (Chapter 28)</h4>
+                  <div id="consultationIcd11Extensions" class="icd11-extensions-grid"></div>
+                  <div class="icd11-preview-box">
+                    <strong>Selected Code Expression:</strong>
+                    <code id="consultationIcd11ExpressionPreview">Unspecified</code>
+                    <br>
+                    <strong>Clinical Description:</strong>
+                    <span id="consultationIcd11DisplayPreview">Unspecified</span>
+                    <input type="hidden" name="icd11Code" id="consultationIcd11CodeHidden" />
+                    <input type="hidden" name="icd11Display" id="consultationIcd11DisplayHidden" />
+                  </div>
+                </div>
+              </div>
+
+              <label>Assessment & Impressions (Clinician Narrative)
+                <textarea name="assessment" rows="2" placeholder="Working assessment and differential diagnosis"></textarea>
+              </label>
+              <label>Plan & Management Notes
+                <textarea name="plan" rows="2" placeholder="Management protocol, follow-up, and warning signs"></textarea>
+              </label>
+
+              <!-- Repeatable Prescription Section -->
+              <div class="panel-inner" style="border:1px solid var(--line); border-radius:8px; padding:12px; margin-top:14px; background:#fbfcfc;">
+                <span class="eyebrow" style="margin-bottom:8px;">Prescription Gateway</span>
+                <div id="prescriptionList" style="display:grid; gap:8px; margin-bottom:10px;"></div>
+                <button type="button" class="secondary-btn" id="addPrescriptionBtn" style="min-height:32px; font-size:12px; padding:0 10px;">+ Add Medication</button>
+              </div>
+
+              <div class="button-row" style="margin-top:16px;">
+                <button class="primary-btn" type="submit">Submit & Process Billing</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Consultation database</span>
+                <h2>Consultation History</h2>
+              </div>
+            </div>
+            <div id="consultationList" class="record-list" style="max-height: 800px; overflow-y: auto;"></div>
           </section>
         </div>
       </section>
@@ -286,16 +384,22 @@
               </div>
             </div>
             <form id="aiScrubForm" class="stack-form">
-              <label>Chief Complaint<textarea name="chiefComplaint" rows="3">Pregnant patient with headache and BP 150/96</textarea></label>
+              <label>Chief Complaint
+                <textarea name="chiefComplaint" rows="3" placeholder="Enter the patient's presenting complaint (e.g. headache, shortness of breath, fever, chest pain...)"></textarea>
+              </label>
               <div class="vitals-grid compact">
-                <label>Temp<input name="temperature" value="36.9" /></label>
-                <label>BP<input name="bp" value="150/96" /></label>
-                <label>Pulse<input name="pulse" value="90" /></label>
-                <label>Resp<input name="respiration" value="18" /></label>
-                <label>SpO2<input name="spo2" value="98" /></label>
+                <label>Temp (°C)<input name="temperature" placeholder="e.g. 37.2" /></label>
+                <label>BP (mmHg)<input name="bp" placeholder="e.g. 120/80" /></label>
+                <label>Pulse (bpm)<input name="pulse" placeholder="e.g. 80" /></label>
+                <label>Resp (/min)<input name="respiration" placeholder="e.g. 18" /></label>
+                <label>SpO2 (%)<input name="spo2" placeholder="e.g. 98" /></label>
               </div>
-              <label>Assessment<textarea name="assessment" rows="3">Pregnancy with elevated blood pressure</textarea></label>
-              <label>Plan<textarea name="plan" rows="3">Check urine protein and refer if severe symptoms</textarea></label>
+              <label>Assessment / Working Diagnosis
+                <textarea name="assessment" rows="3" placeholder="Enter your working assessment and differential diagnoses..."></textarea>
+              </label>
+              <label>Management Plan
+                <textarea name="plan" rows="3" placeholder="Enter your management plan, investigations requested, and follow-up..."></textarea>
+              </label>
               <button class="primary-btn" type="submit">Run Medical Scrub</button>
             </form>
           </section>
@@ -308,7 +412,9 @@
               </div>
             </div>
             <form id="aiInquiryForm" class="stack-form">
-              <label>Question<textarea name="question" rows="5" placeholder="Ask about malaria, hypertension, pre-eclampsia, referral criteria...">What should a PHC document before referring suspected severe malaria?</textarea></label>
+              <label>Clinical Question
+                <textarea name="question" rows="5" placeholder="Ask a clinical question (e.g. What are the referral criteria for severe malaria? What vitals trigger a pre-eclampsia referral? How do I manage a neonate with suspected sepsis?)..."></textarea>
+              </label>
               <button class="primary-btn" type="submit">Ask Inquiry</button>
             </form>
             <div id="aiOutput" class="ai-output"></div>
@@ -330,7 +436,64 @@
           </section>
         </div>
       </section>
+
+      <section id="billing" class="view">
+        <div class="metric-grid">
+          <article class="metric">
+            <span>Outstanding Billing</span>
+            <strong id="billingOutstanding">₦0</strong>
+            <small>Pending patient balances</small>
+          </article>
+          <article class="metric">
+            <span>Collected / Paid</span>
+            <strong id="billingCollected" style="color: var(--success);">₦0</strong>
+            <small>Total revenue collected</small>
+          </article>
+          <article class="metric">
+            <span>Insurance Claims</span>
+            <strong id="billingClaims" style="color: var(--blue);">₦0</strong>
+            <small>Pending insurance payouts</small>
+          </article>
+          <article class="metric">
+            <span>Total Bills Issued</span>
+            <strong id="billingTotal">₦0</strong>
+            <small>Cumulative services billed</small>
+          </article>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <span class="eyebrow">Billing ledger gateway</span>
+              <h2>Patient Accounts & Invoices</h2>
+            </div>
+            <input id="billingSearch" class="search-input" type="search" placeholder="Search by patient name, ID, service..." style="max-width:300px;" />
+          </div>
+          <div id="billingTable" class="table-wrap">
+            <p style="text-align: center; color: var(--muted); padding: 20px;">No billing invoices found.</p>
+          </div>
+        </div>
+      </section>
     </main>
+  </div>
+
+  <!-- Clinical Unit Form Modal -->
+  <div id="unitModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-height: 90vh;">
+      <div class="modal-header">
+        <h3 id="unitModalTitle">Clinical Unit Form</h3>
+        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer;" onclick="document.getElementById('unitModal').style.display='none'">×</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 20px; background: white; color: var(--ink);">
+        <form id="unitModalForm" class="stack-form">
+          <div id="unitFormContent"></div>
+          <div class="button-row" style="margin-top: 20px;">
+            <button class="primary-btn" type="submit">Submit Record & Bill</button>
+            <button class="secondary-btn" type="button" onclick="document.getElementById('unitModal').style.display='none'">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

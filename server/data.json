@@ -249,5 +249,7 @@
       "trend": "Rising",
       "signal": "ANC clinical audit"
     }
-  ]
+  ],
+  "consultations": [],
+  "billing": []
 }

@@ -1,583 +1,1536 @@
+// ============================================================
+//  PlateauCare EHR — Application JavaScript (Complete)
+// ============================================================
+
 const state = {
-  facilities: [],
-  patients: [],
-  encounters: [],
-  orders: [],
-  reports: null,
-  summary: null
+  facilities: [], patients: [], encounters: [], orders: [],
+  reports: null, summary: null, consultations: [], billing: []
 };
 
 const titles = {
   dashboard: "State Command Dashboard",
   patients: "Patient Registry",
+  consultations: "Consultations (ICD-11 Active)",
   clinical: "Clinical Units",
   phc: "PHC Network",
-  orders: "Orders and Referrals",
+  orders: "Orders & Referrals",
+  billing: "Billing & Revenue Gateway",
   ai: "AI Medical Scrub",
-  reports: "Reports and Quality"
+  reports: "Reports & Quality"
 };
 
 const apiStatus = document.querySelector("#apiStatus");
-const toast = document.querySelector("#toast");
+const toast    = document.querySelector("#toast");
 
-function showToast(message) {
-  toast.textContent = message;
+// ---------------------------------------------------------------
+//  Utilities
+// ---------------------------------------------------------------
+function showToast(msg) {
+  toast.textContent = msg;
   toast.classList.add("show");
-  window.setTimeout(() => toast.classList.remove("show"), 2600);
+  setTimeout(() => toast.classList.remove("show"), 2800);
 }
 
-async function api(path, options = {}) {
-  const response = await fetch(path, {
-    headers: { "Content-Type": "application/json" },
-    ...options
-  });
-
-  if (!response.ok) {
-    throw new Error(`API error ${response.status}`);
-  }
-
-  return response.json();
+async function api(path, opts = {}) {
+  const res = await fetch(path, { headers: {"Content-Type":"application/json"}, ...opts });
+  if (!res.ok) throw new Error(`API ${res.status}`);
+  return res.json();
 }
 
-function viewName(id) {
-  return titles[id] || "PlateauCare EHR";
-}
+function patientName(id)  { return state.patients.find(p => p.id === id)?.name  || id; }
+function facilityName(id) { return state.facilities.find(f => f.id === id)?.name || id; }
 
-function switchView(id) {
-  document.querySelectorAll(".view").forEach(view => {
-    view.classList.toggle("active", view.id === id);
-  });
-  document.querySelectorAll(".nav-item").forEach(button => {
-    button.classList.toggle("active", button.dataset.view === id);
-  });
-  document.querySelector("#viewTitle").textContent = viewName(id);
-}
-
-function patientName(id) {
-  return state.patients.find(patient => patient.id === id)?.name || id;
-}
-
-function facilityName(id) {
-  return state.facilities.find(facility => facility.id === id)?.name || id;
-}
-
-function badgeClass(value) {
-  if (["Emergency", "Escalated"].includes(value)) return "badge danger";
-  if (["Urgent", "Needs Sync", "Rising"].includes(value)) return "badge warning";
+function badgeClass(v) {
+  if (["Emergency","Escalated"].includes(v))          return "badge danger";
+  if (["Urgent","Needs Sync","Rising"].includes(v))   return "badge warning";
+  if (v === "Closed" || v === "Paid")                 return "badge success";
   return "badge";
 }
 
-function optionHtml(items, labelFn) {
-  return items.map(item => `<option value="${item.id}">${labelFn(item)}</option>`).join("");
-}
-
-function fillSelects() {
-  const facilityOptions = optionHtml(state.facilities, facility => `${facility.name} - ${facility.lga}`);
-  const patientOptions = optionHtml(state.patients, patient => `${patient.name} (${patient.id})`);
-
-  ["patientFacility", "encounterFacility", "orderFacility"].forEach(id => {
-    const element = document.querySelector(`#${id}`);
-    if (element) element.innerHTML = facilityOptions;
-  });
-
-  ["encounterPatient", "orderPatient"].forEach(id => {
-    const element = document.querySelector(`#${id}`);
-    if (element) element.innerHTML = patientOptions;
-  });
-}
-
-function renderSummary() {
-  const summary = state.summary;
-  if (!summary) return;
-
-  document.querySelector("#metricFacilities").textContent = summary.facilities;
-  document.querySelector("#metricPhcs").textContent = summary.phcs;
-  document.querySelector("#metricPatients").textContent = summary.patients;
-  document.querySelector("#metricUrgent").textContent = summary.urgentOrders + summary.lowStock;
-}
-
-async function showFhirModal(encounterId) {
-  try {
-    const fhirCondition = await api(`/api/fhir/Condition/${encounterId}`);
-    const overlay = document.createElement("div");
-    overlay.className = "modal-overlay";
-    overlay.id = "fhirModal";
-    overlay.innerHTML = `
-      <div class="modal-content">
-        <div class="modal-header">
-          <h3>HL7 FHIR R4 Condition</h3>
-          <button type="button" style="border:none; background:none; font-size:20px; cursor:pointer;" onclick="document.getElementById('fhirModal').remove()">×</button>
-        </div>
-        <pre class="modal-body" style="margin:0; white-space: pre-wrap; word-break: break-all;"><code>${JSON.stringify(fhirCondition, null, 2)}</code></pre>
-        <div class="modal-footer">
-          <button class="primary-btn" style="padding: 6px 12px;" onclick="document.getElementById('fhirModal').remove()">Close</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) overlay.remove();
-    });
-  } catch (error) {
-    showToast("Error loading FHIR: " + error.message);
-  }
-}
-window.showFhirModal = showFhirModal;
-
-function renderEncounters() {
-  const target = document.querySelector("#encounterList");
-  target.innerHTML = state.encounters.slice(0, 6).map(encounter => {
-    const icdText = encounter.icd11Code 
-      ? `<div style="margin-top:6px; font-size:13px; color:var(--brand-dark);">
-           <strong>ICD-11:</strong> <code>${encounter.icd11Code}</code> - ${encounter.icd11Display}
-           <span class="fhir-badge" onclick="showFhirModal('${encounter.id}')">FHIR JSON</span>
-         </div>`
-      : "";
-    return `
-      <article class="record">
-        <strong>${patientName(encounter.patientId)} <span class="${badgeClass(encounter.status)}">${encounter.status}</span></strong>
-        <span>${encounter.unit} at ${facilityName(encounter.facilityId)}</span>
-        <span>${encounter.chiefComplaint}</span>
-        ${icdText}
-      </article>
-    `;
-  }).join("");
-}
-
-function renderFacilities() {
-  const target = document.querySelector("#facilityGrid");
-  target.innerHTML = state.facilities.map(facility => `
-    <article class="facility-card">
-      <h3>${facility.name}</h3>
-      <span>${facility.type} · ${facility.lga} · ${facility.beds} beds</span>
-      <div class="tag-row">
-        <span class="${badgeClass(facility.status)}">${facility.status}</span>
-        <span class="tag">${facility.level}</span>
-      </div>
-      <div class="tag-row">
-        ${facility.services.slice(0, 5).map(service => `<span class="tag">${service}</span>`).join("")}
-      </div>
-    </article>
-  `).join("");
-}
-
-function renderPatients(filter = "") {
-  const q = filter.toLowerCase();
-  const patients = state.patients.filter(patient => {
-    return [patient.name, patient.lga, patient.community, patient.risk, patient.insurance]
-      .join(" ")
-      .toLowerCase()
-      .includes(q);
-  });
-
-  document.querySelector("#patientTable").innerHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Patient</th>
-          <th>Location</th>
-          <th>Risk</th>
-          <th>Facility</th>
-          <th>Insurance</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${patients.map(patient => `
-          <tr>
-            <td>${patient.id}</td>
-            <td><strong>${patient.name}</strong><br>${patient.sex}, ${patient.age} yrs</td>
-            <td>${patient.community}<br>${patient.lga}</td>
-            <td><span class="${badgeClass(patient.risk === "Routine" ? "Routine" : "Urgent")}">${patient.risk}</span></td>
-            <td>${facilityName(patient.facilityId)}</td>
-            <td>${patient.insurance}</td>
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
-}
-
-function renderOrders() {
-  document.querySelector("#ordersTable").innerHTML = `
-    <table>
-      <thead>
-        <tr>
-          <th>Order</th>
-          <th>Patient</th>
-          <th>Type</th>
-          <th>Item</th>
-          <th>Priority</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${state.orders.map(order => `
-          <tr>
-            <td>${order.id}</td>
-            <td>${patientName(order.patientId)}</td>
-            <td>${order.type}</td>
-            <td>${order.item}</td>
-            <td><span class="${badgeClass(order.priority)}">${order.priority}</span></td>
-            <td>${order.status}</td>
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
-}
-
-function renderReports() {
-  const reports = state.reports;
-  if (!reports) return;
-
-  const quality = reports.summary.quality;
-  document.querySelector("#qualityList").innerHTML = `
-    <div class="quality-row"><strong>Average wait time</strong><span>${quality.avgWaitMinutes} minutes</span></div>
-    <div class="quality-row"><strong>Triage under 10 min</strong><span>${quality.triageUnder10Minutes}%</span></div>
-    <div class="quality-row"><strong>Referral completion</strong><span>${quality.referralCompletion}%</span></div>
-    <div class="quality-row"><strong>ANC risk reviewed</strong><span>${quality.ancRiskReviewed}%</span></div>
-  `;
-
-  document.querySelector("#facilityReport").innerHTML = `
-    <table>
-      <thead>
-        <tr><th>Facility</th><th>LGA</th><th>Open Encounters</th><th>Orders</th></tr>
-      </thead>
-      <tbody>
-        ${reports.facilities.map(row => `
-          <tr>
-            <td>${row.name}</td>
-            <td>${row.lga}</td>
-            <td>${row.openEncounters}</td>
-            <td>${row.orders}</td>
-          </tr>
-        `).join("")}
-      </tbody>
-    </table>
-  `;
-
-  document.querySelector("#inventoryList").innerHTML = reports.inventory.map(item => `
-    <article class="record">
-      <strong>${item.item} <span class="${item.quantity <= item.reorderLevel ? "badge danger" : "badge"}">${item.quantity} left</span></strong>
-      <span>${facilityName(item.facilityId)}</span>
-      <span>Reorder level: ${item.reorderLevel}</span>
-    </article>
-  `).join("");
-
-  document.querySelector("#surveillanceList").innerHTML = reports.surveillance.map(item => `
-    <article class="signal">
-      <strong>${item.condition} <span class="${badgeClass(item.trend)}">${item.trend}</span></strong>
-      <span>${item.lga}: ${item.cases7d} cases in 7 days</span>
-      <span>${item.signal}</span>
-    </article>
-  `).join("");
-}
-
-function renderAiOutput(data) {
-  if (data.structuredSoap) {
-    document.querySelector("#aiOutput").innerHTML = `
-      <article class="ai-card">
-        <strong>Quality Score: ${data.qualityScore}%</strong>
-        <p>${data.safety}</p>
-      </article>
-      <article class="ai-card">
-        <strong>Red Flags</strong>
-        <ul>${(data.redFlags.length ? data.redFlags : ["No immediate red flags found."]).map(item => `<li>${item}</li>`).join("")}</ul>
-      </article>
-      <article class="ai-card">
-        <strong>Documentation Issues</strong>
-        <ul>${(data.documentationIssues.length ? data.documentationIssues : ["Core documentation looks complete."]).map(item => `<li>${item}</li>`).join("")}</ul>
-      </article>
-      <article class="ai-card">
-        <strong>Suggestions</strong>
-        <ul>${(data.suggestions.length ? data.suggestions : ["Continue clinician-led assessment."]).map(item => `<li>${item}</li>`).join("")}</ul>
-      </article>
-    `;
-    return;
-  }
-
-  document.querySelector("#aiOutput").innerHTML = `
-    <article class="ai-card">
-      <strong>Answer</strong>
-      <p>${data.answer}</p>
-      <small>${data.disclaimer}</small>
-    </article>
-    <article class="ai-card">
-      <strong>Suggested Actions</strong>
-      <ul>${data.actions.map(item => `<li>${item}</li>`).join("")}</ul>
-    </article>
-  `;
+function optionHtml(items, fn) {
+  return items.map(i => `<option value="${i.id}">${fn(i)}</option>`).join("");
 }
 
 function formToObject(form) {
   return Object.fromEntries(new FormData(form).entries());
 }
 
-function encounterPayloadFromForm(form) {
-  const fields = formToObject(form);
+function switchView(id) {
+  document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
+  document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.view === id));
+  document.querySelector("#viewTitle").textContent = titles[id] || "PlateauCare EHR";
+}
+
+// ---------------------------------------------------------------
+//  Fill all <select> dropdowns
+// ---------------------------------------------------------------
+function fillSelects() {
+  const fp = optionHtml(state.facilities, f => `${f.name} — ${f.lga}`);
+  const pp = optionHtml(state.patients,   p => `${p.name} (${p.id})`);
+
+  ["patientFacility","encounterFacility","orderFacility","consultationFacility"].forEach(id => {
+    const el = document.querySelector(`#${id}`);
+    if (el) el.innerHTML = fp;
+  });
+  ["encounterPatient","orderPatient","consultationPatient"].forEach(id => {
+    const el = document.querySelector(`#${id}`);
+    if (el) el.innerHTML = pp;
+  });
+}
+
+// ---------------------------------------------------------------
+//  Render: Dashboard summary
+// ---------------------------------------------------------------
+function renderSummary() {
+  const s = state.summary; if (!s) return;
+  document.querySelector("#metricFacilities").textContent = s.facilities;
+  document.querySelector("#metricPhcs").textContent       = s.phcs;
+  document.querySelector("#metricPatients").textContent   = s.patients;
+  document.querySelector("#metricUrgent").textContent     = s.urgentOrders + s.lowStock;
+}
+
+// ---------------------------------------------------------------
+//  Render: Open Encounters queue
+// ---------------------------------------------------------------
+function renderEncounters() {
+  const target = document.querySelector("#encounterList");
+  if (!target) return;
+  target.innerHTML = state.encounters.slice(0,6).map(enc => {
+    const icd = enc.icd11Code
+      ? `<div style="margin-top:5px;font-size:12px;color:var(--brand-dark);">
+           <strong>ICD-11:</strong> <code>${enc.icd11Code}</code> — ${enc.icd11Display}
+           <span class="fhir-badge" onclick="showFhirModal('${enc.id}')">FHIR JSON</span>
+         </div>` : "";
+    return `
+      <article class="record">
+        <strong>${patientName(enc.patientId)} <span class="${badgeClass(enc.status)}">${enc.status}</span></strong>
+        <span>${enc.unit} · ${facilityName(enc.facilityId)}</span>
+        <span>${enc.chiefComplaint}</span>
+        ${icd}
+      </article>`;
+  }).join("");
+}
+
+// ---------------------------------------------------------------
+//  Render: Facility cards
+// ---------------------------------------------------------------
+function renderFacilities() {
+  const target = document.querySelector("#facilityGrid");
+  if (!target) return;
+  target.innerHTML = state.facilities.map(f => `
+    <article class="facility-card">
+      <h3>${f.name}</h3>
+      <span>${f.type} · ${f.lga} · ${f.beds} beds</span>
+      <div class="tag-row">
+        <span class="${badgeClass(f.status)}">${f.status}</span>
+        <span class="tag">${f.level}</span>
+      </div>
+      <div class="tag-row">
+        ${f.services.slice(0,5).map(s => `<span class="tag">${s}</span>`).join("")}
+      </div>
+    </article>`).join("");
+}
+
+// ---------------------------------------------------------------
+//  Render: Patient table
+// ---------------------------------------------------------------
+function renderPatients(filter = "") {
+  const q = filter.toLowerCase();
+  const patients = state.patients.filter(p =>
+    [p.name,p.lga,p.community,p.risk,p.insurance].join(" ").toLowerCase().includes(q));
+  document.querySelector("#patientTable").innerHTML = `
+    <table><thead><tr>
+      <th>ID</th><th>Patient</th><th>Location</th><th>Risk</th><th>Facility</th><th>Insurance</th>
+    </tr></thead><tbody>
+      ${patients.map(p => `<tr>
+        <td>${p.id}</td>
+        <td><strong>${p.name}</strong><br>${p.sex}, ${p.age} yrs</td>
+        <td>${p.community}<br><span style="color:var(--muted);font-size:12px;">${p.lga}</span></td>
+        <td><span class="${badgeClass(p.risk==="Routine"?"Routine":"Urgent")}">${p.risk}</span></td>
+        <td>${facilityName(p.facilityId)}</td>
+        <td>${p.insurance}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
+// ---------------------------------------------------------------
+//  Render: Orders queue
+// ---------------------------------------------------------------
+function renderOrders() {
+  document.querySelector("#ordersTable").innerHTML = `
+    <table><thead><tr>
+      <th>Order</th><th>Patient</th><th>Type</th><th>Item</th><th>Priority</th><th>Status</th>
+    </tr></thead><tbody>
+      ${state.orders.map(o => `<tr>
+        <td>${o.id}</td>
+        <td>${patientName(o.patientId)}</td>
+        <td>${o.type}</td>
+        <td>${o.item}</td>
+        <td><span class="${badgeClass(o.priority)}">${o.priority}</span></td>
+        <td>${o.status}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
+// ---------------------------------------------------------------
+//  Render: Reports & Quality
+// ---------------------------------------------------------------
+function renderReports() {
+  const r = state.reports; if (!r) return;
+  const q = r.summary.quality;
+
+  document.querySelector("#qualityList").innerHTML = `
+    <div class="quality-row"><strong>Average wait time</strong><span>${q.avgWaitMinutes} min</span></div>
+    <div class="quality-row"><strong>Triage under 10 min</strong><span>${q.triageUnder10Minutes}%</span></div>
+    <div class="quality-row"><strong>Referral completion</strong><span>${q.referralCompletion}%</span></div>
+    <div class="quality-row"><strong>ANC risk reviewed</strong><span>${q.ancRiskReviewed}%</span></div>`;
+
+  document.querySelector("#facilityReport").innerHTML = `
+    <table><thead><tr><th>Facility</th><th>LGA</th><th>Open Enc.</th><th>Orders</th></tr></thead><tbody>
+      ${r.facilities.map(row => `<tr>
+        <td>${row.name}</td><td>${row.lga}</td>
+        <td>${row.openEncounters}</td><td>${row.orders}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+
+  document.querySelector("#inventoryList").innerHTML = r.inventory.map(item => `
+    <article class="record">
+      <strong>${item.item}
+        <span class="${item.quantity<=item.reorderLevel?"badge danger":"badge"}">${item.quantity} left</span>
+      </strong>
+      <span>${facilityName(item.facilityId)}</span>
+      <span>Reorder level: ${item.reorderLevel}</span>
+    </article>`).join("");
+
+  document.querySelector("#surveillanceList").innerHTML = r.surveillance.map(item => `
+    <article class="signal">
+      <strong>${item.condition} <span class="${badgeClass(item.trend)}">${item.trend}</span></strong>
+      <span>${item.lga}: ${item.cases7d} cases/7 days</span>
+      <span>${item.signal}</span>
+    </article>`).join("");
+}
+
+// ---------------------------------------------------------------
+//  AI output rendering
+// ---------------------------------------------------------------
+function renderAiOutput(data) {
+  const out = document.querySelector("#aiOutput");
+  if (data.structuredSoap) {
+    out.innerHTML = `
+      <article class="ai-card"><strong>Quality Score: ${data.qualityScore}%</strong><p>${data.safety}</p></article>
+      <article class="ai-card"><strong>Red Flags</strong>
+        <ul>${(data.redFlags.length?data.redFlags:["None found."]).map(i=>`<li>${i}</li>`).join("")}</ul></article>
+      <article class="ai-card"><strong>Documentation Issues</strong>
+        <ul>${(data.documentationIssues.length?data.documentationIssues:["Complete."]).map(i=>`<li>${i}</li>`).join("")}</ul></article>
+      <article class="ai-card"><strong>Suggestions</strong>
+        <ul>${(data.suggestions.length?data.suggestions:["Continue assessment."]).map(i=>`<li>${i}</li>`).join("")}</ul></article>`;
+    return;
+  }
+  out.innerHTML = `
+    <article class="ai-card"><strong>Answer</strong><p>${data.answer}</p><small>${data.disclaimer}</small></article>
+    <article class="ai-card"><strong>Suggested Actions</strong>
+      <ul>${data.actions.map(i=>`<li>${i}</li>`).join("")}</ul></article>`;
+}
+
+// ---------------------------------------------------------------
+//  FHIR Modal
+// ---------------------------------------------------------------
+async function showFhirModal(id) {
+  try {
+    const fhir = await api(`/api/fhir/Condition/${id}`);
+    const overlay = document.createElement("div");
+    overlay.className = "modal-overlay"; overlay.id = "fhirModal";
+    overlay.style.display = "flex";
+    overlay.innerHTML = `
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>HL7 FHIR R4 Condition</h3>
+          <button type="button" onclick="document.getElementById('fhirModal').remove()" style="border:none;background:none;font-size:22px;cursor:pointer;">×</button>
+        </div>
+        <pre class="modal-body" style="overflow:auto;background:#0f172a;color:#e2e8f0;padding:16px;border-radius:0 0 12px 12px;font-size:13px;">${JSON.stringify(fhir,null,2)}</pre>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener("click", e => { if(e.target===overlay) overlay.remove(); });
+  } catch(err) { showToast("FHIR error: "+err.message); }
+}
+window.showFhirModal = showFhirModal;
+
+// ---------------------------------------------------------------
+//  ICD-11 helpers (shared across encounter + consultation forms)
+// ---------------------------------------------------------------
+const EXT_DEFS = {
+  "XK8G": {title:"Left side",axis:"Laterality"},
+  "XK9K": {title:"Right side",axis:"Laterality"},
+  "XJ7ZH":{title:"Closed fracture",axis:"Fracture Type"},
+  "XJ7YM":{title:"Open fracture",axis:"Fracture Type"},
+  "XS2A": {title:"Mild severity",axis:"Severity"},
+  "XS0T": {title:"Severe severity",axis:"Severity"}
+};
+
+function buildIcd11SearchUI(opts) {
+  // opts: { searchEl, resultsEl, builderEl, extEl, exprEl, displayEl, codeHidden, displayHidden }
+  const {searchEl, resultsEl, builderEl, extEl, exprEl, displayEl, codeHidden, displayHidden} = opts;
+  let stemCode = null;
+
+  function updatePreview() {
+    if (!stemCode) {
+      exprEl.textContent = "Unspecified"; displayEl.textContent = "Unspecified";
+      codeHidden.value = ""; displayHidden.value = ""; return;
+    }
+    let expr = stemCode.code, disp = stemCode.title;
+    extEl.querySelectorAll("input[type=radio]:checked").forEach(el => {
+      if (el.value) { expr += "&"+el.value; disp += ", "+el.dataset.title; }
+    });
+    exprEl.textContent = expr; displayEl.textContent = disp;
+    codeHidden.value = expr; displayHidden.value = disp;
+  }
+
+  function loadExtensions(codes) {
+    const groups = {};
+    codes.forEach(c => {
+      const d = EXT_DEFS[c]; if (!d) return;
+      (groups[d.axis] = groups[d.axis]||[]).push({code:c,...d});
+    });
+    extEl.innerHTML = Object.entries(groups).map(([axis,items]) => `
+      <div class="icd11-extension-group">
+        <h5>${axis}</h5>
+        ${items.map(it=>`<label class="icd11-extension-option">
+          <input type="radio" name="axis_${axis.replace(/\s+/g,'_')}_${Math.random().toString(36).slice(2)}" value="${it.code}" data-title="${it.title}" />
+          <span>${it.title}</span></label>`).join("")}
+        <label class="icd11-extension-option">
+          <input type="radio" name="axis_${axis.replace(/\s+/g,'_')}_${Math.random().toString(36).slice(2)}" value="" checked />
+          <span style="color:var(--muted)">None</span></label>
+      </div>`).join("");
+    extEl.querySelectorAll("input[type=radio]").forEach(el => el.addEventListener("change", updatePreview));
+  }
+
+  function selectStem(code, title, extCodes) {
+    stemCode = {code, title};
+    searchEl.value = `${code} — ${title}`;
+    resultsEl.innerHTML = "";
+    if (extCodes && extCodes.length && extCodes[0]) {
+      builderEl.style.display = "block";
+      loadExtensions(extCodes);
+    } else { builderEl.style.display = "none"; }
+    updatePreview();
+  }
+
+  searchEl.addEventListener("input", async e => {
+    const q = e.target.value.trim();
+    if (!q) { resultsEl.innerHTML = ""; return; }
+    try {
+      const results = await api(`/api/icd11/search?q=${encodeURIComponent(q)}`);
+      resultsEl.innerHTML = results.map(r =>
+        `<div class="icd11-result-item" data-code="${r.code}" data-title="${r.title}" data-ext="${r.allowedExtensions.join(',')}">
+           <strong>${r.code}</strong> — ${r.title}
+         </div>`).join("");
+      resultsEl.querySelectorAll(".icd11-result-item").forEach(el => {
+        el.addEventListener("click", () => selectStem(el.dataset.code, el.dataset.title,
+          el.dataset.ext ? el.dataset.ext.split(",") : []));
+      });
+    } catch(err) { console.error(err); }
+  });
+
   return {
-    patientId: fields.patientId,
-    facilityId: fields.facilityId,
-    unit: fields.unit,
-    chiefComplaint: fields.chiefComplaint,
-    vitals: {
-      temperature: fields.temperature,
-      bp: fields.bp,
-      pulse: fields.pulse,
-      respiration: fields.respiration,
-      spo2: fields.spo2,
-      weight: fields.weight
-    },
-    assessment: fields.assessment,
-    plan: fields.plan,
-    icd11Code: fields.icd11Code || "",
-    icd11Display: fields.icd11Display || ""
+    reset() {
+      stemCode = null; searchEl.value = ""; resultsEl.innerHTML = "";
+      builderEl.style.display = "none"; updatePreview();
+    }
   };
 }
 
+// ---------------------------------------------------------------
+//  Wire Encounter Form ICD-11
+// ---------------------------------------------------------------
+let icd11EncounterCtrl = null;
+const encSearchEl = document.querySelector("#icd11Search");
+if (encSearchEl) {
+  icd11EncounterCtrl = buildIcd11SearchUI({
+    searchEl: encSearchEl,
+    resultsEl: document.querySelector("#icd11Results"),
+    builderEl: document.querySelector("#icd11Builder"),
+    extEl:     document.querySelector("#icd11Extensions"),
+    exprEl:    document.querySelector("#icd11ExpressionPreview"),
+    displayEl: document.querySelector("#icd11DisplayPreview"),
+    codeHidden:    document.querySelector("#icd11CodeHidden"),
+    displayHidden: document.querySelector("#icd11DisplayHidden")
+  });
+}
+
+// ---------------------------------------------------------------
+//  Wire Consultation Form ICD-11
+// ---------------------------------------------------------------
+let icd11ConsultCtrl = null;
+const conSearchEl = document.querySelector("#consultationIcd11Search");
+if (conSearchEl) {
+  icd11ConsultCtrl = buildIcd11SearchUI({
+    searchEl: conSearchEl,
+    resultsEl: document.querySelector("#consultationIcd11Results"),
+    builderEl: document.querySelector("#consultationIcd11Builder"),
+    extEl:     document.querySelector("#consultationIcd11Extensions"),
+    exprEl:    document.querySelector("#consultationIcd11ExpressionPreview"),
+    displayEl: document.querySelector("#consultationIcd11DisplayPreview"),
+    codeHidden:    document.querySelector("#consultationIcd11CodeHidden"),
+    displayHidden: document.querySelector("#consultationIcd11DisplayHidden")
+  });
+}
+
+// ---------------------------------------------------------------
+//  Load data from server
+// ---------------------------------------------------------------
 async function loadData() {
   try {
     apiStatus.textContent = "Online";
-    [state.summary, state.facilities, state.patients, state.encounters, state.orders, state.reports] = await Promise.all([
-      api("/api/summary"),
-      api("/api/facilities"),
-      api("/api/patients"),
-      api("/api/encounters"),
-      api("/api/orders"),
-      api("/api/reports")
+    apiStatus.style.background = "#e0f2fe";
+    [state.summary, state.facilities, state.patients, state.encounters,
+     state.orders, state.reports, state.consultations, state.billing] = await Promise.all([
+      api("/api/summary"), api("/api/facilities"), api("/api/patients"),
+      api("/api/encounters"), api("/api/orders"), api("/api/reports"),
+      api("/api/consultations"), api("/api/billing")
     ]);
     fillSelects();
-    renderSummary();
-    renderEncounters();
-    renderFacilities();
-    renderPatients(document.querySelector("#patientSearch")?.value || "");
-    renderOrders();
-    renderReports();
-  } catch (error) {
+    renderSummary(); renderEncounters(); renderFacilities();
+    renderPatients(document.querySelector("#patientSearch")?.value||"");
+    renderOrders(); renderReports(); renderConsultations(); renderBilling();
+  } catch(err) {
     apiStatus.textContent = "Offline";
-    showToast("Backend is not reachable. Start the server and refresh.");
+    apiStatus.style.background = "#ffe4e6";
+    showToast("Backend not reachable. Check server.");
   }
 }
 
-document.querySelectorAll(".nav-item").forEach(button => {
-  button.addEventListener("click", () => switchView(button.dataset.view));
+// ---------------------------------------------------------------
+//  Navigation
+// ---------------------------------------------------------------
+document.querySelectorAll(".nav-item").forEach(btn => {
+  btn.addEventListener("click", () => switchView(btn.dataset.view));
 });
-
-document.querySelectorAll("[data-view-jump]").forEach(button => {
-  button.addEventListener("click", () => switchView(button.dataset.viewJump));
+document.querySelectorAll("[data-view-jump]").forEach(btn => {
+  btn.addEventListener("click", () => switchView(btn.dataset.viewJump));
 });
-
 document.querySelector("#refreshBtn").addEventListener("click", loadData);
 
-document.querySelector("#patientSearch").addEventListener("input", event => {
-  renderPatients(event.target.value);
+// ---------------------------------------------------------------
+//  Patient search
+// ---------------------------------------------------------------
+document.querySelector("#patientSearch").addEventListener("input", e => renderPatients(e.target.value));
+
+// ---------------------------------------------------------------
+//  Register Patient
+// ---------------------------------------------------------------
+document.querySelector("#patientForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  await api("/api/patients", {method:"POST", body:JSON.stringify(formToObject(e.currentTarget))});
+  e.currentTarget.reset(); showToast("Patient registered."); await loadData();
 });
 
-document.querySelector("#patientForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  await api("/api/patients", {
-    method: "POST",
-    body: JSON.stringify(formToObject(event.currentTarget))
-  });
-  event.currentTarget.reset();
-  showToast("Patient registered.");
-  await loadData();
-});
-
-let selectedStemCode = null;
-let selectedExtensions = [];
-
-const icd11Search = document.querySelector("#icd11Search");
-const icd11Results = document.querySelector("#icd11Results");
-const icd11Builder = document.querySelector("#icd11Builder");
-const icd11Extensions = document.querySelector("#icd11Extensions");
-const icd11ExpressionPreview = document.querySelector("#icd11ExpressionPreview");
-const icd11DisplayPreview = document.querySelector("#icd11DisplayPreview");
-const icd11CodeHidden = document.querySelector("#icd11CodeHidden");
-const icd11DisplayHidden = document.querySelector("#icd11DisplayHidden");
-
-if (icd11Search) {
-  icd11Search.addEventListener("input", async (e) => {
-    const q = e.target.value.trim();
-    if (!q) {
-      icd11Results.innerHTML = "";
-      return;
-    }
-    try {
-      const results = await api(`/api/icd11/search?q=${encodeURIComponent(q)}`);
-      icd11Results.innerHTML = results.map(item => `
-        <div class="icd11-result-item" data-code="${item.code}" data-title="${item.title}" data-extensions="${item.allowedExtensions.join(',')}">
-          <strong>${item.code}</strong> - ${item.title}
-        </div>
-      `).join("");
-      
-      document.querySelectorAll(".icd11-result-item").forEach(el => {
-        el.addEventListener("click", () => {
-          selectStemCode(el.dataset.code, el.dataset.title, el.dataset.extensions ? el.dataset.extensions.split(",") : []);
-        });
-      });
-    } catch (err) {
-      console.error(err);
-    }
-  });
-}
-
-function selectStemCode(code, title, allowedExtensions) {
-  selectedStemCode = { code, title, allowedExtensions };
-  selectedExtensions = [];
-  icd11Search.value = `${code} - ${title}`;
-  icd11Results.innerHTML = "";
-  
-  if (allowedExtensions && allowedExtensions.length > 0 && allowedExtensions[0] !== "") {
-    icd11Builder.style.display = "block";
-    loadExtensionOptions(allowedExtensions);
-  } else {
-    icd11Builder.style.display = "none";
-  }
-  updateClusterPreview();
-}
-
-function loadExtensionOptions(allowedExtensions) {
-  const extensionDefs = {
-    "XK8G": { title: "Left side", axis: "Laterality" },
-    "XK9K": { title: "Right side", axis: "Laterality" },
-    "XJ7ZH": { title: "Closed fracture", axis: "Fracture Type" },
-    "XJ7YM": { title: "Open fracture", axis: "Fracture Type" },
-    "XS2A": { title: "Mild severity", axis: "Severity" },
-    "XS0T": { title: "Severe severity", axis: "Severity" }
+// ---------------------------------------------------------------
+//  New Encounter submit
+// ---------------------------------------------------------------
+document.querySelector("#encounterForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = formToObject(e.currentTarget);
+  const payload = {
+    patientId:f.patientId, facilityId:f.facilityId, unit:f.unit,
+    chiefComplaint:f.chiefComplaint,
+    vitals:{temperature:f.temperature,bp:f.bp,pulse:f.pulse,respiration:f.respiration,spo2:f.spo2,weight:f.weight},
+    assessment:f.assessment, plan:f.plan,
+    icd11Code:f.icd11Code||"", icd11Display:f.icd11Display||""
   };
-  
-  const groups = {};
-  allowedExtensions.forEach(code => {
-    const def = extensionDefs[code];
-    if (def) {
-      if (!groups[def.axis]) groups[def.axis] = [];
-      groups[def.axis].push({ code, ...def });
-    }
-  });
-  
-  icd11Extensions.innerHTML = Object.entries(groups).map(([axis, items]) => `
-    <div class="icd11-extension-group">
-      <h5>${axis}</h5>
-      ${items.map(item => `
-        <label class="icd11-extension-option">
-          <input type="radio" name="axis_${axis.replace(/\s+/g, '_')}" value="${item.code}" data-title="${item.title}" class="icd11-ext-checkbox" />
-          <span>${item.title}</span>
-        </label>
-      `).join("")}
-      <label class="icd11-extension-option">
-        <input type="radio" name="axis_${axis.replace(/\s+/g, '_')}" value="" checked class="icd11-ext-checkbox" />
-        <span style="color:var(--muted)">None</span>
-      </label>
-    </div>
-  `).join("");
-  
-  document.querySelectorAll(".icd11-ext-checkbox").forEach(el => {
-    el.addEventListener("change", updateClusterPreview);
-  });
-}
-
-function updateClusterPreview() {
-  if (!selectedStemCode) {
-    icd11ExpressionPreview.textContent = "Unspecified";
-    icd11DisplayPreview.textContent = "Unspecified";
-    icd11CodeHidden.value = "";
-    icd11DisplayHidden.value = "";
-    return;
-  }
-  
-  let expression = selectedStemCode.code;
-  let display = selectedStemCode.title;
-  
-  const selectedExts = [];
-  document.querySelectorAll(".icd11-ext-checkbox:checked").forEach(el => {
-    if (el.value) {
-      selectedExts.push({ code: el.value, title: el.dataset.title });
-    }
-  });
-  
-  if (selectedExts.length > 0) {
-    expression += "&" + selectedExts.map(ext => ext.code).join("&");
-    display += ", " + selectedExts.map(ext => ext.title).join(", ");
-  }
-  
-  icd11ExpressionPreview.textContent = expression;
-  icd11DisplayPreview.textContent = display;
-  icd11CodeHidden.value = expression;
-  icd11DisplayHidden.value = display;
-}
-
-function resetIcd11() {
-  selectedStemCode = null;
-  selectedExtensions = [];
-  if (icd11Search) icd11Search.value = "";
-  if (icd11Results) icd11Results.innerHTML = "";
-  if (icd11Builder) icd11Builder.style.display = "none";
-  updateClusterPreview();
-}
-
-document.querySelector("#encounterForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  await api("/api/encounters", {
-    method: "POST",
-    body: JSON.stringify(encounterPayloadFromForm(event.currentTarget))
-  });
-  event.currentTarget.reset();
-  resetIcd11();
-  showToast("Encounter saved.");
-  await loadData();
+  await api("/api/encounters", {method:"POST", body:JSON.stringify(payload)});
+  e.currentTarget.reset();
+  if (icd11EncounterCtrl) icd11EncounterCtrl.reset();
+  showToast("Encounter saved & bill generated."); await loadData();
 });
 
 document.querySelector("#scrubEncounterBtn").addEventListener("click", async () => {
-  const form = document.querySelector("#encounterForm");
-  const result = await api("/api/ai/scrub", {
-    method: "POST",
-    body: JSON.stringify(encounterPayloadFromForm(form))
-  });
-  switchView("ai");
+  const f = formToObject(document.querySelector("#encounterForm"));
+  const result = await api("/api/ai/scrub", {method:"POST", body:JSON.stringify({
+    chiefComplaint:f.chiefComplaint, assessment:f.assessment, plan:f.plan,
+    vitals:{temperature:f.temperature,bp:f.bp,pulse:f.pulse,respiration:f.respiration,spo2:f.spo2,weight:f.weight}
+  })});
+  switchView("ai"); renderAiOutput(result);
+});
+
+// ---------------------------------------------------------------
+//  Create Order
+// ---------------------------------------------------------------
+document.querySelector("#orderForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  await api("/api/orders", {method:"POST", body:JSON.stringify(formToObject(e.currentTarget))});
+  e.currentTarget.reset(); showToast("Order created."); await loadData();
+});
+
+// ---------------------------------------------------------------
+//  AI Scrub Form
+// ---------------------------------------------------------------
+document.querySelector("#aiScrubForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const f = formToObject(e.currentTarget);
+  const result = await api("/api/ai/scrub", {method:"POST", body:JSON.stringify({
+    chiefComplaint:f.chiefComplaint, assessment:f.assessment, plan:f.plan,
+    vitals:{temperature:f.temperature,bp:f.bp,pulse:f.pulse,respiration:f.respiration,spo2:f.spo2}
+  })});
   renderAiOutput(result);
 });
 
-document.querySelector("#orderForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  await api("/api/orders", {
-    method: "POST",
-    body: JSON.stringify(formToObject(event.currentTarget))
-  });
-  event.currentTarget.reset();
-  showToast("Order created.");
-  await loadData();
+// ---------------------------------------------------------------
+//  AI Inquiry Form
+// ---------------------------------------------------------------
+document.querySelector("#aiInquiryForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const result = await api("/api/ai/inquiry", {method:"POST", body:JSON.stringify(formToObject(e.currentTarget))});
+  renderAiOutput(result);
 });
 
-document.querySelector("#aiScrubForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  const fields = formToObject(event.currentTarget);
-  const result = await api("/api/ai/scrub", {
-    method: "POST",
-    body: JSON.stringify({
-      chiefComplaint: fields.chiefComplaint,
-      assessment: fields.assessment,
-      plan: fields.plan,
+// ---------------------------------------------------------------
+//  CONSULTATION MODULE
+// ---------------------------------------------------------------
+
+// Repeatable prescription rows
+const addPrescBtn = document.querySelector("#addPrescriptionBtn");
+const prescList   = document.querySelector("#prescriptionList");
+if (addPrescBtn) {
+  addPrescBtn.addEventListener("click", () => {
+    const row = document.createElement("div");
+    row.className = "presc-row";
+    row.innerHTML = `
+      <input class="presc-drug"     placeholder="Drug name"        required style="flex:2;"/>
+      <input class="presc-dose"     placeholder="Dose (e.g.500mg)" required style="flex:1;"/>
+      <input class="presc-freq"     placeholder="Frequency (TDS)"  required style="flex:1;"/>
+      <input class="presc-duration" placeholder="Duration"         required style="flex:1;"/>
+      <button type="button" class="rm-presc" onclick="this.closest('.presc-row').remove()">×</button>`;
+    prescList.appendChild(row);
+  });
+}
+
+// Consultation form submit
+const consultationForm = document.querySelector("#consultationForm");
+if (consultationForm) {
+  consultationForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const f = formToObject(e.currentTarget);
+    const prescriptions = [];
+    document.querySelectorAll(".presc-row").forEach(row => {
+      const d = row.querySelector(".presc-drug")?.value;
+      if (d) prescriptions.push({
+        drug:d,
+        dose:row.querySelector(".presc-dose").value,
+        frequency:row.querySelector(".presc-freq").value,
+        duration:row.querySelector(".presc-duration").value
+      });
+    });
+    const payload = {
+      patientId:f.patientId, facilityId:f.facilityId,
+      doctorName:f.doctorName, specialty:f.specialty,
+      chiefComplaint:f.chiefComplaint,
+      historyOfPresentingComplaint:f.historyOfPresentingComplaint||"",
+      pastMedicalHistory:f.pastMedicalHistory||"",
+      examinationFindings:f.examinationFindings||"",
+      assessment:f.assessment, plan:f.plan,
+      icd11Code:f.icd11Code||"", icd11Display:f.icd11Display||"",
+      prescriptions
+    };
+    try {
+      await api("/api/consultations", {method:"POST", body:JSON.stringify(payload)});
+      showToast("Consultation saved & bill generated.");
+      e.currentTarget.reset();
+      if (prescList) prescList.innerHTML = "";
+      if (icd11ConsultCtrl) icd11ConsultCtrl.reset();
+      await loadData();
+    } catch(err) { showToast("Save failed: "+err.message); }
+  });
+}
+
+function renderConsultations() {
+  const target = document.querySelector("#consultationList");
+  if (!target) return;
+  if (!state.consultations.length) {
+    target.innerHTML = `<p style="text-align:center;color:var(--muted);padding:20px;">No consultations yet.</p>`;
+    return;
+  }
+  target.innerHTML = state.consultations.map(c => {
+    const icd = c.icd11Code
+      ? `<div style="margin-top:5px;font-size:12px;color:var(--brand-dark);">
+           <strong>ICD-11:</strong> <code>${c.icd11Code}</code> — ${c.icd11Display}
+           <span class="fhir-badge" onclick="showFhirModal('${c.id}')">FHIR</span>
+         </div>` : "";
+    const rx = c.prescriptions?.length
+      ? `<div style="margin-top:6px;font-size:12px;background:#f1f5f9;padding:8px;border-radius:6px;">
+           <strong style="font-size:10px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;">Rx:</strong>
+           ${c.prescriptions.map(p=>`• <strong>${p.drug}</strong> ${p.dose} ${p.frequency} × ${p.duration}`).join("<br>")}
+         </div>` : "";
+    return `
+      <article class="record">
+        <div style="display:flex;justify-content:space-between;">
+          <strong>${patientName(c.patientId)}</strong>
+          <span style="font-size:11px;color:var(--muted);">${c.date}</span>
+        </div>
+        <span style="font-size:12px;color:var(--muted);">Dr. ${c.doctorName} · ${c.specialty} · ${facilityName(c.facilityId)}</span>
+        <p style="margin:5px 0 0;font-size:13px;"><strong>CC:</strong> ${c.chiefComplaint}</p>
+        ${icd}${rx}
+      </article>`;
+  }).join("");
+}
+
+// ---------------------------------------------------------------
+//  BILLING GATEWAY
+// ---------------------------------------------------------------
+async function updateBillStatus(id, status) {
+  try {
+    await api("/api/billing/status", {method:"POST", body:JSON.stringify({id, status})});
+    showToast(`Bill marked as ${status}`); await loadData();
+  } catch(err) { showToast("Update failed: "+err.message); }
+}
+window.updateBillStatus = updateBillStatus;
+
+function renderBilling(filter = "") {
+  const tbl  = document.querySelector("#billingTable");
+  const oEl  = document.querySelector("#billingOutstanding");
+  const cEl  = document.querySelector("#billingCollected");
+  const clEl = document.querySelector("#billingClaims");
+  const ttEl = document.querySelector("#billingTotal");
+  if (!tbl) return;
+
+  let outstanding=0, collected=0, claims=0, total=0;
+  (state.billing||[]).forEach(b => {
+    total += b.totalAmount;
+    if (b.status==="Pending")  { outstanding+=b.patientPayable; claims+=b.insuranceCovered; }
+    if (b.status==="Paid")     { collected+=b.patientPayable; claims+=b.insuranceCovered; }
+    if (b.status==="Claimed")  { collected+=b.totalAmount; }
+  });
+  if (oEl) oEl.textContent  = `₦${outstanding.toLocaleString()}`;
+  if (cEl) cEl.textContent  = `₦${collected.toLocaleString()}`;
+  if (clEl) clEl.textContent= `₦${claims.toLocaleString()}`;
+  if (ttEl) ttEl.textContent= `₦${total.toLocaleString()}`;
+
+  const q = filter.toLowerCase();
+  const bills = (state.billing||[]).filter(b =>
+    [b.id,b.patientName,b.service,b.status,b.insurance].join(" ").toLowerCase().includes(q));
+
+  if (!bills.length) {
+    tbl.innerHTML = `<p style="text-align:center;color:var(--muted);padding:30px;">No billing records yet. Service any patient to generate invoices.</p>`;
+    return;
+  }
+
+  tbl.innerHTML = `<table>
+    <thead><tr>
+      <th>Bill ID</th><th>Patient</th><th>Service</th><th>Insurance</th>
+      <th>Total</th><th>Coverage</th><th>Patient Due</th><th>Status</th><th>Action</th>
+    </tr></thead>
+    <tbody>
+    ${bills.map(b => {
+      const sBadge = {Pending:"badge warning",Paid:"badge success",Claimed:"badge",Waived:"badge"}[b.status]||"badge";
+      const actions = b.status==="Pending"
+        ? `<button class="bill-btn" onclick="updateBillStatus('${b.id}','Paid')">Pay</button>
+           ${b.insurance!=="Private Pay"?`<button class="bill-btn claim" onclick="updateBillStatus('${b.id}','Claimed')">Claim</button>`:""}
+           <button class="bill-btn waive" onclick="updateBillStatus('${b.id}','Waived')">Waive</button>`
+        : `<span class="settled-lbl">Settled</span>`;
+      return `<tr>
+        <td><strong>${b.id}</strong><br><small>${b.date}</small></td>
+        <td><strong>${b.patientName}</strong><br><small>${b.patientId}</small></td>
+        <td><strong>${b.service}</strong><br><small style="color:var(--muted);font-size:11px;">${b.description}</small></td>
+        <td><span class="tag">${b.insurance}</span></td>
+        <td><strong>₦${b.totalAmount.toLocaleString()}</strong></td>
+        <td style="color:var(--success);font-weight:700;">₦${b.insuranceCovered.toLocaleString()}</td>
+        <td style="color:var(--danger);font-weight:700;">₦${b.patientPayable.toLocaleString()}</td>
+        <td><span class="${sBadge}">${b.status}</span></td>
+        <td class="bill-actions">${actions}</td>
+      </tr>`;
+    }).join("")}
+    </tbody></table>`;
+}
+
+const billingSearchEl = document.querySelector("#billingSearch");
+if (billingSearchEl) {
+  billingSearchEl.addEventListener("input", e => renderBilling(e.target.value));
+}
+
+// ---------------------------------------------------------------
+//  CLINICAL UNIT MODALS — 12 Modules
+// ---------------------------------------------------------------
+const unitModal     = document.querySelector("#unitModal");
+const unitModalTitle= document.querySelector("#unitModalTitle");
+const unitFormWrap  = document.querySelector("#unitFormContent");
+const unitModalForm = document.querySelector("#unitModalForm");
+
+// Shared patient + facility selector HTML
+function modalSelectors(code) {
+  return `
+    <input type="hidden" name="unit" value="${code}" />
+    <div class="form-row">
+      <label>Patient Name
+        <select id="mp_${code}" name="patientId" required
+          style="width:100%; min-width:0; max-width:100%; font-size:13px;"></select>
+      </label>
+      <label>Facility
+        <select id="mf_${code}" name="facilityId" required></select>
+      </label>
+    </div>`;
+}
+
+// ICD-11 mini block for OPD modal
+const opdIcd11Block = `
+  <div style="background:#f1f5f9;border-radius:8px;padding:12px;margin-bottom:12px;">
+    <span class="eyebrow" style="margin-bottom:6px;">ICD-11 Diagnosis</span>
+    <input id="modalIcd11SearchInput" type="text" placeholder="Type to search (e.g. malaria)…" autocomplete="off"
+      style="width:100%;padding:9px;border:1px solid var(--line);border-radius:6px;margin-top:4px;"/>
+    <div id="modalIcd11Results" class="icd11-search-results"></div>
+    <div style="margin-top:6px;padding:8px;border:1px dashed var(--brand);border-radius:6px;font-size:13px;">
+      <strong>Code:</strong> <code id="modalIcd11Preview">—</code>
+      <input type="hidden" name="icd11Code"    id="modalIcd11Code"/>
+      <input type="hidden" name="icd11Display" id="modalIcd11Display"/>
+    </div>
+  </div>`;
+
+const unitDefs = {
+  TRI: {
+    label: "Triage",
+    form: code => `
+      ${modalSelectors("Triage")}
+      <div class="vitals-grid">
+        <label>Temp (°C)<input name="temperature" type="number" step="0.1" placeholder="e.g. 36.8"/></label>
+        <label>BP (mmHg)<input name="bp" placeholder="e.g. 120/80"/></label>
+        <label>Pulse (bpm)<input name="pulse" type="number" placeholder="e.g. 80"/></label>
+        <label>Resp (/min)<input name="respiration" type="number" placeholder="e.g. 18"/></label>
+        <label>SpO2 (%)<input name="spo2" type="number" placeholder="e.g. 98"/></label>
+        <label>Weight (kg)<input name="weight" type="number" step="0.1" placeholder="e.g. 70"/></label>
+      </div>
+      <label>Triage Priority
+        <select name="status">
+          <option value="">— Select priority level —</option>
+          <option value="Open">Priority 4 — Stable / Non-urgent (Green)</option>
+          <option value="Urgent">Priority 3 — Urgent (Yellow)</option>
+          <option value="Urgent">Priority 2 — Very Urgent (Orange)</option>
+          <option value="Emergency">Priority 1 — Immediate Resuscitation (Red)</option>
+          <option value="Emergency">Priority 0 — Expectant / Deceased (Black)</option>
+        </select>
+      </label>
+      <label>Presenting Complaint / Danger Signs
+        <textarea name="chiefComplaint" rows="3" placeholder="Enter presenting symptoms, danger signs, mechanism of injury..." required></textarea>
+      </label>
+      <label>Triage Nurse Assessment
+        <textarea name="assessment" rows="2" placeholder="Enter primary survey findings, AVPU score, initial observations..."></textarea>
+      </label>
+      <label>Routing &amp; Initial Action Plan
+        <textarea name="plan" rows="2" placeholder="Enter routing decision, initial interventions, physician alerted..."></textarea>
+      </label>`
+  },
+  OPD: {
+    label: "Outpatient",
+    form: code => `
+      ${modalSelectors("OPD")}
+      <label>Chief Complaint
+        <textarea name="chiefComplaint" rows="2" placeholder="Presenting symptoms and duration" required></textarea>
+      </label>
+      <div class="vitals-grid">
+        <label>Temp<input name="temperature" type="number" step="0.1" placeholder="37.0"/></label>
+        <label>BP<input name="bp" placeholder="120/80"/></label>
+        <label>Pulse<input name="pulse" type="number" placeholder="80"/></label>
+        <label>Resp<input name="respiration" type="number" placeholder="18"/></label>
+        <label>SpO2<input name="spo2" type="number" placeholder="98"/></label>
+        <label>Weight<input name="weight" type="number" step="0.1" placeholder="70"/></label>
+      </div>
+      <label>Assessment / Working Diagnosis
+        <textarea name="assessment" rows="2" placeholder="Clinical reasoning and findings" required></textarea>
+      </label>
+      ${opdIcd11Block}
+      <label>Management Plan
+        <textarea name="plan" rows="2" placeholder="Prescriptions, labs, follow-up date"></textarea>
+      </label>`
+  },
+  EMR: {
+    label: "Emergency",
+    form: code => `
+      ${modalSelectors("Emergency")}
+      <div class="form-row">
+        <label>Level
+          <select name="status">
+            <option value="Emergency">Level 1 — Code Red Resus</option>
+            <option value="Urgent">Level 2 — Critical</option>
+            <option value="Open">Level 3 — Semi-urgent</option>
+          </select>
+        </label>
+        <label>GCS Score (3–15)
+          <input name="gcs" type="number" min="3" max="15" placeholder="e.g. 15"/>
+        </label>
+      </div>
+      <label>Mechanism / Chief Complaint
+        <textarea name="chiefComplaint" rows="2" placeholder="Trauma, RTA, chest pain, stroke..." required></textarea>
+      </label>
+      <div class="vitals-grid">
+        <label>Temp<input name="temperature" type="number" step="0.1" placeholder="36.8"/></label>
+        <label>BP<input name="bp" placeholder="120/80"/></label>
+        <label>Pulse<input name="pulse" type="number" placeholder="100"/></label>
+        <label>SpO2<input name="spo2" type="number" placeholder="96"/></label>
+      </div>
+      <label>Primary Survey (ABCDE)
+        <textarea name="assessment" rows="2" placeholder="Airway patent, IV access x2, fluid bolus given" required></textarea>
+      </label>
+      <label>Disposition Plan
+        <textarea name="plan" rows="2" placeholder="Admit ICU, emergency surgery booking, obs q15min"></textarea>
+      </label>`
+  },
+  IPD: {
+    label: "Ward Admission",
+    form: code => `
+      ${modalSelectors("Ward")}
+      <div class="form-row">
+        <label>Ward / Unit
+          <select name="ward">
+            <option value="">— Select ward —</option>
+            <option>General Male Ward</option>
+            <option>General Female Ward</option>
+            <option>Surgical Ward (Male/Female)</option>
+            <option>Paediatric Ward</option>
+            <option>Paediatric Isolation / HDU</option>
+            <option>Neonatal ICU (NICU)</option>
+            <option>Intensive Care Unit (ICU)</option>
+            <option>Maternity / Postnatal Ward</option>
+            <option>Gynaecological Ward</option>
+            <option>Orthopaedic Ward</option>
+            <option>Infectious Disease / Isolation</option>
+            <option>Burns &amp; Plastics</option>
+            <option>Psychiatric Ward</option>
+            <option>Oncology Ward</option>
+            <option>Ophthalmic Ward</option>
+            <option>ENT Ward</option>
+            <option>Dermatology Ward</option>
+            <option>Renal / Dialysis Unit</option>
+            <option>Cardiac Care Unit (CCU)</option>
+            <option>Labour Ward (Delivery Suite)</option>
+            <option>Observation Ward (A&amp;E Short stay)</option>
+            <option>Private Suite / VIP Ward</option>
+          </select>
+        </label>
+        <label>Bed Number<input name="bed" placeholder="e.g. 12-B" required/></label>
+      </div>
+      <label>Admitting Diagnosis / Reason
+        <textarea name="chiefComplaint" rows="2" placeholder="Clinical justification for admission" required></textarea>
+      </label>
+      <label>Physician Assessment
+        <textarea name="assessment" rows="2" placeholder="Stable, IV antibiotics started, post-op day 1" required></textarea>
+      </label>
+      <label>Nursing & Medical Plan
+        <textarea name="plan" rows="2" placeholder="IV fluids, vitals q4h, wound care, ambulate tomorrow"></textarea>
+      </label>`
+  },
+  LAB: {
+    label: "Laboratory",
+    form: code => `
+      ${modalSelectors("Laboratory")}
+      <div class="form-row">
+        <label>Test Category &amp; Name
+          <select name="chiefComplaint" required>
+            <option value="">— Select test —</option>
+            <optgroup label="🔴 Haematology">
+              <option>Full Blood Count (FBC) / CBC</option>
+              <option>Peripheral Blood Film / Malaria Microscopy (Thick &amp; Thin)</option>
+              <option>Malaria Rapid Diagnostic Test (mRDT)</option>
+              <option>Erythrocyte Sedimentation Rate (ESR)</option>
+              <option>Reticulocyte Count</option>
+              <option>Blood Group &amp; Rhesus Factor (Grouping)</option>
+              <option>Haemoglobin Electrophoresis / Sickling Test (HbS)</option>
+              <option>Prothrombin Time (PT) / INR / Clotting Profile</option>
+              <option>Activated Partial Thromboplastin Time (aPTT)</option>
+              <option>D-Dimer (PE / DVT / DIC screening)</option>
+              <option>Cross-Match &amp; Blood Compatibility</option>
+            </optgroup>
+            <optgroup label="🟡 Biochemistry / Clinical Chemistry">
+              <option>Random Blood Glucose (RBG)</option>
+              <option>Fasting Blood Glucose (FBG)</option>
+              <option>2-Hour Post-Prandial Glucose (2-hr PPG)</option>
+              <option>HbA1c — Glycated Haemoglobin</option>
+              <option>Urea, Electrolytes &amp; Creatinine (U&amp;E / RFT)</option>
+              <option>eGFR — Estimated Glomerular Filtration Rate</option>
+              <option>Liver Function Tests (LFT) — ALT, AST, ALP, GGT, Bilirubin</option>
+              <option>Total Protein &amp; Albumin</option>
+              <option>Lipid Profile — Total Cholesterol, TG, HDL, LDL</option>
+              <option>Serum Uric Acid</option>
+              <option>Serum Calcium, Phosphate &amp; Magnesium</option>
+              <option>Serum Amylase &amp; Lipase (Pancreatitis)</option>
+              <option>Serum Lactate (Sepsis / Shock)</option>
+              <option>Serum Sodium, Potassium, Chloride, Bicarbonate</option>
+              <option>CRP — C-Reactive Protein (Inflammation)</option>
+              <option>Procalcitonin (Sepsis Marker)</option>
+              <option>Serum Iron, TIBC &amp; Ferritin</option>
+              <option>Vitamin B12 &amp; Folate</option>
+              <option>Vitamin D (25-OH Cholecalciferol)</option>
+            </optgroup>
+            <optgroup label="🟢 Microbiology / Infectious Disease">
+              <option>HIV 1 &amp; 2 Rapid Antibody Test</option>
+              <option>CD4 Count (HIV Staging)</option>
+              <option>Hepatitis B Surface Antigen (HBsAg)</option>
+              <option>Hepatitis B e-Antigen (HBeAg)</option>
+              <option>Hepatitis C Antibody (Anti-HCV)</option>
+              <option>VDRL / RPR — Syphilis Serology</option>
+              <option>Widal Test — Typhoid Fever (Salmonella)</option>
+              <option>Brucella Agglutination Test</option>
+              <option>Sputum AFB Smear — TB (Ziehl-Neelsen)</option>
+              <option>GeneXpert MTB/RIF — TB PCR (Sputum)</option>
+              <option>TB Culture &amp; Drug Sensitivity (MGIT)</option>
+              <option>Blood Culture &amp; Sensitivity (C&amp;S)</option>
+              <option>Urine Microscopy, Culture &amp; Sensitivity (MCS)</option>
+              <option>High Vaginal Swab (HVS) — C&amp;S</option>
+              <option>Cervical Swab — Gonorrhoea / Chlamydia PCR</option>
+              <option>Wound Swab / Pus Swab — C&amp;S</option>
+              <option>Stool Microscopy, Culture &amp; Sensitivity</option>
+              <option>Stool Ova &amp; Parasites (O&amp;P)</option>
+              <option>Skin Scraping — Fungal KOH Prep</option>
+              <option>Cerebrospinal Fluid (CSF) Analysis — Meningitis</option>
+              <option>Dengue NS1 Antigen / Dengue IgM/IgG</option>
+              <option>Lassa Fever PCR (Refer to NCDC Lab)</option>
+              <option>SARS-CoV-2 Antigen Test (COVID-19)</option>
+            </optgroup>
+            <optgroup label="🔵 Urinalysis / Renal">
+              <option>Urinalysis — Dipstick (Urine Protein, Sugar, Ketones, Blood)</option>
+              <option>Urine Protein:Creatinine Ratio (Spot)</option>
+              <option>24-Hour Urine Protein / Creatinine Clearance</option>
+              <option>Urine Microscopy (RBCs, Casts, WBCs)</option>
+              <option>Urine β-hCG — Serum/Urine Pregnancy Test</option>
+            </optgroup>
+            <optgroup label="🟣 Hormones / Endocrinology">
+              <option>Thyroid Function Tests (TFTs) — TSH, Free T3, Free T4</option>
+              <option>Cortisol (Morning / Stress)</option>
+              <option>Prolactin, FSH, LH, Oestradiol (Reproductive Panel)</option>
+              <option>Testosterone (Male Reproductive)</option>
+              <option>Progesterone (Luteal Phase)</option>
+              <option>β-hCG — Quantitative (Serum, Ectopic / Early Pregnancy)</option>
+              <option>PSA — Prostate Specific Antigen</option>
+              <option>Anti-TPO / Anti-Thyroglobulin (Autoimmune Thyroid)</option>
+            </optgroup>
+            <optgroup label="⚫ Cardiac / Emergency Markers">
+              <option>Troponin I or T — Acute MI / ACS</option>
+              <option>CK-MB — Cardiac Enzyme</option>
+              <option>BNP / NT-proBNP — Heart Failure Marker</option>
+              <option>ABG — Arterial Blood Gas (Respiratory Failure / ICU)</option>
+              <option>Venous Blood Gas (VBG)</option>
+              <option>Blood Ketones / Urine Ketones (DKA)</option>
+            </optgroup>
+            <optgroup label="🟤 Immunology / Serology">
+              <option>Rheumatoid Factor (RF) — RA Screening</option>
+              <option>Anti-Nuclear Antibody (ANA)</option>
+              <option>Anti-dsDNA (SLE)</option>
+              <option>Complement C3 &amp; C4</option>
+              <option>Anti-CCP (RA Confirmation)</option>
+              <option>IgE — Total (Allergy Panel)</option>
+              <option>ANCA (Vasculitis Panel)</option>
+            </optgroup>
+            <optgroup label="🔶 Histopathology / Cytology">
+              <option>Cervical Smear / Pap Smear (Cancer Screening)</option>
+              <option>Fine Needle Aspiration Cytology (FNAC)</option>
+              <option>Tissue Biopsy — Histopathology (H&amp;E)</option>
+              <option>Semen Analysis (Male Fertility)</option>
+              <option>Bone Marrow Aspirate &amp; Trephine</option>
+            </optgroup>
+          </select>
+        </label>
+        <label>STAT Priority
+          <select name="status">
+            <option value="Open">Routine (24–48 hrs)</option>
+            <option value="Urgent">Urgent (2–6 hrs)</option>
+            <option value="Emergency">STAT / Emergency (&lt;1 hr)</option>
+          </select>
+        </label>
+      </div>
+      <label>Additional Tests (free text — list any extras not in the dropdown above)
+        <textarea name="additionalTests" rows="2" placeholder="e.g. Anti-HBs titre, G6PD screen, Thyroglobulin..."></textarea>
+      </label>
+      <label>Clinical Indication &amp; History
+        <textarea name="assessment" rows="3" placeholder="Enter clinical reason for request: symptoms, differential diagnosis, risk factors, relevant history..." required></textarea>
+      </label>
+      <label>Specimen Type, Collection &amp; Result Instructions
+        <textarea name="plan" rows="2" placeholder="Enter specimen type (e.g. venous blood 5mL EDTA), collection time, transport, result turnaround, critical value notification..."></textarea>
+      </label>`
+  },
+  PHA: {
+    label: "Pharmacy",
+    form: code => `
+      ${modalSelectors("Pharmacy")}
+      <div class="form-row">
+        <label>Drug Class / Category
+          <select name="drugCategory">
+            <option value="">— Select drug class —</option>
+            <optgroup label="Anti-infectives">
+              <option>Antimalarial (Artemether-Lumefantrine, ASAQ, Artesunate IV)</option>
+              <option>Antibiotic — Penicillin (Amoxicillin, Co-Amoxiclav, Ampicillin)</option>
+              <option>Antibiotic — Cephalosporin (Cefuroxime, Ceftriaxone, Cefixime)</option>
+              <option>Antibiotic — Fluoroquinolone (Ciprofloxacin, Ofloxacin)</option>
+              <option>Antibiotic — Macrolide (Azithromycin, Erythromycin)</option>
+              <option>Antibiotic — Metronidazole / Tinidazole</option>
+              <option>Anti-TB (Rifampicin, Isoniazid, Pyrazinamide, Ethambutol)</option>
+              <option>Antifungal (Fluconazole, Griseofulvin, Nystatin)</option>
+              <option>Antiretroviral (TDF/3TC/DTG, EFV-based)</option>
+              <option>Anthelmintic (Albendazole, Mebendazole, Praziquantel)</option>
+            </optgroup>
+            <optgroup label="Cardiovascular">
+              <option>Antihypertensive — ACE Inhibitor (Enalapril, Lisinopril)</option>
+              <option>Antihypertensive — CCB (Amlodipine, Nifedipine)</option>
+              <option>Antihypertensive — Beta-Blocker (Atenolol, Metoprolol)</option>
+              <option>Antihypertensive — Diuretic (Furosemide, HCTZ, Spironolactone)</option>
+              <option>Antiplatelet (Aspirin 75–300mg, Clopidogrel)</option>
+              <option>Statin (Atorvastatin, Simvastatin, Rosuvastatin)</option>
+              <option>Digoxin (Heart failure / AF)</option>
+              <option>MgSO4 — Magnesium Sulphate (Pre-eclampsia)</option>
+            </optgroup>
+            <optgroup label="Endocrine / Metabolic">
+              <option>Insulin (Short-acting, Long-acting, Mixtard)</option>
+              <option>Oral Hypoglycaemic (Metformin, Glibenclamide, Glimepiride)</option>
+              <option>Levothyroxine (Hypothyroidism)</option>
+              <option>Oral Contraceptive (Combined OCP, POP)</option>
+              <option>Injectable Contraceptive (DMPA / Depo-Provera)</option>
+            </optgroup>
+            <optgroup label="Analgesics / Anaesthesia">
+              <option>Non-Opioid (Paracetamol, Ibuprofen, Diclofenac)</option>
+              <option>Opioid (Morphine, Tramadol, Pethidine)</option>
+              <option>Local Anaesthetic (Lidocaine, Bupivacaine)</option>
+              <option>Sedation (Midazolam, Diazepam, Ketamine)</option>
+              <option>Antispasmodic (Hyoscine Butylbromide / Buscopan)</option>
+            </optgroup>
+            <optgroup label="GIT / Nutrition">
+              <option>Antacid / PPI (Omeprazole, Ranitidine, Sucralfate)</option>
+              <option>Antiemetic (Metoclopramide, Ondansetron, Promethazine)</option>
+              <option>Iron Supplement (Ferrous Sulphate, Ferric)</option>
+              <option>Folic Acid / Vitamin B Complex</option>
+              <option>ORS — Oral Rehydration Salts</option>
+              <option>IV Fluids (Normal Saline, Ringer's Lactate, Dextrose 5%)</option>
+              <option>Zinc (Paediatric Diarrhoea Protocol)</option>
+            </optgroup>
+            <optgroup label="Respiratory">
+              <option>Bronchodilator Inhaler (Salbutamol, Ipratropium)</option>
+              <option>Prednisolone / Dexamethasone (Systemic Steroid)</option>
+              <option>Aminophylline (IV Severe Asthma)</option>
+            </optgroup>
+            <optgroup label="Maternal / Neonatal">
+              <option>Oxytocin (Labour Induction / PPH Prevention)</option>
+              <option>Misoprostol (PPH / Cervical Ripening)</option>
+              <option>Nifedipine (Tocolysis / BP in Pregnancy)</option>
+              <option>Vitamin K Injection (Neonatal)</option>
+              <option>Tetracycline Eye Ointment (Neonatal)</option>
+              <option>Vitamin A (Child Health / Measles)</option>
+            </optgroup>
+          </select>
+        </label>
+        <label>Dispensing Status
+          <select name="status">
+            <option value="">— Select status —</option>
+            <option value="Closed">Fully Dispensed</option>
+            <option value="Open">Pending — Awaiting Stock</option>
+            <option value="Urgent">Partial Dispense (shortage)</option>
+          </select>
+        </label>
+      </div>
+      <label>Specific Drug, Dose &amp; Formulation
+        <input name="chiefComplaint" placeholder="Enter exact drug name, strength and form (e.g. Artemether-Lumefantrine 80/480mg tabs)" required/>
+      </label>
+      <label>Allergy Check &amp; Drug Interaction Safety Verification
+        <textarea name="assessment" rows="2" placeholder="Enter allergy screening result, drug interaction check outcome, patient-specific safety considerations..." required></textarea>
+      </label>
+      <label>Dispensing, Counselling &amp; Adherence Notes
+        <textarea name="plan" rows="2" placeholder="Enter dosing instructions, route, frequency, duration, patient counselling points, storage and return visit..."></textarea>
+      </label>`
+  },
+  RAD: {
+    label: "Radiology",
+    form: code => `
+      ${modalSelectors("Radiology")}
+      <div class="form-row">
+        <label>Imaging Study
+          <select name="chiefComplaint" required>
+            <option value="">— Select modality —</option>
+            <optgroup label="Plain X-Ray (Radiograph)">
+              <option>Chest X-Ray — PA View (CXR)</option>
+              <option>Abdominal X-Ray (AXR) — Erect &amp; Supine</option>
+              <option>Skull X-Ray — AP &amp; Lateral</option>
+              <option>Cervical Spine X-Ray (C-Spine)</option>
+              <option>Thoracic Spine X-Ray (T-Spine)</option>
+              <option>Lumbar Spine X-Ray (L-Spine)</option>
+              <option>Pelvis X-Ray</option>
+              <option>Hip X-Ray — AP &amp; Lateral</option>
+              <option>Knee X-Ray — AP &amp; Lateral</option>
+              <option>Ankle &amp; Foot X-Ray</option>
+              <option>Shoulder X-Ray</option>
+              <option>Elbow X-Ray</option>
+              <option>Wrist &amp; Hand X-Ray</option>
+              <option>Forearm / Radius / Ulna X-Ray</option>
+              <option>Humerus / Arm X-Ray</option>
+              <option>Femur / Thigh X-Ray</option>
+              <option>Tibia &amp; Fibula X-Ray</option>
+              <option>Mandible / Facial Bones X-Ray</option>
+              <option>Paranasal Sinuses X-Ray</option>
+              <option>KUB X-Ray (Kidney, Ureter, Bladder)</option>
+            </optgroup>
+            <optgroup label="Ultrasound (USS)">
+              <option>Obstetric Ultrasound — Dating / Anomaly / Viability Scan</option>
+              <option>Obstetric USS — Fetal Wellbeing / Biophysical Profile</option>
+              <option>Abdominal USS — Liver, Gallbladder, Spleen, Pancreas, Aorta</option>
+              <option>Pelvic USS — Uterus, Ovaries (Transabdominal)</option>
+              <option>Transvaginal Ultrasound (TVS) — Gynaecology / Early Pregnancy</option>
+              <option>Scrotal / Testicular Ultrasound</option>
+              <option>Renal USS — Kidneys, Ureters, Bladder (RUB)</option>
+              <option>Thyroid Ultrasound</option>
+              <option>Breast Ultrasound</option>
+              <option>Soft Tissue / Superficial Mass USS</option>
+              <option>FAST Scan — Emergency Trauma (Focused Abdominal USS)</option>
+              <option>Doppler USS — Lower Limb DVT</option>
+              <option>Doppler USS — Carotid Arteries</option>
+              <option>Echocardiography (ECHO) — Cardiac Ultrasound</option>
+            </optgroup>
+            <optgroup label="CT Scan">
+              <option>CT Head — Plain (Trauma / Stroke)</option>
+              <option>CT Head — Contrast (Tumour / Abscess)</option>
+              <option>CT Chest — High Resolution (HRCT) — TB / ILD</option>
+              <option>CT Chest &amp; Abdomen — Contrast (Oncology)</option>
+              <option>CT Abdomen &amp; Pelvis — Plain</option>
+              <option>CT Abdomen &amp; Pelvis — Contrast</option>
+              <option>CT Spine (Cervical / Thoracic / Lumbar)</option>
+              <option>CT Pulmonary Angiogram (CTPA) — PE</option>
+              <option>CT Angiogram — Aorta / Peripheral Vessels</option>
+              <option>CT KUB — Renal Stones</option>
+            </optgroup>
+            <optgroup label="MRI">
+              <option>MRI Brain (Plain)</option>
+              <option>MRI Brain with Gadolinium Contrast</option>
+              <option>MRI Spine — Cervical / Thoracic / Lumbar</option>
+              <option>MRI Pelvis (Gynaecology / Prostate)</option>
+              <option>MRI Knee / Shoulder / Hip (Musculoskeletal)</option>
+              <option>MRI Liver — Hepatobiliary</option>
+              <option>Magnetic Resonance Angiogram (MRA)</option>
+            </optgroup>
+            <optgroup label="Fluoroscopy / Contrast Studies">
+              <option>Barium Swallow</option>
+              <option>Barium Meal / Follow-Through</option>
+              <option>Barium Enema</option>
+              <option>Intravenous Urogram (IVU / IVP)</option>
+              <option>Micturating Cystourethrogram (MCUG)</option>
+              <option>Hysterosalpingogram (HSG) — Tubal Patency</option>
+              <option>Myelogram</option>
+            </optgroup>
+            <optgroup label="Nuclear Medicine / Special">
+              <option>Bone Scan (Technetium Scintigraphy)</option>
+              <option>Thyroid Scan (Tc-99m)</option>
+              <option>Ventilation-Perfusion (V/Q) Scan</option>
+              <option>PET-CT Scan (Oncology)</option>
+              <option>Mammography (Breast Cancer Screening)</option>
+              <option>DEXA Scan (Bone Mineral Density)</option>
+            </optgroup>
+          </select>
+        </label>
+        <label>Priority
+          <select name="status">
+            <option value="">— Select priority —</option>
+            <option value="Open">Routine (Elective)</option>
+            <option value="Urgent">Urgent (Same Day)</option>
+            <option value="Emergency">Emergency (Immediate)</option>
+          </select>
+        </label>
+      </div>
+      <label>Clinical Indication &amp; Question for Radiologist
+        <textarea name="assessment" rows="3" placeholder="Enter clinical history, differential diagnosis, what you need answered (e.g. Rule out fracture, exclude TB, assess fetal lie and presentation at 36 weeks)..." required></textarea>
+      </label>
+      <label>Radiologist Report / Preliminary Findings
+        <textarea name="plan" rows="2" placeholder="Enter radiologist report, preliminary findings, scheduled scan date/time, or result turnaround..."></textarea>
+      </label>`
+  },
+  MAT: {
+    label: "ANC & Maternity",
+    form: code => `
+      ${modalSelectors("ANC")}
+      <div class="form-row">
+        <label>Visit Type
+          <select name="visitType">
+            <option value="">— Select visit type —</option>
+            <option>ANC Visit 1 (Booking / &lt;16 weeks)</option>
+            <option>ANC Visit 2 (16–20 weeks)</option>
+            <option>ANC Visit 3 (24–28 weeks)</option>
+            <option>ANC Visit 4 (30–32 weeks)</option>
+            <option>ANC Visit 5 (34–36 weeks)</option>
+            <option>ANC Visit 6 (38 weeks)</option>
+            <option>ANC Visit 7 (40 weeks)</option>
+            <option>Labour / Active Delivery</option>
+            <option>Immediate Postnatal (0–48 hrs)</option>
+            <option>Postnatal Visit 1 (3–7 days)</option>
+            <option>Postnatal Visit 2 (6 weeks)</option>
+            <option>Gynaecological Visit</option>
+            <option>Family Planning / Contraception</option>
+          </select>
+        </label>
+        <label>Parity
+          <input name="parity" placeholder="e.g. G3P2+0 (3 pregnancies, 2 live births)"/>
+        </label>
+      </div>
+      <div class="vitals-grid">
+        <label>Maternal BP<input name="bp" placeholder="e.g. 120/80" required/></label>
+        <label>Temp (°C)<input name="temperature" type="number" step="0.1" placeholder="e.g. 36.5" required/></label>
+        <label>GA (weeks)<input name="ga" type="number" placeholder="e.g. 28"/></label>
+        <label>FHR (bpm)<input name="fhr" type="number" placeholder="e.g. 144"/></label>
+        <label>Fundal Ht (cm)<input name="fundal" type="number" placeholder="e.g. 28"/></label>
+        <label>Weight (kg)<input name="weight" type="number" step="0.1" placeholder="e.g. 72"/></label>
+      </div>
+      <label>Visit Reason / Maternal Complaint
+        <textarea name="chiefComplaint" rows="2" placeholder="Enter visit reason, presenting complaint, or symptom (e.g. headache, reduced fetal movements, vaginal bleeding)..." required></textarea>
+      </label>
+      <label>Obstetric Assessment
+        <textarea name="assessment" rows="3" placeholder="Enter obstetric findings: lie, presentation, engagement, fetal heart, uterine activity, pre-eclampsia screen, PMTCT status, danger signs..." required></textarea>
+      </label>
+      <label>Management Plan &amp; Danger Sign Counselling
+        <textarea name="plan" rows="2" placeholder="Enter medications, supplements, referral plan, next appointment date, and danger signs discussed with patient..."></textarea>
+      </label>`
+  },
+  IMM: {
+    label: "Immunization",
+    form: code => `
+      ${modalSelectors("Immunization")}
+      <div class="form-row">
+        <label>Vaccine / Antigen
+          <select name="chiefComplaint" required>
+            <option value="">— Select vaccine —</option>
+            <optgroup label="Childhood Routine EPI (Nigeria Schedule)">
+              <option>BCG — Bacillus Calmette-Guérin (TB) — At Birth</option>
+              <option>OPV0 — Oral Polio Vaccine (Birth Dose)</option>
+              <option>OPV1 — Oral Polio (6 weeks)</option>
+              <option>OPV2 — Oral Polio (10 weeks)</option>
+              <option>OPV3 — Oral Polio (14 weeks)</option>
+              <option>IPV — Inactivated Polio Vaccine (14 weeks)</option>
+              <option>Pentavalent 1 — DPT-HepB-Hib (6 weeks)</option>
+              <option>Pentavalent 2 — DPT-HepB-Hib (10 weeks)</option>
+              <option>Pentavalent 3 — DPT-HepB-Hib (14 weeks)</option>
+              <option>PCV10/13 Dose 1 — Pneumococcal (6 weeks)</option>
+              <option>PCV10/13 Dose 2 — Pneumococcal (10 weeks)</option>
+              <option>PCV10/13 Dose 3 — Pneumococcal (14 weeks)</option>
+              <option>Rotavirus Dose 1 (6 weeks)</option>
+              <option>Rotavirus Dose 2 (10 weeks)</option>
+              <option>Measles-Rubella (MR) Dose 1 (9 months)</option>
+              <option>Measles-Rubella (MR) Dose 2 (15 months)</option>
+              <option>Yellow Fever (9 months — single dose, lifelong)</option>
+              <option>Meningitis A — MenAfriVac (9–18 months)</option>
+              <option>Typhoid Conjugate Vaccine (TCV) (9 months)</option>
+              <option>Vitamin A Supplementation (6 months+)</option>
+            </optgroup>
+            <optgroup label="Maternal Immunization">
+              <option>TT1 — Tetanus Toxoid (First ANC Contact)</option>
+              <option>TT2 — Tetanus Toxoid (4 weeks after TT1)</option>
+              <option>TT3 — Tetanus Toxoid (6 months after TT2)</option>
+              <option>TT4 — Tetanus Toxoid (1 year after TT3)</option>
+              <option>TT5 — Tetanus Toxoid (1 year after TT4)</option>
+              <option>IPTp-SP — Intermittent Preventive Treatment (Malaria in Pregnancy)</option>
+              <option>Hepatitis B (Maternal — If non-immune)</option>
+              <option>COVID-19 (Maternal — mRNA or Viral Vector)</option>
+            </optgroup>
+            <optgroup label="Adult / Catch-Up / Special Campaign">
+              <option>HPV Vaccine (Girls 9–14 yrs — Cervarix / Gardasil)</option>
+              <option>Hepatitis B (HBV) — Adult 3-dose series</option>
+              <option>Hepatitis A (HAV)</option>
+              <option>Typhoid Vi Polysaccharide (Adults)</option>
+              <option>Rabies (Pre-exposure / Post-exposure)</option>
+              <option>COVID-19 Primary Series (AstraZeneca / Pfizer / J&amp;J)</option>
+              <option>COVID-19 Booster</option>
+              <option>Influenza (Seasonal Flu Vaccine)</option>
+              <option>Cholera Oral Vaccine (OCV) — Campaign</option>
+              <option>Meningococcal ACWY (Adults / Travel)</option>
+            </optgroup>
+          </select>
+        </label>
+        <label>Dose &amp; Series Status
+          <select name="status">
+            <option value="">— Select dose —</option>
+            <option value="Open">Primary Dose 1</option>
+            <option value="Open">Primary Dose 2</option>
+            <option value="Open">Primary Dose 3</option>
+            <option value="Closed">Booster Dose</option>
+            <option value="Closed">Supplemental / Campaign Dose</option>
+            <option value="Escalated">Catch-up (Defaulter)</option>
+          </select>
+        </label>
+      </div>
+      <label>Child / Patient Clinical Status at Time of Vaccination
+        <textarea name="assessment" rows="2" placeholder="Enter patient weight, temperature, general condition, contraindications checked, AEFI history..." required></textarea>
+      </label>
+      <label>Next Dose Schedule, Cold-Chain &amp; Defaulter Prevention
+        <textarea name="plan" rows="2" placeholder="Enter next vaccine due, date, site, cold chain verification, recall strategy, add to defaulter register if applicable..."></textarea>
+      </label>`
+  },
+  THR: {
+    label: "Theatre",
+    form: code => `
+      ${modalSelectors("Theatre")}
+      <div class="form-row">
+        <label>Procedure / Operation
+          <select name="procedureCategory">
+            <option value="">— Select procedure —</option>
+            <optgroup label="Obstetrics &amp; Gynaecology">
+              <option>Caesarean Section — LSCS (Lower Segment)</option>
+              <option>Manual Removal of Placenta (MROP)</option>
+              <option>Evacuation of Retained Products of Conception (ERPC)</option>
+              <option>Repair of Obstetric Fistula (VVF / RVF)</option>
+              <option>Laparotomy — Ruptured Ectopic Pregnancy</option>
+              <option>Total Abdominal Hysterectomy (TAH)</option>
+              <option>Myomectomy (Open / Laparoscopic)</option>
+              <option>Dilation &amp; Curettage (D&amp;C)</option>
+            </optgroup>
+            <optgroup label="General Surgery">
+              <option>Appendicectomy (Open / Laparoscopic)</option>
+              <option>Exploratory Laparotomy</option>
+              <option>Bowel Resection &amp; Anastomosis</option>
+              <option>Hernia Repair — Inguinal / Umbilical</option>
+              <option>Cholecystectomy (Open / Laparoscopic)</option>
+              <option>Thyroidectomy</option>
+              <option>Mastectomy (Simple / Radical)</option>
+              <option>Haemorrhoidectomy</option>
+            </optgroup>
+            <optgroup label="Orthopaedics &amp; Trauma">
+              <option>Open Reduction &amp; Internal Fixation (ORIF)</option>
+              <option>Closed Reduction &amp; POP / K-Wire Fixation</option>
+              <option>Intramedullary (IM) Nail — Femur / Tibia</option>
+              <option>Hip Hemiarthroplasty / Total Hip Replacement</option>
+              <option>Amputation — Below / Above Knee</option>
+              <option>Debridement &amp; Wound Lavage</option>
+            </optgroup>
+            <optgroup label="Other Procedures">
+              <option>Burr Hole / Craniotomy</option>
+              <option>Ventriculoperitoneal (VP) Shunt</option>
+              <option>Transurethral Resection of Prostate (TURP)</option>
+              <option>Circumcision (Surgical)</option>
+              <option>Tracheostomy</option>
+              <option>Chest Drain Insertion (ICD)</option>
+              <option>Central Venous Catheter (CVC) Insertion</option>
+            </optgroup>
+          </select>
+        </label>
+        <label>Anaesthesia Type
+          <select name="anaesthesia">
+            <option value="">— Select anaesthesia —</option>
+            <option>Spinal / Subarachnoid Block (SAB)</option>
+            <option>Epidural Anaesthesia</option>
+            <option>General Anaesthesia (GA) — Endotracheal</option>
+            <option>General Anaesthesia — LMA</option>
+            <option>Ketamine IV Dissociative Anaesthesia</option>
+            <option>Local Infiltration Anaesthesia</option>
+            <option>IV Sedation (Midazolam + Fentanyl)</option>
+          </select>
+        </label>
+      </div>
+      <label>Specific Procedure / Operation Name
+        <input name="chiefComplaint" placeholder="Enter exact procedure name (e.g. Exploratory Laparotomy + Peritoneal Lavage)..." required/>
+      </label>
+      <label>WHO Surgical Safety Checklist (Sign-In → Time-Out → Sign-Out)
+        <textarea name="assessment" rows="3" placeholder="Enter checklist status: patient identity confirmed, procedure &amp; site verified, consent signed, allergies checked, airway assessed, imaging displayed, anticipated critical events discussed, pulse oximeter functional, instrument count correct..." required></textarea>
+      </label>
+      <label>Post-Operative Recovery, Monitoring &amp; Discharge Plan
+        <textarea name="plan" rows="2" placeholder="Enter post-op ward, monitoring frequency, analgesia plan, IV fluids, wound care, drain management, NBM duration, follow-up date..."></textarea>
+      </label>`
+  },
+  CLA: {
+    label: "Insurance Claims",
+    form: code => `
+      ${modalSelectors("Claims")}
+      <div class="form-row">
+        <label>Insurance Scheme
+          <select name="insurance" required>
+            <option value="">— Select scheme —</option>
+            <option value="PLASCHEMA">PLASCHEMA — Plateau State Health Insurance</option>
+            <option value="NHIA">NHIA — National Health Insurance Authority</option>
+            <option value="Basic Health Care Provision Fund">BHCPF — Basic Health Care Provision Fund</option>
+            <option value="NHIA">NHIS — National Health Insurance Scheme (Legacy)</option>
+            <option value="Private Insurance">Private Insurance (AXA Mansard, Hygeia, Reliance HMO)</option>
+            <option value="GIFSHIP">GIFSHIP — Gov't & IGR Facility Self Health Insurance</option>
+            <option value="Ekiti">State Contributory Scheme (Cross-listed / Visiting)</option>
+          </select>
+        </label>
+        <label>Benefit Package / Claim Type
+          <select name="claimType">
+            <option value="">— Select type —</option>
+            <option>Primary Care Package (OPD, Drugs, Labs)</option>
+            <option>ANC / Maternal Package (ANC, Delivery, Postnatal)</option>
+            <option>Surgical Package (Procedure + Theatre + Anaesthesia)</option>
+            <option>Inpatient Admission Package (Ward + Nursing + Meals)</option>
+            <option>Emergency Care Package</option>
+            <option>Immunization Package</option>
+            <option>Radiology / Diagnostics Package</option>
+            <option>Specialist Consultation Package</option>
+            <option>Chronic Disease Management (Hypertension, Diabetes, TB)</option>
+          </select>
+        </label>
+      </div>
+      <label>Pre-Authorization / Approval Code
+        <input name="chiefComplaint" placeholder="Enter pre-authorization code (e.g. PL-9827-ANC, NHIA-00234)" required/>
+      </label>
+      <label>Eligibility Verification &amp; Beneficiary Check
+        <textarea name="assessment" rows="2" placeholder="Enter verification outcome: card status, benefit limit, active membership, co-payment tier, benefit package confirmed..." required></textarea>
+      </label>
+      <label>Services Rendered &amp; Claim Bundle Details
+        <textarea name="plan" rows="2" placeholder="List all services in this claim bundle, ICD-11 codes, quantities, unit costs and total claim amount submitted to portal..."></textarea>
+      </label>`
+  },
+  REF: {
+    label: "Referral",
+    form: code => `
+      ${modalSelectors("Referrals")}
+      <div class="form-row">
+        <label>Receiving Facility
+          <select name="destination" required>
+            <option value="">— Select receiving facility —</option>
+            <optgroup label="Tertiary / Teaching Hospitals">
+              <option>Jos University Teaching Hospital (JUTH)</option>
+              <option>Plateau State Specialist Hospital (PSSH)</option>
+              <option>Plateau State Specialist Hospital — Vom Campus</option>
+              <option>Federal Medical Centre (FMC) Wase</option>
+              <option>University of Jos Teaching Hospital (UniJOS)</option>
+            </optgroup>
+            <optgroup label="General Hospitals — Plateau State">
+              <option>General Hospital Shendam</option>
+              <option>General Hospital Mangu</option>
+              <option>General Hospital Pankshin</option>
+              <option>General Hospital Barkin Ladi</option>
+              <option>General Hospital Langtang</option>
+              <option>General Hospital Bassa</option>
+              <option>General Hospital Kanke</option>
+              <option>General Hospital Kanam</option>
+              <option>General Hospital Mikang</option>
+              <option>General Hospital Qua'an Pan</option>
+              <option>General Hospital Riyom</option>
+              <option>General Hospital Shendam</option>
+              <option>General Hospital Wase</option>
+              <option>General Hospital Jos East</option>
+              <option>General Hospital Jos South</option>
+              <option>General Hospital Jos North</option>
+            </optgroup>
+            <optgroup label="Specialist Referrals">
+              <option>JUTH — Orthopaedics &amp; Trauma Centre</option>
+              <option>JUTH — Neurosurgery</option>
+              <option>JUTH — Paediatric Emergency (PICU / NICU)</option>
+              <option>JUTH — Obstetrics &amp; Gynaecology (MFMU)</option>
+              <option>JUTH — Cardiothoracic Surgery</option>
+              <option>JUTH — Ophthalmology (Eye Clinic)</option>
+              <option>JUTH — Renal / Dialysis Unit</option>
+              <option>JUTH — Psychiatry (MHMS)</option>
+              <option>JUTH — Oncology / Radiotherapy</option>
+              <option>JUTH — Burns &amp; Plastics Unit</option>
+            </optgroup>
+            <optgroup label="Out-of-State / National Referral">
+              <option>National Hospital Abuja (NHA)</option>
+              <option>Federal Medical Centre Keffi (FMC Keffi)</option>
+              <option>Ahmadu Bello University Teaching Hospital (ABUTH) Zaria</option>
+              <option>Aminu Kano Teaching Hospital (AKTH) Kano</option>
+              <option>NCDC / Reference Lab (Infectious Disease)</option>
+            </optgroup>
+          </select>
+        </label>
+        <label>Urgency Level
+          <select name="status">
+            <option value="Emergency">Emergency — Life Threatening</option>
+            <option value="Urgent">Urgent — Same Day</option>
+            <option value="Open">Routine — Elective</option>
+          </select>
+        </label>
+      </div>
+      <label>Reason for Referral
+        <select name="chiefComplaint" required>
+          <option value="Severe pre-eclampsia — requires urgent stabilisation">Severe pre-eclampsia</option>
+          <option value="Severe malaria with complications">Severe malaria with complications</option>
+          <option value="Emergency surgical intervention required">Emergency surgical intervention</option>
+          <option value="Neonatal intensive care required">Neonatal intensive care required</option>
+          <option value="Specialist review — chronic disease management">Specialist review — chronic disease</option>
+          <option value="Trauma — orthopaedic surgery required">Trauma — orthopaedic surgery</option>
+        </select>
+      </label>
+      <label>Clinical Status at Transfer
+        <textarea name="assessment" rows="2" placeholder="BP 160/110, urine protein ++, MgSO4 loading dose given, IV access secured" required></textarea>
+      </label>
+      <label>Transfer & Feedback Plan
+        <textarea name="plan" rows="2" placeholder="State ambulance dispatched, receiving physician alerted, feedback in 48hrs"></textarea>
+      </label>`
+  }
+};
+
+// Open a unit modal
+function openUnitModal(code) {
+  const def = unitDefs[code];
+  if (!def) return;
+  unitModalTitle.textContent = def.label + " — Clinical Record";
+  unitFormWrap.innerHTML = def.form(code);
+
+  // Populate patient + facility selects
+  const fp = optionHtml(state.facilities, f => `${f.name} — ${f.lga}`);
+  const pp = optionHtml(state.patients,   p => `${p.name} (${p.id})`);
+  const pSel = unitFormWrap.querySelector(`#mp_${code}`);
+  const fSel = unitFormWrap.querySelector(`#mf_${code}`);
+  if (pSel) pSel.innerHTML = pp;
+  if (fSel) fSel.innerHTML = fp;
+
+  // Wire OPD ICD-11 inline search
+  if (code === "OPD") {
+    const srch = document.querySelector("#modalIcd11SearchInput");
+    const res  = document.querySelector("#modalIcd11Results");
+    const prev = document.querySelector("#modalIcd11Preview");
+    const cHid = document.querySelector("#modalIcd11Code");
+    const dHid = document.querySelector("#modalIcd11Display");
+    if (srch) {
+      srch.addEventListener("input", async e => {
+        const q = e.target.value.trim();
+        if (!q) { res.innerHTML=""; return; }
+        try {
+          const data = await api(`/api/icd11/search?q=${encodeURIComponent(q)}`);
+          res.innerHTML = data.map(r =>
+            `<div class="icd11-result-item modal-icd11-item" data-code="${r.code}" data-title="${r.title}">
+               <strong>${r.code}</strong> — ${r.title}
+             </div>`).join("");
+          res.querySelectorAll(".modal-icd11-item").forEach(el => {
+            el.addEventListener("click", () => {
+              srch.value = `${el.dataset.code} — ${el.dataset.title}`;
+              res.innerHTML = "";
+              prev.textContent = `${el.dataset.code} — ${el.dataset.title}`;
+              cHid.value = el.dataset.code;
+              dHid.value = el.dataset.title;
+            });
+          });
+        } catch(err) { console.error(err); }
+      });
+    }
+  }
+
+  unitModal.style.display = "flex";
+}
+
+// Bind module card clicks
+document.querySelectorAll(".module-card").forEach(card => {
+  const code = card.querySelector("span")?.textContent?.trim();
+  if (!code || !unitDefs[code]) return;
+  card.style.cursor = "pointer";
+  card.addEventListener("click", () => openUnitModal(code));
+});
+
+// Close modal
+function closeUnitModal() { unitModal.style.display = "none"; }
+window.closeUnitModal = closeUnitModal;
+unitModal?.addEventListener("click", e => { if (e.target === unitModal) closeUnitModal(); });
+
+// Submit unit modal form
+if (unitModalForm) {
+  unitModalForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const f = formToObject(e.currentTarget);
+    const payload = {
+      patientId: f.patientId, facilityId: f.facilityId,
+      unit: f.unit, chiefComplaint: f.chiefComplaint,
       vitals: {
-        temperature: fields.temperature,
-        bp: fields.bp,
-        pulse: fields.pulse,
-        respiration: fields.respiration,
-        spo2: fields.spo2
-      }
-    })
+        temperature: f.temperature||"", bp: f.bp||"",
+        pulse: f.pulse||"", respiration: f.respiration||"",
+        spo2: f.spo2||"", weight: f.weight||""
+      },
+      assessment: f.assessment, plan: f.plan,
+      icd11Code: f.icd11Code||"", icd11Display: f.icd11Display||""
+    };
+    try {
+      await api("/api/encounters", {method:"POST", body:JSON.stringify(payload)});
+      showToast(`${f.unit} record saved & bill generated.`);
+      closeUnitModal();
+      await loadData();
+    } catch(err) { showToast("Submit failed: "+err.message); }
   });
-  renderAiOutput(result);
-});
+}
 
-document.querySelector("#aiInquiryForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  const result = await api("/api/ai/inquiry", {
-    method: "POST",
-    body: JSON.stringify(formToObject(event.currentTarget))
-  });
-  renderAiOutput(result);
-});
-
+// ---------------------------------------------------------------
+//  Kick off on load
+// ---------------------------------------------------------------
 loadData();
