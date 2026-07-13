@@ -1537,9 +1537,9 @@ document.querySelectorAll(".module-card").forEach(card => {
   const code = card.querySelector("span")?.textContent?.trim();
   card.style.cursor = "pointer";
   card.addEventListener("click", () => {
-    if (code === "TRI") switchView("triage");
+    if (code === "TRI") { switchView("triage"); switchTriageSubTab("triage"); }
     else if (code === "OPD") switchView("consultations");
-    else if (code === "EMR") switchView("emergency");
+    else if (code === "EMR") { switchView("triage"); switchTriageSubTab("emergency"); }
     else if (code === "IPD") switchView("beds");
     else if (code === "LAB") switchView("labresults");
     else if (code === "PHA") switchView("pharmacy");
@@ -2312,12 +2312,43 @@ document.querySelectorAll(".step-link").forEach(link => {
   });
 });
 
+// Collapsible dashboard panels toggle helper
+function toggleDashboardPanel(contentId) {
+  const content = document.getElementById(contentId);
+  if (!content) return;
+  const panel = content.parentElement;
+  const isCollapsed = content.style.display === "none";
+  content.style.display = isCollapsed ? "block" : "none";
+  panel.classList.toggle("expanded", isCollapsed);
+}
+window.toggleDashboardPanel = toggleDashboardPanel;
+
+// Sub-tabs switching helper for Triage & A&E Command
+function switchTriageSubTab(tab) {
+  const triageBtn = document.querySelector("#tabTriageBtn");
+  const emergencyBtn = document.querySelector("#tabEmergencyBtn");
+  const triageForm = document.querySelector("#formSubTriage");
+  const emergencyForm = document.querySelector("#formSubEmergency");
+  
+  if (tab === "triage") {
+    triageBtn?.classList.add("active");
+    emergencyBtn?.classList.remove("active");
+    if (triageForm) triageForm.style.display = "block";
+    if (emergencyForm) emergencyForm.style.display = "none";
+  } else {
+    triageBtn?.classList.remove("active");
+    emergencyBtn?.classList.add("active");
+    if (triageForm) triageForm.style.display = "none";
+    if (emergencyForm) emergencyForm.style.display = "block";
+  }
+}
+window.switchTriageSubTab = switchTriageSubTab;
+
 // Patch loadAllNewData to render new logs
 const origLoadAllNewData = loadAllNewData;
 loadAllNewData = async function() {
   await origLoadAllNewData();
-  renderTriageQueue();
-  renderEmergencyQueue();
+  renderCombinedQueue();
   renderPharmacyLog();
   renderRadiologyLog();
   renderMaternityLog();
@@ -2327,39 +2358,27 @@ loadAllNewData = async function() {
 };
 
 // ── NEW VIEWS RENDERING LOGS ──────────────────────────────────
-function renderTriageQueue() {
-  const el = document.querySelector("#triageQueueTable");
+function renderCombinedQueue() {
+  const el = document.querySelector("#combinedQueueTable");
   if (!el) return;
-  const triage = (state.encounters || []).filter(e => e.unit === "Triage");
-  if (!triage.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No patients in triage queue.</p>'; return; }
+  const queue = (state.encounters || []).filter(e => e.unit === "Triage" || e.unit === "Emergency");
+  if (!queue.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No active patients in triage or A&E queue.</p>'; return; }
   el.innerHTML = `
-    <table><thead><tr><th>Date</th><th>Patient</th><th>Vitals</th><th>Priority</th><th>Complaint</th></tr></thead>
+    <table><thead><tr><th>Date</th><th>Type</th><th>Patient</th><th>Vitals</th><th>Priority</th><th>Details / Survey</th></tr></thead>
     <tbody>
-      ${triage.map(e => `<tr>
-        <td>${e.date}</td>
-        <td><strong>${patientName(e.patientId)}</strong></td>
-        <td>T:${e.vitals?.temperature || "—"}°C, BP:${e.vitals?.bp || "—"}, P:${e.vitals?.pulse || "—"}</td>
-        <td><span class="${badgeClass(e.status)}">${e.status}</span></td>
-        <td>${e.chiefComplaint}</td>
-      </tr>`).join("")}
-    </tbody></table>`;
-}
-
-function renderEmergencyQueue() {
-  const el = document.querySelector("#emergencyQueueTable");
-  if (!el) return;
-  const er = (state.encounters || []).filter(e => e.unit === "Emergency");
-  if (!er.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No active emergency cases.</p>'; return; }
-  el.innerHTML = `
-    <table><thead><tr><th>Date</th><th>Patient</th><th>Vitals</th><th>Severity</th><th>Injury / Mechanism</th></tr></thead>
-    <tbody>
-      ${er.map(e => `<tr>
-        <td>${e.date}</td>
-        <td><strong>${patientName(e.patientId)}</strong></td>
-        <td>BP:${e.vitals?.bp || "—"}, P:${e.vitals?.pulse || "—"}, SpO2:${e.vitals?.spo2 || "—"}%</td>
-        <td><span class="badge danger">${e.status}</span></td>
-        <td>${e.chiefComplaint}</td>
-      </tr>`).join("")}
+      ${queue.map(e => {
+        const typeBadge = e.unit === "Emergency" ? '<span class="badge danger">A&E</span>' : '<span class="badge info">Triage</span>';
+        const gcsText = e.unit === "Emergency" && e.gcs ? ` · <strong>GCS:</strong> ${e.gcs}/15` : "";
+        const vitalsText = `T:${e.vitals?.temperature || "—"}°C, BP:${e.vitals?.bp || "—"}, P:${e.vitals?.pulse || "—"}bpm, SpO2:${e.vitals?.spo2 || "—"}%`;
+        return `<tr>
+          <td>${e.date}</td>
+          <td>${typeBadge}</td>
+          <td><strong>${patientName(e.patientId)}</strong></td>
+          <td><span style="font-size:11px;color:var(--muted);">${vitalsText}</span></td>
+          <td><span class="${badgeClass(e.status)}">${e.status}</span></td>
+          <td><span style="font-size:12px;"><strong>CC:</strong> ${e.chiefComplaint}${gcsText}</span></td>
+        </tr>`;
+      }).join("")}
     </tbody></table>`;
 }
 
@@ -2502,6 +2521,7 @@ function wireFormSubmits() {
         assessment: f.assessment || "", plan: f.plan || "",
         status: f.status || "Open",
         // Extra fields
+        gcs: f.gcs || "",
         visitType: f.visitType || "", parity: f.parity || "", ga: f.ga || "", fhr: f.fhr || "",
         drugCategory: f.drugCategory || "", procedureCategory: f.procedureCategory || "",
         anaesthesia: f.anaesthesia || "", destination: f.destination || ""

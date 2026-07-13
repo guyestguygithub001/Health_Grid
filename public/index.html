@@ -57,42 +57,15 @@
       </header>
 
       <section id="dashboard" class="view active">
-        <div class="metric-grid">
-          <article class="metric">
-            <span>Facilities</span>
-            <strong id="metricFacilities">0</strong>
-            <small>Hospitals and PHCs connected</small>
-          </article>
-          <article class="metric">
-            <span>PHCs</span>
-            <strong id="metricPhcs">0</strong>
-            <small>Primary care access points</small>
-          </article>
-          <article class="metric">
-            <span>Patients</span>
-            <strong id="metricPatients">0</strong>
-            <small>Registered records</small>
-          </article>
-          <article class="metric urgent">
-            <span>Urgent Work</span>
-            <strong id="metricUrgent">0</strong>
-            <small>Urgent orders and escalations</small>
-          </article>
-          <article class="metric">
-            <span>Active Admissions</span>
-            <strong id="metricAdmissions">0</strong>
-            <small>Inpatients in wards</small>
-          </article>
-          <article class="metric urgent">
-            <span>Critical Labs</span>
-            <strong id="metricCriticalLabs">0</strong>
-            <small>Results needing urgent review</small>
-          </article>
-          <article class="metric">
-            <span>Collection Rate</span>
-            <strong id="metricCollection">0%</strong>
-            <small>Revenue collected vs billed</small>
-          </article>
+        <!-- Minimalist State Network Summary Banner -->
+        <div class="summary-banner">
+          <div class="summary-metric-pill">🏢 <strong id="metricFacilities">0</strong> Connected Facilities</div>
+          <div class="summary-metric-pill">🌿 <strong id="metricPhcs">0</strong> Active PHCs</div>
+          <div class="summary-metric-pill">👤 <strong id="metricPatients">0</strong> Registered Patients</div>
+          <div class="summary-metric-pill">🛏 <strong id="metricAdmissions">0</strong> Inpatients</div>
+          <div class="summary-metric-pill warning">⚠️ <strong id="metricUrgent">0</strong> Urgent Actions</div>
+          <div class="summary-metric-pill danger">🚨 <strong id="metricCriticalLabs">0</strong> Critical Labs</div>
+          <div class="summary-metric-pill success">💳 <strong id="metricCollection">0%</strong> Revenue</div>
         </div>
 
         <div class="panel onboarding-launcher" style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #0e7490, #0891b2); color: #fff; border: none; border-radius: 16px; box-shadow: 0 10px 25px rgba(8,145,178,0.25);">
@@ -143,39 +116,57 @@
           </div>
         </div>
 
-        <div class="split-grid">
-          <section class="panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Live queue</span>
-                <h2>Open Encounters</h2>
-              </div>
-              <button class="text-btn" data-view-jump="clinical">Open units</button>
-            </div>
-            <div id="encounterList" class="record-list"></div>
-          </section>
+        <!-- Collapsible Live Activity Logs & Surveillance Signals -->
+        <div class="collapsible-dashboard-panel" id="activityLogsPanel">
+          <button type="button" class="collapsible-header" onclick="toggleDashboardPanel('activityLogsContent')">
+            <span>📋 Live Activity Logs & Public Health Signals</span>
+            <span class="toggle-icon">▼</span>
+          </button>
+          <div class="collapsible-content" id="activityLogsContent" style="display: none;">
+            <div class="split-grid" style="margin-top: 14px;">
+              <section class="panel">
+                <div class="panel-head">
+                  <div>
+                    <span class="eyebrow">Live queue</span>
+                    <h2>Open Encounters</h2>
+                  </div>
+                  <button class="text-btn" data-view-jump="clinical">Open units</button>
+                </div>
+                <div id="encounterList" class="record-list"></div>
+              </section>
 
-          <section class="panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Public health</span>
-                <h2>Surveillance Signals</h2>
-              </div>
-              <button class="text-btn" data-view-jump="reports">Reports</button>
-            </div>
-            <div id="surveillanceList" class="signal-list"></div>
-          </section>
-        </div>
-
-        <section class="panel">
-          <div class="panel-head">
-            <div>
-              <span class="eyebrow">Facility map</span>
-              <h2>Plateau Network Readiness</h2>
+              <section class="panel">
+                <div class="panel-head">
+                  <div>
+                    <span class="eyebrow">Public health</span>
+                    <h2>Surveillance Signals</h2>
+                  </div>
+                  <button class="text-btn" data-view-jump="reports">Reports</button>
+                </div>
+                <div id="surveillanceList" class="signal-list"></div>
+              </section>
             </div>
           </div>
-          <div id="facilityGrid" class="facility-grid"></div>
-        </section>
+        </div>
+
+        <!-- Collapsible Network Readiness Map -->
+        <div class="collapsible-dashboard-panel" id="readinessPanel" style="margin-top: 14px;">
+          <button type="button" class="collapsible-header" onclick="toggleDashboardPanel('readinessContent')">
+            <span>🌿 Plateau State Network Readiness Map</span>
+            <span class="toggle-icon">▼</span>
+          </button>
+          <div class="collapsible-content" id="readinessContent" style="display: none;">
+            <section class="panel" style="margin-top: 14px;">
+              <div class="panel-head">
+                <div>
+                  <span class="eyebrow">Facility map</span>
+                  <h2>Plateau Network Readiness</h2>
+                </div>
+              </div>
+              <div id="facilityGrid" class="facility-grid"></div>
+            </section>
+          </div>
+        </div>
       </section>
 
       <section id="patients" class="view">
@@ -746,114 +737,137 @@
       </section>
 
       <!-- ── Triage View ───────────────────────────────────── -->
+      <!-- ── Triage & Emergency View ──────────────────────── -->
       <section id="triage" class="view">
         <div class="onboarding-steps">
           <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link active" data-step-view="triage"><span class="step-num">2</span> Triage Queue</button>
+          <button class="step-link active" data-step-view="triage"><span class="step-num">2</span> Triage &amp; A&amp;E</button>
           <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
+          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward &amp; Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI &amp; Discharge</button>
         </div>
+
+        <!-- Combined Command Header / Sub-tabs -->
+        <div class="command-tabs">
+          <button type="button" class="command-tab-btn active" id="tabTriageBtn" onclick="switchTriageSubTab('triage')">🩺 Standard Triage Intake</button>
+          <button type="button" class="command-tab-btn" id="tabEmergencyBtn" onclick="switchTriageSubTab('emergency')">🚨 A&amp;E Emergency Resus Bay</button>
+        </div>
+
         <div class="split-grid wide-left">
+          <!-- Combined Queue List -->
           <section class="panel">
             <div class="panel-head">
-              <div><span class="eyebrow">Nurse station</span><h2>Triage Queue & Assessments</h2></div>
+              <div><span class="eyebrow">A&amp;E &amp; Triage Queue</span><h2>Active Patient Board</h2></div>
             </div>
-            <div id="triageQueueTable" class="table-wrap">
-              <p style="padding:20px;color:var(--muted);text-align:center;">No patients in triage queue.</p>
+            <div id="combinedQueueTable" class="table-wrap">
+              <p style="padding:20px;color:var(--muted);text-align:center;">No patients in queue.</p>
             </div>
           </section>
+
+          <!-- Forms Area (Switches based on active sub-tab) -->
           <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Intake check</span><h2>Record Patient Triage</h2></div>
-            </div>
-            <form id="triagePageForm" class="stack-form">
-              <label>Patient<select id="triPatient" name="patientId"></select></label>
-              <label>Facility<select id="triFacility" name="facilityId"></select></label>
-              <div class="vitals-grid">
-                <label>Temp (°C)<input name="temperature" type="number" step="0.1" placeholder="37.0" required /></label>
-                <label>BP (mmHg)<input name="bp" placeholder="120/80" required /></label>
-                <label>Pulse (bpm)<input name="pulse" type="number" placeholder="80" required /></label>
-                <label>Resp (/min)<input name="respiration" type="number" placeholder="18" required /></label>
-                <label>SpO2 (%)<input name="spo2" type="number" placeholder="98" required /></label>
-                <label>Weight (kg)<input name="weight" type="number" step="0.1" placeholder="70" /></label>
+            <!-- Tab 1: Triage Form -->
+            <div id="formSubTriage">
+              <div class="panel-head">
+                <div><span class="eyebrow">Intake check</span><h2>Record Patient Triage</h2></div>
               </div>
-              <label>Triage Priority
-                <select name="status" required>
-                  <option value="Open">Routine / Non-urgent (Green)</option>
-                  <option value="Urgent">Urgent (Yellow)</option>
-                  <option value="Urgent">Very Urgent (Orange)</option>
-                  <option value="Emergency">Immediate Resuscitation (Red)</option>
-                </select>
-              </label>
-              <label>Chief Complaint / Symptoms
-                <textarea name="chiefComplaint" rows="2" placeholder="Symptom list, duration, danger signs..." required></textarea>
-              </label>
-              <label>Nursing Assessment Notes
-                <textarea name="assessment" rows="2" placeholder="Primary survey findings..."></textarea>
-              </label>
-              <button class="primary-btn" type="submit">Complete Triage</button>
-            </form>
+              <form id="triagePageForm" class="stack-form">
+                <label>Patient<select id="triPatient" name="patientId"></select></label>
+                <label>Facility<select id="triFacility" name="facilityId"></select></label>
+                <div class="vitals-grid">
+                  <label>Temp (°C)<input name="temperature" type="number" step="0.1" placeholder="37.0" required /></label>
+                  <label>BP (mmHg)<input name="bp" placeholder="120/80" required /></label>
+                  <label>Pulse (bpm)<input name="pulse" type="number" placeholder="80" required /></label>
+                  <label>Resp (/min)<input name="respiration" type="number" placeholder="18" required /></label>
+                  <label>SpO2 (%)<input name="spo2" type="number" placeholder="98" required /></label>
+                  <label>Weight (kg)<input name="weight" type="number" step="0.1" placeholder="70" /></label>
+                </div>
+                <label>Triage Priority
+                  <select name="status" required>
+                    <option value="Open">Routine / Non-urgent (Green)</option>
+                    <option value="Urgent">Urgent (Yellow)</option>
+                    <option value="Urgent">Very Urgent (Orange)</option>
+                    <option value="Emergency">Immediate Resuscitation (Red)</option>
+                  </select>
+                </label>
+                <label>Chief Complaint / Symptoms
+                  <textarea name="chiefComplaint" rows="2" placeholder="Symptom list, duration, danger signs..." required></textarea>
+                </label>
+                <label>Nursing Assessment Notes
+                  <textarea name="assessment" rows="2" placeholder="Primary survey findings..."></textarea>
+                </label>
+                <button class="primary-btn" type="submit">Complete Triage</button>
+              </form>
+            </div>
+
+            <!-- Tab 2: A&E Emergency Form -->
+            <div id="formSubEmergency" style="display: none;">
+              <div class="panel-head">
+                <div><span class="eyebrow">Trauma bay</span><h2>Emergency Resus Bay Intake</h2></div>
+              </div>
+              <form id="emergencyPageForm" class="stack-form">
+                <label>Patient<select id="emrPatient" name="patientId"></select></label>
+                <label>Facility<select id="emrFacility" name="facilityId"></select></label>
+                <div class="vitals-grid">
+                  <label>Temp (°C)<input name="temperature" type="number" step="0.1" placeholder="37.0" /></label>
+                  <label>BP (mmHg)<input name="bp" placeholder="120/80" required /></label>
+                  <label>Pulse (bpm)<input name="pulse" type="number" placeholder="90" required /></label>
+                  <label>Resp (/min)<input name="respiration" type="number" placeholder="22" required /></label>
+                  <label>SpO2 (%)<input name="spo2" type="number" placeholder="95" required /></label>
+                  <label>Weight (kg)<input name="weight" type="number" step="0.1" placeholder="70" /></label>
+                </div>
+                <div class="form-row">
+                  <label>Acuity Level
+                    <select name="status" required>
+                      <option value="Emergency">Immediate Resuscitation (Red)</option>
+                      <option value="Urgent">Very Urgent (Orange)</option>
+                    </select>
+                  </label>
+                  <label>Glasgow Coma Scale (GCS)
+                    <select name="gcs" required>
+                      <option value="15">15 — Fully Awake</option>
+                      <option value="14">14 — Mild Impairment</option>
+                      <option value="13">13 — Mild Impairment</option>
+                      <option value="12">12 — Moderate Impairment</option>
+                      <option value="11">11 — Moderate Impairment</option>
+                      <option value="10">10 — Moderate Impairment</option>
+                      <option value="9">9 — Moderate Impairment</option>
+                      <option value="8">8 — Severe Injury (Comatose)</option>
+                      <option value="7">7 — Severe Injury (Comatose)</option>
+                      <option value="6">6 — Severe Injury (Comatose)</option>
+                      <option value="5">5 — Severe Injury (Comatose)</option>
+                      <option value="4">4 — Severe Injury (Comatose)</option>
+                      <option value="3">3 — Brain Death / No Response</option>
+                    </select>
+                  </label>
+                </div>
+                <label>Injury Category / Presenting Emergency
+                  <select name="chiefComplaint" required>
+                    <option value="Road Traffic Accident (RTA) / Major Trauma">Road Traffic Accident (RTA) / Major Trauma</option>
+                    <option value="Gunshot / Penetrating Wound">Gunshot / Penetrating Wound</option>
+                    <option value="Acute Coronary Syndrome (ACS) / Chest Pain">Acute Coronary Syndrome (ACS) / Chest Pain</option>
+                    <option value="Acute Ischemic Stroke / Neurological deficit">Acute Ischemic Stroke / Neurological Deficit</option>
+                    <option value="Severe Respiratory Distress / Sepsis shock">Severe Respiratory Distress / Shock</option>
+                    <option value="Obstetric Emergency / Postpartum Hemorrhage">Obstetric Emergency / Hemorrhage</option>
+                  </select>
+                </label>
+                <label>Primary ABCDE Survey Findings
+                  <textarea name="assessment" rows="2" placeholder="Airway patent, breathing shallow, pulse thready, pupils reactive..." required></textarea>
+                </label>
+                <label>Immediate Resus Plan
+                  <textarea name="plan" rows="2" placeholder="IV fluids, oxygen, type &amp; match blood, notify surgeon..." required></textarea>
+                </label>
+                <button class="primary-btn danger-btn" type="submit" style="background:#dc2626;border-color:#b91c1c;">Complete Emergency Intake</button>
+              </form>
+            </div>
           </section>
         </div>
+
         <div class="onboarding-footer">
           <button class="secondary-btn onboarding-prev-btn" onclick="switchView('patients')" type="button">← Back to Step 1: Intake</button>
           <button class="primary-btn onboarding-next-btn" onclick="switchView('consultations')" type="button">Proceed to Step 3: Consultation →</button>
-        </div>
-      </section>
-
-      <!-- ── Emergency View ────────────────────────────────── -->
-      <section id="emergency" class="view">
-        <div class="split-grid wide-left">
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Red zone</span><h2>Emergency Resus Bays</h2></div>
-            </div>
-            <div id="emergencyQueueTable" class="table-wrap">
-              <p style="padding:20px;color:var(--muted);text-align:center;">No active emergency cases.</p>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Immediate entry</span><h2>Trauma / Resus Intake</h2></div>
-            </div>
-            <form id="emergencyPageForm" class="stack-form">
-              <label>Patient<select id="emrPatient" name="patientId"></select></label>
-              <label>Facility<select id="emrFacility" name="facilityId"></select></label>
-              <div class="form-row">
-                <label>Emergency Severity
-                  <select name="status" required>
-                    <option value="Emergency">Code Red — Resuscitation</option>
-                    <option value="Emergency">Code Orange — Critical</option>
-                    <option value="Urgent">Code Yellow — Semi-critical</option>
-                  </select>
-                </label>
-                <label>GCS Score (3-15)<input name="gcs" type="number" min="3" max="15" value="15" required /></label>
-              </div>
-              <label>Mechanism / Injury Type
-                <textarea name="chiefComplaint" rows="2" placeholder="Trauma, RTA, gunshot wound, stroke, chest pain..." required></textarea>
-              </label>
-              <div class="vitals-grid">
-                <label>Temp<input name="temperature" type="number" step="0.1" placeholder="36.8" /></label>
-                <label>BP<input name="bp" placeholder="120/80" /></label>
-                <label>Pulse<input name="pulse" type="number" placeholder="100" /></label>
-                <label>SpO2<input name="spo2" type="number" placeholder="96" /></label>
-              </div>
-              <label>Primary Survey (ABCDE) &amp; Interventions
-                <textarea name="assessment" rows="2" placeholder="Airway status, bilateral air entry, IV access secured, fluids running..." required></textarea>
-              </label>
-              <label>Action &amp; Disposition Plan
-                <textarea name="plan" rows="2" placeholder="Admit ICU, transfer to Theatre, cardiology alert..."></textarea>
-              </label>
-              <button class="primary-btn" type="submit">Register Emergency Case</button>
-            </form>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('clinical')" type="button">← Back to Clinical Units</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('dashboard')" type="button">📋 Exit to Hub</button>
         </div>
       </section>
 
