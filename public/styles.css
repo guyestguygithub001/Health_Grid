@@ -143,6 +143,12 @@ body {
   border-radius: 12px;
   padding: 16px 18px;
   display: flex; flex-direction: column; gap: 4px;
+  transition: transform .2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .2s ease, border-color .2s ease;
+}
+.metric:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(8, 145, 178, 0.1);
+  border-color: rgba(8, 145, 178, 0.3);
 }
 .metric span  { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
 .metric strong { font-size: 30px; font-weight: 700; color: var(--ink); }
@@ -229,9 +235,15 @@ body {
 .facility-card {
   background: #f8fafc; border: 1px solid var(--line);
   border-radius: 10px; padding: 14px;
-  transition: box-shadow .15s;
+  transition: transform .2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow .2s ease, border-color .2s ease;
+  position: relative;
+  overflow: hidden;
 }
-.facility-card:hover { box-shadow: 0 2px 12px rgba(8,145,178,.12); }
+.facility-card:hover { 
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(8,145,178,.12); 
+  border-color: var(--brand);
+}
 .facility-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
 .facility-card > span { font-size: 11px; color: var(--muted); }
 
@@ -248,12 +260,26 @@ body {
   border-radius: 12px;
   padding: 18px 16px;
   cursor: pointer;
-  transition: border-color .15s, box-shadow .15s, transform .12s;
+  position: relative;
+  overflow: hidden;
+  transition: border-color .3s ease, box-shadow .3s ease, transform .3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.module-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.6), transparent);
+  transition: left .5s ease;
+  z-index: 1;
+}
+.module-card:hover::before {
+  left: 100%;
 }
 .module-card:hover {
   border-color: var(--brand);
-  box-shadow: 0 4px 16px rgba(8,145,178,.15);
-  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(8,145,178,.2);
+  transform: translateY(-5px) scale(1.03);
 }
 .module-card span {
   display: inline-block;
@@ -283,8 +309,9 @@ table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th, td { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--line); }
 th { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
      color: var(--muted); background: #f8fafc; position: sticky; top: 0; z-index: 1; }
+tr { transition: background-color 0.2s ease; }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: #f0f9ff; }
+tr:hover td { background: #e0f2fe; }
 
 /* ── Forms ───────────────────────────────────────────────── */
 .stack-form, .encounter-form {
@@ -532,3 +559,215 @@ optgroup option { font-weight: 400; color: var(--ink2); padding-left: 8px; }
   .button-row { flex-direction: column; }
   .button-row .primary-btn, .button-row .secondary-btn { width: 100%; }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   NEW FEATURE STYLES — 2026 EHR Expansion
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Metric Grid Extended ────────────────────────────────── */
+.metric-grid { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+
+/* ── Badge System ────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.badge.success { background: #d1fae5; color: #065f46; }
+.badge.danger  { background: #fee2e2; color: #991b1b; }
+.badge.warning { background: #fef3c7; color: #92400e; }
+.badge.info    { background: #dbeafe; color: #1e40af; }
+.badge.muted   { background: #f1f5f9; color: #64748b; }
+.badge.critical { background: #fee2e2; color: #7f1d1d; border: 1px solid #fca5a5; animation: pulse-badge 1.5s infinite; }
+
+@keyframes pulse-badge {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+}
+
+/* ── Bed Grid ────────────────────────────────────────────── */
+.bed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px; padding: 16px 0;
+}
+.bed-card {
+  position: relative;
+  padding: 16px 12px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s, border-color .2s;
+  text-align: center;
+  background: var(--surface);
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.bed-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+.bed-card .bed-icon { font-size: 28px; display: block; margin-bottom: 8px; }
+.bed-card .bed-label { font-size: 11px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; margin-bottom: 2px; }
+.bed-card .bed-patient { font-size: 11px; color: var(--muted); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bed-card.vacant { border-color: #10b981; background: #f0fdf4; }
+.bed-card.occupied { border-color: #ef4444; background: #fef2f2; }
+.bed-card.maintenance { border-color: #f59e0b; background: #fffbeb; }
+.bed-card .bed-ward { font-size: 10px; color: var(--muted); position: absolute; top: 8px; right: 8px; }
+
+/* ── Analytics Charts ────────────────────────────────────── */
+.chart-panel {
+  background: var(--surface); border-radius: 16px;
+  border: 1px solid var(--line); padding: 24px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  transition: box-shadow .25s, transform .25s;
+}
+.chart-panel:hover { box-shadow: 0 8px 32px rgba(0,0,0,.12); transform: translateY(-2px); }
+canvas { max-width: 100%; }
+
+/* ── Appointment Calendar Table ──────────────────────────── */
+.apt-row { display: grid; grid-template-columns: 90px 100px 1fr 1fr 120px 90px; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 13px; transition: background .15s; }
+.apt-row:hover { background: rgba(37,99,235,.04); }
+.apt-row.header { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: #f8fafc; border-radius: 8px 8px 0 0; }
+.apt-status { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-align: center; }
+.apt-status.Scheduled { background: #dbeafe; color: #1e40af; }
+.apt-status.Checked-In { background: #d1fae5; color: #065f46; }
+.apt-status.Completed { background: #f1f5f9; color: #64748b; }
+.apt-status.No-Show { background: #fee2e2; color: #991b1b; }
+
+/* ── Lab Results ─────────────────────────────────────────── */
+.lab-result-card {
+  border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px;
+  margin-bottom: 10px; background: var(--surface); transition: box-shadow .2s;
+}
+.lab-result-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
+.lab-result-card.critical { border-color: #ef4444; background: #fef2f2; }
+.lab-result-card .lab-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.lab-test-row { display: grid; grid-template-columns: 1fr 80px 100px 80px; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line); font-size: 12px; }
+.lab-test-row .test-name { font-weight: 600; }
+.lab-test-row .interpretation.Normal { color: #10b981; }
+.lab-test-row .interpretation.Abnormal { color: #f59e0b; font-weight: 700; }
+.lab-test-row .interpretation.Critical { color: #ef4444; font-weight: 700; }
+.lab-test-input-row { display: grid; grid-template-columns: 1fr 80px 100px 110px 30px; gap: 6px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line); }
+.lab-test-input-row input, .lab-test-input-row select { padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; font-size: 12px; }
+
+/* ── AI Suite Panels ─────────────────────────────────────── */
+.ai-panel {
+  background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+  border: 1px solid #bfdbfe; border-radius: 12px;
+  padding: 16px; margin-top: 14px;
+  animation: fadeSlideIn .3s ease;
+}
+.ai-panel .ai-panel-title {
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--brand); margin-bottom: 10px;
+}
+.ai-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 10px 0 4px; }
+
+/* ── Drug Alert Cards ────────────────────────────────────── */
+.drug-alert-card {
+  padding: 12px 14px; border-radius: 10px; margin-bottom: 8px;
+  border-left: 4px solid;
+  animation: fadeSlideIn .25s ease;
+}
+.drug-alert-card.Critical { background: #fef2f2; border-color: #ef4444; }
+.drug-alert-card.Warning  { background: #fffbeb; border-color: #f59e0b; }
+.drug-alert-card.Info     { background: #eff6ff; border-color: #3b82f6; }
+.drug-alert-card .alert-type { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 4px; }
+.drug-alert-card.Critical .alert-type { color: #dc2626; }
+.drug-alert-card.Warning  .alert-type { color: #d97706; }
+.drug-alert-card.Info     .alert-type { color: #2563eb; }
+.drug-alert-card .alert-message { font-size: 13px; line-height: 1.5; }
+
+/* ── EWS Score Display ───────────────────────────────────── */
+.ews-score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+.ews-score-box {
+  padding: 16px; border-radius: 12px; text-align: center;
+  background: #f8fafc; border: 1px solid var(--line);
+}
+.ews-score-box .score-number { font-size: 48px; font-weight: 900; line-height: 1; }
+.ews-score-box .score-label { font-size: 13px; font-weight: 600; margin-top: 4px; }
+.ews-score-box .score-risk { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.ews-score-box.high .score-number { color: #dc2626; }
+.ews-score-box.medium .score-number { color: #d97706; }
+.ews-score-box.low .score-number { color: #10b981; }
+.ews-overall {
+  padding: 14px 18px; border-radius: 10px; font-size: 14px; font-weight: 700;
+  text-align: center; margin-top: 12px; letter-spacing: .02em;
+}
+.ews-overall.danger { background: #fef2f2; color: #991b1b; border: 2px solid #fca5a5; }
+.ews-overall.warning { background: #fffbeb; color: #92400e; border: 2px solid #fcd34d; }
+.ews-overall.safe { background: #f0fdf4; color: #065f46; border: 2px solid #86efac; }
+.ews-criteria-list { list-style: none; padding: 0; margin: 6px 0; }
+.ews-criteria-list li { font-size: 12px; padding: 3px 0; color: var(--muted); }
+.ews-criteria-list li::before { content: "▸ "; color: var(--brand); }
+
+/* ── Readmission Risk ────────────────────────────────────── */
+.risk-bar-wrap { background: #f1f5f9; border-radius: 20px; height: 10px; margin: 8px 0; overflow: hidden; }
+.risk-bar { height: 100%; border-radius: 20px; transition: width 1s cubic-bezier(.4,0,.2,1); }
+.risk-bar.Low      { background: #10b981; width: 15%; }
+.risk-bar.Moderate { background: #f59e0b; width: 45%; }
+.risk-bar.High     { background: #ef4444; width: 70%; }
+.risk-bar.Very\ High { background: #7f1d1d; width: 95%; }
+
+/* ── Patient Timeline ────────────────────────────────────── */
+.timeline-wrap { position: relative; padding-left: 28px; }
+.timeline-wrap::before { content: ''; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--brand), #e2e8f0); }
+.timeline-item { position: relative; margin-bottom: 20px; }
+.timeline-item::before { content: ''; position: absolute; left: -22px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--brand); border: 2px solid #fff; box-shadow: 0 0 0 2px var(--brand); }
+.timeline-item .tl-date { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 3px; }
+.timeline-item .tl-card { background: #f8fafc; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; font-size: 13px; }
+.timeline-item .tl-card strong { display: block; margin-bottom: 2px; }
+.timeline-item.encounter::before { background: #2563eb; }
+.timeline-item.lab::before { background: #8b5cf6; }
+.timeline-item.appointment::before { background: #10b981; }
+.timeline-item.billing::before { background: #f59e0b; }
+.timeline-item.admission::before { background: #ef4444; }
+
+/* ── Diff/New AI Section in AI Suite ────────────────────── */
+.ai-tool-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.ai-tool-card {
+  padding: 18px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--surface), #f0f9ff);
+  border: 1px solid var(--line);
+  cursor: pointer; transition: transform .2s, box-shadow .2s;
+  text-align: center;
+}
+.ai-tool-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(37,99,235,.15); border-color: var(--brand); }
+.ai-tool-card .tool-icon { font-size: 32px; margin-bottom: 8px; }
+.ai-tool-card .tool-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+.ai-tool-card .tool-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+/* ── Discharge Summary Output ────────────────────────────── */
+#dischargeModalBody .discharge-section { margin-bottom: 14px; }
+#dischargeModalBody .discharge-section strong { display: block; color: var(--brand); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+#dischargeModalBody .discharge-section p { font-size: 13px; line-height: 1.7; margin: 0; }
+
+/* ── Triage Result Panel ─────────────────────────────────── */
+.triage-acuity {
+  padding: 14px 20px; border-radius: 12px; font-size: 18px; font-weight: 800;
+  text-align: center; margin-bottom: 12px; letter-spacing: .04em;
+}
+.triage-acuity.Emergency { background: #fef2f2; color: #991b1b; border: 2px solid #fca5a5; }
+.triage-acuity.Urgent    { background: #fffbeb; color: #92400e; border: 2px solid #fcd34d; }
+.triage-acuity.Routine   { background: #f0fdf4; color: #065f46; border: 2px solid #86efac; }
+.differential-item {
+  display: grid; grid-template-columns: 30px 1fr auto;
+  gap: 10px; align-items: center;
+  padding: 10px 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 6px;
+  border-left: 3px solid var(--brand);
+}
+.differential-item .rank { font-weight: 900; color: var(--brand); font-size: 16px; }
+.differential-item .dx-name { font-weight: 700; font-size: 13px; }
+.differential-item .dx-reason { font-size: 11px; color: var(--muted); grid-column: 2; margin-top: 2px; }
+.differential-item .confidence { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: #dbeafe; color: #1e40af; }
+
+/* ── Auto-Note SOAP Output ───────────────────────────────── */
+.soap-block { background: #f8fafc; border: 1px solid var(--line); border-radius: 10px; padding: 14px; margin-top: 10px; }
+.soap-block .soap-label { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--brand); margin-bottom: 6px; }
+.soap-block .soap-text { font-size: 13px; line-height: 1.7; white-space: pre-wrap; }
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+

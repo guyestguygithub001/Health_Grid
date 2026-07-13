@@ -4,19 +4,24 @@
 
 const state = {
   facilities: [], patients: [], encounters: [], orders: [],
-  reports: null, summary: null, consultations: [], billing: []
+  reports: null, summary: null, consultations: [], billing: [],
+  appointments: [], labResults: [], beds: [], admissions: []
 };
 
 const titles = {
-  dashboard: "State Command Dashboard",
-  patients: "Patient Registry",
+  dashboard:     "State Command Dashboard",
+  patients:      "Patient Registry",
+  appointments:  "Appointment Scheduling",
   consultations: "Consultations (ICD-11 Active)",
-  clinical: "Clinical Units",
-  phc: "PHC Network",
-  orders: "Orders & Referrals",
-  billing: "Billing & Revenue Gateway",
-  ai: "AI Medical Scrub",
-  reports: "Reports & Quality"
+  clinical:      "Clinical Units",
+  beds:          "Ward & Bed Census",
+  labresults:    "Laboratory Results",
+  orders:        "Orders & Referrals",
+  billing:       "Billing & Revenue Gateway",
+  ai:            "AI Clinical Suite",
+  analytics:     "Analytics Dashboard",
+  phc:           "PHC Network",
+  reports:       "Reports & Quality"
 };
 
 const apiStatus = document.querySelector("#apiStatus");
@@ -68,14 +73,25 @@ function fillSelects() {
   const fp = optionHtml(state.facilities, f => `${f.name} — ${f.lga}`);
   const pp = optionHtml(state.patients,   p => `${p.name} (${p.id})`);
 
-  ["patientFacility","encounterFacility","orderFacility","consultationFacility"].forEach(id => {
+  ["patientFacility","encounterFacility","orderFacility","consultationFacility","aptFacility","labFacility","admitBed"].forEach(id => {
     const el = document.querySelector(`#${id}`);
-    if (el) el.innerHTML = fp;
+    if (!el) return;
+    if (id === "admitBed") {
+      el.innerHTML = state.beds.filter(b => b.status === "Vacant").map(b => `<option value="${b.id}">${b.ward} — Bed ${b.bedNumber} (${b.facilityId})</option>`).join("");
+    } else {
+      el.innerHTML = fp;
+    }
   });
-  ["encounterPatient","orderPatient","consultationPatient"].forEach(id => {
+  ["encounterPatient","orderPatient","consultationPatient","aptPatient","labPatient","admitPatient"].forEach(id => {
     const el = document.querySelector(`#${id}`);
     if (el) el.innerHTML = pp;
   });
+  // Populate lab order dropdown
+  const labOrderEl = document.querySelector("#labOrder");
+  if (labOrderEl) {
+    labOrderEl.innerHTML = '<option value="">-- None --</option>' +
+      state.orders.filter(o => o.type === "Laboratory" && o.status === "Pending").map(o => `<option value="${o.id}">${o.id} — ${o.item} (${patientName(o.patientId)})</option>`).join("");
+  }
 }
 
 // ---------------------------------------------------------------
@@ -83,10 +99,14 @@ function fillSelects() {
 // ---------------------------------------------------------------
 function renderSummary() {
   const s = state.summary; if (!s) return;
-  document.querySelector("#metricFacilities").textContent = s.facilities;
-  document.querySelector("#metricPhcs").textContent       = s.phcs;
-  document.querySelector("#metricPatients").textContent   = s.patients;
-  document.querySelector("#metricUrgent").textContent     = s.urgentOrders + s.lowStock;
+  const el = id => document.querySelector(`#${id}`);
+  if (el("metricFacilities"))  el("metricFacilities").textContent = s.facilities;
+  if (el("metricPhcs"))        el("metricPhcs").textContent       = s.phcs;
+  if (el("metricPatients"))    el("metricPatients").textContent   = s.patients;
+  if (el("metricUrgent"))      el("metricUrgent").textContent     = s.urgentOrders + s.lowStock;
+  if (el("metricAdmissions"))  el("metricAdmissions").textContent = s.activeAdmissions || 0;
+  if (el("metricCriticalLabs")) el("metricCriticalLabs").textContent = s.criticalLabs || 0;
+  if (el("metricCollection"))  el("metricCollection").textContent = (s.collectionRate || 0) + "%";
 }
 
 // ---------------------------------------------------------------
@@ -140,15 +160,16 @@ function renderPatients(filter = "") {
     [p.name,p.lga,p.community,p.risk,p.insurance].join(" ").toLowerCase().includes(q));
   document.querySelector("#patientTable").innerHTML = `
     <table><thead><tr>
-      <th>ID</th><th>Patient</th><th>Location</th><th>Risk</th><th>Facility</th><th>Insurance</th>
+      <th>ID</th><th>Patient</th><th>Location</th><th>Risk</th><th>Facility</th><th>Insurance</th><th>Actions</th>
     </tr></thead><tbody>
       ${patients.map(p => `<tr>
         <td>${p.id}</td>
-        <td><strong>${p.name}</strong><br>${p.sex}, ${p.age} yrs</td>
+        <td><strong>${p.name}</strong><br>${p.sex}, ${p.age} yrs${p.bloodGroup ? ` &bull; ${p.bloodGroup}` : ""}</td>
         <td>${p.community}<br><span style="color:var(--muted);font-size:12px;">${p.lga}</span></td>
         <td><span class="${badgeClass(p.risk==="Routine"?"Routine":"Urgent")}">${p.risk}</span></td>
         <td>${facilityName(p.facilityId)}</td>
         <td>${p.insurance}</td>
+        <td><button class="text-btn" onclick="showPatientTimeline('${p.id}')">Timeline</button></td>
       </tr>`).join("")}
     </tbody></table>`;
 }
@@ -1534,3 +1555,673 @@ if (unitModalForm) {
 //  Kick off on load
 // ---------------------------------------------------------------
 loadData();
+
+// ═══════════════════════════════════════════════════════════════
+//  NEW FEATURE MODULES — 2026 EHR Expansion
+// ═══════════════════════════════════════════════════════════════
+
+// ── Extended loadData ──────────────────────────────────────────
+const _origLoadData = loadData;
+async function loadAllNewData() {
+  try {
+    const [apts, labs, beds, admissions] = await Promise.all([
+      api("/api/appointments"),
+      api("/api/labresults"),
+      api("/api/beds"),
+      api("/api/beds").then(() => fetch("/api/beds").then(r=>r.json())).catch(()=>[])
+    ]);
+    // fetch admissions from beds logic
+    const admRes = await fetch("/api/beds").then(r=>r.json()).catch(()=>[]);
+    state.appointments = apts;
+    state.labResults   = labs;
+    state.beds         = beds;
+
+    renderAppointments();
+    renderLabResults();
+    renderBeds();
+    renderAdmissions();
+    renderAnalytics();
+    fillSelects();
+  } catch(e) { console.warn("New data load:", e.message); }
+}
+// Patch the existing loadData to also call new loaders
+const origLoadData = loadData;
+loadData = async function() {
+  await origLoadData();
+  await loadAllNewData();
+};
+
+// ── APPOINTMENTS ───────────────────────────────────────────────
+function renderAppointments() {
+  const el = document.querySelector("#appointmentsTable");
+  if (!el) return;
+  const apts = state.appointments || [];
+  if (!apts.length) { el.innerHTML = '<p style="text-align:center;color:var(--muted);padding:20px;">No appointments booked yet.</p>'; return; }
+  el.innerHTML = `
+    <div class="apt-row header">
+      <span>Date</span><span>Time</span><span>Patient</span><span>Department</span><span>Doctor</span><span>Status</span>
+    </div>
+    ${apts.map(a => `<div class="apt-row">
+      <span><strong>${a.date}</strong></span>
+      <span>${a.time}</span>
+      <span>${patientName(a.patientId)}</span>
+      <span>${a.department}</span>
+      <span>${a.doctor}</span>
+      <span><span class="apt-status ${a.status.replace(/\s/g,'-')}">${a.status}</span></span>
+    </div>`).join("")}`;
+}
+
+const aptForm = document.querySelector("#appointmentForm");
+if (aptForm) {
+  aptForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const f = formToObject(e.currentTarget);
+    try {
+      await api("/api/appointments", { method: "POST", body: JSON.stringify(f) });
+      showToast("Appointment booked & bill generated!");
+      e.currentTarget.reset();
+      const apts = await api("/api/appointments");
+      state.appointments = apts;
+      renderAppointments();
+    } catch(err) { showToast("Error: " + err.message); }
+  });
+}
+
+// ── LAB RESULTS ────────────────────────────────────────────────
+let labTestCount = 0;
+function addLabTestRow() {
+  const container = document.querySelector("#labTestRows");
+  if (!container) return;
+  const idx = labTestCount++;
+  const row = document.createElement("div");
+  row.className = "lab-test-input-row";
+  row.innerHTML = `
+    <input name="test_name_${idx}" placeholder="Test name (e.g. Haemoglobin)" required />
+    <input name="test_value_${idx}" placeholder="Value" required />
+    <input name="test_unit_${idx}" placeholder="Unit (e.g. g/dL)" />
+    <select name="test_interp_${idx}">
+      <option>Normal</option><option>Abnormal</option><option>Critical</option>
+    </select>
+    <button type="button" onclick="this.parentElement.remove()" style="background:none;border:none;color:#ef4444;font-size:18px;cursor:pointer;">×</button>`;
+  container.appendChild(row);
+}
+
+document.querySelector("#addLabTestBtn")?.addEventListener("click", addLabTestRow);
+// Add first row by default
+addLabTestRow();
+
+const labResultForm = document.querySelector("#labResultForm");
+if (labResultForm) {
+  labResultForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const f = formToObject(e.currentTarget);
+    const tests = [];
+    let i = 0;
+    while (f[`test_name_${i}`] !== undefined) {
+      if (f[`test_name_${i}`]) {
+        tests.push({ name: f[`test_name_${i}`], value: f[`test_value_${i}`], unit: f[`test_unit_${i}`] || "", refRange: "", interpretation: f[`test_interp_${i}`] });
+      }
+      i++;
+    }
+    const payload = { patientId: f.patientId, orderId: f.orderId, facilityId: f.facilityId, tests, technician: f.technician, notes: f.notes };
+    try {
+      const result = await api("/api/labresults", { method: "POST", body: JSON.stringify(payload) });
+      showToast(result.criticalFlag ? "⚠️ Critical lab result saved! Alert clinician." : "Lab results saved.");
+      e.currentTarget.reset();
+      document.querySelector("#labTestRows").innerHTML = "";
+      labTestCount = 0;
+      addLabTestRow();
+      const labs = await api("/api/labresults");
+      state.labResults = labs;
+      renderLabResults();
+    } catch(err) { showToast("Error: " + err.message); }
+  });
+}
+
+function renderLabResults() {
+  const el = document.querySelector("#labResultsTable");
+  if (!el) return;
+  const labs = state.labResults || [];
+  if (!labs.length) { el.innerHTML = '<p style="text-align:center;color:var(--muted);padding:20px;">No lab results on file.</p>'; return; }
+  el.innerHTML = labs.map(lr => `
+    <div class="lab-result-card ${lr.criticalFlag ? 'critical' : ''}">
+      <div class="lab-header">
+        <div>
+          <strong>${patientName(lr.patientId)}</strong>
+          <span style="font-size:11px;color:var(--muted);margin-left:8px;">${lr.date} · ${lr.technician}</span>
+        </div>
+        ${lr.criticalFlag ? '<span class="badge critical">⚠ CRITICAL</span>' : '<span class="badge success">Normal Range</span>'}
+      </div>
+      ${lr.tests.map(t => `<div class="lab-test-row">
+        <span class="test-name">${t.name}</span>
+        <span><strong>${t.value}</strong> ${t.unit}</span>
+        <span style="color:var(--muted);font-size:11px;">${t.refRange || '—'}</span>
+        <span class="interpretation ${t.interpretation}">${t.interpretation}</span>
+      </div>`).join("")}
+      ${lr.notes ? `<p style="font-size:12px;color:var(--muted);margin-top:8px;font-style:italic;">${lr.notes}</p>` : ""}
+    </div>`).join("");
+}
+
+// ── BEDS / WARD CENSUS ─────────────────────────────────────────
+function renderBeds() {
+  const el = document.querySelector("#bedGrid");
+  if (!el) return;
+  const beds = state.beds || [];
+  if (!beds.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);">No beds configured.</p>'; return; }
+  el.innerHTML = beds.map(b => {
+    const icon = b.status === "Vacant" ? "🛏️" : b.status === "Occupied" ? "🔴" : "🔧";
+    const patient = b.status === "Occupied" ? patientName(b.patientId) : "";
+    return `<div class="bed-card ${b.status.toLowerCase()}">
+      <span class="bed-ward">${b.ward}</span>
+      <span class="bed-icon">${icon}</span>
+      <div class="bed-label">Bed ${b.bedNumber}</div>
+      <div class="bed-patient">${patient || b.status}</div>
+      ${b.status === "Occupied" ? `<button class="text-btn" style="margin-top:8px;font-size:10px;" onclick="dischargeFromBed('${b.id}','${b.admissionId}')">Discharge</button>` : ""}
+    </div>`;
+  }).join("");
+}
+
+const admitForm = document.querySelector("#admitForm");
+if (admitForm) {
+  admitForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const f = formToObject(e.currentTarget);
+    try {
+      await api("/api/beds/admit", { method: "POST", body: JSON.stringify(f) });
+      showToast("Patient admitted to ward!");
+      e.currentTarget.reset();
+      const [beds, admissions] = await Promise.all([api("/api/beds"), api("/api/summary")]);
+      state.beds = beds;
+      state.summary = admissions;
+      renderBeds(); renderAdmissions(); renderSummary(); fillSelects();
+    } catch(err) { showToast("Error: " + err.message); }
+  });
+}
+
+async function dischargeFromBed(bedId, admissionId) {
+  if (!admissionId) { showToast("No active admission for this bed."); return; }
+  try {
+    const adm = await api("/api/beds/discharge", { method: "POST", body: JSON.stringify({ admissionId, dischargedBy: "Duty Clinician" }) });
+    showToast("Patient discharged. Generating AI summary...");
+    // Get patient and admission data for discharge summary
+    const admission = adm.admission;
+    if (admission) {
+      const patient = state.patients.find(p => p.id === admission.patientId);
+      const encounter = state.encounters.find(e => e.patientId === admission.patientId);
+      const labResults = state.labResults.filter(l => l.patientId === admission.patientId);
+      const summaryRes = await api("/api/ai/discharge-summary", {
+        method: "POST",
+        body: JSON.stringify({ patient, admission, encounter, labResults, prescriptions: [] })
+      });
+      showDischargeSummary(summaryRes.summary);
+    }
+    const beds = await api("/api/beds");
+    state.beds = beds;
+    renderBeds(); renderAdmissions();
+  } catch(err) { showToast("Discharge error: " + err.message); }
+}
+
+function renderAdmissions() {
+  const el = document.querySelector("#admissionsList");
+  if (!el) return;
+  // We load admissions from beds data (occupied beds = active admissions)
+  const occupied = (state.beds || []).filter(b => b.status === "Occupied");
+  if (!occupied.length) { el.innerHTML = '<p style="text-align:center;color:var(--muted);padding:20px;">No active admissions.</p>'; return; }
+  el.innerHTML = occupied.map(b => `
+    <article class="record">
+      <strong>${patientName(b.patientId)}
+        <span class="badge danger" style="margin-left:6px;">Admitted</span>
+      </strong>
+      <span>${b.ward} — Bed ${b.bedNumber}</span>
+      <span>${facilityName(b.facilityId)}</span>
+    </article>`).join("");
+}
+
+function showDischargeSummary(s) {
+  const modal = document.querySelector("#dischargeModal");
+  const body  = document.querySelector("#dischargeModalBody");
+  if (!modal || !body) return;
+  body.innerHTML = [
+    ["Patient", s.patientInfo],
+    ["Admitted", s.dateOfAdmission],
+    ["Discharged", s.dateOfDischarge],
+    ["Ward", s.ward],
+    ["Admission Diagnosis", s.admittingDiagnosis],
+    ["Final Diagnosis", s.finalDiagnosis],
+    ["Clinical Course", s.hospitalCourse],
+    ["Investigations", s.investigationsPerformed],
+    ["Medications on Discharge", s.medicationsOnDischarge],
+    ["Follow-up", s.followUpInstructions],
+    ["Warning Signs", s.warningSignsToReturn],
+    ["Clinician", s.clinicianSignature]
+  ].map(([label, value]) => `<div class="discharge-section"><strong>${label}</strong><p>${value}</p></div>`).join("") +
+    `<p style="font-size:11px;color:var(--muted);margin-top:12px;font-style:italic;">${s.footer}</p>`;
+  modal.style.display = "flex";
+}
+window.dischargeFromBed = dischargeFromBed;
+
+// ── ANALYTICS CHARTS ───────────────────────────────────────────
+async function renderAnalytics() {
+  try {
+    const data = await api("/api/analytics");
+    drawBarChart("chartDisease",   Object.keys(data.diseaseBurden),   Object.values(data.diseaseBurden),   "Cases/7 days",  ["#ef4444","#f59e0b","#3b82f6","#10b981"]);
+    drawPieChart("chartInsurance", Object.keys(data.insuranceDist),   Object.values(data.insuranceDist));
+    drawLineChart("chartRegistrations", Object.keys(data.registrationByMonth), Object.values(data.registrationByMonth), "Registrations");
+    drawBarChart("chartBilling",   Object.keys(data.billingByStatus), Object.values(data.billingByStatus), "₦ Amount",      ["#f59e0b","#10b981","#3b82f6","#94a3b8"]);
+  } catch(e) { console.warn("Analytics:", e.message); }
+}
+
+function drawBarChart(canvasId, labels, values, yLabel, colors) {
+  const canvas = document.querySelector(`#${canvasId}`);
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const W = canvas.parentElement.clientWidth - 40 || 400;
+  const H = parseInt(canvas.getAttribute("height")) || 220;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0, 0, W, H);
+  const pad = { top: 20, right: 20, bottom: 50, left: 50 };
+  const chartW = W - pad.left - pad.right;
+  const chartH = H - pad.top - pad.bottom;
+  const max = Math.max(...values, 1);
+  const barW = Math.max(20, chartW / labels.length - 8);
+  ctx.fillStyle = "#94a3b8"; ctx.font = "11px Inter, sans-serif";
+  labels.forEach((label, i) => {
+    const x = pad.left + i * (chartW / labels.length) + (chartW / labels.length - barW) / 2;
+    const barH = (values[i] / max) * chartH;
+    const y = pad.top + chartH - barH;
+    ctx.fillStyle = colors ? colors[i % colors.length] : "#2563eb";
+    ctx.beginPath(); ctx.roundRect(x, y, barW, barH, 4); ctx.fill();
+    ctx.fillStyle = "#64748b"; ctx.font = "10px Inter, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(values[i], x + barW/2, y - 4);
+    ctx.fillText(label.length > 10 ? label.slice(0,10)+"…" : label, x + barW/2, H - pad.bottom + 16);
+  });
+}
+
+function drawPieChart(canvasId, labels, values) {
+  const canvas = document.querySelector(`#${canvasId}`);
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const W = canvas.parentElement.clientWidth - 40 || 300;
+  const H = parseInt(canvas.getAttribute("height")) || 220;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0, 0, W, H);
+  const total = values.reduce((a,b) => a+b, 0) || 1;
+  const colors = ["#2563eb","#10b981","#f59e0b","#ef4444","#8b5cf6","#06b6d4"];
+  const cx = W * 0.35, cy = H / 2, r = Math.min(cx, cy) - 10;
+  let angle = -Math.PI / 2;
+  values.forEach((v, i) => {
+    const slice = (v / total) * 2 * Math.PI;
+    ctx.beginPath(); ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, angle, angle + slice); ctx.closePath();
+    ctx.fillStyle = colors[i % colors.length]; ctx.fill();
+    angle += slice;
+  });
+  // Legend
+  labels.forEach((label, i) => {
+    const lx = W * 0.72, ly = 30 + i * 28;
+    ctx.fillStyle = colors[i % colors.length];
+    ctx.fillRect(lx, ly, 12, 12);
+    ctx.fillStyle = "#334155"; ctx.font = "11px Inter, sans-serif"; ctx.textAlign = "left";
+    ctx.fillText(`${label}: ${values[i]}`, lx + 16, ly + 10);
+  });
+}
+
+function drawLineChart(canvasId, labels, values, yLabel) {
+  const canvas = document.querySelector(`#${canvasId}`);
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+  const W = canvas.parentElement.clientWidth - 40 || 400;
+  const H = parseInt(canvas.getAttribute("height")) || 220;
+  canvas.width = W; canvas.height = H;
+  ctx.clearRect(0, 0, W, H);
+  const pad = { top: 20, right: 20, bottom: 50, left: 50 };
+  const chartW = W - pad.left - pad.right;
+  const chartH = H - pad.top - pad.bottom;
+  const max = Math.max(...values, 1);
+  const step = chartW / Math.max(labels.length - 1, 1);
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + chartH);
+  grad.addColorStop(0, "rgba(37,99,235,.3)"); grad.addColorStop(1, "rgba(37,99,235,0)");
+  ctx.beginPath();
+  values.forEach((v, i) => {
+    const x = pad.left + i * step;
+    const y = pad.top + chartH - (v / max) * chartH;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.lineTo(pad.left + (values.length-1) * step, pad.top + chartH);
+  ctx.lineTo(pad.left, pad.top + chartH);
+  ctx.fillStyle = grad; ctx.fill();
+  // Line
+  ctx.beginPath();
+  values.forEach((v, i) => {
+    const x = pad.left + i * step;
+    const y = pad.top + chartH - (v / max) * chartH;
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  });
+  ctx.strokeStyle = "#2563eb"; ctx.lineWidth = 2.5; ctx.stroke();
+  // Dots + labels
+  values.forEach((v, i) => {
+    const x = pad.left + i * step;
+    const y = pad.top + chartH - (v / max) * chartH;
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, Math.PI*2);
+    ctx.fillStyle = "#2563eb"; ctx.fill();
+    ctx.fillStyle = "#64748b"; ctx.font = "10px Inter"; ctx.textAlign = "center";
+    ctx.fillText(labels[i] || "", x, H - pad.bottom + 16);
+  });
+}
+
+// ── PATIENT TIMELINE ───────────────────────────────────────────
+async function showPatientTimeline(patientId) {
+  const modal = document.querySelector("#timelineModal");
+  const body  = document.querySelector("#timelineModalBody");
+  const title = document.querySelector("#timelineModalTitle");
+  if (!modal || !body) return;
+  try {
+    const tl = await api(`/api/patients/${patientId}/timeline`);
+    title.textContent = `Timeline — ${tl.patient.name} (${patientId})`;
+    // Merge all events into a chronological list
+    const events = [
+      ...tl.encounters.map(e => ({ date: e.date, type: "encounter", label: "Encounter", detail: `${e.unit} · ${e.chiefComplaint || ""} · ${e.status}` })),
+      ...tl.appointments.map(a => ({ date: a.date, type: "appointment", label: "Appointment", detail: `${a.department} with ${a.doctor} · ${a.status}` })),
+      ...tl.labResults.map(l => ({ date: l.date, type: "lab", label: "Lab Result", detail: l.tests.map(t => `${t.name}: ${t.value} ${t.unit} (${t.interpretation})`).join(", ") + (l.criticalFlag ? " ⚠️ CRITICAL" : "") })),
+      ...tl.billing.map(b => ({ date: b.date, type: "billing", label: "Bill", detail: `${b.service} — ₦${b.totalAmount.toLocaleString()} (${b.status})` })),
+      ...tl.admissions.map(a => ({ date: a.admissionDate, type: "admission", label: "Admission", detail: `${a.ward} · ${a.admissionDiagnosis} · ${a.status}` }))
+    ].sort((a,b) => (b.date || "").localeCompare(a.date || ""));
+
+    const patientInfo = `
+      <div style="background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:20px;">
+        <strong style="font-size:16px;">${tl.patient.name}</strong>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px;">
+          ${tl.patient.sex}, ${tl.patient.age} yrs &bull; ${tl.patient.bloodGroup || ""} &bull; ${tl.patient.lga}, ${tl.patient.community}
+        </div>
+        <div style="font-size:12px;margin-top:6px;">
+          Insurance: <strong>${tl.patient.insurance}</strong> &bull;
+          Allergies: <strong style="color:#dc2626;">${tl.patient.allergies?.join(", ") || "None"}</strong> &bull;
+          Next of Kin: ${tl.patient.nextOfKin || "—"}
+        </div>
+      </div>`;
+
+    body.innerHTML = patientInfo + `<div class="timeline-wrap">${
+      events.length ? events.map(ev => `
+        <div class="timeline-item ${ev.type}">
+          <div class="tl-date">${ev.date || "Unknown date"}</div>
+          <div class="tl-card"><strong>${ev.label}</strong>${ev.detail}</div>
+        </div>`).join("") : "<p style='color:var(--muted);'>No history on file for this patient.</p>"
+    }</div>`;
+    modal.style.display = "flex";
+  } catch(err) {
+    body.innerHTML = `<p style="color:#dc2626;">Could not load timeline: ${err.message}</p>`;
+    modal.style.display = "flex";
+  }
+}
+window.showPatientTimeline = showPatientTimeline;
+
+// ── EWS CALCULATOR (Inline, auto-triggered from encounter form) ─
+function setupEwsAutoCalc() {
+  const vitalsInputs = document.querySelectorAll("#encounterForm input[name=bp], #encounterForm input[name=respiration], #encounterForm input[name=temperature], #encounterForm input[name=pulse], #encounterForm input[name=spo2]");
+  vitalsInputs.forEach(input => {
+    input.addEventListener("input", debounce(async () => {
+      const form = document.querySelector("#encounterForm");
+      if (!form) return;
+      const f = formToObject(form);
+      const vitals = { bp: f.bp||"120/80", temperature: f.temperature||"37", pulse: f.pulse||"80", respiration: f.respiration||"18", spo2: f.spo2||"98" };
+      try {
+        const ews = await api("/api/ai/ews", { method: "POST", body: JSON.stringify({ vitals }) });
+        let ewsEl = document.querySelector("#ewsInlineResult");
+        if (!ewsEl) {
+          ewsEl = document.createElement("div"); ewsEl.id = "ewsInlineResult";
+          form.insertBefore(ewsEl, form.querySelector(".button-row"));
+        }
+        const riskClass = ews.overallRisk.includes("HIGH") ? "danger" : ews.overallRisk.includes("MODERATE") ? "warning" : "safe";
+        ewsEl.innerHTML = `<div class="ews-overall ${riskClass}" style="margin:10px 0;">
+          ⚡ EWS: qSOFA ${ews.qsofa.score}/3 · SIRS ${ews.sirs.score}/4 — ${ews.overallRisk}
+        </div>`;
+      } catch(e) { /* silent */ }
+    }, 800));
+  });
+}
+setupEwsAutoCalc();
+
+function showEwsModal(data) {
+  const modal = document.querySelector("#ewsModal");
+  const body  = document.querySelector("#ewsModalBody");
+  if (!modal || !body) return;
+  const qClass = data.qsofa.score >= 2 ? "high" : data.qsofa.score === 1 ? "medium" : "low";
+  const sClass = data.sirs.score >= 2 ? "high" : data.sirs.score === 1 ? "medium" : "low";
+  const overall = data.overallRisk.includes("HIGH") ? "danger" : data.overallRisk.includes("MODERATE") ? "warning" : "safe";
+  body.innerHTML = `
+    <div class="ews-score-grid">
+      <div class="ews-score-box ${qClass}">
+        <div class="score-number">${data.qsofa.score}</div>
+        <div class="score-label">qSOFA Score</div>
+        <div class="score-risk">${data.qsofa.risk}</div>
+        <ul class="ews-criteria-list">
+          ${data.qsofa.criteria.length ? data.qsofa.criteria.map(c => `<li>${c}</li>`).join("") : "<li>No criteria met</li>"}
+        </ul>
+      </div>
+      <div class="ews-score-box ${sClass}">
+        <div class="score-number">${data.sirs.score}</div>
+        <div class="score-label">SIRS Score</div>
+        <div class="score-risk">${data.sirs.risk}</div>
+        <ul class="ews-criteria-list">
+          ${data.sirs.criteria.length ? data.sirs.criteria.map(c => `<li>${c}</li>`).join("") : "<li>No criteria met</li>"}
+        </ul>
+      </div>
+    </div>
+    <div class="ews-overall ${overall}">${data.recommendation}</div>
+    <p style="font-size:11px;color:var(--muted);margin-top:10px;">${data.disclaimer}</p>`;
+  modal.style.display = "flex";
+}
+
+// ── DRUG INTERACTION CHECKER ───────────────────────────────────
+const drugCheckForm = document.querySelector("#drugCheckForm");
+if (drugCheckForm) {
+  drugCheckForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const drugs = document.querySelector("#drugCheckInput").value.split("\n").map(d => d.trim()).filter(Boolean);
+    const allergies = document.querySelector("#drugAllergyInput").value.split(",").map(a => a.trim()).filter(Boolean);
+    const resEl = document.querySelector("#drugCheckResults");
+    try {
+      const result = await api("/api/alerts/drug-check", { method: "POST", body: JSON.stringify({ drugs, allergies }) });
+      if (!result.alerts.length) {
+        resEl.innerHTML = '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:10px;padding:14px;color:#065f46;font-weight:600;">✅ No interactions or allergy alerts found. Appears safe to prescribe.</div>';
+        return;
+      }
+      resEl.innerHTML = `<p style="font-weight:700;margin-bottom:8px;">${result.alertCount} alert${result.alertCount > 1 ? "s" : ""} found:</p>` +
+        result.alerts.map(a => `<div class="drug-alert-card ${a.severity}">
+          <div class="alert-type">${a.type} — ${a.severity}</div>
+          <div class="alert-message">${a.message}</div>
+        </div>`).join("");
+    } catch(err) { resEl.innerHTML = `<p style="color:#dc2626;">Error: ${err.message}</p>`; }
+  });
+}
+
+// ── AI TRIAGE TOOL (in AI Suite) ──────────────────────────────
+// Upgrade the AI view with triage + autonote tools
+function upgradeAiView() {
+  const aiSection = document.querySelector("#ai");
+  if (!aiSection) return;
+  // Add the drug checker button and triage form above existing content
+  const toolBar = document.createElement("div");
+  toolBar.style.cssText = "margin-bottom:16px;";
+  toolBar.innerHTML = `
+    <div class="ai-tool-grid">
+      <div class="ai-tool-card" onclick="document.getElementById('drugModal').style.display='flex'">
+        <div class="tool-icon">💊</div>
+        <div class="tool-name">Drug & Allergy Check</div>
+        <div class="tool-desc">Check drug interactions and patient allergy conflicts</div>
+      </div>
+      <div class="ai-tool-card" id="triageToolCard">
+        <div class="tool-icon">🧠</div>
+        <div class="tool-name">Symptom Triage Engine</div>
+        <div class="tool-desc">AI acuity scoring + differential diagnosis suggestions</div>
+      </div>
+      <div class="ai-tool-card" id="ewsToolCard">
+        <div class="tool-icon">⚠️</div>
+        <div class="tool-name">EWS / Sepsis Monitor</div>
+        <div class="tool-desc">qSOFA & SIRS score calculator from vitals</div>
+      </div>
+      <div class="ai-tool-card" id="autoNoteCard">
+        <div class="tool-icon">🎙️</div>
+        <div class="tool-name">Auto-Note Generator</div>
+        <div class="tool-desc">Generate SOAP notes from vitals and complaint</div>
+      </div>
+    </div>
+    <!-- Triage Form -->
+    <div id="triagePanel" style="display:none;" class="ai-panel">
+      <div class="ai-panel-title">🧠 Symptom Triage + Differential Diagnosis</div>
+      <form id="triageForm" class="stack-form">
+        <label>Symptoms (one per line)
+          <textarea id="triageSymptoms" rows="3" placeholder="fever\nheadache\nvomiting"></textarea>
+        </label>
+        <div class="vitals-grid compact">
+          <label>Temp<input id="triageTemp" placeholder="37.0"></label>
+          <label>BP<input id="triageBp" placeholder="120/80"></label>
+          <label>Pulse<input id="triagePulse" placeholder="80"></label>
+          <label>RR<input id="triageRr" placeholder="18"></label>
+          <label>SpO2<input id="triageSpo2" placeholder="98"></label>
+        </div>
+        <div class="form-row">
+          <label>Age<input id="triageAge" type="number" placeholder="35"></label>
+          <label>Sex<select id="triageSex"><option>Female</option><option>Male</option></select></label>
+        </div>
+        <label>Free text / additional history
+          <textarea id="triageFreeText" rows="2" placeholder="Patient is 32 weeks pregnant, known diabetic..."></textarea>
+        </label>
+        <button class="primary-btn" type="submit">Run AI Triage</button>
+      </form>
+      <div id="triageResult"></div>
+    </div>
+    <!-- EWS Form -->
+    <div id="ewsPanel" style="display:none;" class="ai-panel">
+      <div class="ai-panel-title">⚠️ Early Warning Score Calculator</div>
+      <form id="ewsForm" class="stack-form">
+        <div class="vitals-grid compact">
+          <label>Temp<input id="ewsTemp" placeholder="37.0"></label>
+          <label>BP<input id="ewsBp" placeholder="120/80"></label>
+          <label>Pulse<input id="ewsPulse" placeholder="80"></label>
+          <label>RR<input id="ewsRr" placeholder="18"></label>
+          <label>SpO2<input id="ewsSpo2" placeholder="98"></label>
+        </div>
+        <label>GCS (Glasgow Coma Scale, 3-15)<input id="ewsGcs" type="number" min="3" max="15" value="15"></label>
+        <button class="primary-btn" type="submit">Calculate EWS</button>
+      </form>
+      <div id="ewsResult"></div>
+    </div>
+    <!-- Auto-Note Form -->
+    <div id="autoNotePanel" style="display:none;" class="ai-panel">
+      <div class="ai-panel-title">🎙️ Ambient AI Auto-Note Generator</div>
+      <form id="autoNoteForm" class="stack-form">
+        <label>Chief Complaint<textarea id="anComplaint" rows="2" placeholder="Fever with chills for 3 days"></textarea></label>
+        <div class="vitals-grid compact">
+          <label>Temp<input id="anTemp" placeholder="37.0"></label>
+          <label>BP<input id="anBp" placeholder="120/80"></label>
+          <label>Pulse<input id="anPulse" placeholder="80"></label>
+          <label>RR<input id="anRr" placeholder="18"></label>
+          <label>SpO2<input id="anSpo2" placeholder="98"></label>
+          <label>Weight<input id="anWeight" placeholder="70"></label>
+        </div>
+        <div class="form-row">
+          <label>Age<input id="anAge" type="number" placeholder="35"></label>
+          <label>Sex<select id="anSex"><option>Female</option><option>Male</option></select></label>
+        </div>
+        <label>Known Allergies<input id="anAllergies" placeholder="Penicillin, Sulfa"></label>
+        <label>Chronic Conditions<input id="anConditions" placeholder="Hypertension, Diabetes"></label>
+        <button class="primary-btn" type="submit">Generate SOAP Note</button>
+      </form>
+      <div id="autoNoteResult"></div>
+    </div>`;
+  aiSection.insertBefore(toolBar, aiSection.firstChild);
+
+  // Toggle tool panels
+  document.querySelector("#triageToolCard")?.addEventListener("click", () => {
+    togglePanel("triagePanel");
+  });
+  document.querySelector("#ewsToolCard")?.addEventListener("click", () => {
+    togglePanel("ewsPanel");
+  });
+  document.querySelector("#autoNoteCard")?.addEventListener("click", () => {
+    togglePanel("autoNotePanel");
+  });
+
+  // Triage submit
+  document.querySelector("#triageForm")?.addEventListener("submit", async e => {
+    e.preventDefault();
+    const symptoms = document.querySelector("#triageSymptoms").value.split("\n").map(s=>s.trim()).filter(Boolean);
+    const vitals = { temperature: document.querySelector("#triageTemp").value, bp: document.querySelector("#triageBp").value, pulse: document.querySelector("#triagePulse").value, respiration: document.querySelector("#triageRr").value, spo2: document.querySelector("#triageSpo2").value };
+    const age = parseInt(document.querySelector("#triageAge").value) || null;
+    const sex = document.querySelector("#triageSex").value;
+    const freeText = document.querySelector("#triageFreeText").value;
+    try {
+      const result = await api("/api/ai/triage", { method: "POST", body: JSON.stringify({ symptoms, vitals, age, sex, freeText }) });
+      const resEl = document.querySelector("#triageResult");
+      resEl.innerHTML = `
+        <div class="triage-acuity ${result.acuity}">${result.acuity === "Emergency" ? "🚨" : result.acuity === "Urgent" ? "⚡" : "✅"} ACUITY: ${result.acuity.toUpperCase()}</div>
+        ${result.redFlags.length ? `<div style="background:#fef2f2;border-radius:8px;padding:10px 14px;margin-bottom:10px;"><strong style="color:#dc2626;">🚩 Red Flags</strong><ul style="margin:6px 0 0;">${result.redFlags.map(r=>`<li style="font-size:13px;">${r}</li>`).join("")}</ul></div>` : ""}
+        <p class="ai-section-label">Differential Diagnoses</p>
+        ${result.differentials.map(d => `<div class="differential-item">
+          <span class="rank">${d.rank}</span>
+          <div><div class="dx-name">${d.diagnosis}</div><div class="dx-reason">${d.reasoning}</div></div>
+          <span class="confidence">${d.confidence}</span>
+        </div>`).join("")}
+        ${result.suggestedOrders.length ? `<p class="ai-section-label" style="margin-top:12px;">Suggested Orders</p>
+          <ul>${result.suggestedOrders.map(o=>`<li style="font-size:13px;">${o}</li>`).join("")}</ul>` : ""}
+        <p style="font-size:11px;color:var(--muted);margin-top:10px;">${result.disclaimer}</p>`;
+    } catch(err) { document.querySelector("#triageResult").innerHTML = `<p style="color:#dc2626;">${err.message}</p>`; }
+  });
+
+  // EWS submit
+  document.querySelector("#ewsForm")?.addEventListener("submit", async e => {
+    e.preventDefault();
+    const vitals = { temperature: document.querySelector("#ewsTemp").value, bp: document.querySelector("#ewsBp").value, pulse: document.querySelector("#ewsPulse").value, respiration: document.querySelector("#ewsRr").value, spo2: document.querySelector("#ewsSpo2").value };
+    const gcs = document.querySelector("#ewsGcs").value;
+    try {
+      const result = await api("/api/ai/ews", { method: "POST", body: JSON.stringify({ vitals, gcs: parseInt(gcs) }) });
+      showEwsModal(result);
+    } catch(err) { showToast("EWS error: " + err.message); }
+  });
+
+  // Auto-note submit
+  document.querySelector("#autoNoteForm")?.addEventListener("submit", async e => {
+    e.preventDefault();
+    const payload = {
+      chiefComplaint: document.querySelector("#anComplaint").value,
+      vitals: { temperature: document.querySelector("#anTemp").value, bp: document.querySelector("#anBp").value, pulse: document.querySelector("#anPulse").value, respiration: document.querySelector("#anRr").value, spo2: document.querySelector("#anSpo2").value, weight: document.querySelector("#anWeight").value },
+      age: parseInt(document.querySelector("#anAge").value),
+      sex: document.querySelector("#anSex").value,
+      allergies: document.querySelector("#anAllergies").value.split(",").map(a=>a.trim()).filter(Boolean),
+      conditions: document.querySelector("#anConditions").value.split(",").map(c=>c.trim()).filter(Boolean)
+    };
+    try {
+      const result = await api("/api/ai/autonote", { method: "POST", body: JSON.stringify(payload) });
+      const resEl = document.querySelector("#autoNoteResult");
+      const s = result.soap;
+      resEl.innerHTML = `
+        <p style="font-size:11px;color:var(--brand);font-weight:700;margin:12px 0 8px;">AI-GENERATED SOAP NOTE — REVIEW BEFORE USE</p>
+        <div class="soap-block"><div class="soap-label">Subjective</div><div class="soap-text">${s.subjective}</div></div>
+        <div class="soap-block"><div class="soap-label">Objective</div><div class="soap-text">${s.objective}</div></div>
+        <div class="soap-block"><div class="soap-label">Assessment</div><div class="soap-text">${s.assessment}</div></div>
+        <div class="soap-block"><div class="soap-label">Plan</div><div class="soap-text">${s.plan}</div></div>
+        <p style="font-size:11px;color:var(--muted);margin-top:8px;">${result.disclaimer}</p>`;
+    } catch(err) { document.querySelector("#autoNoteResult").innerHTML = `<p style="color:#dc2626;">${err.message}</p>`; }
+  });
+}
+
+function togglePanel(id) {
+  const panels = ["triagePanel","ewsPanel","autoNotePanel"];
+  panels.forEach(pid => {
+    const el = document.querySelector(`#${pid}`);
+    if (el) el.style.display = pid === id && el.style.display === "none" ? "block" : "none";
+  });
+}
+
+// ── Debounce utility ──────────────────────────────────────────
+function debounce(fn, delay) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+}
+
+// Initialise all new features
+upgradeAiView();
+loadAllNewData();

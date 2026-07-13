@@ -2,7 +2,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8082;
 const ROOT = path.resolve(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT, "public");
 const DATA_FILE = path.join(__dirname, "data.json");
@@ -17,19 +17,15 @@ const mimeTypes = {
   ".svg": "image/svg+xml"
 };
 
-function readData() {
-  return JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-}
-
-function writeData(data) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
-}
+// ─── Data Helpers ───────────────────────────────────────────
+function readData() { return JSON.parse(fs.readFileSync(DATA_FILE, "utf8")); }
+function writeData(d) { fs.writeFileSync(DATA_FILE, JSON.stringify(d, null, 2)); }
 
 function sendJson(res, status, body) {
   res.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+    "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type"
   });
   res.end(JSON.stringify(body));
@@ -38,164 +34,42 @@ function sendJson(res, status, body) {
 function collectBody(req) {
   return new Promise((resolve, reject) => {
     let raw = "";
-    req.on("data", chunk => {
-      raw += chunk;
-      if (raw.length > 1_000_000) {
-        reject(new Error("Request body too large"));
-      }
-    });
-    req.on("end", () => {
-      if (!raw) {
-        resolve({});
-        return;
-      }
-      try {
-        resolve(JSON.parse(raw));
-      } catch (error) {
-        reject(error);
-      }
-    });
+    req.on("data", chunk => { raw += chunk; if (raw.length > 2_000_000) reject(new Error("Body too large")); });
+    req.on("end", () => { if (!raw) { resolve({}); return; } try { resolve(JSON.parse(raw)); } catch (e) { reject(e); } });
   });
 }
 
 function nextId(prefix, list) {
-  const max = list.reduce((highest, item) => {
-    const numeric = Number(String(item.id || "").replace(/\D/g, ""));
-    return Number.isFinite(numeric) && numeric > highest ? numeric : highest;
-  }, 0);
+  const max = list.reduce((h, x) => { const n = Number(String(x.id || "").replace(/\D/g, "")); return isFinite(n) && n > h ? n : h; }, 0);
   return `${prefix}-${String(max + 1).padStart(4, "0")}`;
 }
 
 function parseBp(bp) {
-  const [systolic, diastolic] = String(bp || "").split("/").map(Number);
-  return { systolic, diastolic };
+  const [s, d] = String(bp || "").split("/").map(Number);
+  return { systolic: s || 0, diastolic: d || 0 };
 }
 
-function scrubClinicalNote(payload) {
-  const text = [
-    payload.chiefComplaint,
-    payload.assessment,
-    payload.plan,
-    payload.note
-  ].filter(Boolean).join(" ").toLowerCase();
-  const vitals = payload.vitals || {};
-  const issues = [];
-  const missing = [];
-  const suggestions = [];
-  const redFlags = [];
+// ─── Drug Interaction Database ───────────────────────────────
+const DRUG_INTERACTIONS = {
+  "warfarin": { "aspirin": { severity: "Critical", message: "Warfarin + Aspirin: Major bleeding risk. Avoid combination unless under strict haematology supervision." }, "ibuprofen": { severity: "Critical", message: "Warfarin + NSAIDs: Increased haemorrhage risk. Avoid." }, "ciprofloxacin": { severity: "Warning", message: "Warfarin + Ciprofloxacin: May increase INR. Monitor closely." } },
+  "metformin": { "contrast": { severity: "Warning", message: "Metformin + IV Contrast: Risk of contrast-induced nephropathy and lactic acidosis. Hold metformin 48h." }, "alcohol": { severity: "Warning", message: "Metformin + Alcohol: Risk of lactic acidosis." } },
+  "amlodipine": { "simvastatin": { severity: "Warning", message: "Amlodipine + Simvastatin >20mg: Increased statin toxicity/rhabdomyolysis risk." } },
+  "ace inhibitor": { "potassium": { severity: "Warning", message: "ACE Inhibitors + Potassium supplements: Risk of hyperkalaemia." }, "nsaid": { severity: "Warning", message: "ACE Inhibitors + NSAIDs: Reduced antihypertensive effect and renal impairment risk." } },
+  "gentamicin": { "furosemide": { severity: "Critical", message: "Gentamicin + Furosemide: High risk of ototoxicity and nephrotoxicity. Avoid if possible." } },
+  "artemether": { "quinine": { severity: "Critical", message: "Artemether + Quinine: QT prolongation risk. Do not combine." } },
+  "magnesium sulphate": { "calcium channel blocker": { severity: "Warning", message: "MgSO4 + Calcium Channel Blockers: Risk of neuromuscular blockade." } }
+};
 
-  ["temperature", "bp", "pulse", "respiration", "spo2"].forEach(field => {
-    if (!vitals[field]) missing.push(field);
-  });
+const ALLERGY_DRUG_MAP = {
+  "Penicillin": ["penicillin", "amoxicillin", "ampicillin", "flucloxacillin", "co-amoxiclav", "piperacillin"],
+  "Sulfa": ["sulfamethoxazole", "co-trimoxazole", "trimethoprim-sulfamethoxazole", "sulphonamide", "sulfadiazine"],
+  "NSAIDs": ["ibuprofen", "diclofenac", "indomethacin", "naproxen", "aspirin", "ketorolac"],
+  "Aspirin": ["aspirin", "asa"],
+  "Codeine": ["codeine", "dihydrocodeine"],
+  "Contrast": ["iodine contrast", "iv contrast", "contrast dye"]
+};
 
-  const { systolic, diastolic } = parseBp(vitals.bp);
-  if (systolic >= 180 || diastolic >= 120) {
-    redFlags.push("Severe hypertension range. Confirm manually, assess end-organ symptoms, and escalate per protocol.");
-  } else if (systolic >= 140 || diastolic >= 90) {
-    issues.push("Blood pressure is elevated. Document repeat BP and cardiovascular/obstetric risk assessment.");
-  }
-
-  if (Number(vitals.temperature) >= 38) {
-    issues.push("Fever documented. Consider malaria testing, infection screen, hydration status, and local surveillance alerts.");
-  }
-
-  if (Number(vitals.spo2) && Number(vitals.spo2) < 94) {
-    redFlags.push("Low oxygen saturation. Recheck probe, assess airway/breathing, and consider urgent escalation.");
-  }
-
-  if (text.includes("pregnan") && (systolic >= 140 || diastolic >= 90)) {
-    redFlags.push("Pregnancy plus elevated BP. Screen for pre-eclampsia: urine protein, headache, visual symptoms, epigastric pain, platelets/LFT where available.");
-  }
-
-  if (text.includes("child") || text.includes("under-5") || text.includes("under 5")) {
-    suggestions.push("For under-5 care, document weight-based dosing, danger signs, hydration, immunization status, and caregiver counselling.");
-  }
-
-  if (text.includes("malaria")) {
-    suggestions.push("For suspected malaria, record RDT/microscopy result before treatment where feasible and report rising PHC clusters.");
-  }
-
-  if (text.includes("chest pain") || text.includes("stroke") || text.includes("unconscious") || text.includes("seizure")) {
-    redFlags.push("Emergency symptom found in note. Activate emergency workflow and document time-critical actions.");
-  }
-
-  if (missing.length) {
-    issues.push(`Missing core vitals: ${missing.join(", ")}.`);
-  }
-
-  return {
-    safety: "Prototype clinical support only. A licensed clinician must make final decisions.",
-    qualityScore: Math.max(45, 100 - issues.length * 10 - redFlags.length * 18 - missing.length * 5),
-    redFlags,
-    documentationIssues: issues,
-    suggestions,
-    structuredSoap: {
-      subjective: payload.chiefComplaint || "Not documented",
-      objective: vitals,
-      assessment: payload.assessment || "Not documented",
-      plan: payload.plan || "Not documented"
-    }
-  };
-}
-
-function answerClinicalInquiry(question) {
-  const q = String(question || "").toLowerCase();
-  const disclaimer = "Prototype doctor inquiry support. Verify with local clinical protocol and senior review where needed.";
-
-  if (q.includes("pre-eclampsia") || q.includes("preeclampsia")) {
-    return {
-      disclaimer,
-      answer: "In ANC, elevated BP after 20 weeks needs repeat BP, urine protein, symptom screen, and severity assessment. Red flags include severe headache, visual symptoms, epigastric pain, breathlessness, seizures, BP in severe range, low platelets, abnormal LFT/creatinine, or fetal concerns. Stabilize and refer urgently if severe features are present.",
-      actions: ["Repeat BP correctly", "Check urine protein", "Assess danger symptoms", "Order FBC/LFT/renal tests where available", "Refer urgently for severe features"]
-    };
-  }
-
-  if (q.includes("malaria")) {
-    return {
-      disclaimer,
-      answer: "For suspected malaria, confirm with RDT or microscopy where possible, assess danger signs, hydration, pregnancy status, age, and ability to tolerate oral medication. PHCs should escalate severe malaria signs, persistent vomiting, altered consciousness, convulsions, respiratory distress, severe anaemia, or shock.",
-      actions: ["Perform RDT/microscopy", "Check danger signs", "Use weight-based dosing", "Document treatment batch where possible", "Notify surveillance if cluster rises"]
-    };
-  }
-
-  if (q.includes("hypertension") || q.includes("bp")) {
-    return {
-      disclaimer,
-      answer: "For high BP, repeat measurement after rest with correct cuff size, check adherence and symptoms, assess renal/cardiac risk, review current medicines, and escalate severe range or end-organ symptoms. Document BP trend, counselling, and follow-up date.",
-      actions: ["Repeat BP", "Screen chest pain, neuro signs, breathlessness", "Review medication adherence", "Check renal function if available", "Schedule follow-up or emergency referral"]
-    };
-  }
-
-  return {
-    disclaimer,
-    answer: "I can help structure clinical thinking, identify missing documentation, flag danger signs, suggest orders/referrals, and prepare SOAP notes. Ask about a condition, medication safety, triage risk, ANC, malaria, hypertension, emergency symptoms, or PHC referral criteria.",
-    actions: ["Add patient age/sex", "Add vital signs", "State pregnancy/child status", "Mention allergies and medicines", "Ask a focused clinical question"]
-  };
-}
-
-function buildSummary(data) {
-  const openEncounters = data.encounters.filter(item => item.status !== "Closed").length;
-  const phcs = data.facilities.filter(item => item.type.includes("Primary")).length;
-  const urgentOrders = data.orders.filter(item => ["Urgent", "Emergency"].includes(item.priority)).length;
-  const lowStock = data.inventory.filter(item => item.quantity <= item.reorderLevel).length;
-
-  return {
-    facilities: data.facilities.length,
-    phcs,
-    patients: data.patients.length,
-    openEncounters,
-    urgentOrders,
-    lowStock,
-    surveillanceSignals: data.surveillance.length,
-    quality: {
-      avgWaitMinutes: 34,
-      triageUnder10Minutes: 82,
-      referralCompletion: 76,
-      ancRiskReviewed: 91
-    }
-  };
-}
-
+// ─── ICD-11 Database ─────────────────────────────────────────
 const ICD11_DB = {
   stems: {
     "1A00": { title: "Cholera", allowedExtensions: [] },
@@ -206,7 +80,16 @@ const ICD11_DB = {
     "5A11": { title: "Type 2 diabetes mellitus", allowedExtensions: [] },
     "1C44.Z": { title: "Tuberculosis of lungs, unspecified", allowedExtensions: [] },
     "1E31": { title: "Type A influenza", allowedExtensions: [] },
-    "NE60": { title: "Burns of unspecified body region", allowedExtensions: ["XK8G", "XK9K"] }
+    "NE60": { title: "Burns of unspecified body region", allowedExtensions: ["XK8G", "XK9K"] },
+    "CA22.Z": { title: "Pneumonia, unspecified", allowedExtensions: [] },
+    "5B55": { title: "Severe acute malnutrition", allowedExtensions: [] },
+    "KA21": { title: "Sickle cell disease", allowedExtensions: [] },
+    "1C82.Z": { title: "HIV disease, unspecified", allowedExtensions: [] },
+    "5A10": { title: "Type 1 diabetes mellitus", allowedExtensions: [] },
+    "MG43": { title: "Sepsis, unspecified", allowedExtensions: [] },
+    "NA07.1": { title: "Intracranial injury", allowedExtensions: [] },
+    "JA00": { title: "Ectopic pregnancy", allowedExtensions: [] },
+    "BB22": { title: "Ischaemic stroke", allowedExtensions: [] }
   },
   extensions: {
     "XK8G": { title: "Left side", axis: "Laterality" },
@@ -221,464 +104,617 @@ const ICD11_DB = {
 function searchIcd11(query) {
   const q = String(query).toLowerCase().trim();
   if (!q) return [];
-  const results = [];
-  for (const [code, info] of Object.entries(ICD11_DB.stems)) {
-    if (code.toLowerCase().includes(q) || info.title.toLowerCase().includes(q)) {
-      results.push({
-        code,
-        title: info.title,
-        type: "stem",
-        allowedExtensions: info.allowedExtensions
-      });
-    }
-  }
-  return results;
+  return Object.entries(ICD11_DB.stems)
+    .filter(([code, info]) => code.toLowerCase().includes(q) || info.title.toLowerCase().includes(q))
+    .map(([code, info]) => ({ code, title: info.title, type: "stem", allowedExtensions: info.allowedExtensions }));
 }
 
 function validateIcd11Cluster(expression) {
-  if (!expression) {
-    return { isValid: false, error: "Empty expression" };
-  }
+  if (!expression) return { isValid: false, error: "Empty expression" };
   const parts = expression.split("&");
   const stemCode = parts[0];
   const extensionCodes = parts.slice(1);
-  
   const stem = ICD11_DB.stems[stemCode];
-  if (!stem) {
-    return { isValid: false, error: `Invalid stem code: ${stemCode}` };
-  }
-  
+  if (!stem) return { isValid: false, error: `Invalid stem code: ${stemCode}` };
   const seenAxes = {};
   const validatedExtensions = [];
-  
   for (const extCode of extensionCodes) {
     const ext = ICD11_DB.extensions[extCode];
-    if (!ext) {
-      return { isValid: false, error: `Invalid extension code: ${extCode}` };
-    }
-    if (!stem.allowedExtensions.includes(extCode)) {
-      return { isValid: false, error: `Extension ${extCode} (${ext.title}) is not permitted for stem ${stemCode}` };
-    }
-    if (seenAxes[ext.axis]) {
-      return { isValid: false, error: `Axis conflict: ${ext.axis} specified twice` };
-    }
+    if (!ext) return { isValid: false, error: `Invalid extension: ${extCode}` };
+    if (!stem.allowedExtensions.includes(extCode)) return { isValid: false, error: `Extension ${extCode} not permitted for ${stemCode}` };
+    if (seenAxes[ext.axis]) return { isValid: false, error: `Axis conflict: ${ext.axis} duplicated` };
     seenAxes[ext.axis] = extCode;
     validatedExtensions.push({ code: extCode, title: ext.title, axis: ext.axis });
   }
-  
-  return {
-    isValid: true,
-    stem: { code: stemCode, title: stem.title },
-    extensions: validatedExtensions,
-    formattedDisplay: stem.title + (validatedExtensions.length ? ", " + validatedExtensions.map(e => e.title).join(", ") : "")
-  };
+  return { isValid: true, stem: { code: stemCode, title: stem.title }, extensions: validatedExtensions, formattedDisplay: stem.title + (validatedExtensions.length ? ", " + validatedExtensions.map(e => e.title).join(", ") : "") };
 }
 
-const serviceCosts = {
-  "Triage": 500,
-  "Outpatient": 1000,
-  "Emergency": 3000,
-  "Wards": 5000,
-  "Laboratory": 2000,
-  "Pharmacy": 1200,
-  "Radiology": 4500,
-  "ANC and Maternity": 1000,
-  "Immunization": 300,
-  "Theatre": 15000,
-  "Claims": 200,
-  "Referrals": 800,
-  "Consultation": 1500
-};
-
-const unitToServiceMap = {
-  "OPD": "Outpatient",
-  "Emergency": "Emergency",
-  "Ward": "Wards",
-  "ANC": "ANC and Maternity",
-  "PHC": "Triage",
-  "Theatre": "Theatre",
-  "Triage": "Triage",
-  "Laboratory": "Laboratory",
-  "Pharmacy": "Pharmacy",
-  "Radiology": "Radiology",
-  "Immunization": "Immunization",
-  "Claims": "Claims",
-  "Referrals": "Referrals"
-};
-
-const insuranceCoverage = {
-  "PLASCHEMA": 0.7,
-  "NHIA": 0.6,
-  "Basic Health Care Provision Fund": 0.9,
-  "Private Pay": 0.0
-};
+// ─── Billing ─────────────────────────────────────────────────
+const serviceCosts = { "Triage": 500, "Outpatient": 1000, "Emergency": 3000, "Wards": 5000, "Laboratory": 2000, "Pharmacy": 1200, "Radiology": 4500, "ANC and Maternity": 1000, "Immunization": 300, "Theatre": 15000, "Claims": 200, "Referrals": 800, "Consultation": 1500, "Appointment": 500 };
+const unitToServiceMap = { "OPD": "Outpatient", "Emergency": "Emergency", "Ward": "Wards", "ANC": "ANC and Maternity", "PHC": "Triage", "Theatre": "Theatre", "Triage": "Triage", "Laboratory": "Laboratory", "Pharmacy": "Pharmacy", "Radiology": "Radiology", "Immunization": "Immunization", "Claims": "Claims", "Referrals": "Referrals" };
+const insuranceCoverage = { "PLASCHEMA": 0.7, "NHIA": 0.6, "Basic Health Care Provision Fund": 0.9, "Private Pay": 0.0 };
 
 function createAutoBill(data, patientId, serviceType, description) {
   if (!data.billing) data.billing = [];
   const patient = data.patients.find(p => p.id === patientId);
-  const patientName = patient ? patient.name : "Unknown Patient";
-  const insurance = patient ? patient.insurance : "Private Pay";
-  
   const cost = serviceCosts[serviceType] || 1000;
-  const coveragePercent = insuranceCoverage[insurance] !== undefined ? insuranceCoverage[insurance] : 0.0;
-  
-  const totalAmount = cost;
-  const insuranceCovered = Math.round(cost * coveragePercent);
-  const patientPayable = totalAmount - insuranceCovered;
-  
+  const cov = insuranceCoverage[patient?.insurance] ?? 0;
   const bill = {
     id: nextId("BILL", data.billing),
     patientId,
-    patientName,
+    patientName: patient?.name || "Unknown",
     service: serviceType,
-    description: description || `${serviceType} services rendered`,
-    totalAmount,
-    insuranceCovered,
-    patientPayable,
-    insurance,
+    description: description || `${serviceType} services`,
+    totalAmount: cost,
+    insuranceCovered: Math.round(cost * cov),
+    patientPayable: Math.round(cost * (1 - cov)),
+    insurance: patient?.insurance || "Private Pay",
     status: "Pending",
     date: new Date().toISOString().slice(0, 10)
   };
-  
   data.billing.unshift(bill);
   return bill;
 }
 
+// ─── Summary ─────────────────────────────────────────────────
+function buildSummary(data) {
+  const openEncounters = data.encounters.filter(e => e.status !== "Closed").length;
+  const phcs = data.facilities.filter(f => f.type.includes("Primary")).length;
+  const urgentOrders = data.orders.filter(o => ["Urgent", "Emergency"].includes(o.priority)).length;
+  const lowStock = data.inventory.filter(i => i.quantity <= i.reorderLevel).length;
+  const totalBilled = (data.billing || []).reduce((s, b) => s + (b.totalAmount || 0), 0);
+  const totalCollected = (data.billing || []).filter(b => b.status === "Paid").reduce((s, b) => s + (b.patientPayable || 0), 0);
+  const activeAdmissions = (data.admissions || []).filter(a => a.status === "Active").length;
+  const criticalLabs = (data.labResults || []).filter(l => l.criticalFlag).length;
+  return {
+    facilities: data.facilities.length, phcs, patients: data.patients.length,
+    openEncounters, urgentOrders, lowStock,
+    surveillanceSignals: data.surveillance.length,
+    activeAdmissions, criticalLabs,
+    totalBilled, totalCollected,
+    collectionRate: totalBilled > 0 ? Math.round((totalCollected / totalBilled) * 100) : 0,
+    quality: { avgWaitMinutes: 34, triageUnder10Minutes: 82, referralCompletion: 76, ancRiskReviewed: 91 }
+  };
+}
+
+// ─── Analytics ───────────────────────────────────────────────
+function buildAnalytics(data) {
+  const diseaseBurden = {};
+  data.surveillance.forEach(s => { diseaseBurden[s.condition] = (diseaseBurden[s.condition] || 0) + s.cases7d; });
+
+  const registrationByMonth = {};
+  data.patients.forEach(p => {
+    const month = p.lastVisit ? p.lastVisit.slice(0, 7) : "Unknown";
+    registrationByMonth[month] = (registrationByMonth[month] || 0) + 1;
+  });
+
+  const insuranceDist = {};
+  data.patients.forEach(p => { insuranceDist[p.insurance || "Unknown"] = (insuranceDist[p.insurance || "Unknown"] || 0) + 1; });
+
+  const billingByStatus = { Pending: 0, Paid: 0, Claimed: 0, Waived: 0 };
+  (data.billing || []).forEach(b => { if (billingByStatus[b.status] !== undefined) billingByStatus[b.status] += b.totalAmount || 0; });
+
+  const lgaPatients = {};
+  data.patients.forEach(p => { lgaPatients[p.lga || "Unknown"] = (lgaPatients[p.lga || "Unknown"] || 0) + 1; });
+
+  return { diseaseBurden, registrationByMonth, insuranceDist, billingByStatus, lgaPatients };
+}
+
+// ─── AI Engines ──────────────────────────────────────────────
+
+// 1. Clinical Note Scrubber (existing, enhanced)
+function scrubClinicalNote(payload) {
+  const text = [payload.chiefComplaint, payload.assessment, payload.plan, payload.note].filter(Boolean).join(" ").toLowerCase();
+  const vitals = payload.vitals || {};
+  const issues = [], missing = [], suggestions = [], redFlags = [];
+  ["temperature", "bp", "pulse", "respiration", "spo2"].forEach(f => { if (!vitals[f]) missing.push(f); });
+  const { systolic, diastolic } = parseBp(vitals.bp);
+  if (systolic >= 180 || diastolic >= 120) redFlags.push("Severe hypertension range. Confirm manually, assess end-organ symptoms, escalate per protocol.");
+  else if (systolic >= 140 || diastolic >= 90) issues.push("Blood pressure elevated. Document repeat BP and cardiovascular/obstetric risk.");
+  if (Number(vitals.temperature) >= 38) issues.push("Fever documented. Consider malaria RDT, infection screen, hydration status.");
+  if (Number(vitals.spo2) && Number(vitals.spo2) < 94) redFlags.push("Low oxygen saturation. Recheck probe, assess airway, consider urgent escalation.");
+  if (text.includes("pregnan") && (systolic >= 140 || diastolic >= 90)) redFlags.push("Pregnancy + elevated BP → screen for pre-eclampsia: urine protein, headache, visual changes, epigastric pain.");
+  if (text.includes("child") || text.includes("under-5") || text.includes("paediatric")) suggestions.push("Under-5: document weight-based dosing, danger signs, hydration, immunization status, caregiver counselling.");
+  if (text.includes("malaria")) suggestions.push("Malaria: record RDT/microscopy result before treatment. Report rising clusters to surveillance.");
+  if (text.includes("chest pain") || text.includes("stroke") || text.includes("unconscious") || text.includes("seizure")) redFlags.push("Emergency symptom detected. Activate emergency workflow and document time-critical actions.");
+  if (text.includes("diabet")) suggestions.push("Diabetes: document HbA1c, blood glucose, medication adherence, foot exam, renal function.");
+  if (missing.length) issues.push(`Missing core vitals: ${missing.join(", ")}.`);
+  return {
+    safety: "Prototype clinical support only. A licensed clinician must make final decisions.",
+    qualityScore: Math.max(45, 100 - issues.length * 10 - redFlags.length * 18 - missing.length * 5),
+    redFlags, documentationIssues: issues, suggestions,
+    structuredSoap: { subjective: payload.chiefComplaint || "Not documented", objective: vitals, assessment: payload.assessment || "Not documented", plan: payload.plan || "Not documented" }
+  };
+}
+
+// 2. Clinical Inquiry
+function answerClinicalInquiry(question) {
+  const q = String(question || "").toLowerCase();
+  const disclaimer = "Prototype clinical support. Verify with local protocol and senior review where needed.";
+  if (q.includes("pre-eclampsia") || q.includes("preeclampsia")) return { disclaimer, answer: "Elevated BP after 20 weeks: repeat BP, urine protein, symptom screen, severity assessment. Red flags: severe headache, visual disturbance, epigastric pain, seizures, severe BP range, low platelets, abnormal LFT/creatinine, fetal concerns. Stabilize and refer urgently if severe features.", actions: ["Repeat BP", "Check urine protein", "Assess danger symptoms", "Order FBC/LFT/renal", "Refer urgently for severe features"] };
+  if (q.includes("malaria")) return { disclaimer, answer: "Confirm with RDT/microscopy. Assess danger signs, hydration, pregnancy, age, oral tolerance. Escalate: altered consciousness, convulsions, respiratory distress, severe anaemia, shock.", actions: ["Perform RDT/microscopy", "Check danger signs", "Weight-based dosing", "Document batch", "Notify surveillance"] };
+  if (q.includes("hypertension") || q.includes(" bp ") || q.includes("blood pressure")) return { disclaimer, answer: "Repeat BP after rest with correct cuff size. Check adherence and symptoms. Assess renal/cardiac risk. Review medicines. Escalate severe range or end-organ symptoms. Document BP trend, counselling, follow-up date.", actions: ["Repeat BP", "Screen chest pain/neuro signs", "Review medication adherence", "Check renal function", "Schedule follow-up or emergency referral"] };
+  if (q.includes("sepsis")) return { disclaimer, answer: "Sepsis: suspect if SIRS criteria + infection. qSOFA ≥2 (RR≥22, SBP≤100, altered mentation) = high risk. Initiate sepsis bundle: cultures, fluids, antibiotics within 1 hour. Escalate immediately.", actions: ["Calculate qSOFA score", "Draw blood cultures", "IV access + fluids", "Broad-spectrum antibiotics within 1hr", "Escalate to ICU if organ dysfunction"] };
+  if (q.includes("diabet")) return { disclaimer, answer: "Diabetes management: monitor glucose, HbA1c 3-6 monthly, check feet, eyes, renal function annually. Adjust medications at each visit. Educate on lifestyle, hypoglycaemia recognition, and sick day rules.", actions: ["Check fasting glucose", "Review HbA1c", "Foot examination", "Urine ACR for nephropathy", "Medication review"] };
+  return { disclaimer, answer: "I can assist with clinical thinking, documentation gaps, danger sign identification, SOAP notes, condition-specific guidance (malaria, hypertension, pre-eclampsia, sepsis, diabetes, under-5, ANC), drug interactions, and referral criteria.", actions: ["Add patient age/sex", "Add vital signs", "State pregnancy/child status", "Mention allergies and medicines", "Ask a focused clinical question"] };
+}
+
+// 3. Ambient Auto-Note Generator
+function generateAutoNote(payload) {
+  const { chiefComplaint, vitals = {}, age, sex, allergies = [], conditions = [] } = payload;
+  const { systolic, diastolic } = parseBp(vitals.bp);
+  const temp = Number(vitals.temperature);
+  const spo2 = Number(vitals.spo2);
+  const pulse = Number(vitals.pulse);
+  const rr = Number(vitals.respiration);
+
+  const findings = [];
+  if (systolic >= 140 || diastolic >= 90) findings.push(`blood pressure elevated at ${vitals.bp} mmHg`);
+  if (temp >= 38) findings.push(`fever at ${temp}°C`);
+  if (spo2 > 0 && spo2 < 94) findings.push(`hypoxia with SpO2 of ${spo2}%`);
+  if (pulse > 100) findings.push(`tachycardia at ${pulse} bpm`);
+  if (rr > 20) findings.push(`tachypnoea at ${rr} breaths/min`);
+
+  const objectiveText = `Vital signs: Temp ${vitals.temperature || "—"}°C, BP ${vitals.bp || "—"} mmHg, Pulse ${vitals.pulse || "—"} bpm, RR ${vitals.respiration || "—"} breaths/min, SpO2 ${vitals.spo2 || "—"}%, Weight ${vitals.weight || "—"} kg.${findings.length ? " Notable findings: " + findings.join("; ") + "." : " Vitals otherwise stable."}`;
+
+  let assessmentText = `${age ? age + "-year-old " : ""}${sex || "patient"} presenting with ${chiefComplaint || "unspecified complaint"}.`;
+  if (conditions.length) assessmentText += ` Known history of: ${conditions.join(", ")}.`;
+  if (allergies.length) assessmentText += ` Documented allergies: ${allergies.join(", ")}.`;
+
+  let planText = "Further evaluation required. ";
+  if (temp >= 38) planText += "Consider malaria RDT and infection workup. ";
+  if (systolic >= 140) planText += "Repeat BP after rest, assess cardiovascular risk. ";
+  if (spo2 > 0 && spo2 < 94) planText += "Urgent respiratory assessment and supplemental oxygen. ";
+  planText += "Document complete history, review medications, and arrange appropriate follow-up.";
+
+  return {
+    disclaimer: "AI-generated draft note. Clinician must review, edit, and confirm before finalising.",
+    soap: {
+      subjective: chiefComplaint || "Chief complaint not entered",
+      objective: objectiveText,
+      assessment: assessmentText,
+      plan: planText
+    }
+  };
+}
+
+// 4. Symptom Triage + Differential Diagnosis Engine
+function triageSymptoms(payload) {
+  const { symptoms = [], vitals = {}, age, sex, allergies = [], conditions = [] } = payload;
+  const text = (symptoms.join(" ") + " " + (payload.freeText || "")).toLowerCase();
+  const { systolic, diastolic } = parseBp(vitals.bp);
+  const temp = Number(vitals.temperature);
+  const spo2 = Number(vitals.spo2);
+  const pulse = Number(vitals.pulse);
+  const rr = Number(vitals.respiration);
+
+  let acuity = "Routine";
+  const redFlags = [];
+  const differentials = [];
+  const suggestedOrders = [];
+
+  // Emergency triggers
+  if (text.includes("unconscious") || text.includes("not breathing") || text.includes("cardiac arrest")) { acuity = "Emergency"; redFlags.push("Possible cardiac/respiratory arrest — activate emergency response immediately."); }
+  if (text.includes("seizure") || text.includes("convulsion")) { acuity = "Emergency"; redFlags.push("Active or recent seizure — airway, breathing, circulation first."); }
+  if (text.includes("severe bleeding") || text.includes("haemorrhage")) { acuity = "Emergency"; redFlags.push("Significant haemorrhage — obtain IV access, cross-match blood."); }
+  if (spo2 > 0 && spo2 < 90) { acuity = "Emergency"; redFlags.push(`Critical hypoxia: SpO2 ${spo2}%. Immediate airway/breathing assessment.`); }
+  if (systolic > 0 && systolic <= 90) { acuity = "Emergency"; redFlags.push(`Hypotension: BP ${vitals.bp}. Assess for shock.`); }
+  if (systolic >= 180 || diastolic >= 120) { acuity = "Emergency"; redFlags.push("Hypertensive emergency. Assess end-organ damage immediately."); }
+
+  // Urgent triggers
+  if (acuity !== "Emergency") {
+    if (temp >= 39.5 || (temp >= 38 && age < 5)) acuity = "Urgent";
+    if (pulse > 120 || pulse < 50) acuity = "Urgent";
+    if (rr > 25) acuity = "Urgent";
+    if ((systolic >= 160 || diastolic >= 100) && acuity !== "Emergency") acuity = "Urgent";
+  }
+
+  // Differential Diagnosis
+  if (text.includes("fever") || temp >= 38) {
+    if (age < 15 || text.includes("child")) {
+      differentials.push({ rank: 1, diagnosis: "Malaria (Plasmodium falciparum)", confidence: "High", reasoning: "Fever in under-15 in endemic area — malaria is the primary diagnosis until ruled out." });
+      differentials.push({ rank: 2, diagnosis: "Bacterial sepsis", confidence: "Medium", reasoning: "High fever with tachycardia warrants sepsis workup if malaria negative." });
+      differentials.push({ rank: 3, diagnosis: "Typhoid fever", confidence: "Low-Medium", reasoning: "Stepladder fever pattern, abdominal symptoms — consider if malaria RDT negative." });
+      suggestedOrders.push("Malaria RDT / thick and thin blood film", "FBC with differential", "Blood culture if febrile >3 days");
+    } else {
+      differentials.push({ rank: 1, diagnosis: "Malaria", confidence: "High", reasoning: "Fever in malaria-endemic region requires RDT confirmation first." });
+      differentials.push({ rank: 2, diagnosis: "Urinary tract infection", confidence: "Medium", reasoning: "Especially in women — check urinalysis." });
+      differentials.push({ rank: 3, diagnosis: "Typhoid / enteric fever", confidence: "Medium", reasoning: "Prolonged fever with GI symptoms." });
+      suggestedOrders.push("Malaria RDT", "Urinalysis + culture", "FBC + ESR");
+    }
+  }
+
+  if ((systolic >= 140 || diastolic >= 90) && !text.includes("pregnan")) {
+    differentials.push({ rank: differentials.length + 1, diagnosis: "Hypertension (essential or secondary)", confidence: "High", reasoning: "Elevated BP on presentation. Repeat after rest. Screen for end-organ damage." });
+    suggestedOrders.push("Repeat BP x2", "Renal function + electrolytes", "Urinalysis for protein", "ECG if available");
+  }
+
+  if (text.includes("pregnan") && (systolic >= 140 || diastolic >= 90)) {
+    differentials.push({ rank: 1, diagnosis: "Pre-eclampsia / eclampsia", confidence: "High", reasoning: "Pregnancy + hypertension after 20 weeks — rule out pre-eclampsia urgently." });
+    suggestedOrders.push("Urine protein (dipstick)", "FBC + platelets", "LFT + creatinine", "CTG/fetal monitoring if available");
+    if (acuity === "Routine") acuity = "Urgent";
+  }
+
+  if (text.includes("chest pain")) {
+    differentials.push({ rank: 1, diagnosis: "Acute Coronary Syndrome (ACS)", confidence: "Medium-High", reasoning: "Chest pain — exclude myocardial infarction or unstable angina." });
+    differentials.push({ rank: 2, diagnosis: "Pulmonary embolism", confidence: "Low-Medium", reasoning: "Pleuritic chest pain, dyspnoea, risk factors." });
+    differentials.push({ rank: 3, diagnosis: "Musculoskeletal chest pain", confidence: "Medium", reasoning: "Reproducible on palpation." });
+    suggestedOrders.push("ECG", "Troponin if available", "Chest X-ray", "D-dimer if PE suspected");
+    if (acuity === "Routine") acuity = "Urgent";
+  }
+
+  if (text.includes("cough") || text.includes("shortness of breath") || text.includes("dyspnoea")) {
+    differentials.push({ rank: differentials.length + 1, diagnosis: "Pneumonia", confidence: "Medium", reasoning: "Cough + fever + RR elevation — community-acquired pneumonia." });
+    differentials.push({ rank: differentials.length + 1, diagnosis: "Pulmonary TB", confidence: "Medium", reasoning: "Chronic cough >2 weeks in endemic area — screen for TB." });
+    suggestedOrders.push("Chest X-ray", "SpO2 monitoring", "Sputum GeneXpert/ZN stain if TB suspected", "FBC");
+  }
+
+  if (text.includes("diarrhoea") || text.includes("vomiting") || text.includes("gastro")) {
+    differentials.push({ rank: differentials.length + 1, diagnosis: "Acute gastroenteritis", confidence: "High", reasoning: "GI symptoms — assess dehydration status urgently, especially under-5." });
+    differentials.push({ rank: differentials.length + 1, diagnosis: "Cholera", confidence: "Low-Medium", reasoning: "Rice-water stools in epidemic context." });
+    suggestedOrders.push("Assess dehydration (skin turgor, eyes, CRT)", "Stool microscopy/culture", "Electrolytes if severe dehydration", "ORS initiation");
+  }
+
+  if (text.includes("diabetes") || conditions.includes("diabetes") || text.includes("hyperglycaemia")) {
+    differentials.push({ rank: differentials.length + 1, diagnosis: "Diabetic ketoacidosis (DKA) / HONK", confidence: "Medium", reasoning: "Known diabetic with altered state or vomiting — check blood glucose urgently." });
+    suggestedOrders.push("Random blood glucose (urgent)", "Urine ketones", "Electrolytes + bicarbonate", "Blood gas if available");
+  }
+
+  if (differentials.length === 0) differentials.push({ rank: 1, diagnosis: "Undifferentiated — further assessment needed", confidence: "Low", reasoning: "Insufficient data for differential. Please add more symptoms, vitals, and history." });
+
+  return {
+    disclaimer: "AI triage support only. Final clinical judgement must be made by a licensed clinician.",
+    acuity,
+    redFlags,
+    differentials: differentials.slice(0, 5),
+    suggestedOrders: [...new Set(suggestedOrders)]
+  };
+}
+
+// 5. Early Warning Score Calculator (qSOFA + SIRS)
+function calculateEWS(vitals, gcs) {
+  const { systolic, diastolic } = parseBp(vitals.bp);
+  const temp = Number(vitals.temperature);
+  const rr = Number(vitals.respiration);
+  const pulse = Number(vitals.pulse);
+  const gcScore = Number(gcs || vitals.gcs || 15);
+
+  // qSOFA (0-3)
+  let qsofa = 0;
+  const qsofaCriteria = [];
+  if (rr >= 22) { qsofa++; qsofaCriteria.push(`RR ≥22 (${rr} breaths/min)`); }
+  if (systolic > 0 && systolic <= 100) { qsofa++; qsofaCriteria.push(`SBP ≤100 (${systolic} mmHg)`); }
+  if (gcScore < 15) { qsofa++; qsofaCriteria.push(`GCS <15 (${gcScore})`); }
+
+  // SIRS (0-4)
+  let sirs = 0;
+  const sirsCriteria = [];
+  if (temp > 38 || temp < 36) { sirs++; sirsCriteria.push(`Temp >38 or <36 (${temp}°C)`); }
+  if (pulse > 90) { sirs++; sirsCriteria.push(`HR >90 (${pulse} bpm)`); }
+  if (rr > 20) { sirs++; sirsCriteria.push(`RR >20 (${rr} breaths/min)`); }
+
+  let qsofaRisk = "Low";
+  let sirsRisk = "Low";
+  if (qsofa >= 2) qsofaRisk = "High";
+  else if (qsofa === 1) qsofaRisk = "Moderate";
+  if (sirs >= 2) sirsRisk = "SIRS Criteria Met";
+
+  const overallRisk = (qsofa >= 2 || sirs >= 3) ? "HIGH — Sepsis Alert" : (qsofa === 1 || sirs === 2) ? "MODERATE — Monitor Closely" : "LOW";
+
+  return {
+    disclaimer: "EWS is a screening tool only. Clinical assessment and senior review are mandatory.",
+    qsofa: { score: qsofa, risk: qsofaRisk, criteria: qsofaCriteria },
+    sirs: { score: sirs, risk: sirsRisk, criteria: sirsCriteria },
+    overallRisk,
+    recommendation: qsofa >= 2
+      ? "⚠️ HIGH SEPSIS RISK: Initiate sepsis bundle — blood cultures, IV access, fluids, antibiotics within 1hr. Escalate immediately."
+      : sirs >= 2
+        ? "⚡ SIRS criteria met — possible systemic inflammation/early infection. Investigate cause urgently."
+        : "✅ Low EWS — continue monitoring. Reassess if condition changes."
+  };
+}
+
+// 6. 30-Day Readmission Risk (LACE-adapted)
+function calculateReadmissionRisk(payload) {
+  const { age, diagnosis, insurance, admissionDuration, previousAdmissions = 0, comorbidities = [], lga } = payload;
+
+  let score = 0;
+  const factors = [];
+
+  const ruralLgas = ["Wase", "Shendam", "Mangu", "Barkin Ladi", "Qua'an Pan", "Mikang", "Bokkos"];
+  if (Number(age) >= 65) { score += 3; factors.push("Age ≥65 years (+3)"); }
+  else if (Number(age) >= 50) { score += 1; factors.push("Age 50-64 years (+1)"); }
+  if (Number(admissionDuration) >= 7) { score += 3; factors.push("Long hospital stay ≥7 days (+3)"); }
+  else if (Number(admissionDuration) >= 3) { score += 2; factors.push("Hospital stay 3-6 days (+2)"); }
+  if (Number(previousAdmissions) >= 3) { score += 4; factors.push("≥3 previous admissions in 6 months (+4)"); }
+  else if (Number(previousAdmissions) >= 1) { score += 2; factors.push("1-2 previous admissions (+2)"); }
+  if (insurance === "Private Pay") { score += 1; factors.push("No insurance / private pay (+1)"); }
+  if (comorbidities.length >= 3) { score += 3; factors.push("≥3 comorbidities (+3)"); }
+  else if (comorbidities.length >= 1) { score += 1; factors.push("1-2 comorbidities (+1)"); }
+  if (ruralLgas.includes(lga)) { score += 1; factors.push("Rural/remote location (+1)"); }
+  if (String(diagnosis || "").toLowerCase().includes("heart") || String(diagnosis || "").toLowerCase().includes("cardiac")) { score += 2; factors.push("Cardiac diagnosis (+2)"); }
+  if (String(diagnosis || "").toLowerCase().includes("sepsis")) { score += 2; factors.push("Sepsis diagnosis (+2)"); }
+  if (String(diagnosis || "").toLowerCase().includes("diabet")) { score += 1; factors.push("Diabetes (+1)"); }
+
+  let risk = "Low";
+  let probability = "< 10%";
+  let recommendations = [];
+  if (score >= 10) { risk = "Very High"; probability = "> 40%"; recommendations = ["Arrange community health worker (CHW) follow-up within 3 days", "Schedule clinic appointment within 7 days", "Telephone follow-up call on day 3 and day 7", "Ensure full medication supply on discharge", "Activate family caregiver counselling"]; }
+  else if (score >= 7) { risk = "High"; probability = "25-40%"; recommendations = ["Schedule clinic review within 14 days", "Telephone follow-up on day 7", "Medication counselling and supply", "CHW referral if available"]; }
+  else if (score >= 4) { risk = "Moderate"; probability = "10-25%"; recommendations = ["Schedule routine follow-up within 4 weeks", "Discharge medication counselling", "Patient education on warning signs"]; }
+  else { risk = "Low"; probability = "< 10%"; recommendations = ["Standard discharge instructions", "Return if symptoms worsen"]; }
+
+  return {
+    disclaimer: "Readmission risk is a decision-support tool. Clinical assessment takes precedence.",
+    score, risk, probability, factors, recommendations
+  };
+}
+
+// 7. Discharge Summary Generator
+function generateDischargeSummary(payload) {
+  const { patient, admission, encounter, prescriptions = [], labResults = [], clinicianName = "Attending Clinician" } = payload;
+  const patientName = patient?.name || "Patient";
+  const today = new Date().toLocaleDateString("en-GB");
+  const admDate = admission?.admissionDate || encounter?.date || today;
+  const diagnosis = encounter?.icd11Display || encounter?.assessment || admission?.admissionDiagnosis || "Unspecified";
+
+  const labSummary = labResults.length > 0 ? labResults.map(lr => lr.tests?.map(t => `${t.name}: ${t.value} ${t.unit} (${t.interpretation})`).join(", ")).join("; ") : "No laboratory results on file.";
+
+  const medsSummary = prescriptions.length > 0 ? prescriptions.map(p => `• ${p.drug} ${p.dose} — ${p.frequency} for ${p.duration}`).join("\n") : "No medications prescribed on discharge.";
+
+  return {
+    disclaimer: "AI-generated discharge summary. Clinician must review, complete, and sign before issuing to patient.",
+    summary: {
+      header: `DISCHARGE SUMMARY — ${patientName.toUpperCase()}`,
+      patientInfo: `Patient: ${patientName} | Age: ${patient?.age || "—"} | Sex: ${patient?.sex || "—"} | ID: ${patient?.id || "—"}`,
+      dateOfAdmission: admDate,
+      dateOfDischarge: today,
+      ward: admission?.ward || "General Ward",
+      admittingDiagnosis: admission?.admissionDiagnosis || diagnosis,
+      finalDiagnosis: diagnosis,
+      clinicalSummary: encounter?.assessment || "Patient was admitted, assessed, and managed as per clinical findings.",
+      hospitalCourse: encounter?.plan || "Treatment was initiated based on clinical presentation. Patient responded to management.",
+      investigationsPerformed: labSummary,
+      medicationsOnDischarge: medsSummary,
+      followUpInstructions: `Please return to clinic in 2 weeks or sooner if symptoms worsen. Next appointment at ${patient?.facilityId || "nearest clinic"}.`,
+      warningSignsToReturn: "Return immediately for: chest pain, difficulty breathing, high fever >39°C, seizures, loss of consciousness, or any new concerning symptoms.",
+      clinicianSignature: `${clinicianName} — ${today}`,
+      footer: "This document was generated by PlateauCare EHR. It must be reviewed and co-signed by the attending clinician."
+    }
+  };
+}
+
+// ─── Drug Interaction Checker ─────────────────────────────────
+function checkDrugInteractions(drugs, patientAllergies = []) {
+  const alerts = [];
+  const drugList = drugs.map(d => String(d).toLowerCase());
+
+  // Check interactions
+  for (const [drug1, interactions] of Object.entries(DRUG_INTERACTIONS)) {
+    const hasDrug1 = drugList.some(d => d.includes(drug1));
+    if (!hasDrug1) continue;
+    for (const [drug2, interaction] of Object.entries(interactions)) {
+      const hasDrug2 = drugList.some(d => d.includes(drug2));
+      if (hasDrug2) alerts.push({ type: "Interaction", severity: interaction.severity, message: interaction.message });
+    }
+  }
+
+  // Check allergies
+  for (const allergy of patientAllergies) {
+    const mappedDrugs = ALLERGY_DRUG_MAP[allergy] || [];
+    for (const mappedDrug of mappedDrugs) {
+      const prescribed = drugList.find(d => d.includes(mappedDrug));
+      if (prescribed) alerts.push({ type: "Allergy", severity: "Critical", message: `ALLERGY ALERT: Patient is allergic to ${allergy}. Prescribed drug "${prescribed}" may contain ${mappedDrug}. Do not administer without specialist review.` });
+    }
+  }
+
+  return {
+    drugsChecked: drugs,
+    alertCount: alerts.length,
+    alerts,
+    safe: alerts.filter(a => a.severity === "Critical").length === 0
+  };
+}
+
+// ─── Request Handler ─────────────────────────────────────────
 async function handleApi(req, res, url) {
   const data = readData();
-
   if (!data.consultations) data.consultations = [];
   if (!data.billing) data.billing = [];
+  if (!data.appointments) data.appointments = [];
+  if (!data.labResults) data.labResults = [];
+  if (!data.beds) data.beds = [];
+  if (!data.admissions) data.admissions = [];
+  if (!data.alertsLog) data.alertsLog = [];
+  if (!data.dischargeSummaries) data.dischargeSummaries = [];
 
-  if (req.method === "OPTIONS") {
-    sendJson(res, 200, { ok: true });
-    return;
-  }
+  if (req.method === "OPTIONS") { sendJson(res, 200, { ok: true }); return; }
 
-  if (req.method === "GET" && url.pathname === "/api/summary") {
-    sendJson(res, 200, buildSummary(data));
-    return;
-  }
-
-  if (req.method === "GET" && url.pathname === "/api/facilities") {
-    sendJson(res, 200, data.facilities);
-    return;
-  }
-
-  if (req.method === "GET" && url.pathname === "/api/patients") {
-    sendJson(res, 200, data.patients);
-    return;
-  }
-
+  // ── Summary
+  if (req.method === "GET" && url.pathname === "/api/summary") { sendJson(res, 200, buildSummary(data)); return; }
+  // ── Analytics
+  if (req.method === "GET" && url.pathname === "/api/analytics") { sendJson(res, 200, buildAnalytics(data)); return; }
+  // ── Facilities
+  if (req.method === "GET" && url.pathname === "/api/facilities") { sendJson(res, 200, data.facilities); return; }
+  // ── Patients
+  if (req.method === "GET" && url.pathname === "/api/patients") { sendJson(res, 200, data.patients); return; }
   if (req.method === "POST" && url.pathname === "/api/patients") {
     const body = await collectBody(req);
-    const patient = {
-      id: nextId("PT", data.patients),
-      name: body.name || "Unnamed Patient",
-      sex: body.sex || "Unknown",
-      age: Number(body.age || 0),
-      phone: body.phone || "",
-      lga: body.lga || "",
-      community: body.community || "",
-      facilityId: body.facilityId || "FAC-PLSH",
-      insurance: body.insurance || "Private Pay",
-      risk: body.risk || "Routine",
-      allergies: String(body.allergies || "").split(",").map(item => item.trim()).filter(Boolean),
-      lastVisit: new Date().toISOString().slice(0, 10)
-    };
+    const patient = { id: nextId("PT", data.patients), name: body.name || "Unnamed", sex: body.sex || "Unknown", age: Number(body.age || 0), dateOfBirth: body.dateOfBirth || "", bloodGroup: body.bloodGroup || "", phone: body.phone || "", address: body.address || "", occupation: body.occupation || "", lga: body.lga || "", community: body.community || "", facilityId: body.facilityId || "FAC-PLSH", insurance: body.insurance || "Private Pay", risk: body.risk || "Routine", allergies: String(body.allergies || "").split(",").map(s => s.trim()).filter(Boolean), nextOfKin: body.nextOfKin || "", nextOfKinPhone: body.nextOfKinPhone || "", lastVisit: new Date().toISOString().slice(0, 10) };
     data.patients.unshift(patient);
     writeData(data);
     sendJson(res, 201, patient);
     return;
   }
-
-  if (req.method === "GET" && url.pathname === "/api/encounters") {
-    sendJson(res, 200, data.encounters);
+  // ── Patient Timeline
+  if (req.method === "GET" && url.pathname.startsWith("/api/patients/") && url.pathname.endsWith("/timeline")) {
+    const patientId = url.pathname.split("/")[3];
+    const patient = data.patients.find(p => p.id === patientId);
+    if (!patient) { sendJson(res, 404, { error: "Patient not found" }); return; }
+    const timeline = {
+      patient,
+      encounters: data.encounters.filter(e => e.patientId === patientId),
+      appointments: (data.appointments || []).filter(a => a.patientId === patientId),
+      labResults: (data.labResults || []).filter(l => l.patientId === patientId),
+      orders: data.orders.filter(o => o.patientId === patientId),
+      billing: (data.billing || []).filter(b => b.patientId === patientId),
+      admissions: (data.admissions || []).filter(a => a.patientId === patientId),
+      consultations: (data.consultations || []).filter(c => c.patientId === patientId)
+    };
+    sendJson(res, 200, timeline);
     return;
   }
-
+  // ── Encounters
+  if (req.method === "GET" && url.pathname === "/api/encounters") { sendJson(res, 200, data.encounters); return; }
   if (req.method === "POST" && url.pathname === "/api/encounters") {
     const body = await collectBody(req);
-    const encounter = {
-      id: nextId("ENC", data.encounters),
-      patientId: body.patientId,
-      facilityId: body.facilityId,
-      unit: body.unit || "OPD",
-      date: new Date().toISOString().slice(0, 10),
-      chiefComplaint: body.chiefComplaint || "",
-      vitals: body.vitals || {},
-      assessment: body.assessment || "",
-      plan: body.plan || "",
-      status: body.status || "Open",
-      icd11Code: body.icd11Code || "",
-      icd11Display: body.icd11Display || ""
-    };
+    const encounter = { id: nextId("ENC", data.encounters), patientId: body.patientId, facilityId: body.facilityId, unit: body.unit || "OPD", date: new Date().toISOString().slice(0, 10), doctorId: body.doctorId || "", duration: Number(body.duration || 0), chiefComplaint: body.chiefComplaint || "", vitals: body.vitals || {}, assessment: body.assessment || "", plan: body.plan || "", status: body.status || "Open", icd11Code: body.icd11Code || "", icd11Display: body.icd11Display || "", labResultIds: [], earlyWarningScore: body.earlyWarningScore || null, readmissionRisk: body.readmissionRisk || null, dischargeNote: "" };
     data.encounters.unshift(encounter);
-    
-    // Auto-create bill for clinical encounter
     const serviceType = unitToServiceMap[encounter.unit] || "Outpatient";
-    createAutoBill(data, encounter.patientId, serviceType, `${encounter.unit} encounter recorded: ${encounter.chiefComplaint || "Clinical services"}`);
-    
+    createAutoBill(data, encounter.patientId, serviceType, `${encounter.unit} encounter: ${encounter.chiefComplaint || "Clinical services"}`);
     writeData(data);
     sendJson(res, 201, encounter);
     return;
   }
-
-  if (req.method === "GET" && url.pathname === "/api/orders") {
-    sendJson(res, 200, data.orders);
-    return;
-  }
-
+  // ── Orders
+  if (req.method === "GET" && url.pathname === "/api/orders") { sendJson(res, 200, data.orders); return; }
   if (req.method === "POST" && url.pathname === "/api/orders") {
     const body = await collectBody(req);
-    const order = {
-      id: nextId("ORD", data.orders),
-      patientId: body.patientId,
-      type: body.type || "Laboratory",
-      item: body.item || "Unspecified order",
-      priority: body.priority || "Routine",
-      status: "Pending",
-      facilityId: body.facilityId || "FAC-PLSH"
-    };
+    const order = { id: nextId("ORD", data.orders), patientId: body.patientId, type: body.type || "Laboratory", item: body.item || "Unspecified", priority: body.priority || "Routine", status: "Pending", facilityId: body.facilityId || "FAC-PLSH", orderedBy: body.orderedBy || "", date: new Date().toISOString().slice(0, 10) };
     data.orders.unshift(order);
     writeData(data);
     sendJson(res, 201, order);
     return;
   }
-
-  if (req.method === "GET" && url.pathname === "/api/reports") {
-    sendJson(res, 200, {
-      summary: buildSummary(data),
-      inventory: data.inventory,
-      surveillance: data.surveillance,
-      facilities: data.facilities.map(facility => ({
-        id: facility.id,
-        name: facility.name,
-        lga: facility.lga,
-        openEncounters: data.encounters.filter(item => item.facilityId === facility.id && item.status !== "Closed").length,
-        orders: data.orders.filter(item => item.facilityId === facility.id).length
-      }))
-    });
-    return;
-  }
-
-  if (req.method === "POST" && url.pathname === "/api/ai/scrub") {
+  // ── Appointments
+  if (req.method === "GET" && url.pathname === "/api/appointments") { sendJson(res, 200, data.appointments); return; }
+  if (req.method === "POST" && url.pathname === "/api/appointments") {
     const body = await collectBody(req);
-    sendJson(res, 200, scrubClinicalNote(body));
+    const apt = { id: nextId("APT", data.appointments), patientId: body.patientId, facilityId: body.facilityId, department: body.department || "OPD", doctor: body.doctor || "", date: body.date, time: body.time || "08:00", reason: body.reason || "", status: "Scheduled", notes: body.notes || "" };
+    data.appointments.unshift(apt);
+    createAutoBill(data, body.patientId, "Appointment", `Appointment: ${apt.department} — ${apt.date}`);
+    writeData(data);
+    sendJson(res, 201, apt);
     return;
   }
-
-  if (req.method === "POST" && url.pathname === "/api/ai/inquiry") {
+  if (req.method === "POST" && url.pathname === "/api/appointments/status") {
     const body = await collectBody(req);
-    sendJson(res, 200, answerClinicalInquiry(body.question));
+    const apt = data.appointments.find(a => a.id === body.id);
+    if (apt) { apt.status = body.status; writeData(data); sendJson(res, 200, apt); }
+    else sendJson(res, 404, { error: "Appointment not found" });
     return;
   }
-
-  if (req.method === "GET" && url.pathname === "/api/icd11/search") {
-    const q = url.searchParams.get("q") || "";
-    sendJson(res, 200, searchIcd11(q));
-    return;
-  }
-
-  if (req.method === "POST" && url.pathname === "/api/icd11/validate") {
+  // ── Lab Results
+  if (req.method === "GET" && url.pathname === "/api/labresults") { sendJson(res, 200, data.labResults); return; }
+  if (req.method === "POST" && url.pathname === "/api/labresults") {
     const body = await collectBody(req);
-    sendJson(res, 200, validateIcd11Cluster(body.expression));
+    const hasCritical = (body.tests || []).some(t => t.interpretation === "Critical");
+    const lr = { id: nextId("LAB", data.labResults), patientId: body.patientId, orderId: body.orderId || "", facilityId: body.facilityId, date: new Date().toISOString().slice(0, 10), tests: body.tests || [], technician: body.technician || "", notes: body.notes || "", criticalFlag: hasCritical };
+    data.labResults.unshift(lr);
+    if (body.orderId) { const order = data.orders.find(o => o.id === body.orderId); if (order) order.status = "Resulted"; }
+    writeData(data);
+    sendJson(res, 201, lr);
     return;
   }
-
-  if (req.method === "GET" && url.pathname === "/api/consultations") {
-    sendJson(res, 200, data.consultations);
+  // ── Beds
+  if (req.method === "GET" && url.pathname === "/api/beds") { sendJson(res, 200, data.beds); return; }
+  if (req.method === "POST" && url.pathname === "/api/beds/admit") {
+    const body = await collectBody(req);
+    const bed = data.beds.find(b => b.id === body.bedId);
+    if (!bed) { sendJson(res, 404, { error: "Bed not found" }); return; }
+    if (bed.status === "Occupied") { sendJson(res, 400, { error: "Bed is already occupied" }); return; }
+    const admission = { id: nextId("ADM", data.admissions), patientId: body.patientId, facilityId: bed.facilityId, bedId: bed.id, ward: bed.ward, admissionDate: new Date().toISOString().slice(0, 10), dischargeDate: null, admissionDiagnosis: body.diagnosis || "Unspecified", status: "Active", readmissionRisk: null, dischargedBy: null };
+    bed.status = "Occupied"; bed.patientId = body.patientId; bed.admissionId = admission.id;
+    data.admissions.unshift(admission);
+    createAutoBill(data, body.patientId, "Wards", `Ward admission: ${bed.ward}`);
+    writeData(data);
+    sendJson(res, 201, { bed, admission });
     return;
   }
-
+  if (req.method === "POST" && url.pathname === "/api/beds/discharge") {
+    const body = await collectBody(req);
+    const admission = data.admissions.find(a => a.id === body.admissionId);
+    if (!admission) { sendJson(res, 404, { error: "Admission not found" }); return; }
+    const bed = data.beds.find(b => b.id === admission.bedId);
+    admission.status = "Discharged"; admission.dischargeDate = new Date().toISOString().slice(0, 10); admission.dischargedBy = body.dischargedBy || "System";
+    if (bed) { bed.status = "Vacant"; bed.patientId = null; bed.admissionId = null; }
+    writeData(data);
+    sendJson(res, 200, { admission, bed });
+    return;
+  }
+  // ── Reports
+  if (req.method === "GET" && url.pathname === "/api/reports") { sendJson(res, 200, { summary: buildSummary(data), inventory: data.inventory, surveillance: data.surveillance, facilities: data.facilities.map(f => ({ id: f.id, name: f.name, lga: f.lga, openEncounters: data.encounters.filter(e => e.facilityId === f.id && e.status !== "Closed").length, orders: data.orders.filter(o => o.facilityId === f.id).length })) }); return; }
+  // ── Billing
+  if (req.method === "GET" && url.pathname === "/api/billing") { sendJson(res, 200, data.billing); return; }
+  if (req.method === "POST" && url.pathname === "/api/billing") { const body = await collectBody(req); const bill = createAutoBill(data, body.patientId, body.service, body.description); writeData(data); sendJson(res, 201, bill); return; }
+  if (req.method === "POST" && url.pathname === "/api/billing/status") { const body = await collectBody(req); const bill = data.billing.find(b => b.id === body.id); if (bill) { bill.status = body.status; writeData(data); sendJson(res, 200, bill); } else sendJson(res, 404, { error: "Bill not found" }); return; }
+  // ── Consultations
+  if (req.method === "GET" && url.pathname === "/api/consultations") { sendJson(res, 200, data.consultations); return; }
   if (req.method === "POST" && url.pathname === "/api/consultations") {
     const body = await collectBody(req);
-    const consultation = {
-      id: nextId("CNS", data.consultations),
-      patientId: body.patientId,
-      facilityId: body.facilityId,
-      doctorName: body.doctorName || "Dr. Staff",
-      specialty: body.specialty || "General Medicine",
-      chiefComplaint: body.chiefComplaint || "",
-      historyOfPresentingComplaint: body.historyOfPresentingComplaint || "",
-      pastMedicalHistory: body.pastMedicalHistory || "",
-      allergies: body.allergies || "",
-      examinationFindings: body.examinationFindings || "",
-      assessment: body.assessment || "",
-      plan: body.plan || "",
-      icd11Code: body.icd11Code || "",
-      icd11Display: body.icd11Display || "",
-      prescriptions: body.prescriptions || [],
-      date: new Date().toISOString().slice(0, 10)
-    };
-    data.consultations.unshift(consultation);
-    
-    // Auto-create bill for consultation
-    createAutoBill(data, body.patientId, "Consultation", `Doctor Consultation (${consultation.specialty})`);
-    
+    const cns = { id: nextId("CNS", data.consultations), patientId: body.patientId, facilityId: body.facilityId, doctorName: body.doctorName || "Dr. Staff", specialty: body.specialty || "General Medicine", chiefComplaint: body.chiefComplaint || "", historyOfPresentingComplaint: body.historyOfPresentingComplaint || "", pastMedicalHistory: body.pastMedicalHistory || "", allergies: body.allergies || "", examinationFindings: body.examinationFindings || "", assessment: body.assessment || "", plan: body.plan || "", icd11Code: body.icd11Code || "", icd11Display: body.icd11Display || "", prescriptions: body.prescriptions || [], date: new Date().toISOString().slice(0, 10) };
+    data.consultations.unshift(cns);
+    createAutoBill(data, body.patientId, "Consultation", `Doctor Consultation (${cns.specialty})`);
     writeData(data);
-    sendJson(res, 201, consultation);
+    sendJson(res, 201, cns);
     return;
   }
-
-  if (req.method === "GET" && url.pathname === "/api/billing") {
-    sendJson(res, 200, data.billing);
-    return;
-  }
-
-  if (req.method === "POST" && url.pathname === "/api/billing") {
-    const body = await collectBody(req);
-    const bill = createAutoBill(data, body.patientId, body.service, body.description);
-    writeData(data);
-    sendJson(res, 201, bill);
-    return;
-  }
-
-  if (req.method === "POST" && url.pathname === "/api/billing/status") {
-    const body = await collectBody(req);
-    const bill = data.billing.find(b => b.id === body.id);
-    if (bill) {
-      bill.status = body.status; // e.g. "Paid", "Claimed", "Waived"
-      writeData(data);
-      sendJson(res, 200, bill);
-    } else {
-      sendJson(res, 404, { error: `Bill not found: ${body.id}` });
-    }
-    return;
-  }
-
+  // ── ICD-11
+  if (req.method === "GET" && url.pathname === "/api/icd11/search") { sendJson(res, 200, searchIcd11(url.searchParams.get("q") || "")); return; }
+  if (req.method === "POST" && url.pathname === "/api/icd11/validate") { const body = await collectBody(req); sendJson(res, 200, validateIcd11Cluster(body.expression)); return; }
+  // ── FHIR
   if (req.method === "GET" && url.pathname.startsWith("/api/fhir/Condition/")) {
-    const parts = url.pathname.split("/");
-    const id = parts[parts.length - 1];
-    const encounter = data.encounters.find(e => e.id === id);
-    if (!encounter) {
-      sendJson(res, 404, { error: `Encounter not found: ${id}` });
-      return;
-    }
-    const patient = data.patients.find(p => p.id === encounter.patientId);
-    const patientName = patient ? patient.name : "Unknown Patient";
-    const stemCode = encounter.icd11Code ? encounter.icd11Code.split("&")[0] : "";
-    const stemTitle = encounter.icd11Display ? encounter.icd11Display.split(",")[0] : "Unspecified Diagnosis";
-    const extensionCodes = encounter.icd11Code ? encounter.icd11Code.split("&").slice(1) : [];
-
-    const fhirCondition = {
-      resourceType: "Condition",
-      id: encounter.id,
-      clinicalStatus: {
-        coding: [
-          {
-            system: "http://terminology.hl7.org/CodeSystem/condition-clinical",
-            code: encounter.status === "Closed" ? "resolved" : "active"
-          }
-        ]
-      },
-      verificationStatus: {
-        coding: [
-          {
-            system: "http://terminology.hl7.org/CodeSystem/condition-ver-status",
-            code: "confirmed"
-          }
-        ]
-      },
-      subject: {
-        reference: `Patient/${encounter.patientId}`,
-        display: patientName
-      },
-      recordedDate: encounter.date,
-      code: {
-        coding: [
-          {
-            system: "http://id.who.int/icd/release/11/mms",
-            code: stemCode || "Unspecified",
-            display: stemTitle
-          }
-        ],
-        text: encounter.icd11Display || encounter.assessment || "Unspecified Diagnosis"
-      }
-    };
-
-    if (encounter.icd11Code) {
-      fhirCondition.extension = [
-        {
-          url: "http://hl7.org/fhir/StructureDefinition/condition-icd11-postcoordination",
-          extension: [
-            {
-              url: "clusterExpression",
-              valueString: encounter.icd11Code
-            },
-            {
-              url: "stemCode",
-              valueCode: stemCode
-            },
-            ...extensionCodes.map(code => ({
-              url: "extensionCode",
-              valueCode: code
-            }))
-          ]
-        }
-      ];
-    }
-    sendJson(res, 200, fhirCondition);
+    const id = url.pathname.split("/").pop();
+    const enc = data.encounters.find(e => e.id === id);
+    if (!enc) { sendJson(res, 404, { error: "Encounter not found" }); return; }
+    const patient = data.patients.find(p => p.id === enc.patientId);
+    const stemCode = enc.icd11Code ? enc.icd11Code.split("&")[0] : "";
+    const stemTitle = enc.icd11Display ? enc.icd11Display.split(",")[0] : "Unspecified Diagnosis";
+    sendJson(res, 200, { resourceType: "Condition", id: enc.id, clinicalStatus: { coding: [{ system: "http://terminology.hl7.org/CodeSystem/condition-clinical", code: enc.status === "Closed" ? "resolved" : "active" }] }, verificationStatus: { coding: [{ system: "http://terminology.hl7.org/CodeSystem/condition-ver-status", code: "confirmed" }] }, subject: { reference: `Patient/${enc.patientId}`, display: patient?.name || "Unknown" }, recordedDate: enc.date, code: { coding: [{ system: "http://id.who.int/icd/release/11/mms", code: stemCode || "Unspecified", display: stemTitle }], text: enc.icd11Display || enc.assessment || "Unspecified" } });
     return;
   }
+  // ── AI Endpoints
+  if (req.method === "POST" && url.pathname === "/api/ai/scrub") { const body = await collectBody(req); sendJson(res, 200, scrubClinicalNote(body)); return; }
+  if (req.method === "POST" && url.pathname === "/api/ai/inquiry") { const body = await collectBody(req); sendJson(res, 200, answerClinicalInquiry(body.question)); return; }
+  if (req.method === "POST" && url.pathname === "/api/ai/autonote") { const body = await collectBody(req); sendJson(res, 200, generateAutoNote(body)); return; }
+  if (req.method === "POST" && url.pathname === "/api/ai/triage") { const body = await collectBody(req); sendJson(res, 200, triageSymptoms(body)); return; }
+  if (req.method === "POST" && url.pathname === "/api/ai/ews") { const body = await collectBody(req); sendJson(res, 200, calculateEWS(body.vitals || {}, body.gcs)); return; }
+  if (req.method === "POST" && url.pathname === "/api/ai/readmission-risk") { const body = await collectBody(req); sendJson(res, 200, calculateReadmissionRisk(body)); return; }
+  if (req.method === "POST" && url.pathname === "/api/ai/discharge-summary") { const body = await collectBody(req); const summary = generateDischargeSummary(body); data.dischargeSummaries.push({ ...summary, createdAt: new Date().toISOString() }); writeData(data); sendJson(res, 200, summary); return; }
+  if (req.method === "POST" && url.pathname === "/api/alerts/drug-check") { const body = await collectBody(req); sendJson(res, 200, checkDrugInteractions(body.drugs || [], body.allergies || [])); return; }
 
   sendJson(res, 404, { error: "API route not found" });
 }
 
+// ─── Static File Server ───────────────────────────────────────
 function serveStatic(req, res, url) {
   const requested = url.pathname === "/" ? "/index.html" : url.pathname;
-  const safePath = path.normalize(decodeURIComponent(requested)).replace(/^(\.\.[/\\])+/, "");
+  const safePath = path.normalize(decodeURIComponent(requested)).replace(/^(\.\.[\\/])+/, "");
   const filePath = path.join(PUBLIC_DIR, safePath);
-
-  if (!filePath.startsWith(PUBLIC_DIR)) {
-    res.writeHead(403);
-    res.end("Forbidden");
-    return;
-  }
-
-  fs.readFile(filePath, (error, content) => {
-    if (error) {
-      res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
-      res.end("Not found");
-      return;
-    }
-
+  if (!filePath.startsWith(PUBLIC_DIR)) { res.writeHead(403); res.end("Forbidden"); return; }
+  fs.readFile(filePath, (err, content) => {
+    if (err) { res.writeHead(404, { "Content-Type": "text/plain" }); res.end("Not found"); return; }
     const ext = path.extname(filePath).toLowerCase();
     res.writeHead(200, { "Content-Type": mimeTypes[ext] || "application/octet-stream" });
     res.end(content);
   });
 }
 
+// ─── Main Server ──────────────────────────────────────────────
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
-
-  // Basic Auth Check
-  const authHeader = req.headers.authorization || "";
-  const b64auth = authHeader.split(" ")[1] || "";
-  const [login, password] = Buffer.from(b64auth, "base64").toString().split(":");
-  
-  const validUser = process.env.APP_USER || "guyestguy";
-  const validPass = process.env.APP_PASS || "guyestguygithub001";
-
-  if (login !== validUser || password !== validPass) {
+  const b64 = (req.headers.authorization || "").split(" ")[1] || "";
+  const [login, password] = Buffer.from(b64, "base64").toString().split(":");
+  if (login !== (process.env.APP_USER || "guyestguy") || password !== (process.env.APP_PASS || "guyestguygithub001")) {
     res.statusCode = 401;
-    res.setHeader("WWW-Authenticate", 'Basic realm="Secure Area"');
+    res.setHeader("WWW-Authenticate", 'Basic realm="PlateauCare EHR"');
     res.end("Access denied");
     return;
   }
-
   try {
-    if (url.pathname.startsWith("/api/")) {
-      await handleApi(req, res, url);
-      return;
-    }
-
+    if (url.pathname.startsWith("/api/")) { await handleApi(req, res, url); return; }
     serveStatic(req, res, url);
-  } catch (error) {
-    sendJson(res, 500, { error: error.message });
-  }
+  } catch (err) { sendJson(res, 500, { error: err.message }); }
 });
 
-server.listen(PORT, () => {
-  console.log(`PlateauCare EHR running at http://localhost:${PORT}`);
-});
+server.listen(PORT, () => { console.log(`PlateauCare EHR running at http://localhost:${PORT}`); });

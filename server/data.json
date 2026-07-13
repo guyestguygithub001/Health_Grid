@@ -7,7 +7,12 @@
       "lga": "Jos North",
       "level": "Referral",
       "beds": 520,
+      "totalBeds": 520,
+      "availableBeds": 87,
       "status": "Online",
+      "contactPhone": "073-460-0001",
+      "operatingHours": "24/7",
+      "doctors": ["Dr. A. Mwanret", "Dr. B. Dashe", "Dr. C. Pam"],
       "services": ["Emergency", "Surgery", "ICU", "Laboratory", "Radiology", "Pharmacy", "Maternity"]
     },
     {
@@ -17,7 +22,12 @@
       "lga": "Jos North",
       "level": "Secondary",
       "beds": 280,
+      "totalBeds": 280,
+      "availableBeds": 42,
       "status": "Online",
+      "contactPhone": "073-460-0002",
+      "operatingHours": "24/7",
+      "doctors": ["Dr. D. Goshit", "Dr. E. Bala"],
       "services": ["OPD", "Emergency", "Laboratory", "Radiology", "Pharmacy", "Maternity"]
     },
     {
@@ -27,7 +37,12 @@
       "lga": "Wase",
       "level": "Referral",
       "beds": 180,
+      "totalBeds": 180,
+      "availableBeds": 31,
       "status": "Online",
+      "contactPhone": "073-460-0003",
+      "operatingHours": "24/7",
+      "doctors": ["Dr. F. Lot", "Dr. G. Nden"],
       "services": ["OPD", "Emergency", "Surgery", "Laboratory", "Pharmacy"]
     },
     {
@@ -37,7 +52,12 @@
       "lga": "Barkin Ladi",
       "level": "Primary",
       "beds": 24,
+      "totalBeds": 24,
+      "availableBeds": 9,
       "status": "Online",
+      "contactPhone": "073-460-0004",
+      "operatingHours": "08:00-17:00",
+      "doctors": ["Nurse H. Rwang"],
       "services": ["ANC", "Immunization", "Malaria", "Delivery", "Outreach"]
     },
     {
@@ -47,7 +67,12 @@
       "lga": "Mangu",
       "level": "Primary",
       "beds": 18,
+      "totalBeds": 18,
+      "availableBeds": 7,
       "status": "Online",
+      "contactPhone": "073-460-0005",
+      "operatingHours": "08:00-17:00",
+      "doctors": ["Nurse I. Sati"],
       "services": ["ANC", "Immunization", "Malaria", "Nutrition", "Outreach"]
     },
     {
@@ -57,7 +82,12 @@
       "lga": "Shendam",
       "level": "Primary",
       "beds": 20,
+      "totalBeds": 20,
+      "availableBeds": 11,
       "status": "Needs Sync",
+      "contactPhone": "073-460-0006",
+      "operatingHours": "08:00-17:00",
+      "doctors": ["CHO J. Dong"],
       "services": ["ANC", "Immunization", "Malaria", "Delivery"]
     }
   ],
@@ -67,13 +97,19 @@
       "name": "Amina Musa",
       "sex": "Female",
       "age": 29,
+      "dateOfBirth": "1997-03-12",
+      "bloodGroup": "O+",
       "phone": "08030000001",
+      "address": "12 Ropp Road, Barkin Ladi",
+      "occupation": "Farmer",
       "lga": "Barkin Ladi",
       "community": "Ropp",
       "facilityId": "FAC-PHC-BARKIN",
       "insurance": "PLASCHEMA",
       "risk": "Pregnancy",
-      "allergies": ["Sulfa"],
+      "allergies": ["Sulfa", "Penicillin"],
+      "nextOfKin": "Ibrahim Musa",
+      "nextOfKinPhone": "08030000011",
       "lastVisit": "2026-06-18"
     },
     {
@@ -81,13 +117,19 @@
       "name": "Yakubu Pam",
       "sex": "Male",
       "age": 54,
+      "dateOfBirth": "1972-07-08",
+      "bloodGroup": "A+",
       "phone": "08030000002",
+      "address": "5 Bukuru Estate, Jos South",
+      "occupation": "Teacher",
       "lga": "Jos South",
       "community": "Bukuru",
       "facilityId": "FAC-PLSH",
       "insurance": "NHIA",
       "risk": "Hypertension",
       "allergies": [],
+      "nextOfKin": "Ruth Pam",
+      "nextOfKinPhone": "08030000012",
       "lastVisit": "2026-06-22"
     },
     {
@@ -95,13 +137,19 @@
       "name": "Grace Dung",
       "sex": "Female",
       "age": 7,
+      "dateOfBirth": "2019-02-14",
+      "bloodGroup": "B+",
       "phone": "Guardian: 08030000003",
+      "address": "Panyam Village, Mangu LGA",
+      "occupation": "Student",
       "lga": "Mangu",
       "community": "Panyam",
       "facilityId": "FAC-PHC-MANGU",
       "insurance": "Basic Health Care Provision Fund",
       "risk": "Under-5",
       "allergies": ["Penicillin"],
+      "nextOfKin": "Joseph Dung",
+      "nextOfKinPhone": "08030000013",
       "lastVisit": "2026-06-20"
     },
     {
@@ -109,13 +157,19 @@
       "name": "Samuel Longji",
       "sex": "Male",
       "age": 37,
+      "dateOfBirth": "1989-11-20",
+      "bloodGroup": "AB+",
       "phone": "08030000004",
+      "address": "Wase Town, Wase LGA",
+      "occupation": "Civil Servant",
       "lga": "Wase",
       "community": "Wase Town",
       "facilityId": "FAC-WASE",
       "insurance": "Private Pay",
       "risk": "Trauma Follow-up",
       "allergies": [],
+      "nextOfKin": "Mary Longji",
+      "nextOfKinPhone": "08030000014",
       "lastVisit": "2026-06-23"
     }
   ],
@@ -126,6 +180,8 @@
       "facilityId": "FAC-PHC-BARKIN",
       "unit": "ANC",
       "date": "2026-06-18",
+      "doctorId": "Nurse H. Rwang",
+      "duration": 25,
       "chiefComplaint": "Routine antenatal visit, intermittent headache",
       "vitals": {
         "temperature": 36.8,
@@ -133,11 +189,18 @@
         "pulse": 88,
         "respiration": 18,
         "spo2": 98,
-        "weight": 72
+        "weight": 72,
+        "gcs": 15
       },
       "assessment": "Pregnancy at 28 weeks with elevated blood pressure. Rule out pre-eclampsia.",
       "plan": "Check urine protein, FBC, LFT, counsel danger signs, refer if severe features.",
-      "status": "Open"
+      "status": "Open",
+      "icd11Code": "JA60",
+      "icd11Display": "Pre-eclampsia",
+      "labResultIds": [],
+      "earlyWarningScore": null,
+      "readmissionRisk": null,
+      "dischargeNote": ""
     },
     {
       "id": "ENC-1002",
@@ -145,6 +208,8 @@
       "facilityId": "FAC-PLSH",
       "unit": "OPD",
       "date": "2026-06-22",
+      "doctorId": "Dr. D. Goshit",
+      "duration": 20,
       "chiefComplaint": "Headache and dizziness for three days",
       "vitals": {
         "temperature": 37.1,
@@ -152,11 +217,18 @@
         "pulse": 94,
         "respiration": 20,
         "spo2": 97,
-        "weight": 86
+        "weight": 86,
+        "gcs": 15
       },
       "assessment": "Poorly controlled hypertension.",
       "plan": "Review adherence, renal function, ECG, adjust antihypertensive after clinician review.",
-      "status": "Open"
+      "status": "Open",
+      "icd11Code": "BA00.0",
+      "icd11Display": "Essential hypertension",
+      "labResultIds": [],
+      "earlyWarningScore": null,
+      "readmissionRisk": null,
+      "dischargeNote": ""
     },
     {
       "id": "ENC-1003",
@@ -164,6 +236,8 @@
       "facilityId": "FAC-PHC-MANGU",
       "unit": "PHC",
       "date": "2026-06-20",
+      "doctorId": "Nurse I. Sati",
+      "duration": 15,
       "chiefComplaint": "Fever, chills, vomiting",
       "vitals": {
         "temperature": 39.2,
@@ -171,11 +245,112 @@
         "pulse": 124,
         "respiration": 28,
         "spo2": 96,
-        "weight": 21
+        "weight": 21,
+        "gcs": 14
       },
       "assessment": "Suspected malaria with dehydration. Under-5 high risk.",
       "plan": "RDT, oral rehydration if tolerated, urgent referral if lethargy/persistent vomiting.",
-      "status": "Escalated"
+      "status": "Escalated",
+      "icd11Code": "1D2Z",
+      "icd11Display": "Malaria, unspecified",
+      "labResultIds": [],
+      "earlyWarningScore": null,
+      "readmissionRisk": null,
+      "dischargeNote": ""
+    }
+  ],
+  "appointments": [
+    {
+      "id": "APT-0001",
+      "patientId": "PT-0001",
+      "facilityId": "FAC-PHC-BARKIN",
+      "department": "ANC",
+      "doctor": "Nurse H. Rwang",
+      "date": "2026-07-20",
+      "time": "09:00",
+      "reason": "Follow-up ANC visit — 32 weeks",
+      "status": "Scheduled",
+      "notes": ""
+    },
+    {
+      "id": "APT-0002",
+      "patientId": "PT-0002",
+      "facilityId": "FAC-PLSH",
+      "department": "OPD",
+      "doctor": "Dr. D. Goshit",
+      "date": "2026-07-18",
+      "time": "10:30",
+      "reason": "Hypertension review and medication adjustment",
+      "status": "Scheduled",
+      "notes": ""
+    }
+  ],
+  "labResults": [
+    {
+      "id": "LAB-0001",
+      "patientId": "PT-0001",
+      "orderId": "ORD-5001",
+      "facilityId": "FAC-PHC-BARKIN",
+      "date": "2026-06-18",
+      "tests": [
+        { "name": "Urine Protein", "value": "2+", "unit": "", "refRange": "Negative", "interpretation": "Abnormal" },
+        { "name": "Haemoglobin", "value": "9.8", "unit": "g/dL", "refRange": "12-16", "interpretation": "Abnormal" },
+        { "name": "ALT", "value": "38", "unit": "U/L", "refRange": "7-40", "interpretation": "Normal" }
+      ],
+      "technician": "Lab Tech K. Mancha",
+      "notes": "Proteinuria 2+ — clinician review needed urgently",
+      "criticalFlag": true
+    }
+  ],
+  "beds": [
+    { "id": "BED-JUTH-01", "facilityId": "FAC-JUTH", "ward": "Male Medical", "bedNumber": "1", "status": "Occupied", "patientId": "PT-0002", "admissionId": "ADM-0001" },
+    { "id": "BED-JUTH-02", "facilityId": "FAC-JUTH", "ward": "Male Medical", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null },
+    { "id": "BED-JUTH-03", "facilityId": "FAC-JUTH", "ward": "Female Medical", "bedNumber": "1", "status": "Occupied", "patientId": "PT-0001", "admissionId": "ADM-0002" },
+    { "id": "BED-JUTH-04", "facilityId": "FAC-JUTH", "ward": "Female Medical", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null },
+    { "id": "BED-JUTH-05", "facilityId": "FAC-JUTH", "ward": "Paediatric", "bedNumber": "1", "status": "Occupied", "patientId": "PT-0003", "admissionId": "ADM-0003" },
+    { "id": "BED-JUTH-06", "facilityId": "FAC-JUTH", "ward": "Paediatric", "bedNumber": "2", "status": "Maintenance", "patientId": null, "admissionId": null },
+    { "id": "BED-PLSH-01", "facilityId": "FAC-PLSH", "ward": "General Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
+    { "id": "BED-PLSH-02", "facilityId": "FAC-PLSH", "ward": "General Ward", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null }
+  ],
+  "admissions": [
+    {
+      "id": "ADM-0001",
+      "patientId": "PT-0002",
+      "facilityId": "FAC-JUTH",
+      "bedId": "BED-JUTH-01",
+      "ward": "Male Medical",
+      "admissionDate": "2026-07-10",
+      "dischargeDate": null,
+      "admissionDiagnosis": "Hypertensive crisis",
+      "status": "Active",
+      "readmissionRisk": "High",
+      "dischargedBy": null
+    },
+    {
+      "id": "ADM-0002",
+      "patientId": "PT-0001",
+      "facilityId": "FAC-JUTH",
+      "bedId": "BED-JUTH-03",
+      "ward": "Female Medical",
+      "admissionDate": "2026-07-11",
+      "dischargeDate": null,
+      "admissionDiagnosis": "Pre-eclampsia with severe features",
+      "status": "Active",
+      "readmissionRisk": "Very High",
+      "dischargedBy": null
+    },
+    {
+      "id": "ADM-0003",
+      "patientId": "PT-0003",
+      "facilityId": "FAC-JUTH",
+      "bedId": "BED-JUTH-05",
+      "ward": "Paediatric",
+      "admissionDate": "2026-07-12",
+      "dischargeDate": null,
+      "admissionDiagnosis": "Severe malaria with dehydration",
+      "status": "Active",
+      "readmissionRisk": "Medium",
+      "dischargedBy": null
     }
   ],
   "orders": [
@@ -185,17 +360,21 @@
       "type": "Laboratory",
       "item": "Urine Protein, FBC, LFT",
       "priority": "Urgent",
-      "status": "Pending",
-      "facilityId": "FAC-PHC-BARKIN"
+      "status": "Resulted",
+      "facilityId": "FAC-PHC-BARKIN",
+      "orderedBy": "Nurse H. Rwang",
+      "date": "2026-06-18"
     },
     {
       "id": "ORD-5002",
       "patientId": "PT-0002",
       "type": "Pharmacy",
-      "item": "Amlodipine review, adherence counselling",
+      "item": "Amlodipine 10mg OD, Hydrochlorothiazide 25mg OD",
       "priority": "Routine",
       "status": "In Progress",
-      "facilityId": "FAC-PLSH"
+      "facilityId": "FAC-PLSH",
+      "orderedBy": "Dr. D. Goshit",
+      "date": "2026-06-22"
     },
     {
       "id": "ORD-5003",
@@ -204,27 +383,82 @@
       "item": "Refer to General Hospital Mangu if danger signs persist",
       "priority": "Emergency",
       "status": "Escalated",
-      "facilityId": "FAC-PHC-MANGU"
+      "facilityId": "FAC-PHC-MANGU",
+      "orderedBy": "Nurse I. Sati",
+      "date": "2026-06-20"
+    },
+    {
+      "id": "ORD-5004",
+      "patientId": "PT-0002",
+      "type": "Laboratory",
+      "item": "Renal Function Test, Electrolytes, ECG",
+      "priority": "Urgent",
+      "status": "Pending",
+      "facilityId": "FAC-PLSH",
+      "orderedBy": "Dr. D. Goshit",
+      "date": "2026-06-22"
     }
   ],
   "inventory": [
     {
-      "item": "Artemisinin Combination Therapy",
+      "item": "Artemisinin Combination Therapy (ACT)",
       "facilityId": "FAC-PHC-MANGU",
       "quantity": 18,
-      "reorderLevel": 30
+      "reorderLevel": 30,
+      "unit": "Courses",
+      "category": "Antimalarials",
+      "batchNumber": "ACT-2026-007",
+      "expiryDate": "2027-12-31"
     },
     {
-      "item": "Oxytocin",
+      "item": "Oxytocin 10IU/mL",
       "facilityId": "FAC-PHC-BARKIN",
       "quantity": 9,
-      "reorderLevel": 15
+      "reorderLevel": 15,
+      "unit": "Ampoules",
+      "category": "Obstetrics",
+      "batchNumber": "OXY-2026-003",
+      "expiryDate": "2027-06-30"
     },
     {
-      "item": "RDT Kits",
+      "item": "RDT Kits (Malaria)",
       "facilityId": "FAC-PHC-SHENDAM",
       "quantity": 45,
-      "reorderLevel": 50
+      "reorderLevel": 50,
+      "unit": "Kits",
+      "category": "Diagnostics",
+      "batchNumber": "RDT-2026-011",
+      "expiryDate": "2027-08-01"
+    },
+    {
+      "item": "Amlodipine 5mg Tablets",
+      "facilityId": "FAC-PLSH",
+      "quantity": 200,
+      "reorderLevel": 50,
+      "unit": "Tablets",
+      "category": "Antihypertensives",
+      "batchNumber": "AML-2026-005",
+      "expiryDate": "2028-01-01"
+    },
+    {
+      "item": "IV Fluids (Normal Saline 500mL)",
+      "facilityId": "FAC-JUTH",
+      "quantity": 78,
+      "reorderLevel": 100,
+      "unit": "Bags",
+      "category": "IV Fluids",
+      "batchNumber": "NS-2026-022",
+      "expiryDate": "2027-09-01"
+    },
+    {
+      "item": "Oral Rehydration Salts (ORS)",
+      "facilityId": "FAC-PHC-MANGU",
+      "quantity": 120,
+      "reorderLevel": 80,
+      "unit": "Sachets",
+      "category": "Rehydration",
+      "batchNumber": "ORS-2026-014",
+      "expiryDate": "2028-03-01"
     }
   ],
   "surveillance": [
@@ -248,8 +482,17 @@
       "cases7d": 8,
       "trend": "Rising",
       "signal": "ANC clinical audit"
+    },
+    {
+      "condition": "Pneumonia (Under-5)",
+      "lga": "Jos North",
+      "cases7d": 17,
+      "trend": "Stable",
+      "signal": "Monitor — cold season expected"
     }
   ],
+  "alertsLog": [],
+  "dischargeSummaries": [],
   "consultations": [],
   "billing": []
 }

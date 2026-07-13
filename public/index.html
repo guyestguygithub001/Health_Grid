@@ -19,15 +19,19 @@
       </div>
 
       <nav class="nav-menu" aria-label="Primary">
-        <button class="nav-item active" data-view="dashboard">Dashboard</button>
-        <button class="nav-item" data-view="patients">Patients</button>
-        <button class="nav-item" data-view="consultations">Consultations</button>
-        <button class="nav-item" data-view="clinical">Clinical Units</button>
-        <button class="nav-item" data-view="phc">PHC Network</button>
-        <button class="nav-item" data-view="orders">Orders</button>
-        <button class="nav-item" data-view="billing">Billing Gateway</button>
-        <button class="nav-item" data-view="ai">AI Medical Scrub</button>
-        <button class="nav-item" data-view="reports">Reports</button>
+        <button class="nav-item active" data-view="dashboard">📊 Dashboard</button>
+        <button class="nav-item" data-view="patients">👤 Patients</button>
+        <button class="nav-item" data-view="appointments">📅 Appointments</button>
+        <button class="nav-item" data-view="consultations">🩺 Consultations</button>
+        <button class="nav-item" data-view="clinical">🏥 Clinical Units</button>
+        <button class="nav-item" data-view="beds">🛏 Ward / Beds</button>
+        <button class="nav-item" data-view="labresults">🧪 Lab Results</button>
+        <button class="nav-item" data-view="orders">📋 Orders</button>
+        <button class="nav-item" data-view="billing">💳 Billing</button>
+        <button class="nav-item" data-view="ai">🤖 AI Suite</button>
+        <button class="nav-item" data-view="analytics">📈 Analytics</button>
+        <button class="nav-item" data-view="phc">🌿 PHC Network</button>
+        <button class="nav-item" data-view="reports">📑 Reports</button>
       </nav>
 
       <div class="sidebar-card">
@@ -70,6 +74,21 @@
             <span>Urgent Work</span>
             <strong id="metricUrgent">0</strong>
             <small>Urgent orders and escalations</small>
+          </article>
+          <article class="metric">
+            <span>Active Admissions</span>
+            <strong id="metricAdmissions">0</strong>
+            <small>Inpatients in wards</small>
+          </article>
+          <article class="metric urgent">
+            <span>Critical Labs</span>
+            <strong id="metricCriticalLabs">0</strong>
+            <small>Results needing urgent review</small>
+          </article>
+          <article class="metric">
+            <span>Collection Rate</span>
+            <strong id="metricCollection">0%</strong>
+            <small>Revenue collected vs billed</small>
           </article>
         </div>
 
@@ -474,7 +493,173 @@
           </div>
         </div>
       </section>
+
+      <!-- ── Appointments View ──────────────────────────────── -->
+      <section id="appointments" class="view">
+        <div class="split-grid wide-left">
+          <section class="panel">
+            <div class="panel-head">
+              <div><span class="eyebrow">Schedule</span><h2>Appointment Calendar</h2></div>
+              <button class="text-btn" id="newAptBtn" type="button">+ New Appointment</button>
+            </div>
+            <div id="appointmentsTable" class="table-wrap"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><span class="eyebrow">Quick book</span><h2>Book Appointment</h2></div></div>
+            <form id="appointmentForm" class="stack-form">
+              <label>Patient<select id="aptPatient" name="patientId"></select></label>
+              <label>Facility<select id="aptFacility" name="facilityId"></select></label>
+              <label>Department<select name="department"><option>OPD</option><option>ANC</option><option>Emergency</option><option>Laboratory</option><option>Pharmacy</option><option>Radiology</option><option>Paediatrics</option><option>Surgery</option><option>Theatre</option></select></label>
+              <label>Doctor / Clinician<input name="doctor" placeholder="Dr. Name / Nurse Name" /></label>
+              <div class="form-row">
+                <label>Date<input name="date" type="date" required /></label>
+                <label>Time<input name="time" type="time" value="08:00" /></label>
+              </div>
+              <label>Reason<textarea name="reason" rows="2" placeholder="Reason for appointment"></textarea></label>
+              <button class="primary-btn" type="submit">Book Appointment</button>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <!-- ── Lab Results View ───────────────────────────────── -->
+      <section id="labresults" class="view">
+        <div class="split-grid wide-left">
+          <section class="panel">
+            <div class="panel-head"><div><span class="eyebrow">Diagnostics</span><h2>Laboratory Results</h2></div></div>
+            <div id="labResultsTable" class="table-wrap"></div>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><span class="eyebrow">Enter result</span><h2>Record Lab Result</h2></div></div>
+            <form id="labResultForm" class="stack-form">
+              <label>Patient<select id="labPatient" name="patientId"></select></label>
+              <label>Linked Order (optional)<select id="labOrder" name="orderId"><option value="">-- None --</option></select></label>
+              <label>Facility<select id="labFacility" name="facilityId"></select></label>
+              <div id="labTestRows" style="display:flex;flex-direction:column;gap:10px;margin:4px 0;"></div>
+              <button type="button" class="secondary-btn" id="addLabTestBtn" style="margin-bottom:8px;">+ Add Test Result</button>
+              <label>Technician Name<input name="technician" placeholder="Lab Tech name" /></label>
+              <label>Notes<textarea name="notes" rows="2" placeholder="Any additional notes or flags"></textarea></label>
+              <button class="primary-btn" type="submit">Save Lab Results</button>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <!-- ── Beds / Ward View ──────────────────────────────── -->
+      <section id="beds" class="view">
+        <div class="panel">
+          <div class="panel-head">
+            <div><span class="eyebrow">Inpatient management</span><h2>Ward & Bed Census</h2></div>
+            <div style="display:flex;gap:8px;">
+              <span class="badge success" style="padding:6px 12px;">🟢 Vacant</span>
+              <span class="badge danger" style="padding:6px 12px;">🔴 Occupied</span>
+              <span class="badge warning" style="padding:6px 12px;">🟡 Maintenance</span>
+            </div>
+          </div>
+          <div id="bedGrid" class="bed-grid"></div>
+        </div>
+        <div class="split-grid" style="margin-top:16px;">
+          <section class="panel">
+            <div class="panel-head"><div><span class="eyebrow">Admit patient</span><h2>Bed Admission</h2></div></div>
+            <form id="admitForm" class="stack-form">
+              <label>Patient<select id="admitPatient" name="patientId"></select></label>
+              <label>Bed<select id="admitBed" name="bedId"></select></label>
+              <label>Admission Diagnosis<input name="diagnosis" placeholder="Admitting diagnosis" required /></label>
+              <button class="primary-btn" type="submit">Admit Patient</button>
+            </form>
+          </section>
+          <section class="panel">
+            <div class="panel-head"><div><span class="eyebrow">Active admissions</span><h2>Current Inpatients</h2></div></div>
+            <div id="admissionsList" class="record-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- ── Analytics View ────────────────────────────────── -->
+      <section id="analytics" class="view">
+        <div class="split-grid" style="margin-bottom:16px;">
+          <section class="panel" style="padding:20px;">
+            <span class="eyebrow">Disease Burden by LGA</span>
+            <h2 style="margin:4px 0 16px;">Surveillance Overview</h2>
+            <canvas id="chartDisease" height="220"></canvas>
+          </section>
+          <section class="panel" style="padding:20px;">
+            <span class="eyebrow">Insurance Coverage</span>
+            <h2 style="margin:4px 0 16px;">Coverage Distribution</h2>
+            <canvas id="chartInsurance" height="220"></canvas>
+          </section>
+        </div>
+        <div class="split-grid">
+          <section class="panel" style="padding:20px;">
+            <span class="eyebrow">Patient Registration Trend</span>
+            <h2 style="margin:4px 0 16px;">Registrations by Month</h2>
+            <canvas id="chartRegistrations" height="220"></canvas>
+          </section>
+          <section class="panel" style="padding:20px;">
+            <span class="eyebrow">Billing Status</span>
+            <h2 style="margin:4px 0 16px;">Revenue Breakdown</h2>
+            <canvas id="chartBilling" height="220"></canvas>
+          </section>
+        </div>
+      </section>
+
     </main>
+  </div>
+
+  <!-- ── Patient Timeline Modal ────────────────────────────── -->
+  <div id="timelineModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:780px;">
+      <div class="modal-header">
+        <h3 id="timelineModalTitle">Patient Timeline</h3>
+        <button type="button" onclick="document.getElementById('timelineModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+      </div>
+      <div class="modal-body" id="timelineModalBody" style="padding:20px;"></div>
+    </div>
+  </div>
+
+  <!-- ── EWS / Sepsis Alert Modal ──────────────────────────── -->
+  <div id="ewsModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:560px;">
+      <div class="modal-header">
+        <h3>⚠️ Early Warning Score (Sepsis Risk)</h3>
+        <button type="button" onclick="document.getElementById('ewsModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+      </div>
+      <div class="modal-body" id="ewsModalBody" style="padding:20px;"></div>
+    </div>
+  </div>
+
+  <!-- ── Drug Checker Modal ────────────────────────────────── -->
+  <div id="drugModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:540px;">
+      <div class="modal-header">
+        <h3>💊 Drug Interaction & Allergy Check</h3>
+        <button type="button" onclick="document.getElementById('drugModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <form id="drugCheckForm" class="stack-form">
+          <label>Drugs to Check (one per line)
+            <textarea id="drugCheckInput" rows="4" placeholder="e.g.\nWarfarin\nAspirin\nAmlodipine"></textarea>
+          </label>
+          <label>Patient Allergies (comma-separated)
+            <input id="drugAllergyInput" placeholder="Penicillin, Sulfa..." />
+          </label>
+          <button class="primary-btn" type="submit">Check Interactions</button>
+        </form>
+        <div id="drugCheckResults" style="margin-top:16px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Discharge Summary Modal ───────────────────────────── -->
+  <div id="dischargeModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:700px;">
+      <div class="modal-header">
+        <h3>📋 AI Discharge Summary</h3>
+        <button type="button" onclick="document.getElementById('dischargeModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+      </div>
+      <div class="modal-body" id="dischargeModalBody" style="padding:20px;font-family:monospace;font-size:13px;line-height:1.8;"></div>
+    </div>
+  </div>
   </div>
 
   <!-- Clinical Unit Form Modal -->
