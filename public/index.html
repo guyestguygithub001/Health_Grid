@@ -92,6 +92,54 @@
           </article>
         </div>
 
+        <div class="panel onboarding-launcher" style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #0e7490, #0891b2); color: #fff; border: none; border-radius: 16px; box-shadow: 0 10px 25px rgba(8,145,178,0.25);">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+            <div>
+              <span class="badge warning" style="background:#fffbeb; color:#d97706; padding:4px 10px; margin-bottom:8px;">Workflow Wizard Active</span>
+              <h2 style="color:#fff; margin:0 0 4px; font-size:22px; font-weight:700;">Guided Clinical Patient Journey</h2>
+              <p style="color:#e2e8f0; font-size:13px; margin:0;">Intake, schedule, consult, run labs, admit, bill, and discharge patients step-by-step with local AI guidance.</p>
+            </div>
+            <button class="primary-btn" onclick="switchView('patients')" style="background:#fff; color:#0e7490; border:none; padding:12px 24px; font-weight:700; border-radius:10px; cursor:pointer; font-size:14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition:transform .2s;">🚀 Start Patient Intake</button>
+          </div>
+          <div class="guided-path-steps" style="display:grid; grid-template-columns: repeat(7, 1fr); gap:10px; margin-top:20px; border-top:1px solid rgba(255,255,255,0.15); padding-top:20px;">
+            <div class="path-step-card" onclick="switchView('patients')">
+              <div class="step-badge">1</div>
+              <strong>Intake</strong>
+              <span>Patient Directory</span>
+            </div>
+            <div class="path-step-card" onclick="switchView('appointments')">
+              <div class="step-badge">2</div>
+              <strong>Booking</strong>
+              <span>Appointments</span>
+            </div>
+            <div class="path-step-card" onclick="switchView('consultations')">
+              <div class="step-badge">3</div>
+              <strong>Consult</strong>
+              <span>ICD-11 & SOAP</span>
+            </div>
+            <div class="path-step-card" onclick="switchView('labresults')">
+              <div class="step-badge">4</div>
+              <strong>Diagnostics</strong>
+              <span>Lab Entry</span>
+            </div>
+            <div class="path-step-card" onclick="switchView('beds')">
+              <div class="step-badge">5</div>
+              <strong>Admit</strong>
+              <span>Ward Census</span>
+            </div>
+            <div class="path-step-card" onclick="switchView('billing')">
+              <div class="step-badge">6</div>
+              <strong>Billing</strong>
+              <span>Invoices</span>
+            </div>
+            <div class="path-step-card" onclick="switchView('ai')">
+              <div class="step-badge">7</div>
+              <strong>Discharge</strong>
+              <span>AI Suite</span>
+            </div>
+          </div>
+        </div>
+
         <div class="split-grid">
           <section class="panel">
             <div class="panel-head">
@@ -128,6 +176,15 @@
       </section>
 
       <section id="patients" class="view">
+        <div class="onboarding-steps">
+          <button class="step-link active" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
+          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
+          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
+          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
+          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
+          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+        </div>
         <div class="split-grid wide-left">
           <section class="panel">
             <div class="panel-head">
@@ -166,9 +223,22 @@
             </form>
           </section>
         </div>
+        <div class="onboarding-footer">
+          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('dashboard')" type="button">📋 Exit to Hub</button>
+          <button class="primary-btn onboarding-next-btn" onclick="switchView('appointments')" type="button">Proceed to Step 2: Scheduling →</button>
+        </div>
       </section>
 
       <section id="consultations" class="view">
+        <div class="onboarding-steps">
+          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
+          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
+          <button class="step-link active" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
+          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
+          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
+          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+        </div>
         <div class="split-grid wide-left">
           <section class="panel">
             <div class="panel-head">
@@ -261,6 +331,10 @@
             </div>
             <div id="consultationList" class="record-list" style="max-height: 800px; overflow-y: auto;"></div>
           </section>
+        </div>
+        <div class="onboarding-footer">
+          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('appointments')" type="button">← Back to Step 2: Booking</button>
+          <button class="primary-btn onboarding-next-btn" onclick="switchView('labresults')" type="button">Proceed to Step 4: Lab Results →</button>
         </div>
       </section>
 
@@ -394,6 +468,15 @@
       </section>
 
       <section id="ai" class="view">
+        <div class="onboarding-steps">
+          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
+          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
+          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
+          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
+          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
+          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
+          <button class="step-link active" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+        </div>
         <div class="split-grid">
           <section class="panel">
             <div class="panel-head">
@@ -439,6 +522,10 @@
             <div id="aiOutput" class="ai-output"></div>
           </section>
         </div>
+        <div class="onboarding-footer">
+          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('billing')" type="button">← Back to Step 6: Billing</button>
+          <button class="primary-btn onboarding-next-btn" onclick="switchView('dashboard')" type="button">📋 Finish Journey (Back to Hub) ✓</button>
+        </div>
       </section>
 
       <section id="reports" class="view">
@@ -457,6 +544,15 @@
       </section>
 
       <section id="billing" class="view">
+        <div class="onboarding-steps">
+          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
+          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
+          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
+          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
+          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
+          <button class="step-link active" data-step-view="billing"><span class="step-num">6</span> Billing</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+        </div>
         <div class="metric-grid">
           <article class="metric">
             <span>Outstanding Billing</span>
@@ -492,10 +588,24 @@
             <p style="text-align: center; color: var(--muted); padding: 20px;">No billing invoices found.</p>
           </div>
         </div>
+        </div>
+        <div class="onboarding-footer">
+          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('beds')" type="button">← Back to Step 5: Ward & Beds</button>
+          <button class="primary-btn onboarding-next-btn" onclick="switchView('ai')" type="button">Proceed to Step 7: AI & Discharge →</button>
+        </div>
       </section>
 
       <!-- ── Appointments View ──────────────────────────────── -->
       <section id="appointments" class="view">
+        <div class="onboarding-steps">
+          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
+          <button class="step-link active" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
+          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
+          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
+          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
+          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+        </div>
         <div class="split-grid wide-left">
           <section class="panel">
             <div class="panel-head">
@@ -520,10 +630,23 @@
             </form>
           </section>
         </div>
+        <div class="onboarding-footer">
+          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('patients')" type="button">← Back to Step 1: Intake</button>
+          <button class="primary-btn onboarding-next-btn" onclick="switchView('consultations')" type="button">Proceed to Step 3: Consultation →</button>
+        </div>
       </section>
 
       <!-- ── Lab Results View ───────────────────────────────── -->
       <section id="labresults" class="view">
+        <div class="onboarding-steps">
+          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
+          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
+          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
+          <button class="step-link active" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
+          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
+          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+        </div>
         <div class="split-grid wide-left">
           <section class="panel">
             <div class="panel-head"><div><span class="eyebrow">Diagnostics</span><h2>Laboratory Results</h2></div></div>
@@ -543,10 +666,23 @@
             </form>
           </section>
         </div>
+        <div class="onboarding-footer">
+          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('consultations')" type="button">← Back to Step 3: Consult</button>
+          <button class="primary-btn onboarding-next-btn" onclick="switchView('beds')" type="button">Proceed to Step 5: Wards & Beds →</button>
+        </div>
       </section>
 
       <!-- ── Beds / Ward View ──────────────────────────────── -->
       <section id="beds" class="view">
+        <div class="onboarding-steps">
+          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
+          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
+          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
+          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
+          <button class="step-link active" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
+          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+        </div>
         <div class="panel">
           <div class="panel-head">
             <div><span class="eyebrow">Inpatient management</span><h2>Ward & Bed Census</h2></div>
@@ -572,6 +708,10 @@
             <div class="panel-head"><div><span class="eyebrow">Active admissions</span><h2>Current Inpatients</h2></div></div>
             <div id="admissionsList" class="record-list"></div>
           </section>
+        </div>
+        <div class="onboarding-footer">
+          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('labresults')" type="button">← Back to Step 4: Lab Results</button>
+          <button class="primary-btn onboarding-next-btn" onclick="switchView('billing')" type="button">Proceed to Step 6: Billing →</button>
         </div>
       </section>
 

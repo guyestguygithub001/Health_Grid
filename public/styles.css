@@ -771,3 +771,242 @@ canvas { max-width: 100%; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   GUIDED ONBOARDING & WARD COLUMNS STYLES (2026 Minimalist Update)
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Minimalist Full-Width Workspace ─────────────────────── */
+.app-shell.sidebar-collapsed .sidebar {
+  width: 0 !important;
+  overflow: hidden;
+  display: none !important;
+}
+.app-shell.sidebar-collapsed .main {
+  width: 100% !important;
+  max-width: 100% !important;
+  flex: 1;
+}
+
+/* ── Onboarding Launcher (Dashboard Hub) ─────────────────── */
+.onboarding-launcher .primary-btn:hover {
+  transform: scale(1.04);
+}
+.guided-path-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 12px;
+}
+.path-step-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 12px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: background .2s, transform .2s, border-color .2s, box-shadow .2s;
+}
+.path-step-card:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+.path-step-card .step-badge {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: #fff;
+  color: #0e7490;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800;
+  margin-bottom: 6px;
+}
+.path-step-card strong {
+  display: block;
+  font-size: 13px;
+  color: #fff;
+  font-weight: 600;
+}
+.path-step-card span {
+  display: block;
+  font-size: 10px;
+  color: #e2e8f0;
+  margin-top: 2px;
+}
+
+/* ── Onboarding Step Progress Header ─────────────────────── */
+.onboarding-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  gap: 8px;
+  overflow-x: auto;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+.step-link {
+  flex: 1;
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  color: var(--muted);
+  font: 600 12px 'Outfit', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s, color .2s;
+}
+.step-link:hover {
+  background: var(--bg);
+  color: var(--ink);
+}
+.step-link.active {
+  background: var(--brand-light);
+  color: var(--brand-dark);
+  box-shadow: inset 0 0 0 1px rgba(8,145,178,0.2);
+}
+.step-link .step-num {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--muted);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800;
+}
+.step-link.active .step-num {
+  background: var(--brand);
+  color: #fff;
+  animation: pulse-step 1.8s infinite;
+}
+
+@keyframes pulse-step {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(8,145,178,0.4); }
+  50%       { box-shadow: 0 0 0 4px rgba(8,145,178,0); }
+}
+
+/* ── Onboarding Footer Controls ──────────────────────────── */
+.onboarding-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  margin-top: 30px;
+  border-radius: 12px;
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
+}
+
+/* ── Ward Columns Census Grid ────────────────────────────── */
+.bed-grid {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 20px !important;
+  overflow-x: auto !important;
+  padding: 16px 4px !important;
+  align-items: flex-start !important;
+  min-height: 400px;
+  scrollbar-width: thin;
+}
+.ward-column {
+  flex: 0 0 260px;
+  background: rgba(15, 23, 42, 0.02);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.01);
+  transition: transform .25s, box-shadow .25s, border-color .25s;
+}
+.ward-column:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15,23,42,0.06);
+  border-color: rgba(8,145,178,0.25);
+  background: rgba(15, 23, 42, 0.03);
+}
+.ward-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid var(--line);
+  padding-bottom: 10px;
+  margin-bottom: 6px;
+}
+.ward-column-header h3 {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ward-column-header .ward-icon {
+  font-size: 16px;
+}
+.ward-column-header .ward-count {
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--bg);
+  color: var(--muted);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+.ward-column .bed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 100px;
+}
+.ward-column .bed-card {
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ward-column .bed-card .bed-info-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 75%;
+}
+.ward-column .bed-card .bed-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: normal;
+  margin-bottom: 0;
+}
+.ward-column .bed-card .bed-patient {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 0;
+  text-align: left;
+}
+.ward-column .bed-card.occupied {
+  border-left: 4px solid var(--danger);
+}
+.ward-column .bed-card.vacant {
+  border-left: 4px solid var(--success);
+}
+.ward-column .bed-card.maintenance {
+  border-left: 4px solid var(--warning);
+}
+
+

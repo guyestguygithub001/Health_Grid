@@ -64,6 +64,16 @@ function switchView(id) {
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
   document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.view === id));
   document.querySelector("#viewTitle").textContent = titles[id] || "PlateauCare EHR";
+
+  // Auto-collapse sidebar in onboarding workflow views to reduce clutter & make it minimalist
+  const shell = document.querySelector(".app-shell");
+  if (shell) {
+    shell.classList.toggle("sidebar-collapsed", id !== "dashboard");
+  }
+
+  // Scroll view content container back to the top
+  const viewEl = document.getElementById(id);
+  if (viewEl) viewEl.scrollTop = 0;
 }
 
 // ---------------------------------------------------------------
@@ -1708,16 +1718,63 @@ function renderBeds() {
   if (!el) return;
   const beds = state.beds || [];
   if (!beds.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);">No beds configured.</p>'; return; }
-  el.innerHTML = beds.map(b => {
-    const icon = b.status === "Vacant" ? "🛏️" : b.status === "Occupied" ? "🔴" : "🔧";
-    const patient = b.status === "Occupied" ? patientName(b.patientId) : "";
-    return `<div class="bed-card ${b.status.toLowerCase()}">
-      <span class="bed-ward">${b.ward}</span>
-      <span class="bed-icon">${icon}</span>
-      <div class="bed-label">Bed ${b.bedNumber}</div>
-      <div class="bed-patient">${patient || b.status}</div>
-      ${b.status === "Occupied" ? `<button class="text-btn" style="margin-top:8px;font-size:10px;" onclick="dischargeFromBed('${b.id}','${b.admissionId}')">Discharge</button>` : ""}
-    </div>`;
+
+  // Ward display icons mapping
+  const wardIcons = {
+    "Male Medical": "👨‍⚕️",
+    "Female Medical": "👩‍⚕️",
+    "Surgery Ward": "🏥",
+    "Maternity Ward": "🤱",
+    "Paediatric Ward": "👶",
+    "Paediatric": "👶",
+    "Intensive Care Unit (ICU)": "🚨",
+    "Isolation Ward": "😷",
+    "Emergency Ward": "🚑",
+    "General Ward": "🚪"
+  };
+
+  // Group beds by ward name
+  const wards = {};
+  beds.forEach(b => {
+    const w = b.ward || "General Ward";
+    if (!wards[w]) wards[w] = [];
+    wards[w].push(b);
+  });
+
+  // Render vertical column layout for each ward
+  el.innerHTML = Object.entries(wards).map(([wardName, wardBeds]) => {
+    const icon = wardIcons[wardName] || "🛏️";
+    const total = wardBeds.length;
+    const occupied = wardBeds.filter(b => b.status === "Occupied").length;
+    const countText = `${occupied}/${total} Occupied`;
+
+    const bedsHtml = wardBeds.map(b => {
+      const patient = b.status === "Occupied" ? patientName(b.patientId) : "";
+      const statusClass = b.status.toLowerCase();
+      const actionHtml = b.status === "Occupied"
+        ? `<button class="text-btn" style="font-size:10px; margin-top:0; padding:2px 6px;" onclick="dischargeFromBed('${b.id}','${b.admissionId}')">Discharge</button>`
+        : "";
+
+      return `
+        <div class="bed-card ${statusClass}">
+          <div class="bed-info-left">
+            <div class="bed-label">Bed ${b.bedNumber}</div>
+            <div class="bed-patient">${patient || b.status}</div>
+          </div>
+          ${actionHtml}
+        </div>`;
+    }).join("");
+
+    return `
+      <div class="ward-column">
+        <div class="ward-column-header">
+          <h3><span class="ward-icon">${icon}</span> ${wardName}</h3>
+          <span class="ward-count">${countText}</span>
+        </div>
+        <div class="bed-list">
+          ${bedsHtml}
+        </div>
+      </div>`;
   }).join("");
 }
 
@@ -2225,3 +2282,12 @@ function debounce(fn, delay) {
 // Initialise all new features
 upgradeAiView();
 loadAllNewData();
+
+// Onboarding guided workflow step-links click handlers
+document.querySelectorAll(".step-link").forEach(link => {
+  link.addEventListener("click", () => {
+    const view = link.dataset.stepView;
+    if (view) switchView(view);
+  });
+});
+

@@ -309,8 +309,17 @@
     { "id": "BED-JUTH-04", "facilityId": "FAC-JUTH", "ward": "Female Medical", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null },
     { "id": "BED-JUTH-05", "facilityId": "FAC-JUTH", "ward": "Paediatric", "bedNumber": "1", "status": "Occupied", "patientId": "PT-0003", "admissionId": "ADM-0003" },
     { "id": "BED-JUTH-06", "facilityId": "FAC-JUTH", "ward": "Paediatric", "bedNumber": "2", "status": "Maintenance", "patientId": null, "admissionId": null },
+    { "id": "BED-JUTH-07", "facilityId": "FAC-JUTH", "ward": "Surgery Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
+    { "id": "BED-JUTH-08", "facilityId": "FAC-JUTH", "ward": "Surgery Ward", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null },
+    { "id": "BED-JUTH-09", "facilityId": "FAC-JUTH", "ward": "Maternity Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
+    { "id": "BED-JUTH-10", "facilityId": "FAC-JUTH", "ward": "Maternity Ward", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null },
+    { "id": "BED-JUTH-11", "facilityId": "FAC-JUTH", "ward": "Intensive Care Unit (ICU)", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
+    { "id": "BED-JUTH-12", "facilityId": "FAC-JUTH", "ward": "Isolation Ward", "bedNumber": "1", "status": "Maintenance", "patientId": null, "admissionId": null },
+    { "id": "BED-JUTH-13", "facilityId": "FAC-JUTH", "ward": "Emergency Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
     { "id": "BED-PLSH-01", "facilityId": "FAC-PLSH", "ward": "General Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
-    { "id": "BED-PLSH-02", "facilityId": "FAC-PLSH", "ward": "General Ward", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null }
+    { "id": "BED-PLSH-02", "facilityId": "FAC-PLSH", "ward": "General Ward", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null },
+    { "id": "BED-PLSH-03", "facilityId": "FAC-PLSH", "ward": "Maternity Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
+    { "id": "BED-PLSH-04", "facilityId": "FAC-PLSH", "ward": "Surgery Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null }
   ],
   "admissions": [
     {
