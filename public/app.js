@@ -73,12 +73,6 @@ function switchView(id) {
   document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.view === id));
   document.querySelector("#viewTitle").textContent = titles[id] || "PlateauCare EHR";
 
-  // Auto-collapse sidebar in onboarding workflow views to reduce clutter & make it minimalist
-  const shell = document.querySelector(".app-shell");
-  if (shell) {
-    shell.classList.toggle("sidebar-collapsed", id !== "dashboard");
-  }
-
   // Scroll view content container back to the top
   const viewEl = document.getElementById(id);
   if (viewEl) viewEl.scrollTop = 0;
@@ -447,6 +441,13 @@ document.querySelectorAll(".nav-item").forEach(btn => {
 document.querySelectorAll("[data-view-jump]").forEach(btn => {
   btn.addEventListener("click", () => switchView(btn.dataset.viewJump));
 });
+// Sidebar manual toggle listener
+const sidebarToggleBtn = document.querySelector("#sidebarToggleBtn");
+if (sidebarToggleBtn) {
+  sidebarToggleBtn.addEventListener("click", () => {
+    document.querySelector(".app-shell").classList.toggle("sidebar-collapsed");
+  });
+}
 document.querySelector("#refreshBtn").addEventListener("click", loadData);
 
 // ---------------------------------------------------------------
@@ -2474,14 +2475,14 @@ function renderReferralsLog() {
 // ── WIRE NEW CLINICAL FORM SUBMISSIONS ────────────────────────
 function wireFormSubmits() {
   const formMap = [
-    { id: "triageForm", unit: "Triage", msg: "Triage registered successfully." },
-    { id: "emergencyForm", unit: "Emergency", msg: "Emergency resus bay record saved." },
-    { id: "pharmacyForm", unit: "Pharmacy", msg: "Medication dispensed & bill created." },
-    { id: "radiologyForm", unit: "Radiology", msg: "Radiology scan logged." },
-    { id: "maternityForm", unit: "ANC", msg: "Maternity ANC check completed." },
-    { id: "immunizationForm", unit: "Immunization", msg: "Vaccination dose recorded." },
-    { id: "theatreForm", unit: "Theatre", msg: "Operative procedure logged." },
-    { id: "referralsForm", unit: "Referrals", msg: "Outpatient referral issued." }
+    { id: "triagePageForm", unit: "Triage", msg: "Triage registered successfully." },
+    { id: "emergencyPageForm", unit: "Emergency", msg: "Emergency resus bay record saved." },
+    { id: "pharmacyPageForm", unit: "Pharmacy", msg: "Medication dispensed & bill created." },
+    { id: "radiologyPageForm", unit: "Radiology", msg: "Radiology scan logged." },
+    { id: "maternityPageForm", unit: "ANC", msg: "Maternity ANC check completed." },
+    { id: "immunizationPageForm", unit: "Immunization", msg: "Vaccination dose recorded." },
+    { id: "theatrePageForm", unit: "Theatre", msg: "Operative procedure logged." },
+    { id: "referralsPageForm", unit: "Referrals", msg: "Outpatient referral issued." }
   ];
 
   formMap.forEach(({ id, unit, msg }) => {

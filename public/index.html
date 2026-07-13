@@ -43,9 +43,12 @@
 
     <main class="main">
       <header class="topbar">
-        <div>
-          <span class="eyebrow">Plateau State health system</span>
-          <h1 id="viewTitle">State Command Dashboard</h1>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <button id="sidebarToggleBtn" type="button" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--ink); padding:4px 8px; margin-right:4px;" title="Toggle Sidebar">☰</button>
+          <div>
+            <span class="eyebrow">Plateau State health system</span>
+            <h1 id="viewTitle">State Command Dashboard</h1>
+          </div>
         </div>
         <div class="top-actions">
           <span id="apiStatus" class="status-pill">Connecting</span>
@@ -767,7 +770,7 @@
             <div class="panel-head">
               <div><span class="eyebrow">Intake check</span><h2>Record Patient Triage</h2></div>
             </div>
-            <form id="triageForm" class="stack-form">
+            <form id="triagePageForm" class="stack-form">
               <label>Patient<select id="triPatient" name="patientId"></select></label>
               <label>Facility<select id="triFacility" name="facilityId"></select></label>
               <div class="vitals-grid">
@@ -817,7 +820,7 @@
             <div class="panel-head">
               <div><span class="eyebrow">Immediate entry</span><h2>Trauma / Resus Intake</h2></div>
             </div>
-            <form id="emergencyForm" class="stack-form">
+            <form id="emergencyPageForm" class="stack-form">
               <label>Patient<select id="emrPatient" name="patientId"></select></label>
               <label>Facility<select id="emrFacility" name="facilityId"></select></label>
               <div class="form-row">
@@ -870,7 +873,7 @@
             <div class="panel-head">
               <div><span class="eyebrow">Dispensing gateway</span><h2>Dispense Medication</h2></div>
             </div>
-            <form id="pharmacyForm" class="stack-form">
+            <form id="pharmacyPageForm" class="stack-form">
               <label>Patient<select id="phaPatient" name="patientId"></select></label>
               <label>Facility<select id="phaFacility" name="facilityId"></select></label>
               <label>Drug Class
@@ -919,7 +922,7 @@
             <div class="panel-head">
               <div><span class="eyebrow">Scan request</span><h2>Record Imaging Study</h2></div>
             </div>
-            <form id="radiologyForm" class="stack-form">
+            <form id="radiologyPageForm" class="stack-form">
               <label>Patient<select id="radPatient" name="patientId"></select></label>
               <label>Facility<select id="radFacility" name="facilityId"></select></label>
               <label>Imaging Modality / Study
@@ -973,7 +976,7 @@
             <div class="panel-head">
               <div><span class="eyebrow">Prenatal check</span><h2>ANC Booking &amp; Labour</h2></div>
             </div>
-            <form id="maternityForm" class="stack-form">
+            <form id="maternityPageForm" class="stack-form">
               <label>Patient<select id="matPatient" name="patientId"></select></label>
               <label>Facility<select id="matFacility" name="facilityId"></select></label>
               <div class="form-row">
@@ -1029,7 +1032,7 @@
             <div class="panel-head">
               <div><span class="eyebrow">Record dose</span><h2>Administer Vaccine</h2></div>
             </div>
-            <form id="immunizationForm" class="stack-form">
+            <form id="immunizationPageForm" class="stack-form">
               <label>Patient<select id="immPatient" name="patientId"></select></label>
               <label>Facility<select id="immFacility" name="facilityId"></select></label>
               <div class="form-row">
@@ -1085,7 +1088,7 @@
             <div class="panel-head">
               <div><span class="eyebrow">Booking check</span><h2>Book Operative Procedure</h2></div>
             </div>
-            <form id="theatreForm" class="stack-form">
+            <form id="theatrePageForm" class="stack-form">
               <label>Patient<select id="thrPatient" name="patientId"></select></label>
               <label>Facility<select id="thrFacility" name="facilityId"></select></label>
               <div class="form-row">
@@ -1142,7 +1145,7 @@
             <div class="panel-head">
               <div><span class="eyebrow">Continuity transfer</span><h2>Issue Referral Transfer</h2></div>
             </div>
-            <form id="referralsForm" class="stack-form">
+            <form id="referralsPageForm" class="stack-form">
               <label>Patient<select id="refPatient" name="patientId"></select></label>
               <label>Facility<select id="refFacility" name="facilityId"></select></label>
               <label>Receiving Facility
