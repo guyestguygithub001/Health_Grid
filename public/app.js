@@ -21,7 +21,15 @@ const titles = {
   ai:            "AI Clinical Suite",
   analytics:     "Analytics Dashboard",
   phc:           "PHC Network",
-  reports:       "Reports & Quality"
+  reports:       "Reports & Quality",
+  triage:        "Triage Station",
+  emergency:     "Emergency Resus Bays",
+  pharmacy:      "Pharmacy Dispensing Portal",
+  radiology:     "Radiology Modality Desk",
+  maternity:     "ANC & Maternity Registry",
+  immunization:  "Child & Maternal Immunization",
+  theatre:       "Operative Theatre Scheduler",
+  referrals:     "Hospital Continuity Referrals"
 };
 
 const apiStatus = document.querySelector("#apiStatus");
@@ -83,7 +91,7 @@ function fillSelects() {
   const fp = optionHtml(state.facilities, f => `${f.name} — ${f.lga}`);
   const pp = optionHtml(state.patients,   p => `${p.name} (${p.id})`);
 
-  ["patientFacility","encounterFacility","orderFacility","consultationFacility","aptFacility","labFacility","admitBed"].forEach(id => {
+  ["patientFacility","encounterFacility","orderFacility","consultationFacility","aptFacility","labFacility","admitBed","triFacility","emrFacility","phaFacility","radFacility","matFacility","immFacility","thrFacility","refFacility"].forEach(id => {
     const el = document.querySelector(`#${id}`);
     if (!el) return;
     if (id === "admitBed") {
@@ -92,7 +100,7 @@ function fillSelects() {
       el.innerHTML = fp;
     }
   });
-  ["encounterPatient","orderPatient","consultationPatient","aptPatient","labPatient","admitPatient"].forEach(id => {
+  ["encounterPatient","orderPatient","consultationPatient","aptPatient","labPatient","admitPatient","triPatient","emrPatient","phaPatient","radPatient","matPatient","immPatient","thrPatient","refPatient"].forEach(id => {
     const el = document.querySelector(`#${id}`);
     if (el) el.innerHTML = pp;
   });
@@ -1523,12 +1531,24 @@ function openUnitModal(code) {
   unitModal.style.display = "flex";
 }
 
-// Bind module card clicks
+// Bind module card clicks to direct fullscreen pages
 document.querySelectorAll(".module-card").forEach(card => {
   const code = card.querySelector("span")?.textContent?.trim();
-  if (!code || !unitDefs[code]) return;
   card.style.cursor = "pointer";
-  card.addEventListener("click", () => openUnitModal(code));
+  card.addEventListener("click", () => {
+    if (code === "TRI") switchView("triage");
+    else if (code === "OPD") switchView("consultations");
+    else if (code === "EMR") switchView("emergency");
+    else if (code === "IPD") switchView("beds");
+    else if (code === "LAB") switchView("labresults");
+    else if (code === "PHA") switchView("pharmacy");
+    else if (code === "RAD") switchView("radiology");
+    else if (code === "MAT") switchView("maternity");
+    else if (code === "IMM") switchView("immunization");
+    else if (code === "THR") switchView("theatre");
+    else if (code === "CLA") switchView("billing");
+    else if (code === "REF") switchView("referrals");
+  });
 });
 
 // Close modal
@@ -2290,4 +2310,213 @@ document.querySelectorAll(".step-link").forEach(link => {
     if (view) switchView(view);
   });
 });
+
+// Patch loadAllNewData to render new logs
+const origLoadAllNewData = loadAllNewData;
+loadAllNewData = async function() {
+  await origLoadAllNewData();
+  renderTriageQueue();
+  renderEmergencyQueue();
+  renderPharmacyLog();
+  renderRadiologyLog();
+  renderMaternityLog();
+  renderImmunizationLog();
+  renderTheatreLog();
+  renderReferralsLog();
+};
+
+// ── NEW VIEWS RENDERING LOGS ──────────────────────────────────
+function renderTriageQueue() {
+  const el = document.querySelector("#triageQueueTable");
+  if (!el) return;
+  const triage = (state.encounters || []).filter(e => e.unit === "Triage");
+  if (!triage.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No patients in triage queue.</p>'; return; }
+  el.innerHTML = `
+    <table><thead><tr><th>Date</th><th>Patient</th><th>Vitals</th><th>Priority</th><th>Complaint</th></tr></thead>
+    <tbody>
+      ${triage.map(e => `<tr>
+        <td>${e.date}</td>
+        <td><strong>${patientName(e.patientId)}</strong></td>
+        <td>T:${e.vitals?.temperature || "—"}°C, BP:${e.vitals?.bp || "—"}, P:${e.vitals?.pulse || "—"}</td>
+        <td><span class="${badgeClass(e.status)}">${e.status}</span></td>
+        <td>${e.chiefComplaint}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
+function renderEmergencyQueue() {
+  const el = document.querySelector("#emergencyQueueTable");
+  if (!el) return;
+  const er = (state.encounters || []).filter(e => e.unit === "Emergency");
+  if (!er.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No active emergency cases.</p>'; return; }
+  el.innerHTML = `
+    <table><thead><tr><th>Date</th><th>Patient</th><th>Vitals</th><th>Severity</th><th>Injury / Mechanism</th></tr></thead>
+    <tbody>
+      ${er.map(e => `<tr>
+        <td>${e.date}</td>
+        <td><strong>${patientName(e.patientId)}</strong></td>
+        <td>BP:${e.vitals?.bp || "—"}, P:${e.vitals?.pulse || "—"}, SpO2:${e.vitals?.spo2 || "—"}%</td>
+        <td><span class="badge danger">${e.status}</span></td>
+        <td>${e.chiefComplaint}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
+function renderPharmacyLog() {
+  const el = document.querySelector("#pharmacyLogTable");
+  if (!el) return;
+  const rx = (state.encounters || []).filter(e => e.unit === "Pharmacy");
+  if (!rx.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No dispensed logs.</p>'; return; }
+  el.innerHTML = `
+    <table><thead><tr><th>Date</th><th>Patient</th><th>Drug Class</th><th>Formulation</th><th>Status</th></tr></thead>
+    <tbody>
+      ${rx.map(e => `<tr>
+        <td>${e.date}</td>
+        <td><strong>${patientName(e.patientId)}</strong></td>
+        <td>${e.drugCategory || "General"}</td>
+        <td>${e.chiefComplaint}</td>
+        <td><span class="badge success">${e.status || "Closed"}</span></td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
+function renderRadiologyLog() {
+  const el = document.querySelector("#radiologyLogTable");
+  if (!el) return;
+  const rad = (state.encounters || []).filter(e => e.unit === "Radiology");
+  if (!rad.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No radiology cases reported.</p>'; return; }
+  el.innerHTML = `
+    <table><thead><tr><th>Date</th><th>Patient</th><th>Study</th><th>Priority</th><th>Findings</th></tr></thead>
+    <tbody>
+      ${rad.map(e => `<tr>
+        <td>${e.date}</td>
+        <td><strong>${patientName(e.patientId)}</strong></td>
+        <td>${e.chiefComplaint}</td>
+        <td><span class="badge info">${e.status || "Open"}</span></td>
+        <td>${e.plan}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
+function renderMaternityLog() {
+  const el = document.querySelector("#maternityLogTable");
+  if (!el) return;
+  const mat = (state.encounters || []).filter(e => e.unit === "ANC");
+  if (!mat.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No maternal records logged.</p>'; return; }
+  el.innerHTML = `
+    <table><thead><tr><th>Date</th><th>Patient</th><th>Visit Type</th><th>GA</th><th>FHR</th><th>BP</th></tr></thead>
+    <tbody>
+      ${mat.map(e => `<tr>
+        <td>${e.date}</td>
+        <td><strong>${patientName(e.patientId)}</strong></td>
+        <td>${e.visitType || "ANC Booking"}</td>
+        <td>${e.ga || "—"} wks</td>
+        <td>${e.fhr || "—"} bpm</td>
+        <td>${e.vitals?.bp || "—"}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
+function renderImmunizationLog() {
+  const el = document.querySelector("#immunizationLogTable");
+  if (!el) return;
+  const imm = (state.encounters || []).filter(e => e.unit === "Immunization");
+  if (!imm.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No vaccination records logged.</p>'; return; }
+  el.innerHTML = `
+    <table><thead><tr><th>Date</th><th>Patient</th><th>Antigen / Vaccine</th><th>Status</th><th>Defaulter Plan</th></tr></thead>
+    <tbody>
+      ${imm.map(e => `<tr>
+        <td>${e.date}</td>
+        <td><strong>${patientName(e.patientId)}</strong></td>
+        <td>${e.chiefComplaint}</td>
+        <td><span class="badge success">${e.status}</span></td>
+        <td>${e.plan}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
+function renderTheatreLog() {
+  const el = document.querySelector("#theatreLogTable");
+  if (!el) return;
+  const thr = (state.encounters || []).filter(e => e.unit === "Theatre");
+  if (!thr.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No surgical records logged.</p>'; return; }
+  el.innerHTML = `
+    <table><thead><tr><th>Date</th><th>Patient</th><th>Category</th><th>Procedure Name</th><th>Safety Checklist</th></tr></thead>
+    <tbody>
+      ${thr.map(e => `<tr>
+        <td>${e.date}</td>
+        <td><strong>${patientName(e.patientId)}</strong></td>
+        <td>${e.procedureCategory || "General"}</td>
+        <td>${e.chiefComplaint}</td>
+        <td>${e.assessment?.slice(0, 30) || "—"}…</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
+function renderReferralsLog() {
+  const el = document.querySelector("#referralsLogTable");
+  if (!el) return;
+  const ref = (state.encounters || []).filter(e => e.unit === "Referrals");
+  if (!ref.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No outpatient referrals issued.</p>'; return; }
+  el.innerHTML = `
+    <table><thead><tr><th>Date</th><th>Patient</th><th>Destination</th><th>Reason</th><th>Transfer Plan</th></tr></thead>
+    <tbody>
+      ${ref.map(e => `<tr>
+        <td>${e.date}</td>
+        <td><strong>${patientName(e.patientId)}</strong></td>
+        <td>${e.destination || "General Hospital"}</td>
+        <td>${e.chiefComplaint}</td>
+        <td>${e.plan}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
+// ── WIRE NEW CLINICAL FORM SUBMISSIONS ────────────────────────
+function wireFormSubmits() {
+  const formMap = [
+    { id: "triageForm", unit: "Triage", msg: "Triage registered successfully." },
+    { id: "emergencyForm", unit: "Emergency", msg: "Emergency resus bay record saved." },
+    { id: "pharmacyForm", unit: "Pharmacy", msg: "Medication dispensed & bill created." },
+    { id: "radiologyForm", unit: "Radiology", msg: "Radiology scan logged." },
+    { id: "maternityForm", unit: "ANC", msg: "Maternity ANC check completed." },
+    { id: "immunizationForm", unit: "Immunization", msg: "Vaccination dose recorded." },
+    { id: "theatreForm", unit: "Theatre", msg: "Operative procedure logged." },
+    { id: "referralsForm", unit: "Referrals", msg: "Outpatient referral issued." }
+  ];
+
+  formMap.forEach(({ id, unit, msg }) => {
+    const el = document.querySelector(`#${id}`);
+    if (!el) return;
+    el.addEventListener("submit", async e => {
+      e.preventDefault();
+      const f = formToObject(e.currentTarget);
+      const payload = {
+        patientId: f.patientId, facilityId: f.facilityId, unit,
+        chiefComplaint: f.chiefComplaint || f.procedureCategory || f.visitType || "",
+        vitals: {
+          temperature: f.temperature || "", bp: f.bp || "",
+          pulse: f.pulse || "", respiration: f.respiration || "",
+          spo2: f.spo2 || "", weight: f.weight || ""
+        },
+        assessment: f.assessment || "", plan: f.plan || "",
+        status: f.status || "Open",
+        // Extra fields
+        visitType: f.visitType || "", parity: f.parity || "", ga: f.ga || "", fhr: f.fhr || "",
+        drugCategory: f.drugCategory || "", procedureCategory: f.procedureCategory || "",
+        anaesthesia: f.anaesthesia || "", destination: f.destination || ""
+      };
+      try {
+        await api("/api/encounters", { method: "POST", body: JSON.stringify(payload) });
+        showToast(msg);
+        e.currentTarget.reset();
+        await loadData();
+      } catch(err) { showToast("Submission failed: " + err.message); }
+    });
+  });
+}
+
+// Initialise form submission listeners
+wireFormSubmits();
+loadAllNewData();
+
 
