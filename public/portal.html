@@ -183,7 +183,8 @@
 
   <!-- ══════════════ LOGIN SCREEN ═══════════════════ -->
   <div id="loginScreen">
-    <div class="login-card">
+    <!-- Login Form -->
+    <div class="login-card" id="loginCard">
       <div class="login-brand">
         <div class="login-mark">PC</div>
         <h1>Patient Portal</h1>
@@ -205,7 +206,51 @@
         <button class="login-btn" id="loginBtn" type="submit">Sign In to My Health Portal</button>
       </form>
 
+      <div style="text-align: center; margin-top: 16px;">
+        <span style="font-size:12px;color:rgba(255,255,255,0.6);">Don't have an account? </span>
+        <a href="#" onclick="toggleRegister()" style="font-size:12px;color:#10B981;font-weight:600;text-decoration:none;">Register here</a>
+      </div>
       <a class="login-back" href="index.html">← Back to Homepage</a>
+    </div>
+
+    <!-- Register Form -->
+    <div class="login-card hidden" id="registerCard">
+      <div class="login-brand">
+        <div class="login-mark" style="background: linear-gradient(135deg, #2563EB, #1D4ED8);">PC</div>
+        <h1>Create Account</h1>
+        <p>Register as a new patient</p>
+      </div>
+
+      <form id="registerForm" novalidate>
+        <div class="login-field">
+          <label>Full Name</label>
+          <input id="regName" type="text" placeholder="e.g. John Doe" required />
+        </div>
+        <div class="login-field">
+          <label>Phone Number</label>
+          <input id="regPhone" type="tel" placeholder="e.g. 08012345678" required />
+        </div>
+        <div style="display:flex;gap:12px;">
+          <div class="login-field" style="flex:1;">
+            <label>Age</label>
+            <input id="regAge" type="number" placeholder="Years" required />
+          </div>
+          <div class="login-field" style="flex:1;">
+            <label>Sex</label>
+            <select id="regSex" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#fff;outline:none;" required>
+              <option value="Male" style="color:#000;">Male</option>
+              <option value="Female" style="color:#000;">Female</option>
+            </select>
+          </div>
+        </div>
+        <div id="regError" class="login-error hidden">Please fill in all required fields.</div>
+        <button class="login-btn" id="regBtn" type="submit" style="background: linear-gradient(135deg, #2563EB, #1D4ED8);">Create Patient Account</button>
+      </form>
+
+      <div style="text-align: center; margin-top: 16px;">
+        <span style="font-size:12px;color:rgba(255,255,255,0.6);">Already registered? </span>
+        <a href="#" onclick="toggleRegister()" style="font-size:12px;color:#3B82F6;font-weight:600;text-decoration:none;">Log in</a>
+      </div>
     </div>
   </div>
 
@@ -336,6 +381,81 @@
   function clearSession() {
     sessionStorage.removeItem("patient_session");
   }
+
+  // ── Registration Toggle ─────────────────────────────────
+  const loginCard = document.getElementById("loginCard");
+  const registerCard = document.getElementById("registerCard");
+  
+  window.toggleRegister = function() {
+    if (loginCard.classList.contains("hidden")) {
+      loginCard.classList.remove("hidden");
+      registerCard.classList.add("hidden");
+    } else {
+      loginCard.classList.add("hidden");
+      registerCard.classList.remove("hidden");
+    }
+  };
+
+  // ── Register ──────────────────────────────────────────
+  const registerForm = document.getElementById("registerForm");
+  const regError = document.getElementById("regError");
+  const regBtn = document.getElementById("regBtn");
+
+  registerForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const name = document.getElementById("regName").value.trim();
+    const phone = document.getElementById("regPhone").value.trim();
+    const age = document.getElementById("regAge").value;
+    const sex = document.getElementById("regSex").value;
+    
+    if (!name || !phone || !age || !sex) {
+      regError.textContent = "Please fill in all required fields.";
+      regError.classList.remove("hidden");
+      return;
+    }
+
+    regError.classList.add("hidden");
+    regBtn.disabled = true;
+    regBtn.textContent = "Creating Account…";
+
+    try {
+      const res = await fetch("/api/patient/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, age, sex })
+      });
+      const json = await res.json();
+      
+      if (!res.ok || !json.ok || !json.patient) {
+        regError.textContent = json.error || "Failed to create account. Please try again.";
+        regError.classList.remove("hidden");
+        regBtn.disabled = false;
+        regBtn.textContent = "Create Patient Account";
+        return;
+      }
+      
+      // Auto-login upon success
+      saveSession({ phone, patientId: json.patient.id, patientName: json.patient.name });
+      patientSession = { phone, patientId: json.patient.id, patientName: json.patient.name };
+      
+      // Reset forms and view
+      registerForm.reset();
+      regBtn.disabled = false;
+      regBtn.textContent = "Create Patient Account";
+      
+      // Load dashboard
+      await loadDashboard(json.patient, json);
+      
+      // Alert the patient of their new ID (important for logging back in)
+      alert(`Registration Successful!\n\nWelcome, ${json.patient.name}.\nYour Patient ID is: ${json.patient.id}\n\nPlease keep this ID safe as you will need it to log in next time.`);
+      
+    } catch (err) {
+      regError.textContent = "Could not reach server. Please try again.";
+      regError.classList.remove("hidden");
+      regBtn.disabled = false;
+      regBtn.textContent = "Create Patient Account";
+    }
+  });
 
   // ── Login ─────────────────────────────────────────────
   loginForm.addEventListener("submit", async e => {

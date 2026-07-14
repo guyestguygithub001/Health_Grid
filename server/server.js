@@ -808,6 +808,37 @@ function serveStatic(req, res, url) {
 async function handlePatientApi(req, res, url) {
   const data = readData();
 
+  // POST /api/patient/register  { name, phone, age, sex, lga, community }
+  if (req.method === "POST" && url.pathname === "/api/patient/register") {
+    const body = await collectBody(req);
+    const phone = (body.phone || "").trim();
+    if (!phone) {
+      sendJson(res, 400, { ok: false, error: "Phone number is required" });
+      return;
+    }
+    const patient = {
+      id: nextId("PT", data.patients),
+      name: body.name || "Unnamed",
+      sex: body.sex || "Unknown",
+      age: Number(body.age || 0),
+      phone: phone,
+      lga: body.lga || "",
+      community: body.community || "",
+      facilityId: body.facilityId || "FAC-PLSH",
+      insurance: body.insurance || "Private Pay",
+      risk: "Routine",
+      dateOfBirth: "", bloodGroup: "", address: "", occupation: "",
+      allergies: [], nextOfKin: "", nextOfKinPhone: "",
+      lastVisit: new Date().toISOString().slice(0, 10)
+    };
+    data.patients.unshift(patient);
+    writeData(data);
+    
+    // Return empty arrays for a new patient
+    sendJson(res, 201, { ok: true, patient, consultations: [], appointments: [], labResults: [], billing: [] });
+    return;
+  }
+
   // POST /api/patient/login  { phone, patientId }
   if (req.method === "POST" && url.pathname === "/api/patient/login") {
     const body = await collectBody(req);
