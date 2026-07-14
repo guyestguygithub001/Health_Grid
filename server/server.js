@@ -3,16 +3,20 @@ const fs = require("fs");
 const path = require("path");
 
 const PORT = process.env.PORT || 8082;
-const ROOT = path.resolve(__dirname, "..");
+const ROOT = process.cwd();
 const PUBLIC_DIR = path.join(ROOT, "public");
-let DATA_FILE = path.join(__dirname, "data.json");
+let DATA_FILE = path.join(ROOT, "server", "data.json");
 let memoryDb = null;
 
 if (process.env.VERCEL) {
   const tmpPath = path.join("/tmp", "data.json");
   try {
     if (!fs.existsSync(tmpPath)) {
-      fs.copyFileSync(DATA_FILE, tmpPath);
+      // Look for data.json at compile or runtime path
+      const sourcePath = fs.existsSync(DATA_FILE) ? DATA_FILE : path.join(__dirname, "data.json");
+      if (fs.existsSync(sourcePath)) {
+        fs.copyFileSync(sourcePath, tmpPath);
+      }
     }
     DATA_FILE = tmpPath;
   } catch (err) {
@@ -39,18 +43,22 @@ function readData() {
     if (process.env.VERCEL) memoryDb = data;
     return data;
   } catch (err) {
-    // data.json missing — try seed file then generate empty schema
-    const seedFile = path.join(__dirname, "seed_data.json");
     try {
-      console.log("data.json not found, seeding from seed_data.json...");
-      const seed = JSON.parse(fs.readFileSync(seedFile, "utf8"));
-      writeData(seed); // persist so subsequent reads work
+      console.warn("data.json not found, using bundled copy:", err.message);
+      const seed = require("./data.json");
+      writeData(seed);
       return seed;
     } catch (_) {
-      console.error("Seed file also missing, using empty schema:", err.message);
-      const empty = { patients: [], encounters: [], admissions: [], billing: [], facilities: [], orders: [], appointments: [], labResults: [], beds: [], consultations: [] };
-      writeData(empty);
-      return empty;
+      try {
+        const seedFile = path.join(ROOT, "server", "seed_data.json");
+        const seed = JSON.parse(fs.readFileSync(seedFile, "utf8"));
+        writeData(seed);
+        return seed;
+      } catch (__) {
+        console.error("All data sources missing, using empty schema:", err.message);
+        const empty = { patients: [], encounters: [], admissions: [], billing: [], facilities: [], orders: [], appointments: [], labResults: [], beds: [], consultations: [] };
+        return empty;
+      }
     }
   }
 }
@@ -928,7 +936,7 @@ const server = http.createServer(async (req, res) => {
   } catch (err) { sendJson(res, 500, { error: err.message }); }
 });
 
-if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+if (require.main === module) {
   server.listen(PORT, () => { console.log(`PlateauCare EHR running at http://localhost:${PORT}`); });
 }
 
