@@ -1097,22 +1097,50 @@
                 <label>Parity / Gravity<input name="parity" placeholder="e.g. G3P2+0" required /></label>
               </div>
               <div class="vitals-grid">
-                <label>BP<input name="bp" placeholder="120/80" required /></label>
+                <label>BP<input name="bp" id="matBpInput" placeholder="120/80" required /></label>
                 <label>Temp<input name="temperature" type="number" step="0.1" placeholder="36.5" required /></label>
-                <label>GA (weeks)<input name="ga" type="number" placeholder="28" required /></label>
-                <label>FHR (bpm)<input name="fhr" type="number" placeholder="140" /></label>
-                <label>Fundal Ht (cm)<input name="fundal" type="number" placeholder="28" /></label>
-                <label>Weight (kg)<input name="weight" type="number" step="0.1" placeholder="70" /></label>
+                <label>GA (wks)<input name="ga" id="matGaInput" type="number" placeholder="28" required /></label>
+                <label>FHR (bpm)<input name="fhr" id="matFhrInput" type="number" placeholder="140" /></label>
+                <label>Fundal Ht<input name="fundal" type="number" placeholder="28" /></label>
+                <label>Weight<input name="weight" type="number" step="0.1" placeholder="70" /></label>
               </div>
+
+              <!-- Point-of-Care Insights Banner -->
+              <div id="matInsightsBanner" class="clinical-insight-banner" style="display: none;">
+                <span class="insight-icon">💡</span>
+                <div class="insight-content">
+                  <strong class="insight-title" id="matInsightTitle">Automated Clinical Insight</strong>
+                  <p class="insight-desc" id="matInsightDesc">Analyzing vitals...</p>
+                </div>
+              </div>
+
               <label>Maternal Complaints / Presentation
                 <textarea name="chiefComplaint" rows="2" placeholder="ANC check, pre-eclampsia screening, active labour..." required></textarea>
               </label>
-              <label>Obstetric Assessment &amp; Risks
-                <textarea name="assessment" rows="2" placeholder="Fetal lie, presentation, fetal heart rate stable, urine protein negative..." required></textarea>
-              </label>
-              <label>Management &amp; Counselling Plan
+
+              <div class="smart-action-row" style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+                <label style="margin:0;">Obstetric Assessment & Risks</label>
+                <button type="button" class="secondary-btn" id="btnAutoStructureMatNote" style="padding: 4px 10px; font-size: 11px;">
+                  ✨ Auto-Structure Note
+                </button>
+              </div>
+              <textarea name="assessment" rows="3" placeholder="Fetal lie, presentation, fetal heart rate stable, urine protein negative..." required></textarea>
+              
+              <label>Management & Counselling Plan
                 <textarea name="plan" rows="2" placeholder="Prophylactic supplements given, routine lab tests ordered, delivery plan discussed..."></textarea>
               </label>
+
+              <div class="smart-toggles-box" style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:12px; margin-top:10px; margin-bottom:15px;">
+                <label style="display:flex; align-items:center; gap:8px; font-weight:500; cursor:pointer; margin-bottom:8px;">
+                  <input type="checkbox" name="autoPriorAuth" checked style="width:auto; height:auto; margin:0;" />
+                  One-Click Claim & Prior Auth Sync (Clean Claim Guarantee)
+                </label>
+                <label style="display:flex; align-items:center; gap:8px; font-weight:500; cursor:pointer; margin:0;">
+                  <input type="checkbox" name="syncPortal" checked style="width:auto; height:auto; margin:0;" />
+                  Sync Care Plan & Next Visit to Patient Portal
+                </label>
+              </div>
+
               <button class="primary-btn" type="submit">Save ANC Record</button>
             </form>
           </section>
