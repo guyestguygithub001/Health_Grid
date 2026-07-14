@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PlateauCare EHR | Hospitals and PHCs</title>
-  <meta name="description" content="A Plateau State hospital and PHC electronic health record prototype with clinical, operational, reporting, and AI medical scrub modules." />
+  <meta name="description" content="A Plateau State hospital and PHC electronic health record prototype with clinical, operational, reporting, and clinical documentation audit modules." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -28,7 +28,7 @@
         <button class="nav-item" data-view="labresults">🧪 Lab Results</button>
         <button class="nav-item" data-view="orders">📋 Orders</button>
         <button class="nav-item" data-view="billing">💳 Billing</button>
-        <button class="nav-item" data-view="ai">🤖 AI Suite</button>
+        <button class="nav-item" data-view="ai">🧠 Decision Support</button>
         <button class="nav-item" data-view="analytics">📈 Analytics</button>
         <button class="nav-item" data-view="phc">🌿 PHC Network</button>
         <button class="nav-item" data-view="reports">📑 Reports</button>
@@ -73,7 +73,7 @@
             <div>
               <span class="badge warning" style="background:#fffbeb; color:#d97706; padding:4px 10px; margin-bottom:8px;">Workflow Wizard Active</span>
               <h2 style="color:#fff; margin:0 0 4px; font-size:22px; font-weight:700;">Guided Clinical Patient Journey</h2>
-              <p style="color:#e2e8f0; font-size:13px; margin:0;">Intake, schedule, consult, run labs, admit, bill, and discharge patients step-by-step with local AI guidance.</p>
+              <p style="color:#e2e8f0; font-size:13px; margin:0;">Intake, schedule, consult, run labs, admit, bill, and discharge patients step-by-step with local decision support guidance.</p>
             </div>
             <button class="primary-btn" onclick="switchView('patients')" style="background:#fff; color:#0e7490; border:none; padding:12px 24px; font-weight:700; border-radius:10px; cursor:pointer; font-size:14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition:transform .2s;">🚀 Start Patient Intake</button>
           </div>
@@ -177,7 +177,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid wide-left">
           <section class="panel">
@@ -231,7 +231,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid wide-left">
           <section class="panel">
@@ -469,13 +469,13 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link active" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+          <button class="step-link active" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid">
           <section class="panel">
             <div class="panel-head">
               <div>
-                <span class="eyebrow">AI Medical Scrub</span>
+                <span class="eyebrow">Clinical Documentation Audit</span>
                 <h2>Clinical Note Quality Check</h2>
               </div>
             </div>
@@ -545,7 +545,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link active" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="metric-grid">
           <article class="metric">
@@ -584,7 +584,7 @@
         </div>
         <div class="onboarding-footer">
           <button class="secondary-btn onboarding-prev-btn" onclick="switchView('beds')" type="button">← Back to Step 5: Ward & Beds</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('ai')" type="button">Proceed to Step 7: AI & Discharge →</button>
+          <button class="primary-btn onboarding-next-btn" onclick="switchView('ai')" type="button">Proceed to Step 7: Decision Support & Discharge →</button>
         </div>
       </section>
 
@@ -597,7 +597,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid wide-left">
           <section class="panel">
@@ -638,7 +638,7 @@
           <button class="step-link active" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid wide-left">
           <section class="panel">
@@ -674,7 +674,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link active" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI & Discharge</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="panel">
           <div class="panel-head">
@@ -746,7 +746,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward &amp; Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> AI &amp; Discharge</button>
+          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support &amp; Discharge</button>
         </div>
 
         <!-- Combined Command Header / Sub-tabs -->
@@ -1247,7 +1247,7 @@
   <div id="dischargeModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:700px;">
       <div class="modal-header">
-        <h3>📋 AI Discharge Summary</h3>
+        <h3>📋 Clinical Discharge Summary</h3>
         <button type="button" onclick="document.getElementById('dischargeModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
       </div>
       <div class="modal-body" id="dischargeModalBody" style="padding:20px;font-family:monospace;font-size:13px;line-height:1.8;"></div>

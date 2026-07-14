@@ -5,7 +5,20 @@ const path = require("path");
 const PORT = process.env.PORT || 8082;
 const ROOT = path.resolve(__dirname, "..");
 const PUBLIC_DIR = path.join(ROOT, "public");
-const DATA_FILE = path.join(__dirname, "data.json");
+let DATA_FILE = path.join(__dirname, "data.json");
+let memoryDb = null;
+
+if (process.env.VERCEL) {
+  const tmpPath = path.join("/tmp", "data.json");
+  try {
+    if (!fs.existsSync(tmpPath)) {
+      fs.copyFileSync(DATA_FILE, tmpPath);
+    }
+    DATA_FILE = tmpPath;
+  } catch (err) {
+    console.warn("Failed to set up /tmp database, using memory fallback:", err);
+  }
+}
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
@@ -18,8 +31,26 @@ const mimeTypes = {
 };
 
 // ─── Data Helpers ───────────────────────────────────────────
-function readData() { return JSON.parse(fs.readFileSync(DATA_FILE, "utf8")); }
-function writeData(d) { fs.writeFileSync(DATA_FILE, JSON.stringify(d, null, 2)); }
+function readData() {
+  if (memoryDb) return memoryDb;
+  try {
+    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+    if (process.env.VERCEL) memoryDb = data;
+    return data;
+  } catch (err) {
+    console.error("Read data failed, using empty schema:", err);
+    return { patients: [], encounters: [], admissions: [], billing: [], facilities: [], orders: [] };
+  }
+}
+
+function writeData(d) {
+  memoryDb = d;
+  try {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(d, null, 2), "utf8");
+  } catch (err) {
+    console.error("Write data failed, keeping in memory:", err);
+  }
+}
 
 function sendJson(res, status, body) {
   res.writeHead(status, {
@@ -220,7 +251,7 @@ function scrubClinicalNote(payload) {
   if (text.includes("diabet")) suggestions.push("Diabetes: document HbA1c, blood glucose, medication adherence, foot exam, renal function.");
   if (missing.length) issues.push(`Missing core vitals: ${missing.join(", ")}.`);
   return {
-    safety: "Prototype clinical support only. A licensed clinician must make final decisions.",
+    safety: "Clinical decision support only. Licensed clinicians are responsible for all clinical decisions.",
     qualityScore: Math.max(45, 100 - issues.length * 10 - redFlags.length * 18 - missing.length * 5),
     redFlags, documentationIssues: issues, suggestions,
     structuredSoap: { subjective: payload.chiefComplaint || "Not documented", objective: vitals, assessment: payload.assessment || "Not documented", plan: payload.plan || "Not documented" }
@@ -230,7 +261,7 @@ function scrubClinicalNote(payload) {
 // 2. Clinical Inquiry
 function answerClinicalInquiry(question) {
   const q = String(question || "").toLowerCase();
-  const disclaimer = "Prototype clinical support. Verify with local protocol and senior review where needed.";
+  const disclaimer = "Clinical decision support. Verify with local protocol and senior review where needed.";
   if (q.includes("pre-eclampsia") || q.includes("preeclampsia")) return { disclaimer, answer: "Elevated BP after 20 weeks: repeat BP, urine protein, symptom screen, severity assessment. Red flags: severe headache, visual disturbance, epigastric pain, seizures, severe BP range, low platelets, abnormal LFT/creatinine, fetal concerns. Stabilize and refer urgently if severe features.", actions: ["Repeat BP", "Check urine protein", "Assess danger symptoms", "Order FBC/LFT/renal", "Refer urgently for severe features"] };
   if (q.includes("malaria")) return { disclaimer, answer: "Confirm with RDT/microscopy. Assess danger signs, hydration, pregnancy, age, oral tolerance. Escalate: altered consciousness, convulsions, respiratory distress, severe anaemia, shock.", actions: ["Perform RDT/microscopy", "Check danger signs", "Weight-based dosing", "Document batch", "Notify surveillance"] };
   if (q.includes("hypertension") || q.includes(" bp ") || q.includes("blood pressure")) return { disclaimer, answer: "Repeat BP after rest with correct cuff size. Check adherence and symptoms. Assess renal/cardiac risk. Review medicines. Escalate severe range or end-organ symptoms. Document BP trend, counselling, follow-up date.", actions: ["Repeat BP", "Screen chest pain/neuro signs", "Review medication adherence", "Check renal function", "Schedule follow-up or emergency referral"] };
@@ -268,7 +299,7 @@ function generateAutoNote(payload) {
   planText += "Document complete history, review medications, and arrange appropriate follow-up.";
 
   return {
-    disclaimer: "AI-generated draft note. Clinician must review, edit, and confirm before finalising.",
+    disclaimer: "System-generated draft note. Clinician must review, edit, and confirm before finalising.",
     soap: {
       subjective: chiefComplaint || "Chief complaint not entered",
       objective: objectiveText,
@@ -363,7 +394,7 @@ function triageSymptoms(payload) {
   if (differentials.length === 0) differentials.push({ rank: 1, diagnosis: "Undifferentiated — further assessment needed", confidence: "Low", reasoning: "Insufficient data for differential. Please add more symptoms, vitals, and history." });
 
   return {
-    disclaimer: "AI triage support only. Final clinical judgement must be made by a licensed clinician.",
+    disclaimer: "Decision support only. Final clinical judgement must be made by a licensed clinician.",
     acuity,
     redFlags,
     differentials: differentials.slice(0, 5),
@@ -463,7 +494,7 @@ function generateDischargeSummary(payload) {
   const medsSummary = prescriptions.length > 0 ? prescriptions.map(p => `• ${p.drug} ${p.dose} — ${p.frequency} for ${p.duration}`).join("\n") : "No medications prescribed on discharge.";
 
   return {
-    disclaimer: "AI-generated discharge summary. Clinician must review, complete, and sign before issuing to patient.",
+    disclaimer: "System-generated discharge summary. Clinician must review, complete, and sign before issuing to patient.",
     summary: {
       header: `DISCHARGE SUMMARY — ${patientName.toUpperCase()}`,
       patientInfo: `Patient: ${patientName} | Age: ${patient?.age || "—"} | Sex: ${patient?.sex || "—"} | ID: ${patient?.id || "—"}`,
@@ -717,4 +748,8 @@ const server = http.createServer(async (req, res) => {
   } catch (err) { sendJson(res, 500, { error: err.message }); }
 });
 
-server.listen(PORT, () => { console.log(`PlateauCare EHR running at http://localhost:${PORT}`); });
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  server.listen(PORT, () => { console.log(`PlateauCare EHR running at http://localhost:${PORT}`); });
+}
+
+module.exports = server;
