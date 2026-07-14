@@ -246,6 +246,39 @@
                 <label>Select Patient<select id="consultationPatient" name="patientId" required></select></label>
                 <label>Select Facility<select id="consultationFacility" name="facilityId" required></select></label>
               </div>
+
+              <!-- Editable Selected Patient Details -->
+              <div id="consultationPatientEditCard" class="patient-edit-card" style="display:none; background:var(--brand-light); border-left:4px solid var(--brand); padding:15px; border-radius:6px; margin-bottom:15px;">
+                <h4 style="margin:0 0 10px; font-size:13px; color:var(--brand-dark); text-transform:uppercase; letter-spacing:0.05em; font-weight:700;">Edit Patient Demographics (Consultation Context)</h4>
+                <div class="vitals-grid compact" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
+                  <label>Age (Yrs)<input type="number" id="conPatAge" style="width:100%;" /></label>
+                  <label>Sex
+                    <select id="conPatSex" style="width:100%;">
+                      <option>Male</option>
+                      <option>Female</option>
+                      <option>Other</option>
+                    </select>
+                  </label>
+                  <label>Insurance
+                    <select id="conPatInsurance" style="width:100%;">
+                      <option>Private Pay</option>
+                      <option>PLASCHEMA</option>
+                      <option>NHIA</option>
+                    </select>
+                  </label>
+                  <label>Clinical Risk
+                    <select id="conPatRisk" style="width:100%;">
+                      <option>Routine</option>
+                      <option>Medium</option>
+                      <option>High</option>
+                    </select>
+                  </label>
+                </div>
+                <label style="margin-top:10px; display:block;">Allergies (comma-separated)
+                  <input type="text" id="conPatAllergies" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:6px;" placeholder="e.g. penicillin, sulfa" />
+                </label>
+                <button type="button" id="saveConPatBtn" class="secondary-btn" style="margin-top:10px; padding:6px 12px; font-size:12px;">Update Patient Info ✓</button>
+              </div>
               <div class="form-row">
                 <label>Consulting Doctor<input name="doctorName" placeholder="Dr. Daniel Kingsley Ene" required /></label>
                 <label>Specialty
@@ -1267,6 +1300,27 @@
           <div class="button-row" style="margin-top: 20px;">
             <button class="primary-btn" type="submit">Submit Record & Bill</button>
             <button class="secondary-btn" type="button" onclick="document.getElementById('unitModal').style.display='none'">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generic Edit Record Modal -->
+  <div id="editRecordModal" class="modal-overlay" style="display: none; z-index: 10000;">
+    <div class="modal-content" style="max-width: 600px; max-height: 90vh;">
+      <div class="modal-header">
+        <h3 id="editRecordModalTitle">Edit Record</h3>
+        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer; color:#fff;" onclick="document.getElementById('editRecordModal').style.display='none'">×</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 20px; background: white; color: var(--ink);">
+        <form id="editRecordForm" class="stack-form">
+          <input type="hidden" id="editRecordCollection" />
+          <input type="hidden" id="editRecordId" />
+          <div id="editRecordFields"></div>
+          <div class="button-row" style="margin-top: 20px;">
+            <button class="primary-btn" type="submit">Save Changes</button>
+            <button class="secondary-btn" type="button" onclick="document.getElementById('editRecordModal').style.display='none'">Cancel</button>
           </div>
         </form>
       </div>

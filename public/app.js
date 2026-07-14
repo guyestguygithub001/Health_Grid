@@ -181,7 +181,10 @@ function renderPatients(filter = "") {
         <td><span class="${badgeClass(p.risk==="Routine"?"Routine":"Urgent")}">${p.risk}</span></td>
         <td>${facilityName(p.facilityId)}</td>
         <td>${p.insurance}</td>
-        <td><button class="text-btn" onclick="showPatientTimeline('${p.id}')">Timeline</button></td>
+        <td>
+          <button class="text-btn" onclick="showPatientTimeline('${p.id}')">Timeline</button> | 
+          <button class="text-btn" style="color:var(--brand); font-weight:600;" onclick="openEditRecordModal('patients','${p.id}')">Edit</button>
+        </td>
       </tr>`).join("")}
     </tbody></table>`;
 }
@@ -192,7 +195,7 @@ function renderPatients(filter = "") {
 function renderOrders() {
   document.querySelector("#ordersTable").innerHTML = `
     <table><thead><tr>
-      <th>Order</th><th>Patient</th><th>Type</th><th>Item</th><th>Priority</th><th>Status</th>
+      <th>Order</th><th>Patient</th><th>Type</th><th>Item</th><th>Priority</th><th>Status</th><th>Action</th>
     </tr></thead><tbody>
       ${state.orders.map(o => `<tr>
         <td>${o.id}</td>
@@ -201,6 +204,9 @@ function renderOrders() {
         <td>${o.item}</td>
         <td><span class="${badgeClass(o.priority)}">${o.priority}</span></td>
         <td>${o.status}</td>
+        <td>
+          <button class="text-btn" style="color:var(--brand); font-weight:600;" onclick="openEditRecordModal('orders','${o.id}')">Edit</button>
+        </td>
       </tr>`).join("")}
     </tbody></table>`;
 }
@@ -594,7 +600,8 @@ function renderConsultations() {
       ? `<div style="margin-top:5px;font-size:12px;color:var(--brand-dark);">
            <strong>ICD-11:</strong> <code>${c.icd11Code}</code> — ${c.icd11Display}
            <span class="fhir-badge" onclick="showFhirModal('${c.id}')">FHIR</span>
-         </div>` : "";
+           <span class="fhir-badge" style="background:var(--brand); color:#fff; cursor:pointer;" onclick="openEditRecordModal('consultations','${c.id}')">Edit</span>
+         </div>` : `<div style="margin-top:5px;"><span class="fhir-badge" style="background:var(--brand); color:#fff; cursor:pointer;" onclick="openEditRecordModal('consultations','${c.id}')">Edit Consultation</span></div>`;
     const rx = c.prescriptions?.length
       ? `<div style="margin-top:6px;font-size:12px;background:#f1f5f9;padding:8px;border-radius:6px;">
            <strong style="font-size:10px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:4px;">Rx:</strong>
@@ -675,7 +682,10 @@ function renderBilling(filter = "") {
         <td style="color:var(--success);font-weight:700;">₦${b.insuranceCovered.toLocaleString()}</td>
         <td style="color:var(--danger);font-weight:700;">₦${b.patientPayable.toLocaleString()}</td>
         <td><span class="${sBadge}">${b.status}</span></td>
-        <td class="bill-actions">${actions}</td>
+        <td class="bill-actions">
+          ${actions}
+          <button class="bill-btn" style="background:var(--brand); color:#fff; margin-left:4px;" onclick="openEditRecordModal('billing','${b.id}')">Edit</button>
+        </td>
       </tr>`;
     }).join("")}
     </tbody></table>`;
@@ -1630,7 +1640,7 @@ function renderAppointments() {
   if (!apts.length) { el.innerHTML = '<p style="text-align:center;color:var(--muted);padding:20px;">No appointments booked yet.</p>'; return; }
   el.innerHTML = `
     <div class="apt-row header">
-      <span>Date</span><span>Time</span><span>Patient</span><span>Department</span><span>Doctor</span><span>Status</span>
+      <span>Date</span><span>Time</span><span>Patient</span><span>Department</span><span>Doctor</span><span>Status</span><span>Action</span>
     </div>
     ${apts.map(a => `<div class="apt-row">
       <span><strong>${a.date}</strong></span>
@@ -1639,6 +1649,7 @@ function renderAppointments() {
       <span>${a.department}</span>
       <span>${a.doctor}</span>
       <span><span class="apt-status ${a.status.replace(/\s/g,'-')}">${a.status}</span></span>
+      <span><button class="text-btn" style="color:var(--brand); font-weight:600;" onclick="openEditRecordModal('appointments','${a.id}')">Edit</button></span>
     </div>`).join("")}`;
 }
 
@@ -2539,5 +2550,285 @@ function wireFormSubmits() {
 // Initialise form submission listeners
 wireFormSubmits();
 loadAllNewData();
+
+// ---------------------------------------------------------------
+//  GENERIC RECORD EDIT SYSTEM
+// ---------------------------------------------------------------
+function openEditRecordModal(collection, id) {
+  const collectionList = {
+    patients: state.patients,
+    consultations: state.consultations,
+    appointments: state.appointments,
+    orders: state.orders,
+    billing: state.billing
+  };
+  const list = collectionList[collection];
+  if (!list) return;
+  const record = list.find(r => r.id === id);
+  if (!record) return;
+
+  const titleEl = document.querySelector("#editRecordModalTitle");
+  const collectionHidden = document.querySelector("#editRecordCollection");
+  const idHidden = document.querySelector("#editRecordId");
+  const fieldsEl = document.querySelector("#editRecordFields");
+
+  titleEl.textContent = `Edit Record — ${record.id}`;
+  collectionHidden.value = collection;
+  idHidden.value = id;
+
+  let fieldsHtml = "";
+
+  if (collection === "patients") {
+    fieldsHtml = `
+      <label>Full Name
+        <input type="text" name="name" value="${record.name || ''}" required />
+      </label>
+      <div class="form-row">
+        <label>Age (Yrs)
+          <input type="number" name="age" value="${record.age || 0}" required />
+        </label>
+        <label>Sex
+          <select name="sex">
+            <option ${record.sex === 'Male' ? 'selected' : ''}>Male</option>
+            <option ${record.sex === 'Female' ? 'selected' : ''}>Female</option>
+            <option ${record.sex === 'Other' ? 'selected' : ''}>Other</option>
+          </select>
+        </label>
+      </div>
+      <div class="form-row">
+        <label>LGA
+          <input type="text" name="lga" value="${record.lga || ''}" />
+        </label>
+        <label>Community
+          <input type="text" name="community" value="${record.community || ''}" />
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Insurance Provider
+          <select name="insurance">
+            <option ${record.insurance === 'Private Pay' ? 'selected' : ''}>Private Pay</option>
+            <option ${record.insurance === 'PLASCHEMA' ? 'selected' : ''}>PLASCHEMA</option>
+            <option ${record.insurance === 'NHIA' ? 'selected' : ''}>NHIA</option>
+          </select>
+        </label>
+        <label>Clinical Risk Level
+          <select name="risk">
+            <option ${record.risk === 'Routine' ? 'selected' : ''}>Routine</option>
+            <option ${record.risk === 'Medium' ? 'selected' : ''}>Medium</option>
+            <option ${record.risk === 'High' ? 'selected' : ''}>High</option>
+          </select>
+        </label>
+      </div>
+      <label>Allergies (comma-separated)
+        <input type="text" name="allergies" value="${(record.allergies || []).join(', ')}" />
+      </label>
+    `;
+  } else if (collection === "consultations") {
+    fieldsHtml = `
+      <label>Chief Complaint / Symptoms
+        <textarea name="chiefComplaint" rows="3" required>${record.chiefComplaint || ''}</textarea>
+      </label>
+      <label>History of Presenting Illness
+        <textarea name="historyOfPresentingComplaint" rows="3">${record.historyOfPresentingComplaint || ''}</textarea>
+      </label>
+      <label>Past Medical History
+        <textarea name="pastMedicalHistory" rows="3">${record.pastMedicalHistory || ''}</textarea>
+      </label>
+      <label>Clinical Examination Findings
+        <textarea name="examinationFindings" rows="3">${record.examinationFindings || ''}</textarea>
+      </label>
+      <label>Assessment
+        <textarea name="assessment" rows="3" required>${record.assessment || ''}</textarea>
+      </label>
+      <label>Management Plan
+        <textarea name="plan" rows="3" required>${record.plan || ''}</textarea>
+      </label>
+    `;
+  } else if (collection === "appointments") {
+    fieldsHtml = `
+      <div class="form-row">
+        <label>Appointment Date
+          <input type="date" name="date" value="${record.date || ''}" required />
+        </label>
+        <label>Time
+          <input type="time" name="time" value="${record.time || '08:00'}" required />
+        </label>
+      </div>
+      <div class="form-row">
+        <label>Department
+          <input type="text" name="department" value="${record.department || 'OPD'}" required />
+        </label>
+        <label>Assigned Doctor
+          <input type="text" name="doctor" value="${record.doctor || ''}" />
+        </label>
+      </div>
+      <label>Reason for Visit
+        <input type="text" name="reason" value="${record.reason || ''}" />
+      </label>
+      <label>Status
+        <select name="status">
+          <option ${record.status === 'Scheduled' ? 'selected' : ''}>Scheduled</option>
+          <option ${record.status === 'Completed' ? 'selected' : ''}>Completed</option>
+          <option ${record.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+          <option ${record.status === 'No-Show' ? 'selected' : ''}>No-Show</option>
+        </select>
+      </label>
+    `;
+  } else if (collection === "orders") {
+    fieldsHtml = `
+      <label>Item Name / Description
+        <input type="text" name="item" value="${record.item || ''}" required />
+      </label>
+      <div class="form-row">
+        <label>Order Type
+          <select name="type">
+            <option ${record.type === 'Laboratory' ? 'selected' : ''}>Laboratory</option>
+            <option ${record.type === 'Radiology' ? 'selected' : ''}>Radiology</option>
+            <option ${record.type === 'Pharmacy' ? 'selected' : ''}>Pharmacy</option>
+            <option ${record.type === 'Procedure' ? 'selected' : ''}>Procedure</option>
+          </select>
+        </label>
+        <label>Priority
+          <select name="priority">
+            <option ${record.priority === 'Routine' ? 'selected' : ''}>Routine</option>
+            <option ${record.priority === 'Urgent' ? 'selected' : ''}>Urgent</option>
+            <option ${record.priority === 'Emergency' ? 'selected' : ''}>Emergency</option>
+          </select>
+        </label>
+      </div>
+      <label>Status
+        <select name="status">
+          <option ${record.status === 'Pending' ? 'selected' : ''}>Pending</option>
+          <option ${record.status === 'Completed' ? 'selected' : ''}>Completed</option>
+          <option ${record.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+        </select>
+      </label>
+    `;
+  } else if (collection === "billing") {
+    fieldsHtml = `
+      <label>Service Category
+        <input type="text" name="service" value="${record.service || ''}" required />
+      </label>
+      <label>Description
+        <input type="text" name="description" value="${record.description || ''}" required />
+      </label>
+      <div class="form-row">
+        <label>Total Price (₦)
+          <input type="number" name="totalAmount" value="${record.totalAmount || 0}" required />
+        </label>
+        <label>Patient Payable (₦)
+          <input type="number" name="patientPayable" value="${record.patientPayable || 0}" required />
+        </label>
+      </div>
+      <label>Invoice Status
+        <select name="status">
+          <option ${record.status === 'Pending' ? 'selected' : ''}>Pending</option>
+          <option ${record.status === 'Paid' ? 'selected' : ''}>Paid</option>
+          <option ${record.status === 'Claimed' ? 'selected' : ''}>Claimed</option>
+          <option ${record.status === 'Waived' ? 'selected' : ''}>Waived</option>
+        </select>
+      </label>
+    `;
+  }
+
+  fieldsEl.innerHTML = fieldsHtml;
+  document.querySelector("#editRecordModal").style.display = "flex";
+}
+window.openEditRecordModal = openEditRecordModal;
+
+// Wire Edit Record Form Submit
+const editRecordForm = document.querySelector("#editRecordForm");
+if (editRecordForm) {
+  editRecordForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const collection = document.querySelector("#editRecordCollection").value;
+    const id = document.querySelector("#editRecordId").value;
+    const formData = formToObject(e.currentTarget);
+
+    if (collection === "patients" && typeof formData.allergies === "string") {
+      formData.allergies = formData.allergies.split(",").map(s => s.trim()).filter(Boolean);
+    }
+    if (collection === "billing") {
+      formData.totalAmount = Number(formData.totalAmount);
+      formData.patientPayable = Number(formData.patientPayable);
+      const originalBill = state.billing.find(b => b.id === id);
+      if (originalBill) {
+        formData.insuranceCovered = Math.max(0, formData.totalAmount - formData.patientPayable);
+      }
+    }
+
+    try {
+      await api("/api/update-record", {
+        method: "POST",
+        body: JSON.stringify({ collection, id, fields: formData })
+      });
+      showToast("Changes saved successfully.");
+      document.querySelector("#editRecordModal").style.display = "none";
+      await loadData();
+    } catch (err) {
+      showToast("Error updating record: " + err.message);
+    }
+  });
+}
+
+// ---------------------------------------------------------------
+//  CONSULTATION PATIENT INLINE EDIT SYSTEM
+// ---------------------------------------------------------------
+function setupConsultationPatientEdit() {
+  const conPatSelect = document.querySelector("#consultationPatient");
+  const conPatEditCard = document.querySelector("#consultationPatientEditCard");
+  if (conPatSelect && conPatEditCard) {
+    conPatSelect.addEventListener("change", () => {
+      const patId = conPatSelect.value;
+      if (!patId) {
+        conPatEditCard.style.display = "none";
+        return;
+      }
+      const patient = state.patients.find(p => p.id === patId);
+      if (!patient) {
+        conPatEditCard.style.display = "none";
+        return;
+      }
+      document.querySelector("#conPatAge").value = patient.age || 0;
+      document.querySelector("#conPatSex").value = patient.sex || "Male";
+      document.querySelector("#conPatInsurance").value = patient.insurance || "Private Pay";
+      document.querySelector("#conPatRisk").value = patient.risk || "Routine";
+      document.querySelector("#conPatAllergies").value = (patient.allergies || []).join(", ");
+      conPatEditCard.style.display = "block";
+    });
+  }
+
+  const saveConPatBtn = document.querySelector("#saveConPatBtn");
+  if (saveConPatBtn) {
+    saveConPatBtn.addEventListener("click", async () => {
+      const patId = document.querySelector("#consultationPatient").value;
+      if (!patId) return;
+      const age = Number(document.querySelector("#conPatAge").value);
+      const sex = document.querySelector("#conPatSex").value;
+      const insurance = document.querySelector("#conPatInsurance").value;
+      const risk = document.querySelector("#conPatRisk").value;
+      const allergiesStr = document.querySelector("#conPatAllergies").value;
+      const allergies = allergiesStr.split(",").map(s => s.trim()).filter(Boolean);
+
+      try {
+        await api("/api/update-record", {
+          method: "POST",
+          body: JSON.stringify({
+            collection: "patients",
+            id: patId,
+            fields: { age, sex, insurance, risk, allergies }
+          })
+        });
+        showToast("Patient demographics updated inline.");
+        await loadData();
+      } catch (err) {
+        showToast("Error updating patient: " + err.message);
+      }
+    });
+  }
+}
+
+// Initialize consultation patient editing once DOM is wired
+setupConsultationPatientEdit();
 
 

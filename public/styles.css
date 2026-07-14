@@ -622,7 +622,7 @@ optgroup option { font-weight: 400; color: var(--ink2); padding-left: 8px; }
 canvas { max-width: 100%; }
 
 /* ── Appointment Calendar Table ──────────────────────────── */
-.apt-row { display: grid; grid-template-columns: 90px 100px 1fr 1fr 120px 90px; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 13px; transition: background .15s; }
+.apt-row { display: grid; grid-template-columns: 90px 80px 1.2fr 1fr 1fr 90px 80px; gap: 12px; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 13px; transition: background .15s; }
 .apt-row:hover { background: rgba(37,99,235,.04); }
 .apt-row.header { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: #f8fafc; border-radius: 8px 8px 0 0; }
 .apt-status { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-align: center; }

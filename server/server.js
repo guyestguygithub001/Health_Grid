@@ -713,6 +713,21 @@ async function handleApi(req, res, url) {
   if (req.method === "POST" && url.pathname === "/api/ai/readmission-risk") { const body = await collectBody(req); sendJson(res, 200, calculateReadmissionRisk(body)); return; }
   if (req.method === "POST" && url.pathname === "/api/ai/discharge-summary") { const body = await collectBody(req); const summary = generateDischargeSummary(body); data.dischargeSummaries.push({ ...summary, createdAt: new Date().toISOString() }); writeData(data); sendJson(res, 200, summary); return; }
   if (req.method === "POST" && url.pathname === "/api/alerts/drug-check") { const body = await collectBody(req); sendJson(res, 200, checkDrugInteractions(body.drugs || [], body.allergies || [])); return; }
+  // ── Generic Update Record Endpoint
+  if (req.method === "POST" && url.pathname === "/api/update-record") {
+    const body = await collectBody(req);
+    const { collection, id, fields } = body;
+    if (!data[collection]) { sendJson(res, 400, { error: "Invalid collection" }); return; }
+    const record = data[collection].find(x => x.id === id);
+    if (record) {
+      Object.assign(record, fields);
+      writeData(data);
+      sendJson(res, 200, record);
+    } else {
+      sendJson(res, 404, { error: "Record not found" });
+    }
+    return;
+  }
 
   sendJson(res, 404, { error: "API route not found" });
 }
