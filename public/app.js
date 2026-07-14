@@ -101,10 +101,10 @@ const toast    = document.querySelector("#toast");
 // ---------------------------------------------------------------
 //  Utilities
 // ---------------------------------------------------------------
-function showToast(msg) {
+function showToast(msg, duration = 2800) {
   toast.textContent = msg;
   toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 2800);
+  setTimeout(() => toast.classList.remove("show"), duration);
 }
 
 async function api(path, opts = {}) {
@@ -542,11 +542,15 @@ document.querySelector("#patientSearch").addEventListener("input", e => renderPa
 document.querySelector("#patientForm").addEventListener("submit", async e => {
   e.preventDefault();
   const btn = e.currentTarget.querySelector("button[type=submit]");
+  const formData = formToObject(e.currentTarget);
   if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
   try {
-    await api("/api/patients", { method: "POST", body: JSON.stringify(formToObject(e.currentTarget)) });
+    const saved = await api("/api/patients", { method: "POST", body: JSON.stringify(formData) });
     e.currentTarget.reset();
-    showToast("✅ Patient registered successfully.");
+    // Show the patient their portal login credentials
+    const phone = formData.phone || "(not provided)";
+    const patId  = saved.id || "PT-????";
+    showToast(`✅ Registered! Portal login — Phone: ${phone} | Password: ${patId}`, 6000);
     await loadData();
   } catch (err) {
     showToast("❌ Save failed: " + err.message);

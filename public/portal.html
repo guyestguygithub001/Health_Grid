@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PlateauCare — Patient Portal</title>
+  <meta name="description" content="Access your personal health records, appointments, and test results on the PlateauCare patient portal." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: #F0F4FF; color: #0F172A; line-height: 1.6; min-height: 100vh; }
+
+    /* ── SHARED ─────────────────────────────────────── */
+    .hidden { display: none !important; }
+
+    /* ── LOGIN SCREEN ───────────────────────────────── */
+    #loginScreen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+      background: linear-gradient(160deg, #0B1426 0%, #0f2347 55%, #0B2458 100%);
+      position: relative; overflow: hidden;
+    }
+    #loginScreen::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 80% 60% at 60% 20%, rgba(37,99,235,0.18) 0%, transparent 70%),
+                  radial-gradient(ellipse 40% 40% at 10% 80%, rgba(16,185,129,0.1) 0%, transparent 60%);
+    }
+    .login-card {
+      position: relative; width: 100%; max-width: 420px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(20px); border-radius: 24px; padding: 48px 40px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.4);
+    }
+    .login-brand { text-align: center; margin-bottom: 36px; }
+    .login-mark {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 56px; height: 56px; border-radius: 16px;
+      background: linear-gradient(135deg, #10B981, #059669);
+      font-weight: 800; font-size: 18px; color: #fff; margin-bottom: 16px;
+    }
+    .login-brand h1 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .login-brand p { font-size: 13px; color: rgba(255,255,255,0.45); }
+    .login-field { margin-bottom: 16px; }
+    .login-field label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 7px; }
+    .login-field input {
+      width: 100%; padding: 13px 16px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.07);
+      color: #fff; font-size: 15px; font-family: inherit; outline: none;
+      transition: border-color 0.2s;
+    }
+    .login-field input::placeholder { color: rgba(255,255,255,0.25); }
+    .login-field input:focus { border-color: rgba(16,185,129,0.5); background: rgba(255,255,255,0.09); }
+    .login-hint { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 5px; }
+    .login-error {
+      background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25);
+      color: #fca5a5; font-size: 13px; padding: 10px 14px; border-radius: 8px;
+      margin-bottom: 16px;
+    }
+    .login-btn {
+      width: 100%; padding: 14px; margin-top: 8px; border: none; border-radius: 12px;
+      background: linear-gradient(135deg, #10B981, #059669);
+      color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
+      font-family: inherit; letter-spacing: 0.01em;
+      box-shadow: 0 4px 16px rgba(16,185,129,0.3); transition: all 0.2s;
+    }
+    .login-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(16,185,129,0.4); }
+    .login-btn:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
+    .login-back { display: block; text-align: center; margin-top: 20px; font-size: 13px; color: rgba(255,255,255,0.3); text-decoration: none; }
+    .login-back:hover { color: rgba(255,255,255,0.6); }
+
+    /* ── PORTAL SHELL ───────────────────────────────── */
+    #portalShell { display: none; min-height: 100vh; background: #F0F4FF; }
+
+    /* ── PORTAL NAV ─────────────────────────────────── */
+    .pnav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,0.9); backdrop-filter: blur(12px);
+      border-bottom: 1px solid #E2E8F0;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 6vw; height: 60px;
+    }
+    .pnav-brand { display: flex; align-items: center; gap: 9px; text-decoration: none; }
+    .pnav-mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg,#10B981,#059669); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11px; color:#fff; }
+    .pnav-name { font-weight: 700; font-size: 14px; color: #0F172A; }
+    .pnav-right { display: flex; align-items: center; gap: 12px; }
+    .patient-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg,#10B981,#059669);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px; color: #fff;
+    }
+    .patient-nav-name { font-size: 13px; font-weight: 600; color: #0F172A; }
+    .logout-btn {
+      padding: 6px 14px; border-radius: 8px; border: 1px solid #E2E8F0;
+      font-size: 12px; font-weight: 500; color: #64748B; background: #fff;
+      cursor: pointer; font-family: inherit; transition: all 0.2s;
+    }
+    .logout-btn:hover { background: #FEF2F2; border-color: #FECACA; color: #DC2626; }
+
+    /* ── MAIN CONTENT ───────────────────────────────── */
+    .pmain { max-width: 960px; margin: 0 auto; padding: 36px 6vw 60px; }
+
+    /* Welcome header */
+    .welcome-bar { margin-bottom: 32px; }
+    .welcome-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #10B981; margin-bottom: 6px; }
+    .welcome-bar h2 { font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 800; color: #0F172A; letter-spacing: -0.02em; }
+    .welcome-bar p { color: #64748B; font-size: 14px; margin-top: 4px; }
+
+    /* Summary cards */
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 32px; }
+    .sum-card {
+      background: #fff; border: 1px solid #E2E8F0; border-radius: 14px;
+      padding: 20px; transition: all 0.2s;
+    }
+    .sum-card:hover { border-color: #BFDBFE; box-shadow: 0 4px 16px rgba(37,99,235,0.08); }
+    .sum-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #94A3B8; margin-bottom: 8px; }
+    .sum-value { font-size: 26px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em; }
+    .sum-sub { font-size: 11px; color: #94A3B8; margin-top: 3px; }
+    .sum-card.green .sum-value { color: #10B981; }
+    .sum-card.blue .sum-value { color: #2563EB; }
+    .sum-card.amber .sum-value { color: #D97706; }
+
+    /* Section */
+    .psection { margin-bottom: 28px; }
+    .psection-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .psection-head h3 { font-size: 14px; font-weight: 700; color: #0F172A; }
+    .psection-head .count-badge { font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; padding: 2px 10px; border-radius: 100px; }
+
+    /* Cards list */
+    .record-card {
+      background: #fff; border: 1px solid #E2E8F0; border-radius: 12px;
+      padding: 18px 20px; margin-bottom: 10px; transition: all 0.2s;
+    }
+    .record-card:hover { border-color: #BFDBFE; }
+    .record-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
+    .record-card-title { font-size: 14px; font-weight: 600; color: #0F172A; }
+    .record-card-date { font-size: 12px; color: #94A3B8; }
+    .record-card-body { font-size: 13px; color: #64748B; line-height: 1.5; }
+    .record-card-body strong { color: #0F172A; }
+
+    /* Badge */
+    .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 100px; }
+    .badge-green { background: #D1FAE5; color: #065F46; }
+    .badge-blue { background: #DBEAFE; color: #1E40AF; }
+    .badge-amber { background: #FEF3C7; color: #92400E; }
+    .badge-red { background: #FEE2E2; color: #991B1B; }
+    .badge-gray { background: #F1F5F9; color: #475569; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 32px; color: #94A3B8; font-size: 14px; background: #fff; border-radius: 12px; border: 1px dashed #E2E8F0; }
+    .empty-state .empty-icon { font-size: 32px; display: block; margin-bottom: 10px; }
+
+    /* Profile card */
+    .profile-card {
+      background: linear-gradient(135deg, #0f2347, #0B2458);
+      border-radius: 16px; padding: 28px; color: #fff; margin-bottom: 32px;
+      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    }
+    .profile-avatar {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .profile-info { flex: 1; min-width: 200px; }
+    .profile-name { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 4px; }
+    .profile-meta { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.6; }
+    .profile-id { font-size: 11px; color: rgba(255,255,255,0.35); font-family: monospace; margin-top: 6px; }
+    .profile-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .profile-tag { font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 100px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
+
+    @media (max-width: 580px) {
+      .pnav { padding: 0 4vw; }
+      .patient-nav-name { display: none; }
+      .pmain { padding: 24px 4vw 48px; }
+      .login-card { padding: 36px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ══════════════ LOGIN SCREEN ═══════════════════ -->
+  <div id="loginScreen">
+    <div class="login-card">
+      <div class="login-brand">
+        <div class="login-mark">PC</div>
+        <h1>Patient Portal</h1>
+        <p>PlateauCare Health Information System</p>
+      </div>
+
+      <form id="loginForm" novalidate>
+        <div class="login-field">
+          <label>Phone Number</label>
+          <input id="loginPhone" type="tel" placeholder="e.g. 08012345678" autocomplete="tel" required />
+          <div class="login-hint">The phone number used during registration</div>
+        </div>
+        <div class="login-field">
+          <label>Patient ID (Password)</label>
+          <input id="loginPatId" type="text" placeholder="e.g. PT-0001" autocomplete="off" required />
+          <div class="login-hint">Your Patient ID — provided at registration</div>
+        </div>
+        <div id="loginError" class="login-error hidden">Invalid phone number or Patient ID. Please check and try again.</div>
+        <button class="login-btn" id="loginBtn" type="submit">Sign In to My Health Portal</button>
+      </form>
+
+      <a class="login-back" href="index.html">← Back to Homepage</a>
+    </div>
+  </div>
+
+  <!-- ══════════════ PORTAL SHELL ═══════════════════ -->
+  <div id="portalShell">
+
+    <!-- NAV -->
+    <nav class="pnav">
+      <a class="pnav-brand" href="index.html">
+        <div class="pnav-mark">PC</div>
+        <span class="pnav-name">PlateauCare</span>
+      </a>
+      <div class="pnav-right">
+        <div class="patient-avatar" id="navAvatar">?</div>
+        <span class="patient-nav-name" id="navName">Patient</span>
+        <button class="logout-btn" id="logoutBtn">Sign Out</button>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main class="pmain">
+
+      <!-- PROFILE CARD -->
+      <div class="profile-card" id="profileCard">
+        <div class="profile-avatar" id="profileAvatar">?</div>
+        <div class="profile-info">
+          <div class="profile-name" id="profileName">Loading…</div>
+          <div class="profile-meta" id="profileMeta"></div>
+          <div class="profile-id" id="profileId"></div>
+          <div class="profile-tags" id="profileTags"></div>
+        </div>
+      </div>
+
+      <!-- WELCOME -->
+      <div class="welcome-bar">
+        <div class="welcome-eyebrow">My Health Dashboard</div>
+        <h2 id="welcomeTitle">Welcome back</h2>
+        <p id="welcomeSub">Here's a summary of your health records at PlateauCare.</p>
+      </div>
+
+      <!-- SUMMARY CARDS -->
+      <div class="summary-grid">
+        <div class="sum-card blue">
+          <div class="sum-label">Consultations</div>
+          <div class="sum-value" id="sumConsult">0</div>
+          <div class="sum-sub">Total visits</div>
+        </div>
+        <div class="sum-card green">
+          <div class="sum-label">Appointments</div>
+          <div class="sum-value" id="sumAppts">0</div>
+          <div class="sum-sub">Scheduled</div>
+        </div>
+        <div class="sum-card">
+          <div class="sum-label">Lab Results</div>
+          <div class="sum-value" id="sumLabs">0</div>
+          <div class="sum-sub">Records available</div>
+        </div>
+        <div class="sum-card amber">
+          <div class="sum-label">Billing</div>
+          <div class="sum-value" id="sumBilling">0</div>
+          <div class="sum-sub">Invoices</div>
+        </div>
+      </div>
+
+      <!-- RECENT CONSULTATIONS -->
+      <div class="psection">
+        <div class="psection-head">
+          <h3>🩺 Recent Consultations</h3>
+          <span class="count-badge" id="consultCount">0</span>
+        </div>
+        <div id="consultList"></div>
+      </div>
+
+      <!-- APPOINTMENTS -->
+      <div class="psection">
+        <div class="psection-head">
+          <h3>📅 Appointments</h3>
+          <span class="count-badge" id="apptCount">0</span>
+        </div>
+        <div id="apptList"></div>
+      </div>
+
+      <!-- LAB RESULTS -->
+      <div class="psection">
+        <div class="psection-head">
+          <h3>🧪 Laboratory Results</h3>
+          <span class="count-badge" id="labCount">0</span>
+        </div>
+        <div id="labList"></div>
+      </div>
+
+      <!-- BILLING -->
+      <div class="psection">
+        <div class="psection-head">
+          <h3>💳 Billing & Payments</h3>
+          <span class="count-badge" id="billCount">0</span>
+        </div>
+        <div id="billList"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+  // ──────────────────────────────────────────────────────
+  //  Patient Portal — JavaScript
+  // ──────────────────────────────────────────────────────
+
+  const loginScreen = document.getElementById("loginScreen");
+  const portalShell = document.getElementById("portalShell");
+  const loginForm   = document.getElementById("loginForm");
+  const loginError  = document.getElementById("loginError");
+  const loginBtn    = document.getElementById("loginBtn");
+
+  // ── Session ──────────────────────────────────────────
+  let patientSession = null;
+
+  function loadSession() {
+    const raw = sessionStorage.getItem("patient_session");
+    if (raw) { try { return JSON.parse(raw); } catch (_) {} }
+    return null;
+  }
+
+  function saveSession(data) {
+    sessionStorage.setItem("patient_session", JSON.stringify(data));
+  }
+
+  function clearSession() {
+    sessionStorage.removeItem("patient_session");
+  }
+
+  // ── Login ─────────────────────────────────────────────
+  loginForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const phone    = document.getElementById("loginPhone").value.trim();
+    const patientId = document.getElementById("loginPatId").value.trim().toUpperCase();
+    loginError.classList.add("hidden");
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Signing in…";
+
+    try {
+      const res = await fetch("/api/patient/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, patientId })
+      });
+      if (res.status === 401) {
+        loginError.classList.remove("hidden");
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Sign In to My Health Portal";
+        return;
+      }
+      const json = await res.json();
+      if (!json.ok || !json.patient) {
+        loginError.classList.remove("hidden");
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Sign In to My Health Portal";
+        return;
+      }
+      saveSession({ phone, patientId, patientName: json.patient.name });
+      patientSession = { phone, patientId, patientName: json.patient.name };
+      await loadDashboard(json.patient, json);
+    } catch (err) {
+      loginError.textContent = "Could not reach server. Please try again.";
+      loginError.classList.remove("hidden");
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Sign In to My Health Portal";
+    }
+  });
+
+  // ── Logout ────────────────────────────────────────────
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    clearSession();
+    portalShell.style.display = "none";
+    loginScreen.style.display = "flex";
+    document.getElementById("loginPhone").value = "";
+    document.getElementById("loginPatId").value = "";
+  });
+
+  // ── Helper: initials ──────────────────────────────────
+  function initials(name) {
+    return (name || "?").split(" ").slice(0,2).map(w => w[0]).join("").toUpperCase();
+  }
+
+  function badgeClass(status) {
+    const s = (status || "").toLowerCase();
+    if (["paid","completed","resolved","collected"].includes(s)) return "badge-green";
+    if (["pending","scheduled","active"].includes(s)) return "badge-blue";
+    if (["overdue","escalated","unpaid"].includes(s)) return "badge-red";
+    if (["partial","booked","open"].includes(s)) return "badge-amber";
+    return "badge-gray";
+  }
+
+  function emptyState(icon, msg) {
+    return `<div class="empty-state"><span class="empty-icon">${icon}</span>${msg}</div>`;
+  }
+
+  // ── Dashboard Render ──────────────────────────────────
+  async function loadDashboard(patient, payload) {
+    // Show portal, hide login
+    loginScreen.style.display = "none";
+    portalShell.style.display = "block";
+
+    // Fetch full dashboard data if not already in payload
+    let data = payload;
+    if (!data.consultations) {
+      try {
+        const r = await fetch(`/api/patient/dashboard/${patient.id}?phone=${encodeURIComponent(patientSession.phone)}`);
+        data = await r.json();
+      } catch (_) {}
+    }
+
+    const p = data.patient || patient;
+    const consultations = data.consultations || [];
+    const appointments  = data.appointments  || [];
+    const labResults    = data.labResults    || [];
+    const billing       = data.billing       || [];
+
+    // Nav
+    document.getElementById("navAvatar").textContent = initials(p.name);
+    document.getElementById("navName").textContent   = p.name.split(" ")[0];
+
+    // Profile card
+    document.getElementById("profileAvatar").textContent = initials(p.name);
+    document.getElementById("profileName").textContent   = p.name;
+    document.getElementById("profileMeta").innerHTML = [
+      p.sex && `${p.sex}`,
+      p.age && `${p.age} yrs`,
+      p.lga && `${p.lga} LGA`,
+      p.phone && `📱 ${p.phone}`
+    ].filter(Boolean).join("  ·  ");
+    document.getElementById("profileId").textContent = `Patient ID: ${p.id}  ·  Last visit: ${p.lastVisit || "—"}`;
+    const tagsEl = document.getElementById("profileTags");
+    tagsEl.innerHTML = "";
+    if (p.insurance) { const t=document.createElement("span"); t.className="profile-tag"; t.textContent=p.insurance; tagsEl.appendChild(t); }
+    if (p.risk) { const t=document.createElement("span"); t.className="profile-tag"; t.textContent=p.risk; tagsEl.appendChild(t); }
+    if (p.allergies && p.allergies.length) {
+      const t=document.createElement("span"); t.className="profile-tag";
+      t.textContent="⚠ Allergies: " + p.allergies.join(", "); tagsEl.appendChild(t);
+    }
+
+    // Welcome
+    document.getElementById("welcomeTitle").textContent = `Welcome, ${p.name.split(" ")[0]}`;
+    document.getElementById("welcomeSub").textContent   = `Here's a summary of your health records. Facility: ${p.facilityId || "—"}`;
+
+    // Summary counts
+    document.getElementById("sumConsult").textContent  = consultations.length;
+    document.getElementById("sumAppts").textContent    = appointments.length;
+    document.getElementById("sumLabs").textContent     = labResults.length;
+    document.getElementById("sumBilling").textContent  = billing.length;
+    document.getElementById("consultCount").textContent = consultations.length;
+    document.getElementById("apptCount").textContent    = appointments.length;
+    document.getElementById("labCount").textContent     = labResults.length;
+    document.getElementById("billCount").textContent    = billing.length;
+
+    // Consultations
+    const consultEl = document.getElementById("consultList");
+    consultEl.innerHTML = consultations.length ? consultations.slice(0,8).map(c => `
+      <div class="record-card">
+        <div class="record-card-top">
+          <span class="record-card-title">🩺 ${c.chiefComplaint || "Consultation"}</span>
+          <span class="record-card-date">${c.date || ""}</span>
+        </div>
+        <div class="record-card-body">
+          ${c.assessment ? `<strong>Assessment:</strong> ${c.assessment}<br/>` : ""}
+          ${c.icd11Display ? `<strong>Diagnosis (ICD-11):</strong> ${c.icd11Display}<br/>` : ""}
+          ${c.plan ? `<strong>Plan:</strong> ${c.plan}<br/>` : ""}
+          ${c.doctorName ? `<span style="color:#94A3B8;font-size:12px;margin-top:4px;display:block;">Dr. ${c.doctorName} · ${c.specialty || ""}</span>` : ""}
+        </div>
+      </div>`).join("") : emptyState("🩺", "No consultation records yet.");
+
+    // Appointments
+    const apptEl = document.getElementById("apptList");
+    apptEl.innerHTML = appointments.length ? appointments.slice(0,6).map(a => `
+      <div class="record-card">
+        <div class="record-card-top">
+          <span class="record-card-title">📅 ${a.department || a.specialty || "Appointment"}</span>
+          <span class="badge ${badgeClass(a.status)}">${a.status || "Scheduled"}</span>
+        </div>
+        <div class="record-card-body">
+          ${a.date ? `<strong>Date:</strong> ${a.date} ${a.time || ""}<br/>` : ""}
+          ${a.doctor ? `<strong>Doctor:</strong> ${a.doctor}<br/>` : ""}
+          ${a.reason ? `<strong>Reason:</strong> ${a.reason}` : ""}
+        </div>
+      </div>`).join("") : emptyState("📅", "No appointments scheduled.");
+
+    // Lab Results
+    const labEl = document.getElementById("labList");
+    labEl.innerHTML = labResults.length ? labResults.slice(0,6).map(l => `
+      <div class="record-card">
+        <div class="record-card-top">
+          <span class="record-card-title">🧪 ${l.testName || l.test || "Laboratory Test"}</span>
+          <span class="badge ${badgeClass(l.status)}">${l.status || "Resulted"}</span>
+        </div>
+        <div class="record-card-body">
+          ${l.result ? `<strong>Result:</strong> ${l.result}<br/>` : ""}
+          ${l.referenceRange ? `<strong>Reference:</strong> ${l.referenceRange}<br/>` : ""}
+          ${l.date ? `<span style="color:#94A3B8;font-size:12px;">${l.date}</span>` : ""}
+        </div>
+      </div>`).join("") : emptyState("🧪", "No laboratory results available.");
+
+    // Billing
+    const billEl = document.getElementById("billList");
+    billEl.innerHTML = billing.length ? billing.slice(0,6).map(b => `
+      <div class="record-card">
+        <div class="record-card-top">
+          <span class="record-card-title">💳 ${b.serviceCategory || b.description || "Invoice"}</span>
+          <span class="badge ${badgeClass(b.status)}">${b.status || "Pending"}</span>
+        </div>
+        <div class="record-card-body">
+          ${b.totalAmount ? `<strong>Total:</strong> ₦${Number(b.totalAmount).toLocaleString()}<br/>` : ""}
+          ${b.patientPayable !== undefined ? `<strong>Patient Payable:</strong> ₦${Number(b.patientPayable).toLocaleString()}<br/>` : ""}
+          ${b.date ? `<span style="color:#94A3B8;font-size:12px;">${b.date}</span>` : ""}
+        </div>
+      </div>`).join("") : emptyState("💳", "No billing records available.");
+  }
+
+  // ── Auto-login from session ───────────────────────────
+  (async function init() {
+    const session = loadSession();
+    if (session) {
+      patientSession = session;
+      try {
+        const res = await fetch(`/api/patient/dashboard/${session.patientId}?phone=${encodeURIComponent(session.phone)}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.patient) { await loadDashboard(data.patient, data); return; }
+        }
+      } catch (_) {}
+      clearSession();
+    }
+    loginScreen.style.display = "flex";
+  })();
+  </script>
+</body>
+</html>

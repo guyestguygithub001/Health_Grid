@@ -3,1391 +3,235 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PlateauCare EHR | Hospitals and PHCs</title>
-  <meta name="description" content="A Plateau State hospital and PHC electronic health record prototype with clinical, operational, reporting, and clinical documentation audit modules." />
-  <link rel="stylesheet" href="styles.css" />
+  <title>PlateauCare — Plateau State Health Information System</title>
+  <meta name="description" content="Plateau State's integrated electronic health records platform connecting patients, clinicians, and administrators across hospitals and PHCs." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Inter', sans-serif; background: #F0F4FF; color: #0F172A; line-height: 1.6; min-height: 100vh; }
+
+    /* ── NAV ─────────────────────────────────────────────── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 6vw; height: 64px;
+      background: rgba(255,255,255,0.82); backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(37,99,235,0.08);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-mark {
+      width: 36px; height: 36px; border-radius: 9px;
+      background: linear-gradient(135deg, #2563EB, #1d4ed8);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 13px; color: #fff; letter-spacing: -0.5px;
+    }
+    .nav-name { font-weight: 700; font-size: 15px; color: #0F172A; }
+    .nav-name span { color: #2563EB; }
+    .nav-links { display: flex; align-items: center; gap: 8px; }
+    .nav-links a {
+      padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      text-decoration: none; color: #475569; transition: all 0.2s;
+    }
+    .nav-links a:hover { background: #EFF6FF; color: #2563EB; }
+    .nav-cta {
+      background: #2563EB; color: #fff !important;
+      box-shadow: 0 2px 8px rgba(37,99,235,0.25);
+    }
+    .nav-cta:hover { background: #1d4ed8 !important; color: #fff !important; transform: translateY(-1px); }
+
+    /* ── HERO ────────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 100px 6vw 60px;
+      background: linear-gradient(160deg, #0B1426 0%, #0f2347 55%, #0B2458 100%);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 60% 30%, rgba(37,99,235,0.18) 0%, transparent 70%),
+                  radial-gradient(ellipse 50% 40% at 10% 80%, rgba(16,185,129,0.10) 0%, transparent 60%);
+    }
+    .hero-badge {
+      position: relative; display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(37,99,235,0.18); border: 1px solid rgba(37,99,235,0.3);
+      color: #93c5fd; font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 5px 14px; border-radius: 100px;
+      margin-bottom: 28px;
+    }
+    .hero-badge::before { content: '●'; color: #10B981; font-size: 8px; }
+    .hero h1 {
+      position: relative; font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 800; color: #fff; text-align: center;
+      line-height: 1.15; letter-spacing: -0.02em; max-width: 780px;
+      margin-bottom: 20px;
+    }
+    .hero h1 span { color: #60a5fa; }
+    .hero p {
+      position: relative; font-size: clamp(0.95rem, 1.8vw, 1.1rem);
+      color: rgba(255,255,255,0.55); text-align: center;
+      max-width: 520px; margin-bottom: 56px; font-weight: 400;
+    }
+
+    /* ── PORTAL CARDS ───────────────────────────────────── */
+    .portal-cards {
+      position: relative; display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px; max-width: 680px; width: 100%;
+    }
+    .pcard {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px; padding: 36px 32px; text-decoration: none;
+      cursor: pointer; transition: all 0.3s; display: flex; flex-direction: column;
+      backdrop-filter: blur(12px); position: relative; overflow: hidden;
+    }
+    .pcard::before {
+      content: ''; position: absolute; inset: 0; opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .pcard:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.2); }
+    .pcard:hover::before { opacity: 1; }
+    .pcard.patient { }
+    .pcard.patient::before { background: linear-gradient(135deg, rgba(16,185,129,0.08), transparent); }
+    .pcard.patient:hover { box-shadow: 0 20px 48px rgba(16,185,129,0.15); }
+    .pcard.admin::before { background: linear-gradient(135deg, rgba(37,99,235,0.12), transparent); }
+    .pcard.admin:hover { box-shadow: 0 20px 48px rgba(37,99,235,0.2); }
+
+    .pcard-icon {
+      width: 52px; height: 52px; border-radius: 14px; display: flex;
+      align-items: center; justify-content: center; font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .pcard.patient .pcard-icon { background: rgba(16,185,129,0.15); }
+    .pcard.admin .pcard-icon { background: rgba(37,99,235,0.15); }
+    .pcard h2 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .pcard p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.55; flex: 1; margin-bottom: 24px; }
+    .pcard-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 13px; font-weight: 600; padding: 10px 20px;
+      border-radius: 10px; border: none; cursor: pointer; transition: all 0.2s;
+      text-decoration: none;
+    }
+    .pcard.patient .pcard-btn { background: rgba(16,185,129,0.2); color: #34d399; }
+    .pcard.patient:hover .pcard-btn { background: #10B981; color: #fff; }
+    .pcard.admin .pcard-btn { background: rgba(37,99,235,0.2); color: #93c5fd; }
+    .pcard.admin:hover .pcard-btn { background: #2563EB; color: #fff; }
+
+    /* ── STATS BAR ───────────────────────────────────────── */
+    .stats-bar {
+      display: flex; justify-content: center; gap: 0;
+      background: #fff; border-top: 1px solid #E2E8F0;
+    }
+    .stat {
+      flex: 1; max-width: 200px; padding: 32px 24px; text-align: center;
+      border-right: 1px solid #E2E8F0;
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num { font-size: 28px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em; }
+    .stat-label { font-size: 12px; color: #94A3B8; font-weight: 500; margin-top: 2px; }
+
+    /* ── FEATURES ────────────────────────────────────────── */
+    .features { padding: 80px 6vw; background: #fff; }
+    .features-header { text-align: center; margin-bottom: 52px; }
+    .features-header h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; color: #0F172A; letter-spacing: -0.02em; }
+    .features-header p { color: #64748B; margin-top: 10px; font-size: 15px; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto; }
+    .feat {
+      padding: 28px; border-radius: 16px; background: #F8FAFF;
+      border: 1px solid #E2ECF9; transition: all 0.25s;
+    }
+    .feat:hover { border-color: #BFDBFE; box-shadow: 0 8px 24px rgba(37,99,235,0.08); transform: translateY(-2px); }
+    .feat-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+    .feat h3 { font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 6px; }
+    .feat p { font-size: 13px; color: #64748B; line-height: 1.55; }
+
+    /* ── FOOTER ──────────────────────────────────────────── */
+    footer {
+      padding: 32px 6vw; background: #0B1426;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;
+    }
+    footer p { font-size: 12px; color: rgba(255,255,255,0.3); }
+    .footer-links { display: flex; gap: 20px; }
+    .footer-links a { font-size: 12px; color: rgba(255,255,255,0.3); text-decoration: none; }
+    .footer-links a:hover { color: rgba(255,255,255,0.6); }
+
+    @media (max-width: 600px) {
+      .nav-links { display: none; }
+      .portal-cards { grid-template-columns: 1fr; }
+      .stats-bar { display: none; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ── LOGIN SCREEN ─────────────────────────────────────── -->
-  <div id="loginScreen" style="
-    display:none; position:fixed; inset:0; z-index:9999;
-    background:linear-gradient(135deg,#0a1628 0%,#0f2347 60%,#1a3a5c 100%);
-    align-items:center; justify-content:center; flex-direction:column;
-  ">
-    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:48px 44px;max-width:420px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,0.4);">
-      <div style="text-align:center;margin-bottom:32px;">
-        <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border-radius:12px;font-weight:900;font-size:20px;color:#fff;margin-bottom:16px;">PC</div>
-        <h2 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 4px;">PlateauCare EHR</h2>
-        <p style="color:rgba(255,255,255,0.5);font-size:13px;margin:0;">Plateau State Health Information System</p>
-      </div>
-      <form id="loginForm" autocomplete="on">
-        <div style="margin-bottom:16px;">
-          <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Username</label>
-          <input id="loginUser" name="username" type="text" autocomplete="username" required
-            style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;outline:none;"
-            placeholder="Enter username" />
-        </div>
-        <div style="margin-bottom:24px;">
-          <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Password</label>
-          <input id="loginPass" name="password" type="password" autocomplete="current-password" required
-            style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;outline:none;"
-            placeholder="Enter password" />
-        </div>
-        <div id="loginError" style="display:none;color:#f87171;font-size:13px;margin-bottom:16px;padding:10px 14px;background:rgba(239,68,68,0.15);border-radius:8px;border:1px solid rgba(239,68,68,0.3);">
-          Invalid username or password. Please try again.
-        </div>
-        <button type="submit" id="loginBtn"
-          style="width:100%;padding:13px;border:none;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.02em;transition:opacity 0.2s;">
-          Sign In
-        </button>
-      </form>
-      <p style="text-align:center;margin-top:20px;color:rgba(255,255,255,0.3);font-size:11px;">
-        Plateau State Ministry of Health &nbsp;·&nbsp; Secure Clinical Access
-      </p>
+  <!-- ── NAV ─────────────────────────────────────── -->
+  <nav>
+    <a class="nav-brand" href="/">
+      <div class="nav-mark">PC</div>
+      <span class="nav-name">Plateau<span>Care</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="portal.html" class="nav-cta">Patient Login</a>
     </div>
-  </div>
+  </nav>
 
-  <div class="app-shell">
-    <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-mark">PC</div>
-        <div>
-          <strong>PlateauCare</strong>
-          <span>EHR Command</span>
-        </div>
-      </div>
+  <!-- ── HERO ─────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-badge">Plateau State Ministry of Health</div>
+    <h1>Your Health Records,<br /><span>Anywhere You Are</span></h1>
+    <p>Integrated electronic health records for patients, clinicians, and administrators across Plateau State hospitals and PHCs.</p>
 
-      <nav class="nav-menu" aria-label="Primary">
-        <button class="nav-item active" data-view="dashboard">📊 Dashboard</button>
-        <button class="nav-item" data-view="patients">👤 Patients</button>
-        <button class="nav-item" data-view="appointments">📅 Appointments</button>
-        <button class="nav-item" data-view="consultations">🩺 Consultations</button>
-        <button class="nav-item" data-view="clinical">🏥 Clinical Units</button>
-        <button class="nav-item" data-view="beds">🛏 Ward / Beds</button>
-        <button class="nav-item" data-view="labresults">🧪 Lab Results</button>
-        <button class="nav-item" data-view="orders">📋 Orders</button>
-        <button class="nav-item" data-view="billing">💳 Billing</button>
-        <button class="nav-item" data-view="support">🧠 Decision Support</button>
-        <button class="nav-item" data-view="analytics">📈 Analytics</button>
-        <button class="nav-item" data-view="phc">🌿 PHC Network</button>
-        <button class="nav-item" data-view="reports">📑 Reports</button>
-      </nav>
-
-      <div class="sidebar-card">
-        <span class="eyebrow">Deployment Scope</span>
-        <strong>Statewide hospitals + PHCs</strong>
-        <p>Designed for referral continuity, PHC outreach, maternal-child health, surveillance, claims, and clinical quality.</p>
-      </div>
-    </aside>
-
-    <main class="main">
-      <header class="topbar">
-        <div style="display:flex; align-items:center; gap:12px;">
-          <button id="sidebarToggleBtn" type="button" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--ink); padding:4px 8px; margin-right:4px;" title="Toggle Sidebar">☰</button>
-          <div>
-            <span class="eyebrow">Plateau State health system</span>
-            <h1 id="viewTitle">State Command Dashboard</h1>
-          </div>
-        </div>
-        <div class="top-actions">
-          <span id="apiStatus" class="status-pill">Connecting</span>
-          <button id="refreshBtn" class="icon-btn" type="button" title="Refresh data">Refresh</button>
-        </div>
-      </header>
-
-      <section id="dashboard" class="view active">
-        <!-- Minimalist State Network Summary Banner -->
-        <div class="summary-banner">
-          <div class="summary-metric-pill">🏢 <strong id="metricFacilities">0</strong> Connected Facilities</div>
-          <div class="summary-metric-pill">🌿 <strong id="metricPhcs">0</strong> Active PHCs</div>
-          <div class="summary-metric-pill">👤 <strong id="metricPatients">0</strong> Registered Patients</div>
-          <div class="summary-metric-pill">🛏 <strong id="metricAdmissions">0</strong> Inpatients</div>
-          <div class="summary-metric-pill warning">⚠️ <strong id="metricUrgent">0</strong> Urgent Actions</div>
-          <div class="summary-metric-pill danger">🚨 <strong id="metricCriticalLabs">0</strong> Critical Labs</div>
-          <div class="summary-metric-pill success">💳 <strong id="metricCollection">0%</strong> Revenue</div>
-        </div>
-
-        <div class="panel onboarding-launcher" style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #0e7490, #0891b2); color: #fff; border: none; border-radius: 16px; box-shadow: 0 10px 25px rgba(8,145,178,0.25);">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
-            <div>
-              <span class="badge warning" style="background:#fffbeb; color:#d97706; padding:4px 10px; margin-bottom:8px;">Workflow Wizard Active</span>
-              <h2 style="color:#fff; margin:0 0 4px; font-size:22px; font-weight:700;">Guided Clinical Patient Journey</h2>
-              <p style="color:#e2e8f0; font-size:13px; margin:0;">Intake, schedule, consult, run labs, admit, bill, and discharge patients step-by-step with local decision support guidance.</p>
-            </div>
-            <button class="primary-btn" onclick="switchView('patients')" style="background:#fff; color:#0e7490; border:none; padding:12px 24px; font-weight:700; border-radius:10px; cursor:pointer; font-size:14px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition:transform .2s;">🚀 Start Patient Intake</button>
-          </div>
-          <div class="guided-path-steps" style="display:grid; grid-template-columns: repeat(7, 1fr); gap:10px; margin-top:20px; border-top:1px solid rgba(255,255,255,0.15); padding-top:20px;">
-            <div class="path-step-card" onclick="switchView('patients')">
-              <div class="step-badge">1</div>
-              <strong>Intake</strong>
-              <span>Patient Directory</span>
-            </div>
-            <div class="path-step-card" onclick="switchView('appointments')">
-              <div class="step-badge">2</div>
-              <strong>Booking</strong>
-              <span>Appointments</span>
-            </div>
-            <div class="path-step-card" onclick="switchView('consultations')">
-              <div class="step-badge">3</div>
-              <strong>Consult</strong>
-              <span>ICD-11 & SOAP</span>
-            </div>
-            <div class="path-step-card" onclick="switchView('labresults')">
-              <div class="step-badge">4</div>
-              <strong>Diagnostics</strong>
-              <span>Lab Entry</span>
-            </div>
-            <div class="path-step-card" onclick="switchView('beds')">
-              <div class="step-badge">5</div>
-              <strong>Admit</strong>
-              <span>Ward Census</span>
-            </div>
-            <div class="path-step-card" onclick="switchView('billing')">
-              <div class="step-badge">6</div>
-              <strong>Billing</strong>
-              <span>Invoices</span>
-            </div>
-            <div class="path-step-card" onclick="switchView('support')">
-              <div class="step-badge">7</div>
-              <strong>Discharge</strong>
-              <span>AI Suite</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Collapsible Live Activity Logs & Surveillance Signals -->
-        <div class="collapsible-dashboard-panel" id="activityLogsPanel">
-          <button type="button" class="collapsible-header" onclick="toggleDashboardPanel('activityLogsContent')">
-            <span>📋 Live Activity Logs & Public Health Signals</span>
-            <span class="toggle-icon">▼</span>
-          </button>
-          <div class="collapsible-content" id="activityLogsContent" style="display: none;">
-            <div class="split-grid" style="margin-top: 14px;">
-              <section class="panel">
-                <div class="panel-head">
-                  <div>
-                    <span class="eyebrow">Live queue</span>
-                    <h2>Open Encounters</h2>
-                  </div>
-                  <button class="text-btn" data-view-jump="clinical">Open units</button>
-                </div>
-                <div id="encounterList" class="record-list"></div>
-              </section>
-
-              <section class="panel">
-                <div class="panel-head">
-                  <div>
-                    <span class="eyebrow">Public health</span>
-                    <h2>Surveillance Signals</h2>
-                  </div>
-                  <button class="text-btn" data-view-jump="reports">Reports</button>
-                </div>
-                <div id="surveillanceList" class="signal-list"></div>
-              </section>
-            </div>
-          </div>
-        </div>
-
-        <!-- Collapsible Network Readiness Map -->
-        <div class="collapsible-dashboard-panel" id="readinessPanel" style="margin-top: 14px;">
-          <button type="button" class="collapsible-header" onclick="toggleDashboardPanel('readinessContent')">
-            <span>🌿 Plateau State Network Readiness Map</span>
-            <span class="toggle-icon">▼</span>
-          </button>
-          <div class="collapsible-content" id="readinessContent" style="display: none;">
-            <section class="panel" style="margin-top: 14px;">
-              <div class="panel-head">
-                <div>
-                  <span class="eyebrow">Facility map</span>
-                  <h2>Plateau Network Readiness</h2>
-                </div>
-              </div>
-              <div id="facilityGrid" class="facility-grid"></div>
-            </section>
-          </div>
-        </div>
-      </section>
-
-      <section id="patients" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link active" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
-        </div>
-        <div class="split-grid wide-left">
-          <section class="panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Registry</span>
-                <h2>Patient Directory</h2>
-              </div>
-              <input id="patientSearch" class="search-input" type="search" placeholder="Search patients, LGA, risk..." />
-            </div>
-            <div id="patientTable" class="table-wrap"></div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Quick capture</span>
-                <h2>Register Patient</h2>
-              </div>
-            </div>
-            <form id="patientForm" class="stack-form">
-              <label>Full Name<input name="name" required placeholder="Patient full name" /></label>
-              <div class="form-row">
-                <label>Sex<select name="sex"><option>Female</option><option>Male</option><option>Other</option></select></label>
-                <label>Age<input name="age" type="number" min="0" required placeholder="0" /></label>
-              </div>
-              <label>Phone<input name="phone" placeholder="Phone or guardian contact" /></label>
-              <div class="form-row">
-                <label>LGA<input name="lga" placeholder="Jos North" /></label>
-                <label>Community<input name="community" placeholder="Community" /></label>
-              </div>
-              <label>Facility<select id="patientFacility" name="facilityId"></select></label>
-              <label>Insurance<select name="insurance"><option>PLASCHEMA</option><option>NHIA</option><option>Basic Health Care Provision Fund</option><option>Private Pay</option></select></label>
-              <label>Risk Group<input name="risk" placeholder="Routine, Pregnancy, Under-5, Hypertension..." /></label>
-              <label>Allergies<input name="allergies" placeholder="Comma-separated allergies" /></label>
-              <button class="primary-btn" type="submit">Save Patient</button>
-            </form>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('dashboard')" type="button">📋 Exit to Hub</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('appointments')" type="button">Proceed to Step 2: Scheduling →</button>
-        </div>
-      </section>
-
-      <section id="consultations" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link active" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
-        </div>
-        <div class="split-grid wide-left">
-          <section class="panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Interactive Clinic Module</span>
-                <h2>New Consultation Entry</h2>
-              </div>
-            </div>
-            <form id="consultationForm" class="encounter-form">
-              <div class="form-row">
-                <label>Select Patient<select id="consultationPatient" name="patientId" required></select></label>
-                <label>Select Facility<select id="consultationFacility" name="facilityId" required></select></label>
-              </div>
-
-              <!-- Editable Selected Patient Details -->
-              <div id="consultationPatientEditCard" class="patient-edit-card" style="display:none; background:var(--brand-light); border-left:4px solid var(--brand); padding:15px; border-radius:6px; margin-bottom:15px;">
-                <h4 style="margin:0 0 10px; font-size:13px; color:var(--brand-dark); text-transform:uppercase; letter-spacing:0.05em; font-weight:700;">Edit Patient Demographics (Consultation Context)</h4>
-                <div class="vitals-grid compact" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
-                  <label>Age (Yrs)<input type="number" id="conPatAge" style="width:100%;" /></label>
-                  <label>Sex
-                    <select id="conPatSex" style="width:100%;">
-                      <option>Male</option>
-                      <option>Female</option>
-                      <option>Other</option>
-                    </select>
-                  </label>
-                  <label>Insurance
-                    <select id="conPatInsurance" style="width:100%;">
-                      <option>Private Pay</option>
-                      <option>PLASCHEMA</option>
-                      <option>NHIA</option>
-                    </select>
-                  </label>
-                  <label>Clinical Risk
-                    <select id="conPatRisk" style="width:100%;">
-                      <option>Routine</option>
-                      <option>Medium</option>
-                      <option>High</option>
-                    </select>
-                  </label>
-                </div>
-                <label style="margin-top:10px; display:block;">Allergies (comma-separated)
-                  <input type="text" id="conPatAllergies" style="width:100%; padding:8px; border:1px solid var(--line); border-radius:6px;" placeholder="e.g. penicillin, sulfa" />
-                </label>
-                <button type="button" id="saveConPatBtn" class="secondary-btn" style="margin-top:10px; padding:6px 12px; font-size:12px;">Update Patient Info ✓</button>
-              </div>
-              <div class="form-row">
-                <label>Consulting Doctor<input name="doctorName" placeholder="Dr. Daniel Kingsley Ene" required /></label>
-                <label>Specialty
-                  <select name="specialty">
-                    <option>General Medicine</option>
-                    <option>Obstetrics & Gynecology</option>
-                    <option>Pediatrics</option>
-                    <option>Cardiology</option>
-                    <option>Orthopedics</option>
-                    <option>Surgery</option>
-                  </select>
-                </label>
-              </div>
-              
-              <label>Chief Complaint / Symptoms
-                <textarea name="chiefComplaint" rows="2" placeholder="Presenting symptoms and timeline" required></textarea>
-              </label>
-              <label>History of Presenting Illness
-                <textarea name="historyOfPresentingComplaint" rows="2" placeholder="Detailed history of symptoms"></textarea>
-              </label>
-              <label>Past Medical & Surgical History / Chronic Illnesses
-                <textarea name="pastMedicalHistory" rows="2" placeholder="PMH, drug history, past surgeries"></textarea>
-              </label>
-              <label>Clinical Examination & Findings
-                <textarea name="examinationFindings" rows="2" placeholder="Objective physical examination findings"></textarea>
-              </label>
-
-              <!-- Clinical Vitals & Social History -->
-              <div class="form-row" style="margin-top: 15px;">
-                <h4 style="width: 100%; margin-bottom: 5px; font-size: 13px; color: var(--brand-dark); font-weight: 700; text-transform: uppercase;">Clinical Vitals & Social History</h4>
-              </div>
-              <div class="vitals-grid compact" style="margin-bottom: 15px;">
-                <label>Temp (°C)<input type="number" step="0.1" name="temperature" placeholder="36.5" /></label>
-                <label>BP (mmHg)<input name="bp" placeholder="120/80" /></label>
-                <label>Pulse (bpm)<input type="number" name="pulse" placeholder="72" /></label>
-                <label>Resp (/min)<input type="number" name="respiration" placeholder="16" /></label>
-                <label>SpO2 (%)<input type="number" name="spo2" placeholder="98" /></label>
-                <label>Weight (kg)<input type="number" step="0.1" name="weight" placeholder="65" /></label>
-              </div>
-              <div class="form-row" style="margin-bottom: 15px;">
-                <label>Social History / Risk Factors
-                  <input type="text" name="socialHistory" placeholder="e.g. Non-smoker, occasional alcohol, active lifestyle" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:6px; margin-top:4px;" />
-                </label>
-              </div>
-              
-              <!-- ICD-11 Diagnosis Builder (Integrated) -->
-              <div class="icd11-module">
-                <span class="eyebrow" style="color:var(--brand); font-weight:600; margin-bottom:8px; display:block;">ICD-11 Interoperability Standard</span>
-                <label>Search ICD-11 Diagnosis
-                  <input type="text" id="consultationIcd11Search" placeholder="Type to search (e.g. malaria, forearm fracture, pre-eclampsia)..." autocomplete="off" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:6px; margin-top:4px;" />
-                </label>
-                <div id="consultationIcd11AutoSuggest" style="font-size:12px; margin-top:5px; margin-bottom:10px; display:none; background:#ecfdf5; padding:8px; border-radius:6px; border:1px solid #a7f3d0; color:#065f46;"></div>
-                <div id="consultationIcd11Results" class="icd11-search-results"></div>
-                
-                <div id="consultationIcd11Builder" class="icd11-builder" style="display: none;">
-                  <h4 style="margin:10px 0; font-size:14px; color:var(--brand-dark);">Post-Coordination Builder (Chapter 28)</h4>
-                  <div id="consultationIcd11Extensions" class="icd11-extensions-grid"></div>
-                  <div class="icd11-preview-box">
-                    <strong>Selected Code Expression:</strong>
-                    <code id="consultationIcd11ExpressionPreview">Unspecified</code>
-                    <br>
-                    <strong>Clinical Description:</strong>
-                    <span id="consultationIcd11DisplayPreview">Unspecified</span>
-                    <input type="hidden" name="icd11Code" id="consultationIcd11CodeHidden" />
-                    <input type="hidden" name="icd11Display" id="consultationIcd11DisplayHidden" />
-                  </div>
-                </div>
-              </div>
-
-              <label>Assessment & Impressions (Clinician Narrative)
-                <textarea name="assessment" rows="2" placeholder="Working assessment and differential diagnosis"></textarea>
-              </label>
-              <label>Plan & Management Notes
-                <textarea name="plan" rows="2" placeholder="Management protocol, follow-up, and warning signs"></textarea>
-              </label>
-
-              <!-- Repeatable Prescription Section -->
-              <div class="panel-inner" style="border:1px solid var(--line); border-radius:8px; padding:12px; margin-top:14px; background:#fbfcfc;">
-                <span class="eyebrow" style="margin-bottom:8px;">Prescription Gateway</span>
-                <div id="prescriptionList" style="display:grid; gap:8px; margin-bottom:10px;"></div>
-                <button type="button" class="secondary-btn" id="addPrescriptionBtn" style="min-height:32px; font-size:12px; padding:0 10px;">+ Add Medication</button>
-              </div>
-
-              <div class="button-row" style="margin-top:16px;">
-                <button class="primary-btn" type="submit">Submit & Process Billing</button>
-              </div>
-            </form>
-          </section>
-
-          <section class="panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Consultation database</span>
-                <h2>Consultation History</h2>
-              </div>
-            </div>
-            <div id="consultationList" class="record-list" style="max-height: 800px; overflow-y: auto;"></div>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('appointments')" type="button">← Back to Step 2: Booking</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('labresults')" type="button">Proceed to Step 4: Lab Results →</button>
-        </div>
-      </section>
-
-      <section id="clinical" class="view">
-        <div class="module-grid">
-          <article class="module-card"><span>TRI</span><h3>Triage</h3><p>Arrival time, vital signs, acuity, danger signs, queue routing.</p></article>
-          <article class="module-card"><span>OPD</span><h3>Outpatient</h3><p>SOAP notes, diagnosis, prescriptions, labs, follow-up.</p></article>
-          <article class="module-card"><span>EMR</span><h3>Emergency</h3><p>Resus notes, trauma, stroke/chest pain pathway, handover.</p></article>
-          <article class="module-card"><span>IPD</span><h3>Wards</h3><p>Admissions, nursing charts, ward rounds, discharge summaries.</p></article>
-          <article class="module-card"><span>LAB</span><h3>Laboratory</h3><p>Requests, specimen tracking, results, critical value alerts.</p></article>
-          <article class="module-card"><span>PHA</span><h3>Pharmacy</h3><p>Prescriptions, allergy checks, stock, dispensing, counselling.</p></article>
-          <article class="module-card"><span>RAD</span><h3>Radiology</h3><p>Imaging requests, reports, clinical indications, scheduling.</p></article>
-          <article class="module-card"><span>MAT</span><h3>ANC and Maternity</h3><p>ANC risk, labour, delivery, postnatal, PMTCT, referral alerts.</p></article>
-          <article class="module-card"><span>IMM</span><h3>Immunization</h3><p>Child schedule, defaulters, cold-chain notes, outreach line lists.</p></article>
-          <article class="module-card"><span>THR</span><h3>Theatre</h3><p>Procedure booking, consent, checklist, operative notes.</p></article>
-          <article class="module-card"><span>CLA</span><h3>Claims</h3><p>PLASCHEMA/NHIA eligibility, claim bundles, approvals, audit trail.</p></article>
-          <article class="module-card"><span>REF</span><h3>Referrals</h3><p>PHC-to-hospital escalation, feedback loop, transport notes.</p></article>
-        </div>
-
-        <section class="panel">
-          <div class="panel-head">
-            <div>
-              <span class="eyebrow">Clinical documentation</span>
-              <h2>New Encounter</h2>
-            </div>
-          </div>
-          <form id="encounterForm" class="encounter-form">
-            <label>Patient<select id="encounterPatient" name="patientId"></select></label>
-            <label>Facility<select id="encounterFacility" name="facilityId"></select></label>
-            <label>Unit<select name="unit"><option>OPD</option><option>Emergency</option><option>ANC</option><option>PHC</option><option>Ward</option><option>Theatre</option></select></label>
-            <label>Chief Complaint<textarea name="chiefComplaint" rows="3" placeholder="Presenting complaint and duration"></textarea></label>
-            <div class="vitals-grid">
-              <label>Temp<input name="temperature" type="number" step="0.1" placeholder="37.0" /></label>
-              <label>BP<input name="bp" placeholder="120/80" /></label>
-              <label>Pulse<input name="pulse" type="number" placeholder="80" /></label>
-              <label>Resp<input name="respiration" type="number" placeholder="18" /></label>
-              <label>SpO2<input name="spo2" type="number" placeholder="98" /></label>
-              <label>Weight<input name="weight" type="number" step="0.1" placeholder="70" /></label>
-            </div>
-            <label>Assessment<textarea name="assessment" rows="3" placeholder="Working diagnosis and clinical reasoning"></textarea></label>
-            
-            <!-- ICD-11 Coding Module -->
-            <div class="icd11-module">
-              <span class="eyebrow" style="color:var(--brand); font-weight:600; margin-bottom:8px; display:block;">ICD-11 Interoperability Standard</span>
-               <label>Search ICD-11 Diagnosis
-                 <input type="text" id="icd11Search" placeholder="Type to search (e.g. malaria, forearm fracture, pre-eclampsia)..." autocomplete="off" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:6px; margin-top:4px;" />
-               </label>
-               <div id="encounterIcd11AutoSuggest" style="font-size:12px; margin-top:5px; margin-bottom:10px; display:none; background:#ecfdf5; padding:8px; border-radius:6px; border:1px solid #a7f3d0; color:#065f46;"></div>
-               <div id="icd11Results" class="icd11-search-results"></div>
-              
-              <div id="icd11Builder" class="icd11-builder" style="display: none;">
-                <h4 style="margin:10px 0; font-size:14px; color:var(--brand-dark);">Post-Coordination Builder (Chapter 28)</h4>
-                <div id="icd11Extensions" class="icd11-extensions-grid"></div>
-                <div class="icd11-preview-box">
-                  <strong>Selected Code Expression:</strong>
-                  <code id="icd11ExpressionPreview">Unspecified</code>
-                  <br>
-                  <strong>Clinical Description:</strong>
-                  <span id="icd11DisplayPreview">Unspecified</span>
-                  <input type="hidden" name="icd11Code" id="icd11CodeHidden" />
-                  <input type="hidden" name="icd11Display" id="icd11DisplayHidden" />
-                </div>
-              </div>
-            </div>
-            
-            <label>Plan<textarea name="plan" rows="3" placeholder="Investigations, treatment, counselling, referral, follow-up"></textarea></label>
-            <div class="button-row">
-              <button class="primary-btn" type="submit">Save Encounter</button>
-              <button class="secondary-btn" id="scrubEncounterBtn" type="button">Scrub Before Save</button>
-            </div>
-          </form>
-        </section>
-      </section>
-
-      <section id="phc" class="view">
-        <div class="split-grid">
-          <section class="panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Primary care</span>
-                <h2>PHC Operating Model</h2>
-              </div>
-            </div>
-            <div class="workflow">
-              <div><strong>1. Community capture</strong><span>Registration, household, risk group, insurance.</span></div>
-              <div><strong>2. Triage and PHC care</strong><span>Vitals, malaria, ANC, immunization, minor ailments.</span></div>
-              <div><strong>3. Referral escalation</strong><span>Danger signs routed to general/specialist hospitals.</span></div>
-              <div><strong>4. Feedback and follow-up</strong><span>Hospital outcome returns to PHC for continuity.</span></div>
-              <div><strong>5. State reporting</strong><span>Routine indicators, outbreak signals, stock and quality.</span></div>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Stock</span>
-                <h2>PHC Supply Alerts</h2>
-              </div>
-            </div>
-            <div id="inventoryList" class="record-list"></div>
-          </section>
-        </div>
-      </section>
-
-      <section id="orders" class="view">
-        <div class="split-grid wide-left">
-          <section class="panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Diagnostics and treatment</span>
-                <h2>Orders Queue</h2>
-              </div>
-            </div>
-            <div id="ordersTable" class="table-wrap"></div>
-          </section>
-          <section class="panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Quick order</span>
-                <h2>Create Order</h2>
-              </div>
-            </div>
-            <form id="orderForm" class="stack-form">
-              <label>Patient<select id="orderPatient" name="patientId"></select></label>
-              <label>Facility<select id="orderFacility" name="facilityId"></select></label>
-              <label>Type<select name="type"><option>Laboratory</option><option>Pharmacy</option><option>Radiology</option><option>Referral</option><option>Procedure</option></select></label>
-              <label>Item<textarea name="item" rows="3" placeholder="Order details"></textarea></label>
-              <label>Priority<select name="priority"><option>Routine</option><option>Urgent</option><option>Emergency</option></select></label>
-              <button class="primary-btn" type="submit">Create Order</button>
-            </form>
-          </section>
-        </div>
-      </section>
-
-      <section id="support" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link active" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
-        </div>
-        <div class="split-grid">
-          <section class="panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Clinical Documentation Audit</span>
-                <h2>Clinical Note Quality Check</h2>
-              </div>
-            </div>
-            <form id="supportScrubForm" class="stack-form">
-              <label>Chief Complaint
-                <textarea name="chiefComplaint" rows="3" placeholder="Enter the patient's presenting complaint (e.g. headache, shortness of breath, fever, chest pain...)"></textarea>
-              </label>
-              <div class="vitals-grid compact">
-                <label>Temp (°C)<input name="temperature" placeholder="e.g. 37.2" /></label>
-                <label>BP (mmHg)<input name="bp" placeholder="e.g. 120/80" /></label>
-                <label>Pulse (bpm)<input name="pulse" placeholder="e.g. 80" /></label>
-                <label>Resp (/min)<input name="respiration" placeholder="e.g. 18" /></label>
-                <label>SpO2 (%)<input name="spo2" placeholder="e.g. 98" /></label>
-              </div>
-              <label>Assessment / Working Diagnosis
-                <textarea name="assessment" rows="3" placeholder="Enter your working assessment and differential diagnoses..."></textarea>
-              </label>
-              <label>Management Plan
-                <textarea name="plan" rows="3" placeholder="Enter your management plan, investigations requested, and follow-up..."></textarea>
-              </label>
-              <button class="primary-btn" type="submit">Run Medical Scrub</button>
-            </form>
-          </section>
-
-          <section class="panel">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Doctor inquiry</span>
-                <h2>Ask Clinical Support</h2>
-              </div>
-            </div>
-            <form id="supportInquiryForm" class="stack-form">
-              <label>Clinical Question
-                <textarea name="question" rows="5" placeholder="Ask a clinical question (e.g. What are the referral criteria for severe malaria? What vitals trigger a pre-eclampsia referral? How do I manage a neonate with suspected sepsis?)..."></textarea>
-              </label>
-              <button class="primary-btn" type="submit">Ask Inquiry</button>
-            </form>
-            <div id="supportOutput" class="ai-output"></div>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('billing')" type="button">← Back to Step 6: Billing</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('dashboard')" type="button">📋 Finish Journey (Back to Hub) ✓</button>
-        </div>
-      </section>
-
-      <section id="reports" class="view">
-        <div class="report-grid">
-          <section class="panel">
-            <span class="eyebrow">Quality</span>
-            <h2>Clinical Quality Indicators</h2>
-            <div id="qualityList" class="quality-list"></div>
-          </section>
-          <section class="panel">
-            <span class="eyebrow">State reporting</span>
-            <h2>Facility Performance</h2>
-            <div id="facilityReport" class="table-wrap"></div>
-          </section>
-        </div>
-      </section>
-
-      <section id="billing" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link active" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
-        </div>
-        <div class="metric-grid">
-          <article class="metric">
-            <span>Outstanding Billing</span>
-            <strong id="billingOutstanding">₦0</strong>
-            <small>Pending patient balances</small>
-          </article>
-          <article class="metric">
-            <span>Collected / Paid</span>
-            <strong id="billingCollected" style="color: var(--success);">₦0</strong>
-            <small>Total revenue collected</small>
-          </article>
-          <article class="metric">
-            <span>Insurance Claims</span>
-            <strong id="billingClaims" style="color: var(--blue);">₦0</strong>
-            <small>Pending insurance payouts</small>
-          </article>
-          <article class="metric">
-            <span>Total Bills Issued</span>
-            <strong id="billingTotal">₦0</strong>
-            <small>Cumulative services billed</small>
-          </article>
-        </div>
-
-        <div class="panel">
-          <div class="panel-head">
-            <div>
-              <span class="eyebrow">Billing ledger gateway</span>
-              <h2>Patient Accounts & Invoices</h2>
-            </div>
-            <input id="billingSearch" class="search-input" type="search" placeholder="Search by patient name, ID, service..." style="max-width:300px;" />
-          </div>
-          <div id="billingTable" class="table-wrap">
-            <p style="text-align: center; color: var(--muted); padding: 20px;">No billing invoices found.</p>
-          </div>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('beds')" type="button">← Back to Step 5: Ward & Beds</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('support')" type="button">Proceed to Step 7: Decision Support & Discharge →</button>
-        </div>
-      </section>
-
-      <!-- ── Appointments View ──────────────────────────────── -->
-      <section id="appointments" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link active" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
-        </div>
-        <div class="split-grid wide-left">
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Schedule</span><h2>Appointment Calendar</h2></div>
-              <button class="text-btn" id="newAptBtn" type="button">+ New Appointment</button>
-            </div>
-            <div id="appointmentsTable" class="table-wrap"></div>
-          </section>
-          <section class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Quick book</span><h2>Book Appointment</h2></div></div>
-            <form id="appointmentForm" class="stack-form">
-              <label>Patient<select id="aptPatient" name="patientId"></select></label>
-              <label>Facility<select id="aptFacility" name="facilityId"></select></label>
-              <label>Department<select name="department"><option>OPD</option><option>ANC</option><option>Emergency</option><option>Laboratory</option><option>Pharmacy</option><option>Radiology</option><option>Paediatrics</option><option>Surgery</option><option>Theatre</option></select></label>
-              <label>Doctor / Clinician<input name="doctor" placeholder="Dr. Name / Nurse Name" /></label>
-              <div class="form-row">
-                <label>Date<input name="date" type="date" required /></label>
-                <label>Time<input name="time" type="time" value="08:00" /></label>
-              </div>
-              <label>Reason<textarea name="reason" rows="2" placeholder="Reason for appointment"></textarea></label>
-              <button class="primary-btn" type="submit">Book Appointment</button>
-            </form>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('patients')" type="button">← Back to Step 1: Intake</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('consultations')" type="button">Proceed to Step 3: Consultation →</button>
-        </div>
-      </section>
-
-      <!-- ── Lab Results View ───────────────────────────────── -->
-      <section id="labresults" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link active" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
-        </div>
-        <div class="split-grid wide-left">
-          <section class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Diagnostics</span><h2>Laboratory Results</h2></div></div>
-            <div id="labResultsTable" class="table-wrap"></div>
-          </section>
-          <section class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Enter result</span><h2>Record Lab Result</h2></div></div>
-            <form id="labResultForm" class="stack-form">
-              <label>Patient<select id="labPatient" name="patientId"></select></label>
-              <label>Linked Order (optional)<select id="labOrder" name="orderId"><option value="">-- None --</option></select></label>
-              <label>Facility<select id="labFacility" name="facilityId"></select></label>
-              <div id="labTestRows" style="display:flex;flex-direction:column;gap:10px;margin:4px 0;"></div>
-              <button type="button" class="secondary-btn" id="addLabTestBtn" style="margin-bottom:8px;">+ Add Test Result</button>
-              <label>Technician Name<input name="technician" placeholder="Lab Tech name" /></label>
-              <label>Notes<textarea name="notes" rows="2" placeholder="Any additional notes or flags"></textarea></label>
-              <button class="primary-btn" type="submit">Save Lab Results</button>
-            </form>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('consultations')" type="button">← Back to Step 3: Consult</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('beds')" type="button">Proceed to Step 5: Wards & Beds →</button>
-        </div>
-      </section>
-
-      <!-- ── Beds / Ward View ──────────────────────────────── -->
-      <section id="beds" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link active" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
-        </div>
-        <div class="panel">
-          <div class="panel-head">
-            <div><span class="eyebrow">Inpatient management</span><h2>Ward & Bed Census</h2></div>
-            <div style="display:flex;gap:8px;">
-              <span class="badge success" style="padding:6px 12px;">🟢 Vacant</span>
-              <span class="badge danger" style="padding:6px 12px;">🔴 Occupied</span>
-              <span class="badge warning" style="padding:6px 12px;">🟡 Maintenance</span>
-            </div>
-          </div>
-          <div id="bedGrid" class="bed-grid"></div>
-        </div>
-        <div class="split-grid" style="margin-top:16px;">
-          <section class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Admit patient</span><h2>Bed Admission</h2></div></div>
-            <form id="admitForm" class="stack-form">
-              <label>Patient<select id="admitPatient" name="patientId"></select></label>
-              <label>Bed<select id="admitBed" name="bedId"></select></label>
-              <label>Admission Diagnosis<input name="diagnosis" placeholder="Admitting diagnosis" required /></label>
-              <button class="primary-btn" type="submit">Admit Patient</button>
-            </form>
-          </section>
-          <section class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Active admissions</span><h2>Current Inpatients</h2></div></div>
-            <div id="admissionsList" class="record-list"></div>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('labresults')" type="button">← Back to Step 4: Lab Results</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('billing')" type="button">Proceed to Step 6: Billing →</button>
-        </div>
-      </section>
-
-      <!-- ── Analytics View ────────────────────────────────── -->
-      <section id="analytics" class="view">
-        <div class="split-grid" style="margin-bottom:16px;">
-          <section class="panel" style="padding:20px;">
-            <span class="eyebrow">Disease Burden by LGA</span>
-            <h2 style="margin:4px 0 16px;">Surveillance Overview</h2>
-            <canvas id="chartDisease" height="220"></canvas>
-          </section>
-          <section class="panel" style="padding:20px;">
-            <span class="eyebrow">Insurance Coverage</span>
-            <h2 style="margin:4px 0 16px;">Coverage Distribution</h2>
-            <canvas id="chartInsurance" height="220"></canvas>
-          </section>
-        </div>
-        <div class="split-grid">
-          <section class="panel" style="padding:20px;">
-            <span class="eyebrow">Patient Registration Trend</span>
-            <h2 style="margin:4px 0 16px;">Registrations by Month</h2>
-            <canvas id="chartRegistrations" height="220"></canvas>
-          </section>
-          <section class="panel" style="padding:20px;">
-            <span class="eyebrow">Billing Status</span>
-            <h2 style="margin:4px 0 16px;">Revenue Breakdown</h2>
-            <canvas id="chartBilling" height="220"></canvas>
-          </section>
-        </div>
-      </section>
-
-      <!-- ── Triage View ───────────────────────────────────── -->
-      <!-- ── Triage & Emergency View ──────────────────────── -->
-      <section id="triage" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link active" data-step-view="triage"><span class="step-num">2</span> Triage &amp; A&amp;E</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward &amp; Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support &amp; Discharge</button>
-        </div>
-
-        <!-- Combined Command Header / Sub-tabs -->
-        <div class="command-tabs">
-          <button type="button" class="command-tab-btn active" id="tabTriageBtn" onclick="switchTriageSubTab('triage')">🩺 Standard Triage Intake</button>
-          <button type="button" class="command-tab-btn" id="tabEmergencyBtn" onclick="switchTriageSubTab('emergency')">🚨 A&amp;E Emergency Resus Bay</button>
-        </div>
-
-        <div class="split-grid wide-left">
-          <!-- Combined Queue List -->
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">A&amp;E &amp; Triage Queue</span><h2>Active Patient Board</h2></div>
-            </div>
-            <div id="combinedQueueTable" class="table-wrap">
-              <p style="padding:20px;color:var(--muted);text-align:center;">No patients in queue.</p>
-            </div>
-          </section>
-
-          <!-- Forms Area (Switches based on active sub-tab) -->
-          <section class="panel">
-            <!-- Tab 1: Triage Form -->
-            <div id="formSubTriage">
-              <div class="panel-head">
-                <div><span class="eyebrow">Intake check</span><h2>Record Patient Triage</h2></div>
-              </div>
-              <form id="triagePageForm" class="stack-form">
-                <label>Patient<select id="triPatient" name="patientId"></select></label>
-                <label>Facility<select id="triFacility" name="facilityId"></select></label>
-                <div class="vitals-grid">
-                  <label>Temp (°C)<input name="temperature" type="number" step="0.1" placeholder="37.0" required /></label>
-                  <label>BP (mmHg)<input name="bp" placeholder="120/80" required /></label>
-                  <label>Pulse (bpm)<input name="pulse" type="number" placeholder="80" required /></label>
-                  <label>Resp (/min)<input name="respiration" type="number" placeholder="18" required /></label>
-                  <label>SpO2 (%)<input name="spo2" type="number" placeholder="98" required /></label>
-                  <label>Weight (kg)<input name="weight" type="number" step="0.1" placeholder="70" /></label>
-                </div>
-                <label>Triage Priority
-                  <select name="status" required>
-                    <option value="Open">Routine / Non-urgent (Green)</option>
-                    <option value="Urgent">Urgent (Yellow)</option>
-                    <option value="Urgent">Very Urgent (Orange)</option>
-                    <option value="Emergency">Immediate Resuscitation (Red)</option>
-                  </select>
-                </label>
-                <label>Chief Complaint / Symptoms
-                  <textarea name="chiefComplaint" rows="2" placeholder="Symptom list, duration, danger signs..." required></textarea>
-                </label>
-                <label>Nursing Assessment Notes
-                  <textarea name="assessment" rows="2" placeholder="Primary survey findings..."></textarea>
-                </label>
-                <button class="primary-btn" type="submit">Complete Triage</button>
-              </form>
-            </div>
-
-            <!-- Tab 2: A&E Emergency Form -->
-            <div id="formSubEmergency" style="display: none;">
-              <div class="panel-head">
-                <div><span class="eyebrow">Trauma bay</span><h2>Emergency Resus Bay Intake</h2></div>
-              </div>
-              <form id="emergencyPageForm" class="stack-form">
-                <label>Patient<select id="emrPatient" name="patientId"></select></label>
-                <label>Facility<select id="emrFacility" name="facilityId"></select></label>
-                <div class="vitals-grid">
-                  <label>Temp (°C)<input name="temperature" type="number" step="0.1" placeholder="37.0" /></label>
-                  <label>BP (mmHg)<input name="bp" placeholder="120/80" required /></label>
-                  <label>Pulse (bpm)<input name="pulse" type="number" placeholder="90" required /></label>
-                  <label>Resp (/min)<input name="respiration" type="number" placeholder="22" required /></label>
-                  <label>SpO2 (%)<input name="spo2" type="number" placeholder="95" required /></label>
-                  <label>Weight (kg)<input name="weight" type="number" step="0.1" placeholder="70" /></label>
-                </div>
-                <div class="form-row">
-                  <label>Acuity Level
-                    <select name="status" required>
-                      <option value="Emergency">Immediate Resuscitation (Red)</option>
-                      <option value="Urgent">Very Urgent (Orange)</option>
-                    </select>
-                  </label>
-                  <label>Glasgow Coma Scale (GCS)
-                    <select name="gcs" required>
-                      <option value="15">15 — Fully Awake</option>
-                      <option value="14">14 — Mild Impairment</option>
-                      <option value="13">13 — Mild Impairment</option>
-                      <option value="12">12 — Moderate Impairment</option>
-                      <option value="11">11 — Moderate Impairment</option>
-                      <option value="10">10 — Moderate Impairment</option>
-                      <option value="9">9 — Moderate Impairment</option>
-                      <option value="8">8 — Severe Injury (Comatose)</option>
-                      <option value="7">7 — Severe Injury (Comatose)</option>
-                      <option value="6">6 — Severe Injury (Comatose)</option>
-                      <option value="5">5 — Severe Injury (Comatose)</option>
-                      <option value="4">4 — Severe Injury (Comatose)</option>
-                      <option value="3">3 — Brain Death / No Response</option>
-                    </select>
-                  </label>
-                </div>
-                <label>Injury Category / Presenting Emergency
-                  <select name="chiefComplaint" required>
-                    <option value="Road Traffic Accident (RTA) / Major Trauma">Road Traffic Accident (RTA) / Major Trauma</option>
-                    <option value="Gunshot / Penetrating Wound">Gunshot / Penetrating Wound</option>
-                    <option value="Acute Coronary Syndrome (ACS) / Chest Pain">Acute Coronary Syndrome (ACS) / Chest Pain</option>
-                    <option value="Acute Ischemic Stroke / Neurological deficit">Acute Ischemic Stroke / Neurological Deficit</option>
-                    <option value="Severe Respiratory Distress / Sepsis shock">Severe Respiratory Distress / Shock</option>
-                    <option value="Obstetric Emergency / Postpartum Hemorrhage">Obstetric Emergency / Hemorrhage</option>
-                  </select>
-                </label>
-                <label>Primary ABCDE Survey Findings
-                  <textarea name="assessment" rows="2" placeholder="Airway patent, breathing shallow, pulse thready, pupils reactive..." required></textarea>
-                </label>
-                <label>Immediate Resus Plan
-                  <textarea name="plan" rows="2" placeholder="IV fluids, oxygen, type &amp; match blood, notify surgeon..." required></textarea>
-                </label>
-                <button class="primary-btn danger-btn" type="submit" style="background:#dc2626;border-color:#b91c1c;">Complete Emergency Intake</button>
-              </form>
-            </div>
-          </section>
-        </div>
-
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('patients')" type="button">← Back to Step 1: Intake</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('consultations')" type="button">Proceed to Step 3: Consultation →</button>
-        </div>
-      </section>
-
-      <!-- ── Pharmacy View ─────────────────────────────────── -->
-      <section id="pharmacy" class="view">
-        <div class="split-grid wide-left">
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Pharmacist ledger</span><h2>Dispensed Prescriptions Log</h2></div>
-            </div>
-            <div id="pharmacyLogTable" class="table-wrap">
-              <p style="padding:20px;color:var(--muted);text-align:center;">No dispensed logs.</p>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Dispensing gateway</span><h2>Dispense Medication</h2></div>
-            </div>
-            <form id="pharmacyPageForm" class="stack-form">
-              <label>Patient<select id="phaPatient" name="patientId"></select></label>
-              <label>Facility<select id="phaFacility" name="facilityId"></select></label>
-              <label>Drug Class
-                <select name="drugCategory" required>
-                  <option>Antimalarials</option><option>Antibiotics</option><option>Antihypertensives</option><option>Analgesics</option><option>Endocrine/Insulin</option><option>IV Fluids</option>
-                </select>
-              </label>
-              <label>Specific Drug, Dose &amp; Formulation
-                <input name="chiefComplaint" placeholder="e.g. Artemether-Lumefantrine 80/480mg tabs" required />
-              </label>
-              <label>Dispensing Status
-                <select name="status">
-                  <option value="Closed">Fully Dispensed</option>
-                  <option value="Open">Pending — Awaiting Stock</option>
-                  <option value="Urgent">Partial Dispense</option>
-                </select>
-              </label>
-              <label>Allergy Check &amp; Safety Verification
-                <textarea name="assessment" rows="2" placeholder="Allergies verified, drug interactions checked..." required></textarea>
-              </label>
-              <label>Dispensing, Counselling &amp; Adherence Instructions
-                <textarea name="plan" rows="2" placeholder="Take with food, avoid alcohol, finish dose..." required></textarea>
-              </label>
-              <button class="primary-btn" type="submit">Confirm Dispensing &amp; Generate Invoice</button>
-            </form>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('clinical')" type="button">← Back to Clinical Units</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('billing')" type="button">Proceed to Step 6: Billing →</button>
-        </div>
-      </section>
-
-      <!-- ── Radiology View ────────────────────────────────── -->
-      <section id="radiology" class="view">
-        <div class="split-grid wide-left">
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Imaging logs</span><h2>Radiology Reports &amp; Requests</h2></div>
-            </div>
-            <div id="radiologyLogTable" class="table-wrap">
-              <p style="padding:20px;color:var(--muted);text-align:center;">No radiology cases reported.</p>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Scan request</span><h2>Record Imaging Study</h2></div>
-            </div>
-            <form id="radiologyPageForm" class="stack-form">
-              <label>Patient<select id="radPatient" name="patientId"></select></label>
-              <label>Facility<select id="radFacility" name="facilityId"></select></label>
-              <label>Imaging Modality / Study
-                <select name="chiefComplaint" required>
-                  <option>Chest X-Ray PA View (CXR)</option>
-                  <option>Abdominal X-Ray (Erect/Supine)</option>
-                  <option>Obstetric Ultrasound (Dating/Anomaly Scan)</option>
-                  <option>Pelvic Ultrasound</option>
-                  <option>CT Head (Plain/Contrast)</option>
-                  <option>CT Spine</option>
-                  <option>MRI Brain</option>
-                  <option>MRI Spine</option>
-                  <option>Mammography</option>
-                </select>
-              </label>
-              <label>Priority
-                <select name="status">
-                  <option value="Open">Routine (Elective)</option>
-                  <option value="Urgent">Urgent (Same Day)</option>
-                  <option value="Emergency">Emergency (Immediate)</option>
-                </select>
-              </label>
-              <label>Clinical Indication &amp; Question for Radiologist
-                <textarea name="assessment" rows="2" placeholder="e.g. Rule out pneumonia, exclude fracture, check gestational age..." required></textarea>
-              </label>
-              <label>Radiologist Preliminary Findings
-                <textarea name="plan" rows="2" placeholder="Bilateral lung fields clear, no focal consolidation..." required></textarea>
-              </label>
-              <button class="primary-btn" type="submit">Submit Radiology Case</button>
-            </form>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('clinical')" type="button">← Back to Clinical Units</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('labresults')" type="button">Proceed to Step 4: Lab Results →</button>
-        </div>
-      </section>
-
-      <!-- ── ANC & Maternity View ──────────────────────────── -->
-      <section id="maternity" class="view">
-        <div class="split-grid wide-left">
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Registry</span><h2>Maternal Risk Register</h2></div>
-            </div>
-            <div id="maternityLogTable" class="table-wrap">
-              <p style="padding:20px;color:var(--muted);text-align:center;">No maternal records logged.</p>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Prenatal check</span><h2>ANC Booking &amp; Labour</h2></div>
-            </div>
-            <form id="maternityPageForm" class="stack-form">
-              <label>Patient<select id="matPatient" name="patientId"></select></label>
-              <label>Facility<select id="matFacility" name="facilityId"></select></label>
-              <div class="form-row">
-                <label>Visit Type
-                  <select name="visitType" required>
-                    <option>ANC Visit 1 (Booking)</option>
-                    <option>ANC Follow-up (General)</option>
-                    <option>Labour Admission</option>
-                    <option>Immediate Postnatal</option>
-                  </select>
-                </label>
-                <label>Parity / Gravity<input name="parity" placeholder="e.g. G3P2+0" required /></label>
-              </div>
-              <div class="vitals-grid">
-                <label>BP<input name="bp" placeholder="120/80" required /></label>
-                <label>Temp<input name="temperature" type="number" step="0.1" placeholder="36.5" required /></label>
-                <label>GA (weeks)<input name="ga" type="number" placeholder="28" required /></label>
-                <label>FHR (bpm)<input name="fhr" type="number" placeholder="140" /></label>
-                <label>Fundal Ht (cm)<input name="fundal" type="number" placeholder="28" /></label>
-                <label>Weight (kg)<input name="weight" type="number" step="0.1" placeholder="70" /></label>
-              </div>
-              <label>Maternal Complaints / Presentation
-                <textarea name="chiefComplaint" rows="2" placeholder="ANC check, pre-eclampsia screening, active labour..." required></textarea>
-              </label>
-              <label>Obstetric Assessment &amp; Risks
-                <textarea name="assessment" rows="2" placeholder="Fetal lie, presentation, fetal heart rate stable, urine protein negative..." required></textarea>
-              </label>
-              <label>Management &amp; Counselling Plan
-                <textarea name="plan" rows="2" placeholder="Prophylactic supplements given, routine lab tests ordered, delivery plan discussed..."></textarea>
-              </label>
-              <button class="primary-btn" type="submit">Save ANC Record</button>
-            </form>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('clinical')" type="button">← Back to Clinical Units</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('dashboard')" type="button">📋 Exit to Hub</button>
-        </div>
-      </section>
-
-      <!-- ── Immunization View ──────────────────────────────── -->
-      <section id="immunization" class="view">
-        <div class="split-grid wide-left">
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Child ledger</span><h2>Immunization Log</h2></div>
-            </div>
-            <div id="immunizationLogTable" class="table-wrap">
-              <p style="padding:20px;color:var(--muted);text-align:center;">No vaccination records logged.</p>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Record dose</span><h2>Administer Vaccine</h2></div>
-            </div>
-            <form id="immunizationPageForm" class="stack-form">
-              <label>Patient<select id="immPatient" name="patientId"></select></label>
-              <label>Facility<select id="immFacility" name="facilityId"></select></label>
-              <div class="form-row">
-                <label>Antigen / Vaccine
-                  <select name="chiefComplaint" required>
-                    <option>BCG (TB) — At Birth</option>
-                    <option>OPV0 (Polio) — At Birth</option>
-                    <option>OPV1 / Pentavalent 1 (6 Weeks)</option>
-                    <option>OPV2 / Pentavalent 2 (10 Weeks)</option>
-                    <option>OPV3 / Pentavalent 3 / IPV / PCV (14 Weeks)</option>
-                    <option>Measles Dose 1 / Yellow Fever (9 Months)</option>
-                    <option>Measles Dose 2 / Meningitis (15 Months)</option>
-                    <option>Tetanus Toxoid (TT) — Maternal</option>
-                  </select>
-                </label>
-                <label>Series / Dose Status
-                  <select name="status">
-                    <option value="Open">Primary Dose 1</option>
-                    <option value="Open">Primary Dose 2</option>
-                    <option value="Open">Primary Dose 3</option>
-                    <option value="Closed">Fully Completed Schedule</option>
-                  </select>
-                </label>
-              </div>
-              <label>Clinical Status &amp; Contraindications
-                <textarea name="assessment" rows="2" placeholder="Weight, temperature normal, no contraindications detected..." required></textarea>
-              </label>
-              <label>Schedule &amp; Defaulter Prevention
-                <textarea name="plan" rows="2" placeholder="Next dose scheduled, caregiver advised on routine return..." required></textarea>
-              </label>
-              <button class="primary-btn" type="submit">Record Vaccine Dose</button>
-            </form>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('clinical')" type="button">← Back to Clinical Units</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('dashboard')" type="button">📋 Exit to Hub</button>
-        </div>
-      </section>
-
-      <!-- ── Theatre View ──────────────────────────────────── -->
-      <section id="theatre" class="view">
-        <div class="split-grid wide-left">
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Operative calendar</span><h2>Surgical Operations Log</h2></div>
-            </div>
-            <div id="theatreLogTable" class="table-wrap">
-              <p style="padding:20px;color:var(--muted);text-align:center;">No surgical records logged.</p>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Booking check</span><h2>Book Operative Procedure</h2></div>
-            </div>
-            <form id="theatrePageForm" class="stack-form">
-              <label>Patient<select id="thrPatient" name="patientId"></select></label>
-              <label>Facility<select id="thrFacility" name="facilityId"></select></label>
-              <div class="form-row">
-                <label>Procedure Category
-                  <select name="procedureCategory" required>
-                    <option>Caesarean Section (LSCS)</option>
-                    <option>Appendicectomy</option>
-                    <option>Hernia Repair</option>
-                    <option>Exploratory Laparotomy</option>
-                    <option>Reduction &amp; Fixation (POP/ORIF)</option>
-                    <option>Debridement &amp; Lavage</option>
-                  </select>
-                </label>
-                <label>Anaesthesia Type
-                  <select name="anaesthesia" required>
-                    <option>Spinal Block (SAB)</option>
-                    <option>General Anaesthesia (GA)</option>
-                    <option>Ketamine IV Dissociative</option>
-                    <option>Local Infiltration</option>
-                  </select>
-                </label>
-              </div>
-              <label>Specific Procedure Name
-                <input name="chiefComplaint" placeholder="Exploratory Laparotomy + Peritoneal Lavage" required />
-              </label>
-              <label>WHO Safety Checklist Status
-                <textarea name="assessment" rows="2" placeholder="Patient identity confirmed, consent verified, pulse oximeter functional, surgical site marked..." required></textarea>
-              </label>
-              <label>Post-Op Care &amp; Discharge Plan
-                <textarea name="plan" rows="2" placeholder="Transfer to recovery room, vitals monitoring, analgesia schedule..."></textarea>
-              </label>
-              <button class="primary-btn" type="submit">Book Procedure &amp; Bill</button>
-            </form>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('clinical')" type="button">← Back to Clinical Units</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('dashboard')" type="button">📋 Exit to Hub</button>
-        </div>
-      </section>
-
-      <!-- ── Referrals View ────────────────────────────────── -->
-      <section id="referrals" class="view">
-        <div class="split-grid wide-left">
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Continuity ledger</span><h2>Outbound Referral Log</h2></div>
-            </div>
-            <div id="referralsLogTable" class="table-wrap">
-              <p style="padding:20px;color:var(--muted);text-align:center;">No outpatient referrals issued.</p>
-            </div>
-          </section>
-          <section class="panel">
-            <div class="panel-head">
-              <div><span class="eyebrow">Continuity transfer</span><h2>Issue Referral Transfer</h2></div>
-            </div>
-            <form id="referralsPageForm" class="stack-form">
-              <label>Patient<select id="refPatient" name="patientId"></select></label>
-              <label>Facility<select id="refFacility" name="facilityId"></select></label>
-              <label>Receiving Facility
-                <select name="destination" required>
-                  <option>Jos University Teaching Hospital (JUTH)</option>
-                  <option>Plateau State Specialist Hospital (PSSH)</option>
-                  <option>Federal Medical Centre (FMC) Wase</option>
-                  <option>General Hospital Mangu</option>
-                  <option>General Hospital Shendam</option>
-                  <option>General Hospital Barkin Ladi</option>
-                </select>
-              </label>
-              <label>Reason for Referral
-                <select name="chiefComplaint" required>
-                  <option value="Severe pre-eclampsia — requires urgent stabilisation">Severe pre-eclampsia</option>
-                  <option value="Severe malaria with complications">Severe malaria with complications</option>
-                  <option value="Emergency surgical intervention required">Emergency surgical intervention</option>
-                  <option value="Neonatal intensive care required">Neonatal intensive care required</option>
-                  <option value="Specialist review — chronic disease management">Specialist review — chronic disease</option>
-                </select>
-              </label>
-              <label>Clinical Status at Transfer
-                <textarea name="assessment" rows="2" placeholder="BP 160/110, urine protein ++, IV access secured..." required></textarea>
-              </label>
-              <label>Transfer &amp; Feedback Plan
-                <textarea name="plan" rows="2" placeholder="State ambulance dispatched, receiving physician alerted..." required></textarea>
-              </label>
-              <button class="primary-btn" type="submit">Confirm &amp; Log Transfer</button>
-            </form>
-          </section>
-        </div>
-        <div class="onboarding-footer">
-          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('clinical')" type="button">← Back to Clinical Units</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('dashboard')" type="button">📋 Exit to Hub</button>
-        </div>
-      </section>
-
-    </main>
-  </div>
-
-  <!-- ── Patient Timeline Modal ────────────────────────────── -->
-  <div id="timelineModal" class="modal-overlay" style="display:none;">
-    <div class="modal-content" style="max-width:780px;">
-      <div class="modal-header">
-        <h3 id="timelineModalTitle">Patient Timeline</h3>
-        <button type="button" onclick="document.getElementById('timelineModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
-      </div>
-      <div class="modal-body" id="timelineModalBody" style="padding:20px;"></div>
+    <div class="portal-cards">
+      <a class="pcard patient" href="portal.html">
+        <div class="pcard-icon">🏥</div>
+        <h2>Patient Portal</h2>
+        <p>View your health history, appointments, lab results, prescriptions, and billing — all in one place.</p>
+        <span class="pcard-btn">Access Patient Portal →</span>
+      </a>
+      <a class="pcard admin" href="admin.html">
+        <div class="pcard-icon">⚕️</div>
+        <h2>Clinical Staff</h2>
+        <p>EHR command centre for doctors, nurses, administrators, and health records officers.</p>
+        <span class="pcard-btn">Staff Sign In →</span>
+      </a>
     </div>
+  </section>
+
+  <!-- ── STATS ─────────────────────────────────────── -->
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Health Facilities</div></div>
+    <div class="stat"><div class="stat-num">ICD-11</div><div class="stat-label">Diagnosis Standard</div></div>
+    <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">System Availability</div></div>
+    <div class="stat"><div class="stat-num">NHIA</div><div class="stat-label">Insurance Integrated</div></div>
   </div>
 
-  <!-- ── EWS / Sepsis Alert Modal ──────────────────────────── -->
-  <div id="ewsModal" class="modal-overlay" style="display:none;">
-    <div class="modal-content" style="max-width:560px;">
-      <div class="modal-header">
-        <h3>⚠️ Early Warning Score (Sepsis Risk)</h3>
-        <button type="button" onclick="document.getElementById('ewsModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
-      </div>
-      <div class="modal-body" id="ewsModalBody" style="padding:20px;"></div>
+  <!-- ── FEATURES ──────────────────────────────────── -->
+  <section class="features" id="features">
+    <div class="features-header">
+      <h2>Everything in One System</h2>
+      <p>Designed for Plateau State's unique health landscape — from referral hospitals to rural PHCs.</p>
     </div>
-  </div>
-
-  <!-- ── Drug Checker Modal ────────────────────────────────── -->
-  <div id="drugModal" class="modal-overlay" style="display:none;">
-    <div class="modal-content" style="max-width:540px;">
-      <div class="modal-header">
-        <h3>💊 Drug Interaction & Allergy Check</h3>
-        <button type="button" onclick="document.getElementById('drugModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
-      </div>
-      <div class="modal-body" style="padding:20px;">
-        <form id="drugCheckForm" class="stack-form">
-          <label>Drugs to Check (one per line)
-            <textarea id="drugCheckInput" rows="4" placeholder="e.g.\nWarfarin\nAspirin\nAmlodipine"></textarea>
-          </label>
-          <label>Patient Allergies (comma-separated)
-            <input id="drugAllergyInput" placeholder="Penicillin, Sulfa..." />
-          </label>
-          <button class="primary-btn" type="submit">Check Interactions</button>
-        </form>
-        <div id="drugCheckResults" style="margin-top:16px;"></div>
-      </div>
+    <div class="features-grid">
+      <div class="feat"><span class="feat-icon">🩺</span><h3>Clinical Consultations</h3><p>Full SOAP notes with ICD-11 coded diagnoses, prescriptions, and referrals.</p></div>
+      <div class="feat"><span class="feat-icon">📅</span><h3>Appointment Scheduling</h3><p>Book, reschedule, and track appointments across all departments.</p></div>
+      <div class="feat"><span class="feat-icon">🧪</span><h3>Laboratory Results</h3><p>Receive and view lab reports linked directly to patient records.</p></div>
+      <div class="feat"><span class="feat-icon">💳</span><h3>Billing & Insurance</h3><p>PLASCHEMA, NHIA, and private pay claims managed in one workflow.</p></div>
+      <div class="feat"><span class="feat-icon">🛏</span><h3>Ward Management</h3><p>Real-time bed census across clinical units and wards.</p></div>
+      <div class="feat"><span class="feat-icon">📊</span><h3>Analytics & Reports</h3><p>State-level health metrics, disease surveillance, and quality indicators.</p></div>
     </div>
-  </div>
+  </section>
 
-  <!-- ── Discharge Summary Modal ───────────────────────────── -->
-  <div id="dischargeModal" class="modal-overlay" style="display:none;">
-    <div class="modal-content" style="max-width:700px;">
-      <div class="modal-header">
-        <h3>📋 Clinical Discharge Summary</h3>
-        <button type="button" onclick="document.getElementById('dischargeModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
-      </div>
-      <div class="modal-body" id="dischargeModalBody" style="padding:20px;font-family:monospace;font-size:13px;line-height:1.8;"></div>
+  <!-- ── FOOTER ────────────────────────────────────── -->
+  <footer>
+    <p>© 2025 PlateauCare EHR · Plateau State Ministry of Health · All rights reserved</p>
+    <div class="footer-links">
+      <a href="portal.html">Patient Portal</a>
+      <a href="admin.html">Staff Access</a>
     </div>
-  </div>
+  </footer>
 
-  <!-- Clinical Unit Form Modal -->
-  <div id="unitModal" class="modal-overlay" style="display: none;">
-    <div class="modal-content" style="max-height: 90vh;">
-      <div class="modal-header">
-        <h3 id="unitModalTitle">Clinical Unit Form</h3>
-        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer;" onclick="document.getElementById('unitModal').style.display='none'">×</button>
-      </div>
-      <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 20px; background: white; color: var(--ink);">
-        <form id="unitModalForm" class="stack-form">
-          <div id="unitFormContent"></div>
-          <div class="button-row" style="margin-top: 20px;">
-            <button class="primary-btn" type="submit">Submit Record & Bill</button>
-            <button class="secondary-btn" type="button" onclick="document.getElementById('unitModal').style.display='none'">Cancel</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- Generic Edit Record Modal -->
-  <div id="editRecordModal" class="modal-overlay" style="display: none; z-index: 10000;">
-    <div class="modal-content" style="max-width: 600px; max-height: 90vh;">
-      <div class="modal-header">
-        <h3 id="editRecordModalTitle">Edit Record</h3>
-        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer; color:#fff;" onclick="document.getElementById('editRecordModal').style.display='none'">×</button>
-      </div>
-      <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 20px; background: white; color: var(--ink);">
-        <form id="editRecordForm" class="stack-form">
-          <input type="hidden" id="editRecordCollection" />
-          <input type="hidden" id="editRecordId" />
-          <div id="editRecordFields"></div>
-          <div class="button-row" style="margin-top: 20px;">
-            <button class="primary-btn" type="submit">Save Changes</button>
-            <button class="secondary-btn" type="button" onclick="document.getElementById('editRecordModal').style.display='none'">Cancel</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js"></script>
 </body>
 </html>

@@ -804,20 +804,96 @@ function serveStatic(req, res, url) {
   });
 }
 
-// ─── Main Server ──────────────────────────────────────────────
-const server = http.createServer(async (req, res) => {
-  const url = new URL(req.url, `http://${req.headers.host}`);
-  const b64 = (req.headers.authorization || "").split(" ")[1] || "";
-  const [login, password] = Buffer.from(b64, "base64").toString().split(":");
-  if (login !== (process.env.APP_USER || "guyestguy") || password !== (process.env.APP_PASS || "guyestguygithub001")) {
-    res.statusCode = 401;
-    res.setHeader("WWW-Authenticate", 'Basic realm="PlateauCare EHR"');
-    res.end("Access denied");
+// ─── Patient Auth API ────────────────────────────────────────
+async function handlePatientApi(req, res, url) {
+  const data = readData();
+
+  // POST /api/patient/login  { phone, patientId }
+  if (req.method === "POST" && url.pathname === "/api/patient/login") {
+    const body = await collectBody(req);
+    const phone     = (body.phone || "").trim();
+    const patientId = (body.patientId || "").trim().toUpperCase();
+    const patient   = data.patients.find(p =>
+      p.phone && p.phone.trim() === phone && p.id && p.id.toUpperCase() === patientId
+    );
+    if (!patient) {
+      sendJson(res, 401, { ok: false, error: "Invalid phone number or Patient ID." });
+      return;
+    }
+    // Return patient + their records
+    const consultations = (data.consultations || []).filter(c => c.patientId === patient.id);
+    const appointments  = (data.appointments  || []).filter(a => a.patientId === patient.id);
+    const labResults    = (data.labResults    || []).filter(l => l.patientId === patient.id);
+    const billing       = (data.billing       || []).filter(b => b.patientId === patient.id);
+    sendJson(res, 200, { ok: true, patient, consultations, appointments, labResults, billing });
     return;
   }
+
+  // GET /api/patient/dashboard/:patientId?phone=xxx
+  if (req.method === "GET" && url.pathname.startsWith("/api/patient/dashboard/")) {
+    const patientId = url.pathname.split("/")[4] || "";
+    const phone     = (url.searchParams.get("phone") || "").trim();
+    const patient   = data.patients.find(p =>
+      p.id && p.id.toUpperCase() === patientId.toUpperCase() &&
+      p.phone && p.phone.trim() === phone
+    );
+    if (!patient) { sendJson(res, 401, { error: "Unauthorized" }); return; }
+    const consultations = (data.consultations || []).filter(c => c.patientId === patient.id);
+    const appointments  = (data.appointments  || []).filter(a => a.patientId === patient.id);
+    const labResults    = (data.labResults    || []).filter(l => l.patientId === patient.id);
+    const billing       = (data.billing       || []).filter(b => b.patientId === patient.id);
+    sendJson(res, 200, { patient, consultations, appointments, labResults, billing });
+    return;
+  }
+
+  sendJson(res, 404, { error: "Not found" });
+}
+
+// ─── Main Server ──────────────────────────────────────────────
+// PUBLIC paths that need no admin auth:
+//   /                   → homepage
+//   /index.html         → homepage
+//   /portal.html        → patient portal
+//   /portal.js          → patient portal script (if any)
+//   /api/patient/*      → patient auth endpoints
+const PUBLIC_PATHS = ["/", "/index.html", "/portal.html"];
+const PUBLIC_API   = "/api/patient/";
+
+const server = http.createServer(async (req, res) => {
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const pathname = url.pathname;
+
   try {
-    if (url.pathname.startsWith("/api/")) { await handleApi(req, res, url); return; }
+    // ── 1. Public static pages (no auth needed) ──────────
+    if (!pathname.startsWith("/api/") && (
+      pathname === "/" || pathname === "/index.html" || pathname === "/portal.html"
+    )) {
+      serveStatic(req, res, url);
+      return;
+    }
+
+    // ── 2. Patient API (no admin auth needed) ─────────────
+    if (pathname.startsWith(PUBLIC_API)) {
+      await handlePatientApi(req, res, url);
+      return;
+    }
+
+    // ── 3. All other routes require admin auth ─────────────
+    const b64 = (req.headers.authorization || "").split(" ")[1] || "";
+    const decoded = Buffer.from(b64, "base64").toString();
+    const colonIdx = decoded.indexOf(":");
+    const login    = decoded.slice(0, colonIdx);
+    const password = decoded.slice(colonIdx + 1);
+    if (login !== (process.env.APP_USER || "guyestguy") || password !== (process.env.APP_PASS || "guyestguygithub001")) {
+      res.statusCode = 401;
+      res.setHeader("WWW-Authenticate", 'Basic realm="PlateauCare EHR"');
+      res.end("Access denied");
+      return;
+    }
+
+    if (pathname.startsWith("/api/")) { await handleApi(req, res, url); return; }
     serveStatic(req, res, url);
+
   } catch (err) { sendJson(res, 500, { error: err.message }); }
 });
 
