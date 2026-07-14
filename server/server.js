@@ -288,7 +288,7 @@ function buildAnalytics(data) {
   return { diseaseBurden, registrationByMonth, insuranceDist, billingByStatus, lgaPatients };
 }
 
-// ─── Clinical Engines ──────────────────────────────────────────────
+// ─── AI Engines ──────────────────────────────────────────────
 
 // 1. Clinical Note Scrubber (existing, enhanced)
 function scrubClinicalNote(payload) {
@@ -327,7 +327,7 @@ function answerClinicalInquiry(question) {
   return { disclaimer, answer: "I can assist with clinical thinking, documentation gaps, danger sign identification, SOAP notes, condition-specific guidance (malaria, hypertension, pre-eclampsia, sepsis, diabetes, under-5, ANC), drug interactions, and referral criteria.", actions: ["Add patient age/sex", "Add vital signs", "State pregnancy/child status", "Mention allergies and medicines", "Ask a focused clinical question"] };
 }
 
-// 3. Ambient Auto-Note Generator
+// 3. Ambient AI Auto-Note Generator
 function generateAutoNote(payload) {
   const { chiefComplaint, vitals = {}, age, sex, allergies = [], conditions = [] } = payload;
   const { systolic, diastolic } = parseBp(vitals.bp);
@@ -762,7 +762,7 @@ async function handleApi(req, res, url) {
     sendJson(res, 200, { resourceType: "Condition", id: enc.id, clinicalStatus: { coding: [{ system: "http://terminology.hl7.org/CodeSystem/condition-clinical", code: enc.status === "Closed" ? "resolved" : "active" }] }, verificationStatus: { coding: [{ system: "http://terminology.hl7.org/CodeSystem/condition-ver-status", code: "confirmed" }] }, subject: { reference: `Patient/${enc.patientId}`, display: patient?.name || "Unknown" }, recordedDate: enc.date, code: { coding: [{ system: "http://id.who.int/icd/release/11/mms", code: stemCode || "Unspecified", display: stemTitle }], text: enc.icd11Display || enc.assessment || "Unspecified" } });
     return;
   }
-  // ── Clinical Endpoints
+  // ── AI Endpoints
   if (req.method === "POST" && url.pathname === "/api/support/scrub") { const body = await collectBody(req); sendJson(res, 200, scrubClinicalNote(body)); return; }
   if (req.method === "POST" && url.pathname === "/api/support/inquiry") { const body = await collectBody(req); sendJson(res, 200, answerClinicalInquiry(body.question)); return; }
   if (req.method === "POST" && url.pathname === "/api/support/autonote") { const body = await collectBody(req); sendJson(res, 200, generateAutoNote(body)); return; }
