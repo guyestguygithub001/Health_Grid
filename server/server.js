@@ -34,12 +34,24 @@ const mimeTypes = {
 function readData() {
   if (memoryDb) return memoryDb;
   try {
-    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+    const raw = fs.readFileSync(DATA_FILE, "utf8");
+    const data = JSON.parse(raw);
     if (process.env.VERCEL) memoryDb = data;
     return data;
   } catch (err) {
-    console.error("Read data failed, using empty schema:", err);
-    return { patients: [], encounters: [], admissions: [], billing: [], facilities: [], orders: [] };
+    // data.json missing — try seed file then generate empty schema
+    const seedFile = path.join(__dirname, "seed_data.json");
+    try {
+      console.log("data.json not found, seeding from seed_data.json...");
+      const seed = JSON.parse(fs.readFileSync(seedFile, "utf8"));
+      writeData(seed); // persist so subsequent reads work
+      return seed;
+    } catch (_) {
+      console.error("Seed file also missing, using empty schema:", err.message);
+      const empty = { patients: [], encounters: [], admissions: [], billing: [], facilities: [], orders: [], appointments: [], labResults: [], beds: [], consultations: [] };
+      writeData(empty);
+      return empty;
+    }
   }
 }
 
