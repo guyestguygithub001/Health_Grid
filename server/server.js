@@ -246,18 +246,18 @@ function createAutoBill(data, patientId, serviceType, description) {
 
 // ─── Summary ─────────────────────────────────────────────────
 function buildSummary(data) {
-  const openEncounters = data.encounters.filter(e => e.status !== "Closed").length;
-  const phcs = data.facilities.filter(f => f.type.includes("Primary")).length;
-  const urgentOrders = data.orders.filter(o => ["Urgent", "Emergency"].includes(o.priority)).length;
-  const lowStock = data.inventory.filter(i => i.quantity <= i.reorderLevel).length;
+  const openEncounters = (data.encounters || []).filter(e => e.status !== "Closed").length;
+  const phcs = (data.facilities || []).filter(f => f.type.includes("Primary")).length;
+  const urgentOrders = (data.orders || []).filter(o => ["Urgent", "Emergency"].includes(o.priority)).length;
+  const lowStock = (data.inventory || []).filter(i => i.quantity <= i.reorderLevel).length;
   const totalBilled = (data.billing || []).reduce((s, b) => s + (b.totalAmount || 0), 0);
   const totalCollected = (data.billing || []).filter(b => b.status === "Paid").reduce((s, b) => s + (b.patientPayable || 0), 0);
   const activeAdmissions = (data.admissions || []).filter(a => a.status === "Active").length;
   const criticalLabs = (data.labResults || []).filter(l => l.criticalFlag).length;
   return {
-    facilities: data.facilities.length, phcs, patients: data.patients.length,
+    facilities: (data.facilities || []).length, phcs, patients: (data.patients || []).length,
     openEncounters, urgentOrders, lowStock,
-    surveillanceSignals: data.surveillance.length,
+    surveillanceSignals: (data.surveillance || []).length,
     activeAdmissions, criticalLabs,
     totalBilled, totalCollected,
     collectionRate: totalBilled > 0 ? Math.round((totalCollected / totalBilled) * 100) : 0,
@@ -268,16 +268,16 @@ function buildSummary(data) {
 // ─── Analytics ───────────────────────────────────────────────
 function buildAnalytics(data) {
   const diseaseBurden = {};
-  data.surveillance.forEach(s => { diseaseBurden[s.condition] = (diseaseBurden[s.condition] || 0) + s.cases7d; });
+  (data.surveillance || []).forEach(s => { diseaseBurden[s.condition] = (diseaseBurden[s.condition] || 0) + s.cases7d; });
 
   const registrationByMonth = {};
-  data.patients.forEach(p => {
+  (data.patients || []).forEach(p => {
     const month = p.lastVisit ? p.lastVisit.slice(0, 7) : "Unknown";
     registrationByMonth[month] = (registrationByMonth[month] || 0) + 1;
   });
 
   const insuranceDist = {};
-  data.patients.forEach(p => { insuranceDist[p.insurance || "Unknown"] = (insuranceDist[p.insurance || "Unknown"] || 0) + 1; });
+  (data.patients || []).forEach(p => { insuranceDist[p.insurance || "Unknown"] = (insuranceDist[p.insurance || "Unknown"] || 0) + 1; });
 
   const billingByStatus = { Pending: 0, Paid: 0, Claimed: 0, Waived: 0 };
   (data.billing || []).forEach(b => { if (billingByStatus[b.status] !== undefined) billingByStatus[b.status] += b.totalAmount || 0; });
@@ -288,7 +288,7 @@ function buildAnalytics(data) {
   return { diseaseBurden, registrationByMonth, insuranceDist, billingByStatus, lgaPatients };
 }
 
-// ─── AI Engines ──────────────────────────────────────────────
+// ─── Clinical Engines ──────────────────────────────────────────────
 
 // 1. Clinical Note Scrubber (existing, enhanced)
 function scrubClinicalNote(payload) {
@@ -762,7 +762,7 @@ async function handleApi(req, res, url) {
     sendJson(res, 200, { resourceType: "Condition", id: enc.id, clinicalStatus: { coding: [{ system: "http://terminology.hl7.org/CodeSystem/condition-clinical", code: enc.status === "Closed" ? "resolved" : "active" }] }, verificationStatus: { coding: [{ system: "http://terminology.hl7.org/CodeSystem/condition-ver-status", code: "confirmed" }] }, subject: { reference: `Patient/${enc.patientId}`, display: patient?.name || "Unknown" }, recordedDate: enc.date, code: { coding: [{ system: "http://id.who.int/icd/release/11/mms", code: stemCode || "Unspecified", display: stemTitle }], text: enc.icd11Display || enc.assessment || "Unspecified" } });
     return;
   }
-  // ── AI Endpoints
+  // ── Clinical Endpoints
   if (req.method === "POST" && url.pathname === "/api/support/scrub") { const body = await collectBody(req); sendJson(res, 200, scrubClinicalNote(body)); return; }
   if (req.method === "POST" && url.pathname === "/api/support/inquiry") { const body = await collectBody(req); sendJson(res, 200, answerClinicalInquiry(body.question)); return; }
   if (req.method === "POST" && url.pathname === "/api/support/autonote") { const body = await collectBody(req); sendJson(res, 200, generateAutoNote(body)); return; }

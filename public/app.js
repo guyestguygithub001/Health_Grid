@@ -325,24 +325,24 @@ function renderReports() {
 }
 
 // ---------------------------------------------------------------
-//  AI output rendering
+//  Clinical output rendering
 // ---------------------------------------------------------------
 function renderSupportOutput(data) {
   const out = document.querySelector("#supportOutput");
   if (data.structuredSoap) {
     out.innerHTML = `
-      <article class="ai-card"><strong>Quality Score: ${data.qualityScore}%</strong><p>${data.safety}</p></article>
-      <article class="ai-card"><strong>Red Flags</strong>
+      <article class="insight-card"><strong>Quality Score: ${data.qualityScore}%</strong><p>${data.safety}</p></article>
+      <article class="insight-card"><strong>Red Flags</strong>
         <ul>${(data.redFlags.length?data.redFlags:["None found."]).map(i=>`<li>${i}</li>`).join("")}</ul></article>
-      <article class="ai-card"><strong>Documentation Issues</strong>
+      <article class="insight-card"><strong>Documentation Issues</strong>
         <ul>${(data.documentationIssues.length?data.documentationIssues:["Complete."]).map(i=>`<li>${i}</li>`).join("")}</ul></article>
-      <article class="ai-card"><strong>Suggestions</strong>
+      <article class="insight-card"><strong>Suggestions</strong>
         <ul>${(data.suggestions.length?data.suggestions:["Continue assessment."]).map(i=>`<li>${i}</li>`).join("")}</ul></article>`;
     return;
   }
   out.innerHTML = `
-    <article class="ai-card"><strong>Answer</strong><p>${data.answer}</p><small>${data.disclaimer}</small></article>
-    <article class="ai-card"><strong>Suggested Actions</strong>
+    <article class="insight-card"><strong>Answer</strong><p>${data.answer}</p><small>${data.disclaimer}</small></article>
+    <article class="insight-card"><strong>Suggested Actions</strong>
       <ul>${data.actions.map(i=>`<li>${i}</li>`).join("")}</ul></article>`;
 }
 
@@ -585,7 +585,7 @@ document.querySelector("#scrubEncounterBtn").addEventListener("click", async () 
     chiefComplaint:f.chiefComplaint, assessment:f.assessment, plan:f.plan,
     vitals:{temperature:f.temperature,bp:f.bp,pulse:f.pulse,respiration:f.respiration,spo2:f.spo2,weight:f.weight}
   })});
-  switchView("ai"); renderSupportOutput(result);
+  switchView("insight"); renderSupportOutput(result);
 });
 
 // ---------------------------------------------------------------
@@ -598,7 +598,7 @@ document.querySelector("#orderForm").addEventListener("submit", async e => {
 });
 
 // ---------------------------------------------------------------
-//  AI Scrub Form
+//  Automated Scrub Form
 // ---------------------------------------------------------------
 document.querySelector("#supportScrubForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -611,7 +611,7 @@ document.querySelector("#supportScrubForm").addEventListener("submit", async e =
 });
 
 // ---------------------------------------------------------------
-//  AI Inquiry Form
+//  Clinical Inquiry Form
 // ---------------------------------------------------------------
 document.querySelector("#supportInquiryForm").addEventListener("submit", async e => {
   e.preventDefault();
@@ -1930,7 +1930,7 @@ async function dischargeFromBed(bedId, admissionId) {
   if (!admissionId) { showToast("No active admission for this bed."); return; }
   try {
     const adm = await api("/api/beds/discharge", { method: "POST", body: JSON.stringify({ admissionId, dischargedBy: "Duty Clinician" }) });
-    showToast("Patient discharged. Generating AI summary...");
+    showToast("Patient discharged. Generating clinical summary...");
     // Get patient and admission data for discharge summary
     const admission = adm.admission;
     if (admission) {
@@ -2225,40 +2225,40 @@ if (drugCheckForm) {
   });
 }
 
-// ── AI TRIAGE TOOL (in AI Suite) ──────────────────────────────
-// Upgrade the AI view with triage + autonote tools
+// ── CLINICAL TRIAGE TOOL (in Clinical Suite) ──────────────────────────────
+// Upgrade the Clinical view with triage + autonote tools
 function upgradeAiView() {
-  const aiSection = document.querySelector("#ai");
-  if (!aiSection) return;
+  const insightSection = document.querySelector("#Clinical");
+  if (!insightSection) return;
   // Add the drug checker button and triage form above existing content
   const toolBar = document.createElement("div");
   toolBar.style.cssText = "margin-bottom:16px;";
   toolBar.innerHTML = `
-    <div class="ai-tool-grid">
-      <div class="ai-tool-card" onclick="document.getElementById('drugModal').style.display='flex'">
+    <div class="insight-tool-grid">
+      <div class="insight-tool-card" onclick="document.getElementById('drugModal').style.display='flex'">
         <div class="tool-icon">💊</div>
         <div class="tool-name">Drug & Allergy Check</div>
         <div class="tool-desc">Check drug interactions and patient allergy conflicts</div>
       </div>
-      <div class="ai-tool-card" id="triageToolCard">
+      <div class="insight-tool-card" id="triageToolCard">
         <div class="tool-icon">🧠</div>
         <div class="tool-name">Symptom Triage Engine</div>
-        <div class="tool-desc">AI acuity scoring + differential diagnosis suggestions</div>
+        <div class="tool-desc">Automated acuity scoring + differential diagnosis suggestions</div>
       </div>
-      <div class="ai-tool-card" id="ewsToolCard">
+      <div class="insight-tool-card" id="ewsToolCard">
         <div class="tool-icon">⚠️</div>
         <div class="tool-name">EWS / Sepsis Monitor</div>
         <div class="tool-desc">qSOFA & SIRS score calculator from vitals</div>
       </div>
-      <div class="ai-tool-card" id="autoNoteCard">
+      <div class="insight-tool-card" id="autoNoteCard">
         <div class="tool-icon">🎙️</div>
         <div class="tool-name">Auto-Note Generator</div>
         <div class="tool-desc">Generate SOAP notes from vitals and complaint</div>
       </div>
     </div>
     <!-- Triage Form -->
-    <div id="triagePanel" style="display:none;" class="ai-panel">
-      <div class="ai-panel-title">🧠 Symptom Triage + Differential Diagnosis</div>
+    <div id="triagePanel" style="display:none;" class="insight-panel">
+      <div class="insight-panel-title">🧠 Symptom Triage + Differential Diagnosis</div>
       <form id="triageForm" class="stack-form">
         <label>Symptoms (one per line)
           <textarea id="triageSymptoms" rows="3" placeholder="fever\nheadache\nvomiting"></textarea>
@@ -2277,13 +2277,13 @@ function upgradeAiView() {
         <label>Free text / additional history
           <textarea id="triageFreeText" rows="2" placeholder="Patient is 32 weeks pregnant, known diabetic..."></textarea>
         </label>
-        <button class="primary-btn" type="submit">Run AI Triage</button>
+        <button class="primary-btn" type="submit">Run Triage</button>
       </form>
       <div id="triageResult"></div>
     </div>
     <!-- EWS Form -->
-    <div id="ewsPanel" style="display:none;" class="ai-panel">
-      <div class="ai-panel-title">⚠️ Early Warning Score Calculator</div>
+    <div id="ewsPanel" style="display:none;" class="insight-panel">
+      <div class="insight-panel-title">⚠️ Early Warning Score Calculator</div>
       <form id="ewsForm" class="stack-form">
         <div class="vitals-grid compact">
           <label>Temp<input id="ewsTemp" placeholder="37.0"></label>
@@ -2298,8 +2298,8 @@ function upgradeAiView() {
       <div id="ewsResult"></div>
     </div>
     <!-- Auto-Note Form -->
-    <div id="autoNotePanel" style="display:none;" class="ai-panel">
-      <div class="ai-panel-title">🎙️ Ambient AI Auto-Note Generator</div>
+    <div id="autoNotePanel" style="display:none;" class="insight-panel">
+      <div class="insight-panel-title">🎙️ Ambient Auto-Note Generator</div>
       <form id="autoNoteForm" class="stack-form">
         <label>Chief Complaint<textarea id="anComplaint" rows="2" placeholder="Fever with chills for 3 days"></textarea></label>
         <div class="vitals-grid compact">
@@ -2320,7 +2320,7 @@ function upgradeAiView() {
       </form>
       <div id="autoNoteResult"></div>
     </div>`;
-  aiSection.insertBefore(toolBar, aiSection.firstChild);
+  insightSection.insertBefore(toolBar, insightSection.firstChild);
 
   // Toggle tool panels
   document.querySelector("#triageToolCard")?.addEventListener("click", () => {
@@ -2347,13 +2347,13 @@ function upgradeAiView() {
       resEl.innerHTML = `
         <div class="triage-acuity ${result.acuity}">${result.acuity === "Emergency" ? "🚨" : result.acuity === "Urgent" ? "⚡" : "✅"} ACUITY: ${result.acuity.toUpperCase()}</div>
         ${result.redFlags.length ? `<div style="background:#fef2f2;border-radius:8px;padding:10px 14px;margin-bottom:10px;"><strong style="color:#dc2626;">🚩 Red Flags</strong><ul style="margin:6px 0 0;">${result.redFlags.map(r=>`<li style="font-size:13px;">${r}</li>`).join("")}</ul></div>` : ""}
-        <p class="ai-section-label">Differential Diagnoses</p>
+        <p class="insight-section-label">Differential Diagnoses</p>
         ${result.differentials.map(d => `<div class="differential-item">
           <span class="rank">${d.rank}</span>
           <div><div class="dx-name">${d.diagnosis}</div><div class="dx-reason">${d.reasoning}</div></div>
           <span class="confidence">${d.confidence}</span>
         </div>`).join("")}
-        ${result.suggestedOrders.length ? `<p class="ai-section-label" style="margin-top:12px;">Suggested Orders</p>
+        ${result.suggestedOrders.length ? `<p class="insight-section-label" style="margin-top:12px;">Suggested Orders</p>
           <ul>${result.suggestedOrders.map(o=>`<li style="font-size:13px;">${o}</li>`).join("")}</ul>` : ""}
         <p style="font-size:11px;color:var(--muted);margin-top:10px;">${result.disclaimer}</p>`;
     } catch(err) { document.querySelector("#triageResult").innerHTML = `<p style="color:#dc2626;">${err.message}</p>`; }
@@ -2386,7 +2386,7 @@ function upgradeAiView() {
       const resEl = document.querySelector("#autoNoteResult");
       const s = result.soap;
       resEl.innerHTML = `
-        <p style="font-size:11px;color:var(--brand);font-weight:700;margin:12px 0 8px;">AI-GENERATED SOAP NOTE — REVIEW BEFORE USE</p>
+        <p style="font-size:11px;color:var(--brand);font-weight:700;margin:12px 0 8px;">AUTO-GENERATED SOAP NOTE — REVIEW BEFORE USE</p>
         <div class="soap-block"><div class="soap-label">Subjective</div><div class="soap-text">${s.subjective}</div></div>
         <div class="soap-block"><div class="soap-label">Objective</div><div class="soap-text">${s.objective}</div></div>
         <div class="soap-block"><div class="soap-label">Assessment</div><div class="soap-text">${s.assessment}</div></div>
