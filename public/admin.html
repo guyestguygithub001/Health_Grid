@@ -163,8 +163,8 @@
             <span class="toggle-icon">▼</span>
           </button>
           <div class="collapsible-content" id="activityLogsContent" style="display: none;">
-            <div class="split-grid" style="margin-top: 14px;">
-              <section class="panel">
+            <div class="split-grid reveal" style="margin-top: 14px;">
+              <section class="panel reveal">
                 <div class="panel-head">
                   <div>
                     <span class="eyebrow">Live queue</span>
@@ -175,7 +175,7 @@
                 <div id="encounterList" class="record-list"></div>
               </section>
 
-              <section class="panel">
+              <section class="panel reveal">
                 <div class="panel-head">
                   <div>
                     <span class="eyebrow">Public health</span>
@@ -196,14 +196,14 @@
             <span class="toggle-icon">▼</span>
           </button>
           <div class="collapsible-content" id="readinessContent" style="display: none;">
-            <section class="panel" style="margin-top: 14px;">
+            <section class="panel reveal" style="margin-top: 14px;">
               <div class="panel-head">
                 <div>
                   <span class="eyebrow">Facility map</span>
                   <h2>Plateau Network Readiness</h2>
                 </div>
               </div>
-              <div id="facilityGrid" class="facility-grid"></div>
+              <div id="facilityGrid" class="facility-grid reveal"></div>
             </section>
           </div>
         </div>
@@ -220,7 +220,7 @@
           <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid wide-left">
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">Registry</span>
@@ -231,7 +231,7 @@
             <div id="patientTable" class="table-wrap"></div>
           </section>
 
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">Quick capture</span>
@@ -274,7 +274,7 @@
           <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid wide-left">
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">Interactive Clinic Module</span>
@@ -408,7 +408,7 @@
             </form>
           </section>
 
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">Consultation database</span>
@@ -425,7 +425,7 @@
       </section>
 
       <section id="clinical" class="view">
-        <div class="module-grid">
+        <div class="module-grid reveal">
           <article class="module-card"><span>TRI</span><h3>Triage</h3><p>Arrival time, vital signs, acuity, danger signs, queue routing.</p></article>
           <article class="module-card"><span>OPD</span><h3>Outpatient</h3><p>SOAP notes, diagnosis, prescriptions, labs, follow-up.</p></article>
           <article class="module-card"><span>EMR</span><h3>Emergency</h3><p>Resus notes, trauma, stroke/chest pain pathway, handover.</p></article>
@@ -440,7 +440,7 @@
           <article class="module-card"><span>REF</span><h3>Referrals</h3><p>PHC-to-hospital escalation, feedback loop, transport notes.</p></article>
         </div>
 
-        <section class="panel">
+        <section class="panel reveal">
           <div class="panel-head">
             <div>
               <span class="eyebrow">Clinical documentation</span>
@@ -496,8 +496,8 @@
       </section>
 
       <section id="phc" class="view">
-        <div class="split-grid">
-          <section class="panel">
+        <div class="split-grid reveal">
+          <section class="panel reveal">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">Primary care</span>
@@ -512,7 +512,7 @@
               <div><strong>5. State reporting</strong><span>Routine indicators, outbreak signals, stock and quality.</span></div>
             </div>
           </section>
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">Stock</span>
@@ -526,7 +526,7 @@
 
       <section id="orders" class="view">
         <div class="split-grid wide-left">
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">Diagnostics and treatment</span>
@@ -535,7 +535,7 @@
             </div>
             <div id="ordersTable" class="table-wrap"></div>
           </section>
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">Quick order</span>
@@ -564,8 +564,8 @@
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
           <button class="step-link active" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
-        <div class="split-grid">
-          <section class="panel">
+        <div class="split-grid reveal">
+          <section class="panel reveal">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">Clinical Documentation Audit</span>
@@ -593,7 +593,7 @@
             </form>
           </section>
 
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div>
                 <span class="eyebrow">Doctor inquiry</span>
@@ -617,12 +617,12 @@
 
       <section id="reports" class="view">
         <div class="report-grid">
-          <section class="panel">
+          <section class="panel reveal">
             <span class="eyebrow">Quality</span>
             <h2>Clinical Quality Indicators</h2>
             <div id="qualityList" class="quality-list"></div>
           </section>
-          <section class="panel">
+          <section class="panel reveal">
             <span class="eyebrow">State reporting</span>
             <h2>Facility Performance</h2>
             <div id="facilityReport" class="table-wrap"></div>
@@ -640,7 +640,7 @@
           <button class="step-link active" data-step-view="billing"><span class="step-num">6</span> Billing</button>
           <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
-        <div class="metric-grid">
+        <div class="metric-grid reveal">
           <article class="metric">
             <span>Outstanding Billing</span>
             <strong id="billingOutstanding">₦0</strong>
@@ -663,7 +663,7 @@
           </article>
         </div>
 
-        <div class="panel">
+        <div class="panel reveal">
           <div class="panel-head">
             <div>
               <span class="eyebrow">Billing ledger gateway</span>
@@ -693,14 +693,14 @@
           <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid wide-left">
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Schedule</span><h2>Appointment Calendar</h2></div>
               <button class="text-btn" id="newAptBtn" type="button">+ New Appointment</button>
             </div>
             <div id="appointmentsTable" class="table-wrap"></div>
           </section>
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head"><div><span class="eyebrow">Quick book</span><h2>Book Appointment</h2></div></div>
             <form id="appointmentForm" class="stack-form">
               <label>Patient<select id="aptPatient" name="patientId"></select></label>
@@ -734,11 +734,11 @@
           <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid wide-left">
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head"><div><span class="eyebrow">Diagnostics</span><h2>Laboratory Results</h2></div></div>
             <div id="labResultsTable" class="table-wrap"></div>
           </section>
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head"><div><span class="eyebrow">Enter result</span><h2>Record Lab Result</h2></div></div>
             <form id="labResultForm" class="stack-form">
               <label>Patient<select id="labPatient" name="patientId"></select></label>
@@ -769,7 +769,7 @@
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
           <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
-        <div class="panel">
+        <div class="panel reveal">
           <div class="panel-head">
             <div><span class="eyebrow">Inpatient management</span><h2>Ward & Bed Census</h2></div>
             <div style="display:flex;gap:8px;">
@@ -780,8 +780,8 @@
           </div>
           <div id="bedGrid" class="bed-grid"></div>
         </div>
-        <div class="split-grid" style="margin-top:16px;">
-          <section class="panel">
+        <div class="split-grid reveal" style="margin-top:16px;">
+          <section class="panel reveal">
             <div class="panel-head"><div><span class="eyebrow">Admit patient</span><h2>Bed Admission</h2></div></div>
             <form id="admitForm" class="stack-form">
               <label>Patient<select id="admitPatient" name="patientId"></select></label>
@@ -790,7 +790,7 @@
               <button class="primary-btn" type="submit">Admit Patient</button>
             </form>
           </section>
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head"><div><span class="eyebrow">Active admissions</span><h2>Current Inpatients</h2></div></div>
             <div id="admissionsList" class="record-list"></div>
           </section>
@@ -803,25 +803,25 @@
 
       <!-- ── Analytics View ────────────────────────────────── -->
       <section id="analytics" class="view">
-        <div class="split-grid" style="margin-bottom:16px;">
-          <section class="panel" style="padding:20px;">
+        <div class="split-grid reveal" style="margin-bottom:16px;">
+          <section class="panel reveal" style="padding:20px;">
             <span class="eyebrow">Disease Burden by LGA</span>
             <h2 style="margin:4px 0 16px;">Surveillance Overview</h2>
             <canvas id="chartDisease" height="220"></canvas>
           </section>
-          <section class="panel" style="padding:20px;">
+          <section class="panel reveal" style="padding:20px;">
             <span class="eyebrow">Insurance Coverage</span>
             <h2 style="margin:4px 0 16px;">Coverage Distribution</h2>
             <canvas id="chartInsurance" height="220"></canvas>
           </section>
         </div>
-        <div class="split-grid">
-          <section class="panel" style="padding:20px;">
+        <div class="split-grid reveal">
+          <section class="panel reveal" style="padding:20px;">
             <span class="eyebrow">Patient Registration Trend</span>
             <h2 style="margin:4px 0 16px;">Registrations by Month</h2>
             <canvas id="chartRegistrations" height="220"></canvas>
           </section>
-          <section class="panel" style="padding:20px;">
+          <section class="panel reveal" style="padding:20px;">
             <span class="eyebrow">Billing Status</span>
             <h2 style="margin:4px 0 16px;">Revenue Breakdown</h2>
             <canvas id="chartBilling" height="220"></canvas>
@@ -850,7 +850,7 @@
 
         <div class="split-grid wide-left">
           <!-- Combined Queue List -->
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">A&amp;E &amp; Triage Queue</span><h2>Active Patient Board</h2></div>
             </div>
@@ -860,7 +860,7 @@
           </section>
 
           <!-- Forms Area (Switches based on active sub-tab) -->
-          <section class="panel">
+          <section class="panel reveal">
             <!-- Tab 1: Triage Form -->
             <div id="formSubTriage">
               <div class="panel-head">
@@ -967,7 +967,7 @@
       <!-- ── Pharmacy View ─────────────────────────────────── -->
       <section id="pharmacy" class="view">
         <div class="split-grid wide-left">
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Pharmacist ledger</span><h2>Dispensed Prescriptions Log</h2></div>
             </div>
@@ -975,7 +975,7 @@
               <p style="padding:20px;color:var(--muted);text-align:center;">No dispensed logs.</p>
             </div>
           </section>
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Dispensing gateway</span><h2>Dispense Medication</h2></div>
             </div>
@@ -1016,7 +1016,7 @@
       <!-- ── Radiology View ────────────────────────────────── -->
       <section id="radiology" class="view">
         <div class="split-grid wide-left">
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Imaging logs</span><h2>Radiology Reports &amp; Requests</h2></div>
             </div>
@@ -1024,7 +1024,7 @@
               <p style="padding:20px;color:var(--muted);text-align:center;">No radiology cases reported.</p>
             </div>
           </section>
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Scan request</span><h2>Record Imaging Study</h2></div>
             </div>
@@ -1070,7 +1070,7 @@
       <!-- ── ANC & Maternity View ──────────────────────────── -->
       <section id="maternity" class="view">
         <div class="split-grid wide-left">
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Registry</span><h2>Maternal Risk Register</h2></div>
             </div>
@@ -1078,7 +1078,7 @@
               <p style="padding:20px;color:var(--muted);text-align:center;">No maternal records logged.</p>
             </div>
           </section>
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Prenatal check</span><h2>ANC Booking &amp; Labour</h2></div>
             </div>
@@ -1126,7 +1126,7 @@
       <!-- ── Immunization View ──────────────────────────────── -->
       <section id="immunization" class="view">
         <div class="split-grid wide-left">
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Child ledger</span><h2>Immunization Log</h2></div>
             </div>
@@ -1134,7 +1134,7 @@
               <p style="padding:20px;color:var(--muted);text-align:center;">No vaccination records logged.</p>
             </div>
           </section>
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Record dose</span><h2>Administer Vaccine</h2></div>
             </div>
@@ -1182,7 +1182,7 @@
       <!-- ── Theatre View ──────────────────────────────────── -->
       <section id="theatre" class="view">
         <div class="split-grid wide-left">
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Operative calendar</span><h2>Surgical Operations Log</h2></div>
             </div>
@@ -1190,7 +1190,7 @@
               <p style="padding:20px;color:var(--muted);text-align:center;">No surgical records logged.</p>
             </div>
           </section>
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Booking check</span><h2>Book Operative Procedure</h2></div>
             </div>
@@ -1239,7 +1239,7 @@
       <!-- ── Referrals View ────────────────────────────────── -->
       <section id="referrals" class="view">
         <div class="split-grid wide-left">
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Continuity ledger</span><h2>Outbound Referral Log</h2></div>
             </div>
@@ -1247,7 +1247,7 @@
               <p style="padding:20px;color:var(--muted);text-align:center;">No outpatient referrals issued.</p>
             </div>
           </section>
-          <section class="panel">
+          <section class="panel reveal">
             <div class="panel-head">
               <div><span class="eyebrow">Continuity transfer</span><h2>Issue Referral Transfer</h2></div>
             </div>

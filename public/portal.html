@@ -229,7 +229,7 @@
     <main class="pmain">
 
       <!-- PROFILE CARD -->
-      <div class="profile-card" id="profileCard">
+      <div class="profile-card reveal" id="profileCard">
         <div class="profile-avatar" id="profileAvatar">?</div>
         <div class="profile-info">
           <div class="profile-name" id="profileName">Loading…</div>
@@ -247,7 +247,7 @@
       </div>
 
       <!-- SUMMARY CARDS -->
-      <div class="summary-grid">
+      <div class="summary-grid reveal">
         <div class="sum-card blue">
           <div class="sum-label">Consultations</div>
           <div class="sum-value" id="sumConsult">0</div>
@@ -271,7 +271,7 @@
       </div>
 
       <!-- RECENT CONSULTATIONS -->
-      <div class="psection">
+      <div class="psection reveal">
         <div class="psection-head">
           <h3>🩺 Recent Consultations</h3>
           <span class="count-badge" id="consultCount">0</span>
@@ -280,7 +280,7 @@
       </div>
 
       <!-- APPOINTMENTS -->
-      <div class="psection">
+      <div class="psection reveal">
         <div class="psection-head">
           <h3>📅 Appointments</h3>
           <span class="count-badge" id="apptCount">0</span>
@@ -289,7 +289,7 @@
       </div>
 
       <!-- LAB RESULTS -->
-      <div class="psection">
+      <div class="psection reveal">
         <div class="psection-head">
           <h3>🧪 Laboratory Results</h3>
           <span class="count-badge" id="labCount">0</span>
@@ -298,7 +298,7 @@
       </div>
 
       <!-- BILLING -->
-      <div class="psection">
+      <div class="psection reveal">
         <div class="psection-head">
           <h3>💳 Billing & Payments</h3>
           <span class="count-badge" id="billCount">0</span>
@@ -464,7 +464,7 @@
     // Consultations
     const consultEl = document.getElementById("consultList");
     consultEl.innerHTML = consultations.length ? consultations.slice(0,8).map(c => `
-      <div class="record-card">
+      <div class="record-card reveal">
         <div class="record-card-top">
           <span class="record-card-title">🩺 ${c.chiefComplaint || "Consultation"}</span>
           <span class="record-card-date">${c.date || ""}</span>
@@ -480,7 +480,7 @@
     // Appointments
     const apptEl = document.getElementById("apptList");
     apptEl.innerHTML = appointments.length ? appointments.slice(0,6).map(a => `
-      <div class="record-card">
+      <div class="record-card reveal">
         <div class="record-card-top">
           <span class="record-card-title">📅 ${a.department || a.specialty || "Appointment"}</span>
           <span class="badge ${badgeClass(a.status)}">${a.status || "Scheduled"}</span>
@@ -495,7 +495,7 @@
     // Lab Results
     const labEl = document.getElementById("labList");
     labEl.innerHTML = labResults.length ? labResults.slice(0,6).map(l => `
-      <div class="record-card">
+      <div class="record-card reveal">
         <div class="record-card-top">
           <span class="record-card-title">🧪 ${l.testName || l.test || "Laboratory Test"}</span>
           <span class="badge ${badgeClass(l.status)}">${l.status || "Resulted"}</span>
@@ -510,7 +510,7 @@
     // Billing
     const billEl = document.getElementById("billList");
     billEl.innerHTML = billing.length ? billing.slice(0,6).map(b => `
-      <div class="record-card">
+      <div class="record-card reveal">
         <div class="record-card-top">
           <span class="record-card-title">💳 ${b.serviceCategory || b.description || "Invoice"}</span>
           <span class="badge ${badgeClass(b.status)}">${b.status || "Pending"}</span>

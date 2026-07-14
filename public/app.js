@@ -209,7 +209,7 @@ function renderEncounters() {
            <span class="fhir-badge" onclick="showFhirModal('${enc.id}')">FHIR JSON</span>
          </div>` : "";
     return `
-      <article class="record">
+      <article class="record reveal">
         <strong>${patientName(enc.patientId)} <span class="${badgeClass(enc.status)}">${enc.status}</span></strong>
         <span>${enc.unit} · ${facilityName(enc.facilityId)}</span>
         <span>${enc.chiefComplaint}</span>
@@ -225,7 +225,7 @@ function renderFacilities() {
   const target = document.querySelector("#facilityGrid");
   if (!target) return;
   target.innerHTML = state.facilities.map(f => `
-    <article class="facility-card">
+    <article class="facility-card reveal">
       <h3>${f.name}</h3>
       <span>${f.type} · ${f.lga} · ${f.beds} beds</span>
       <div class="tag-row">
@@ -308,7 +308,7 @@ function renderReports() {
     </tbody></table>`;
 
   document.querySelector("#inventoryList").innerHTML = r.inventory.map(item => `
-    <article class="record">
+    <article class="record reveal">
       <strong>${item.item}
         <span class="${item.quantity<=item.reorderLevel?"badge danger":"badge"}">${item.quantity} left</span>
       </strong>
@@ -707,7 +707,7 @@ function renderConsultations() {
            ${c.prescriptions.map(p=>`• <strong>${p.drug}</strong> ${p.dose} ${p.frequency} × ${p.duration}`).join("<br>")}
          </div>` : "";
     return `
-      <article class="record">
+      <article class="record reveal">
         <div style="display:flex;justify-content:space-between;">
           <strong>${patientName(c.patientId)}</strong>
           <span style="font-size:11px;color:var(--muted);">${c.date}</span>
@@ -1956,7 +1956,7 @@ function renderAdmissions() {
   const occupied = (state.beds || []).filter(b => b.status === "Occupied");
   if (!occupied.length) { el.innerHTML = '<p style="text-align:center;color:var(--muted);padding:20px;">No active admissions.</p>'; return; }
   el.innerHTML = occupied.map(b => `
-    <article class="record">
+    <article class="record reveal">
       <strong>${patientName(b.patientId)}
         <span class="badge danger" style="margin-left:6px;">Admitted</span>
       </strong>
