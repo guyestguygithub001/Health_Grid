@@ -28,7 +28,7 @@
         <button class="nav-item" data-view="labresults">🧪 Lab Results</button>
         <button class="nav-item" data-view="orders">📋 Orders</button>
         <button class="nav-item" data-view="billing">💳 Billing</button>
-        <button class="nav-item" data-view="ai">🧠 Decision Support</button>
+        <button class="nav-item" data-view="support">🧠 Decision Support</button>
         <button class="nav-item" data-view="analytics">📈 Analytics</button>
         <button class="nav-item" data-view="phc">🌿 PHC Network</button>
         <button class="nav-item" data-view="reports">📑 Reports</button>
@@ -108,7 +108,7 @@
               <strong>Billing</strong>
               <span>Invoices</span>
             </div>
-            <div class="path-step-card" onclick="switchView('ai')">
+            <div class="path-step-card" onclick="switchView('support')">
               <div class="step-badge">7</div>
               <strong>Discharge</strong>
               <span>AI Suite</span>
@@ -177,7 +177,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
+          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid wide-left">
           <section class="panel">
@@ -231,7 +231,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
+          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid wide-left">
           <section class="panel">
@@ -305,6 +305,24 @@
               <label>Clinical Examination & Findings
                 <textarea name="examinationFindings" rows="2" placeholder="Objective physical examination findings"></textarea>
               </label>
+
+              <!-- Clinical Vitals & Social History -->
+              <div class="form-row" style="margin-top: 15px;">
+                <h4 style="width: 100%; margin-bottom: 5px; font-size: 13px; color: var(--brand-dark); font-weight: 700; text-transform: uppercase;">Clinical Vitals & Social History</h4>
+              </div>
+              <div class="vitals-grid compact" style="margin-bottom: 15px;">
+                <label>Temp (°C)<input type="number" step="0.1" name="temperature" placeholder="36.5" /></label>
+                <label>BP (mmHg)<input name="bp" placeholder="120/80" /></label>
+                <label>Pulse (bpm)<input type="number" name="pulse" placeholder="72" /></label>
+                <label>Resp (/min)<input type="number" name="respiration" placeholder="16" /></label>
+                <label>SpO2 (%)<input type="number" name="spo2" placeholder="98" /></label>
+                <label>Weight (kg)<input type="number" step="0.1" name="weight" placeholder="65" /></label>
+              </div>
+              <div class="form-row" style="margin-bottom: 15px;">
+                <label>Social History / Risk Factors
+                  <input type="text" name="socialHistory" placeholder="e.g. Non-smoker, occasional alcohol, active lifestyle" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:6px; margin-top:4px;" />
+                </label>
+              </div>
               
               <!-- ICD-11 Diagnosis Builder (Integrated) -->
               <div class="icd11-module">
@@ -312,6 +330,7 @@
                 <label>Search ICD-11 Diagnosis
                   <input type="text" id="consultationIcd11Search" placeholder="Type to search (e.g. malaria, forearm fracture, pre-eclampsia)..." autocomplete="off" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:6px; margin-top:4px;" />
                 </label>
+                <div id="consultationIcd11AutoSuggest" style="font-size:12px; margin-top:5px; margin-bottom:10px; display:none; background:#ecfdf5; padding:8px; border-radius:6px; border:1px solid #a7f3d0; color:#065f46;"></div>
                 <div id="consultationIcd11Results" class="icd11-search-results"></div>
                 
                 <div id="consultationIcd11Builder" class="icd11-builder" style="display: none;">
@@ -406,10 +425,11 @@
             <!-- ICD-11 Coding Module -->
             <div class="icd11-module">
               <span class="eyebrow" style="color:var(--brand); font-weight:600; margin-bottom:8px; display:block;">ICD-11 Interoperability Standard</span>
-              <label>Search ICD-11 Diagnosis
-                <input type="text" id="icd11Search" placeholder="Type to search (e.g. malaria, forearm fracture, pre-eclampsia)..." autocomplete="off" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:6px; margin-top:4px;" />
-              </label>
-              <div id="icd11Results" class="icd11-search-results"></div>
+               <label>Search ICD-11 Diagnosis
+                 <input type="text" id="icd11Search" placeholder="Type to search (e.g. malaria, forearm fracture, pre-eclampsia)..." autocomplete="off" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:6px; margin-top:4px;" />
+               </label>
+               <div id="encounterIcd11AutoSuggest" style="font-size:12px; margin-top:5px; margin-bottom:10px; display:none; background:#ecfdf5; padding:8px; border-radius:6px; border:1px solid #a7f3d0; color:#065f46;"></div>
+               <div id="icd11Results" class="icd11-search-results"></div>
               
               <div id="icd11Builder" class="icd11-builder" style="display: none;">
                 <h4 style="margin:10px 0; font-size:14px; color:var(--brand-dark);">Post-Coordination Builder (Chapter 28)</h4>
@@ -494,7 +514,7 @@
         </div>
       </section>
 
-      <section id="ai" class="view">
+      <section id="support" class="view">
         <div class="onboarding-steps">
           <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
           <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
@@ -502,7 +522,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link active" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
+          <button class="step-link active" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid">
           <section class="panel">
@@ -512,7 +532,7 @@
                 <h2>Clinical Note Quality Check</h2>
               </div>
             </div>
-            <form id="aiScrubForm" class="stack-form">
+            <form id="supportScrubForm" class="stack-form">
               <label>Chief Complaint
                 <textarea name="chiefComplaint" rows="3" placeholder="Enter the patient's presenting complaint (e.g. headache, shortness of breath, fever, chest pain...)"></textarea>
               </label>
@@ -540,13 +560,13 @@
                 <h2>Ask Clinical Support</h2>
               </div>
             </div>
-            <form id="aiInquiryForm" class="stack-form">
+            <form id="supportInquiryForm" class="stack-form">
               <label>Clinical Question
                 <textarea name="question" rows="5" placeholder="Ask a clinical question (e.g. What are the referral criteria for severe malaria? What vitals trigger a pre-eclampsia referral? How do I manage a neonate with suspected sepsis?)..."></textarea>
               </label>
               <button class="primary-btn" type="submit">Ask Inquiry</button>
             </form>
-            <div id="aiOutput" class="ai-output"></div>
+            <div id="supportOutput" class="ai-output"></div>
           </section>
         </div>
         <div class="onboarding-footer">
@@ -578,7 +598,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link active" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
+          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="metric-grid">
           <article class="metric">
@@ -617,7 +637,7 @@
         </div>
         <div class="onboarding-footer">
           <button class="secondary-btn onboarding-prev-btn" onclick="switchView('beds')" type="button">← Back to Step 5: Ward & Beds</button>
-          <button class="primary-btn onboarding-next-btn" onclick="switchView('ai')" type="button">Proceed to Step 7: Decision Support & Discharge →</button>
+          <button class="primary-btn onboarding-next-btn" onclick="switchView('support')" type="button">Proceed to Step 7: Decision Support & Discharge →</button>
         </div>
       </section>
 
@@ -630,7 +650,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
+          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid wide-left">
           <section class="panel">
@@ -671,7 +691,7 @@
           <button class="step-link active" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
+          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="split-grid wide-left">
           <section class="panel">
@@ -707,7 +727,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link active" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support & Discharge</button>
+          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
         </div>
         <div class="panel">
           <div class="panel-head">
@@ -779,7 +799,7 @@
           <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
           <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward &amp; Beds</button>
           <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="ai"><span class="step-num">7</span> Decision Support &amp; Discharge</button>
+          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support &amp; Discharge</button>
         </div>
 
         <!-- Combined Command Header / Sub-tabs -->

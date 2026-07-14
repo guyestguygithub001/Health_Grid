@@ -132,6 +132,51 @@ const ICD11_DB = {
   }
 };
 
+const SYMPTOM_MAP = [
+  { keywords: ["cholera", "watery diarrhoea", "rice water", "severe dehydration"], code: "1A00" },
+  { keywords: ["malaria", "fever", "chills", "sweating", "rigors", "rdt positive"], code: "1D2Z" },
+  { keywords: ["hypertension", "high blood pressure", "elevated bp", "systolic", "diastolic"], code: "BA00.0" },
+  { keywords: ["pre-eclampsia", "preeclampsia", "pregnancy", "proteinuria", "elevated bp", "blurred vision"], code: "JA60" },
+  { keywords: ["fracture", "broken arm", "forearm pain", "deformity", "fall"], code: "NC72.Z" },
+  { keywords: ["diabetes", "polyuria", "polydipsia", "increased thirst", "high blood sugar", "hyperglycemia"], code: "5A11" },
+  { keywords: ["tuberculosis", "tb", "coughing blood", "hemoptysis", "night sweats", "geneXpert"], code: "1C44.Z" },
+  { keywords: ["influenza", "flu", "sore throat", "runny nose", "body aches", "cough"], code: "1E31" },
+  { keywords: ["burn", "burns", "scald", "blister", "fire injury"], code: "NE60" },
+  { keywords: ["pneumonia", "chest pain", "cough with phlegm", "difficulty breathing", "crepitations"], code: "CA22.Z" },
+  { keywords: ["malnutrition", "wasting", "muac", "edema", "severe acute malnutrition"], code: "5B55" },
+  { keywords: ["sickle cell", "crisis", "vaso-occlusive", "hb ss", "anemia"], code: "KA21" },
+  { keywords: ["hiv", "aids", "opportunistic infection", "retroviral"], code: "1C82.Z" },
+  { keywords: ["sepsis", "qsofa", "shock", "infection", "confusion", "hypothermia"], code: "MG43" },
+  { keywords: ["head injury", "concussion", "gcs < 15", "loss of consciousness", "intracranial"], code: "NA07.1" },
+  { keywords: ["ectopic", "pregnancy pain", "missed period", "vaginal bleeding", "pelvic pain"], code: "JA00" },
+  { keywords: ["stroke", "slurred speech", "hemiplegia", "facial droop", "weakness"], code: "BB22" }
+];
+
+function suggestIcd11FromSymptoms(text) {
+  const t = String(text).toLowerCase();
+  let bestMatch = null;
+  let maxMatches = 0;
+
+  for (const item of SYMPTOM_MAP) {
+    let matches = 0;
+    for (const kw of item.keywords) {
+      if (t.includes(kw)) {
+        matches++;
+      }
+    }
+    if (matches > maxMatches) {
+      maxMatches = matches;
+      bestMatch = item.code;
+    }
+  }
+
+  if (bestMatch) {
+    const stem = ICD11_DB.stems[bestMatch];
+    return { code: bestMatch, title: stem.title, allowedExtensions: stem.allowedExtensions };
+  }
+  return null;
+}
+
 function searchIcd11(query) {
   const q = String(query).toLowerCase().trim();
   if (!q) return [];
@@ -683,7 +728,7 @@ async function handleApi(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/consultations") { sendJson(res, 200, data.consultations); return; }
   if (req.method === "POST" && url.pathname === "/api/consultations") {
     const body = await collectBody(req);
-    const cns = { id: nextId("CNS", data.consultations), patientId: body.patientId, facilityId: body.facilityId, doctorName: body.doctorName || "Dr. Staff", specialty: body.specialty || "General Medicine", chiefComplaint: body.chiefComplaint || "", historyOfPresentingComplaint: body.historyOfPresentingComplaint || "", pastMedicalHistory: body.pastMedicalHistory || "", allergies: body.allergies || "", examinationFindings: body.examinationFindings || "", assessment: body.assessment || "", plan: body.plan || "", icd11Code: body.icd11Code || "", icd11Display: body.icd11Display || "", prescriptions: body.prescriptions || [], date: new Date().toISOString().slice(0, 10) };
+    const cns = { id: nextId("CNS", data.consultations), patientId: body.patientId, facilityId: body.facilityId, doctorName: body.doctorName || "Dr. Staff", specialty: body.specialty || "General Medicine", chiefComplaint: body.chiefComplaint || "", historyOfPresentingComplaint: body.historyOfPresentingComplaint || "", pastMedicalHistory: body.pastMedicalHistory || "", allergies: body.allergies || "", examinationFindings: body.examinationFindings || "", vitals: body.vitals || {}, socialHistory: body.socialHistory || "", assessment: body.assessment || "", plan: body.plan || "", icd11Code: body.icd11Code || "", icd11Display: body.icd11Display || "", prescriptions: body.prescriptions || [], date: new Date().toISOString().slice(0, 10) };
     data.consultations.unshift(cns);
     createAutoBill(data, body.patientId, "Consultation", `Doctor Consultation (${cns.specialty})`);
     writeData(data);
@@ -693,6 +738,7 @@ async function handleApi(req, res, url) {
   // ── ICD-11
   if (req.method === "GET" && url.pathname === "/api/icd11/search") { sendJson(res, 200, searchIcd11(url.searchParams.get("q") || "")); return; }
   if (req.method === "POST" && url.pathname === "/api/icd11/validate") { const body = await collectBody(req); sendJson(res, 200, validateIcd11Cluster(body.expression)); return; }
+  if (req.method === "GET" && url.pathname === "/api/icd11/suggest") { sendJson(res, 200, { suggestion: suggestIcd11FromSymptoms(url.searchParams.get("symptoms") || "") }); return; }
   // ── FHIR
   if (req.method === "GET" && url.pathname.startsWith("/api/fhir/Condition/")) {
     const id = url.pathname.split("/").pop();
@@ -705,13 +751,13 @@ async function handleApi(req, res, url) {
     return;
   }
   // ── AI Endpoints
-  if (req.method === "POST" && url.pathname === "/api/ai/scrub") { const body = await collectBody(req); sendJson(res, 200, scrubClinicalNote(body)); return; }
-  if (req.method === "POST" && url.pathname === "/api/ai/inquiry") { const body = await collectBody(req); sendJson(res, 200, answerClinicalInquiry(body.question)); return; }
-  if (req.method === "POST" && url.pathname === "/api/ai/autonote") { const body = await collectBody(req); sendJson(res, 200, generateAutoNote(body)); return; }
-  if (req.method === "POST" && url.pathname === "/api/ai/triage") { const body = await collectBody(req); sendJson(res, 200, triageSymptoms(body)); return; }
-  if (req.method === "POST" && url.pathname === "/api/ai/ews") { const body = await collectBody(req); sendJson(res, 200, calculateEWS(body.vitals || {}, body.gcs)); return; }
-  if (req.method === "POST" && url.pathname === "/api/ai/readmission-risk") { const body = await collectBody(req); sendJson(res, 200, calculateReadmissionRisk(body)); return; }
-  if (req.method === "POST" && url.pathname === "/api/ai/discharge-summary") { const body = await collectBody(req); const summary = generateDischargeSummary(body); data.dischargeSummaries.push({ ...summary, createdAt: new Date().toISOString() }); writeData(data); sendJson(res, 200, summary); return; }
+  if (req.method === "POST" && url.pathname === "/api/support/scrub") { const body = await collectBody(req); sendJson(res, 200, scrubClinicalNote(body)); return; }
+  if (req.method === "POST" && url.pathname === "/api/support/inquiry") { const body = await collectBody(req); sendJson(res, 200, answerClinicalInquiry(body.question)); return; }
+  if (req.method === "POST" && url.pathname === "/api/support/autonote") { const body = await collectBody(req); sendJson(res, 200, generateAutoNote(body)); return; }
+  if (req.method === "POST" && url.pathname === "/api/support/triage") { const body = await collectBody(req); sendJson(res, 200, triageSymptoms(body)); return; }
+  if (req.method === "POST" && url.pathname === "/api/support/ews") { const body = await collectBody(req); sendJson(res, 200, calculateEWS(body.vitals || {}, body.gcs)); return; }
+  if (req.method === "POST" && url.pathname === "/api/support/readmission-risk") { const body = await collectBody(req); sendJson(res, 200, calculateReadmissionRisk(body)); return; }
+  if (req.method === "POST" && url.pathname === "/api/support/discharge-summary") { const body = await collectBody(req); const summary = generateDischargeSummary(body); data.dischargeSummaries.push({ ...summary, createdAt: new Date().toISOString() }); writeData(data); sendJson(res, 200, summary); return; }
   if (req.method === "POST" && url.pathname === "/api/alerts/drug-check") { const body = await collectBody(req); sendJson(res, 200, checkDrugInteractions(body.drugs || [], body.allergies || [])); return; }
   // ── Generic Update Record Endpoint
   if (req.method === "POST" && url.pathname === "/api/update-record") {

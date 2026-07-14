@@ -12,8 +12,20 @@
       "status": "Online",
       "contactPhone": "073-460-0001",
       "operatingHours": "24/7",
-      "doctors": ["Dr. A. Mwanret", "Dr. B. Dashe", "Dr. C. Pam"],
-      "services": ["Emergency", "Surgery", "ICU", "Laboratory", "Radiology", "Pharmacy", "Maternity"]
+      "doctors": [
+        "Dr. A. Mwanret",
+        "Dr. B. Dashe",
+        "Dr. C. Pam"
+      ],
+      "services": [
+        "Emergency",
+        "Surgery",
+        "ICU",
+        "Laboratory",
+        "Radiology",
+        "Pharmacy",
+        "Maternity"
+      ]
     },
     {
       "id": "FAC-PLSH",
@@ -27,8 +39,18 @@
       "status": "Online",
       "contactPhone": "073-460-0002",
       "operatingHours": "24/7",
-      "doctors": ["Dr. D. Goshit", "Dr. E. Bala"],
-      "services": ["OPD", "Emergency", "Laboratory", "Radiology", "Pharmacy", "Maternity"]
+      "doctors": [
+        "Dr. D. Goshit",
+        "Dr. E. Bala"
+      ],
+      "services": [
+        "OPD",
+        "Emergency",
+        "Laboratory",
+        "Radiology",
+        "Pharmacy",
+        "Maternity"
+      ]
     },
     {
       "id": "FAC-WASE",
@@ -42,8 +64,17 @@
       "status": "Online",
       "contactPhone": "073-460-0003",
       "operatingHours": "24/7",
-      "doctors": ["Dr. F. Lot", "Dr. G. Nden"],
-      "services": ["OPD", "Emergency", "Surgery", "Laboratory", "Pharmacy"]
+      "doctors": [
+        "Dr. F. Lot",
+        "Dr. G. Nden"
+      ],
+      "services": [
+        "OPD",
+        "Emergency",
+        "Surgery",
+        "Laboratory",
+        "Pharmacy"
+      ]
     },
     {
       "id": "FAC-PHC-BARKIN",
@@ -57,8 +88,16 @@
       "status": "Online",
       "contactPhone": "073-460-0004",
       "operatingHours": "08:00-17:00",
-      "doctors": ["Nurse H. Rwang"],
-      "services": ["ANC", "Immunization", "Malaria", "Delivery", "Outreach"]
+      "doctors": [
+        "Nurse H. Rwang"
+      ],
+      "services": [
+        "ANC",
+        "Immunization",
+        "Malaria",
+        "Delivery",
+        "Outreach"
+      ]
     },
     {
       "id": "FAC-PHC-MANGU",
@@ -72,8 +111,16 @@
       "status": "Online",
       "contactPhone": "073-460-0005",
       "operatingHours": "08:00-17:00",
-      "doctors": ["Nurse I. Sati"],
-      "services": ["ANC", "Immunization", "Malaria", "Nutrition", "Outreach"]
+      "doctors": [
+        "Nurse I. Sati"
+      ],
+      "services": [
+        "ANC",
+        "Immunization",
+        "Malaria",
+        "Nutrition",
+        "Outreach"
+      ]
     },
     {
       "id": "FAC-PHC-SHENDAM",
@@ -87,8 +134,15 @@
       "status": "Needs Sync",
       "contactPhone": "073-460-0006",
       "operatingHours": "08:00-17:00",
-      "doctors": ["CHO J. Dong"],
-      "services": ["ANC", "Immunization", "Malaria", "Delivery"]
+      "doctors": [
+        "CHO J. Dong"
+      ],
+      "services": [
+        "ANC",
+        "Immunization",
+        "Malaria",
+        "Delivery"
+      ]
     }
   ],
   "patients": [
@@ -106,8 +160,10 @@
       "community": "Ropp",
       "facilityId": "FAC-PHC-BARKIN",
       "insurance": "PLASCHEMA",
-      "risk": "Pregnancy",
-      "allergies": ["Sulfa", "Penicillin"],
+      "risk": "Routine",
+      "allergies": [
+        "Arthemeter"
+      ],
       "nextOfKin": "Ibrahim Musa",
       "nextOfKinPhone": "08030000011",
       "lastVisit": "2026-06-18"
@@ -147,7 +203,9 @@
       "facilityId": "FAC-PHC-MANGU",
       "insurance": "Basic Health Care Provision Fund",
       "risk": "Under-5",
-      "allergies": ["Penicillin"],
+      "allergies": [
+        "Penicillin"
+      ],
       "nextOfKin": "Joseph Dung",
       "nextOfKinPhone": "08030000013",
       "lastVisit": "2026-06-20"
@@ -293,9 +351,27 @@
       "facilityId": "FAC-PHC-BARKIN",
       "date": "2026-06-18",
       "tests": [
-        { "name": "Urine Protein", "value": "2+", "unit": "", "refRange": "Negative", "interpretation": "Abnormal" },
-        { "name": "Haemoglobin", "value": "9.8", "unit": "g/dL", "refRange": "12-16", "interpretation": "Abnormal" },
-        { "name": "ALT", "value": "38", "unit": "U/L", "refRange": "7-40", "interpretation": "Normal" }
+        {
+          "name": "Urine Protein",
+          "value": "2+",
+          "unit": "",
+          "refRange": "Negative",
+          "interpretation": "Abnormal"
+        },
+        {
+          "name": "Haemoglobin",
+          "value": "9.8",
+          "unit": "g/dL",
+          "refRange": "12-16",
+          "interpretation": "Abnormal"
+        },
+        {
+          "name": "ALT",
+          "value": "38",
+          "unit": "U/L",
+          "refRange": "7-40",
+          "interpretation": "Normal"
+        }
       ],
       "technician": "Lab Tech K. Mancha",
       "notes": "Proteinuria 2+ — clinician review needed urgently",
@@ -303,23 +379,159 @@
     }
   ],
   "beds": [
-    { "id": "BED-JUTH-01", "facilityId": "FAC-JUTH", "ward": "Male Medical", "bedNumber": "1", "status": "Occupied", "patientId": "PT-0002", "admissionId": "ADM-0001" },
-    { "id": "BED-JUTH-02", "facilityId": "FAC-JUTH", "ward": "Male Medical", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null },
-    { "id": "BED-JUTH-03", "facilityId": "FAC-JUTH", "ward": "Female Medical", "bedNumber": "1", "status": "Occupied", "patientId": "PT-0001", "admissionId": "ADM-0002" },
-    { "id": "BED-JUTH-04", "facilityId": "FAC-JUTH", "ward": "Female Medical", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null },
-    { "id": "BED-JUTH-05", "facilityId": "FAC-JUTH", "ward": "Paediatric", "bedNumber": "1", "status": "Occupied", "patientId": "PT-0003", "admissionId": "ADM-0003" },
-    { "id": "BED-JUTH-06", "facilityId": "FAC-JUTH", "ward": "Paediatric", "bedNumber": "2", "status": "Maintenance", "patientId": null, "admissionId": null },
-    { "id": "BED-JUTH-07", "facilityId": "FAC-JUTH", "ward": "Surgery Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
-    { "id": "BED-JUTH-08", "facilityId": "FAC-JUTH", "ward": "Surgery Ward", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null },
-    { "id": "BED-JUTH-09", "facilityId": "FAC-JUTH", "ward": "Maternity Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
-    { "id": "BED-JUTH-10", "facilityId": "FAC-JUTH", "ward": "Maternity Ward", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null },
-    { "id": "BED-JUTH-11", "facilityId": "FAC-JUTH", "ward": "Intensive Care Unit (ICU)", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
-    { "id": "BED-JUTH-12", "facilityId": "FAC-JUTH", "ward": "Isolation Ward", "bedNumber": "1", "status": "Maintenance", "patientId": null, "admissionId": null },
-    { "id": "BED-JUTH-13", "facilityId": "FAC-JUTH", "ward": "Emergency Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
-    { "id": "BED-PLSH-01", "facilityId": "FAC-PLSH", "ward": "General Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
-    { "id": "BED-PLSH-02", "facilityId": "FAC-PLSH", "ward": "General Ward", "bedNumber": "2", "status": "Vacant", "patientId": null, "admissionId": null },
-    { "id": "BED-PLSH-03", "facilityId": "FAC-PLSH", "ward": "Maternity Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null },
-    { "id": "BED-PLSH-04", "facilityId": "FAC-PLSH", "ward": "Surgery Ward", "bedNumber": "1", "status": "Vacant", "patientId": null, "admissionId": null }
+    {
+      "id": "BED-JUTH-01",
+      "facilityId": "FAC-JUTH",
+      "ward": "Male Medical",
+      "bedNumber": "1",
+      "status": "Occupied",
+      "patientId": "PT-0002",
+      "admissionId": "ADM-0001"
+    },
+    {
+      "id": "BED-JUTH-02",
+      "facilityId": "FAC-JUTH",
+      "ward": "Male Medical",
+      "bedNumber": "2",
+      "status": "Vacant",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-JUTH-03",
+      "facilityId": "FAC-JUTH",
+      "ward": "Female Medical",
+      "bedNumber": "1",
+      "status": "Occupied",
+      "patientId": "PT-0001",
+      "admissionId": "ADM-0002"
+    },
+    {
+      "id": "BED-JUTH-04",
+      "facilityId": "FAC-JUTH",
+      "ward": "Female Medical",
+      "bedNumber": "2",
+      "status": "Vacant",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-JUTH-05",
+      "facilityId": "FAC-JUTH",
+      "ward": "Paediatric",
+      "bedNumber": "1",
+      "status": "Occupied",
+      "patientId": "PT-0003",
+      "admissionId": "ADM-0003"
+    },
+    {
+      "id": "BED-JUTH-06",
+      "facilityId": "FAC-JUTH",
+      "ward": "Paediatric",
+      "bedNumber": "2",
+      "status": "Maintenance",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-JUTH-07",
+      "facilityId": "FAC-JUTH",
+      "ward": "Surgery Ward",
+      "bedNumber": "1",
+      "status": "Vacant",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-JUTH-08",
+      "facilityId": "FAC-JUTH",
+      "ward": "Surgery Ward",
+      "bedNumber": "2",
+      "status": "Vacant",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-JUTH-09",
+      "facilityId": "FAC-JUTH",
+      "ward": "Maternity Ward",
+      "bedNumber": "1",
+      "status": "Vacant",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-JUTH-10",
+      "facilityId": "FAC-JUTH",
+      "ward": "Maternity Ward",
+      "bedNumber": "2",
+      "status": "Vacant",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-JUTH-11",
+      "facilityId": "FAC-JUTH",
+      "ward": "Intensive Care Unit (ICU)",
+      "bedNumber": "1",
+      "status": "Vacant",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-JUTH-12",
+      "facilityId": "FAC-JUTH",
+      "ward": "Isolation Ward",
+      "bedNumber": "1",
+      "status": "Maintenance",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-JUTH-13",
+      "facilityId": "FAC-JUTH",
+      "ward": "Emergency Ward",
+      "bedNumber": "1",
+      "status": "Vacant",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-PLSH-01",
+      "facilityId": "FAC-PLSH",
+      "ward": "General Ward",
+      "bedNumber": "1",
+      "status": "Vacant",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-PLSH-02",
+      "facilityId": "FAC-PLSH",
+      "ward": "General Ward",
+      "bedNumber": "2",
+      "status": "Vacant",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-PLSH-03",
+      "facilityId": "FAC-PLSH",
+      "ward": "Maternity Ward",
+      "bedNumber": "1",
+      "status": "Vacant",
+      "patientId": null,
+      "admissionId": null
+    },
+    {
+      "id": "BED-PLSH-04",
+      "facilityId": "FAC-PLSH",
+      "ward": "Surgery Ward",
+      "bedNumber": "1",
+      "status": "Vacant",
+      "patientId": null,
+      "admissionId": null
+    }
   ],
   "admissions": [
     {

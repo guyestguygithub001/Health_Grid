@@ -252,8 +252,8 @@ function renderReports() {
 // ---------------------------------------------------------------
 //  AI output rendering
 // ---------------------------------------------------------------
-function renderAiOutput(data) {
-  const out = document.querySelector("#aiOutput");
+function renderSupportOutput(data) {
+  const out = document.querySelector("#supportOutput");
   if (data.structuredSoap) {
     out.innerHTML = `
       <article class="ai-card"><strong>Quality Score: ${data.qualityScore}%</strong><p>${data.safety}</p></article>
@@ -491,11 +491,11 @@ document.querySelector("#encounterForm").addEventListener("submit", async e => {
 
 document.querySelector("#scrubEncounterBtn").addEventListener("click", async () => {
   const f = formToObject(document.querySelector("#encounterForm"));
-  const result = await api("/api/ai/scrub", {method:"POST", body:JSON.stringify({
+  const result = await api("/api/support/scrub", {method:"POST", body:JSON.stringify({
     chiefComplaint:f.chiefComplaint, assessment:f.assessment, plan:f.plan,
     vitals:{temperature:f.temperature,bp:f.bp,pulse:f.pulse,respiration:f.respiration,spo2:f.spo2,weight:f.weight}
   })});
-  switchView("ai"); renderAiOutput(result);
+  switchView("ai"); renderSupportOutput(result);
 });
 
 // ---------------------------------------------------------------
@@ -510,23 +510,23 @@ document.querySelector("#orderForm").addEventListener("submit", async e => {
 // ---------------------------------------------------------------
 //  AI Scrub Form
 // ---------------------------------------------------------------
-document.querySelector("#aiScrubForm").addEventListener("submit", async e => {
+document.querySelector("#supportScrubForm").addEventListener("submit", async e => {
   e.preventDefault();
   const f = formToObject(e.currentTarget);
-  const result = await api("/api/ai/scrub", {method:"POST", body:JSON.stringify({
+  const result = await api("/api/support/scrub", {method:"POST", body:JSON.stringify({
     chiefComplaint:f.chiefComplaint, assessment:f.assessment, plan:f.plan,
     vitals:{temperature:f.temperature,bp:f.bp,pulse:f.pulse,respiration:f.respiration,spo2:f.spo2}
   })});
-  renderAiOutput(result);
+  renderSupportOutput(result);
 });
 
 // ---------------------------------------------------------------
 //  AI Inquiry Form
 // ---------------------------------------------------------------
-document.querySelector("#aiInquiryForm").addEventListener("submit", async e => {
+document.querySelector("#supportInquiryForm").addEventListener("submit", async e => {
   e.preventDefault();
-  const result = await api("/api/ai/inquiry", {method:"POST", body:JSON.stringify(formToObject(e.currentTarget))});
-  renderAiOutput(result);
+  const result = await api("/api/support/inquiry", {method:"POST", body:JSON.stringify(formToObject(e.currentTarget))});
+  renderSupportOutput(result);
 });
 
 // ---------------------------------------------------------------
@@ -573,8 +573,17 @@ if (consultationForm) {
       historyOfPresentingComplaint:f.historyOfPresentingComplaint||"",
       pastMedicalHistory:f.pastMedicalHistory||"",
       examinationFindings:f.examinationFindings||"",
-      assessment:f.assessment, plan:f.plan,
-      icd11Code:f.icd11Code||"", icd11Display:f.icd11Display||"",
+      vitals: {
+        temperature: f.temperature || "",
+        bp: f.bp || "",
+        pulse: f.pulse || "",
+        respiration: f.respiration || "",
+        spo2: f.spo2 || "",
+        weight: f.weight || ""
+      },
+      socialHistory: f.socialHistory || "",
+      assessment: f.assessment, plan: f.plan,
+      icd11Code: f.icd11Code || "", icd11Display: f.icd11Display || "",
       prescriptions
     };
     try {
@@ -1838,7 +1847,7 @@ async function dischargeFromBed(bedId, admissionId) {
       const patient = state.patients.find(p => p.id === admission.patientId);
       const encounter = state.encounters.find(e => e.patientId === admission.patientId);
       const labResults = state.labResults.filter(l => l.patientId === admission.patientId);
-      const summaryRes = await api("/api/ai/discharge-summary", {
+      const summaryRes = await api("/api/support/discharge-summary", {
         method: "POST",
         body: JSON.stringify({ patient, admission, encounter, labResults, prescriptions: [] })
       });
@@ -2056,7 +2065,7 @@ function setupEwsAutoCalc() {
       const f = formToObject(form);
       const vitals = { bp: f.bp||"120/80", temperature: f.temperature||"37", pulse: f.pulse||"80", respiration: f.respiration||"18", spo2: f.spo2||"98" };
       try {
-        const ews = await api("/api/ai/ews", { method: "POST", body: JSON.stringify({ vitals }) });
+        const ews = await api("/api/support/ews", { method: "POST", body: JSON.stringify({ vitals }) });
         let ewsEl = document.querySelector("#ewsInlineResult");
         if (!ewsEl) {
           ewsEl = document.createElement("div"); ewsEl.id = "ewsInlineResult";
@@ -2243,7 +2252,7 @@ function upgradeAiView() {
     const sex = document.querySelector("#triageSex").value;
     const freeText = document.querySelector("#triageFreeText").value;
     try {
-      const result = await api("/api/ai/triage", { method: "POST", body: JSON.stringify({ symptoms, vitals, age, sex, freeText }) });
+      const result = await api("/api/support/triage", { method: "POST", body: JSON.stringify({ symptoms, vitals, age, sex, freeText }) });
       const resEl = document.querySelector("#triageResult");
       resEl.innerHTML = `
         <div class="triage-acuity ${result.acuity}">${result.acuity === "Emergency" ? "🚨" : result.acuity === "Urgent" ? "⚡" : "✅"} ACUITY: ${result.acuity.toUpperCase()}</div>
@@ -2266,7 +2275,7 @@ function upgradeAiView() {
     const vitals = { temperature: document.querySelector("#ewsTemp").value, bp: document.querySelector("#ewsBp").value, pulse: document.querySelector("#ewsPulse").value, respiration: document.querySelector("#ewsRr").value, spo2: document.querySelector("#ewsSpo2").value };
     const gcs = document.querySelector("#ewsGcs").value;
     try {
-      const result = await api("/api/ai/ews", { method: "POST", body: JSON.stringify({ vitals, gcs: parseInt(gcs) }) });
+      const result = await api("/api/support/ews", { method: "POST", body: JSON.stringify({ vitals, gcs: parseInt(gcs) }) });
       showEwsModal(result);
     } catch(err) { showToast("EWS error: " + err.message); }
   });
@@ -2283,7 +2292,7 @@ function upgradeAiView() {
       conditions: document.querySelector("#anConditions").value.split(",").map(c=>c.trim()).filter(Boolean)
     };
     try {
-      const result = await api("/api/ai/autonote", { method: "POST", body: JSON.stringify(payload) });
+      const result = await api("/api/support/autonote", { method: "POST", body: JSON.stringify(payload) });
       const resEl = document.querySelector("#autoNoteResult");
       const s = result.soap;
       resEl.innerHTML = `
@@ -2830,5 +2839,114 @@ function setupConsultationPatientEdit() {
 
 // Initialize consultation patient editing once DOM is wired
 setupConsultationPatientEdit();
+
+// ---------------------------------------------------------------
+//  AUTOMATIC ICD-11 DIAGNOSIS AUTO-SUGGEST
+// ---------------------------------------------------------------
+function wireIcd11SymptomSuggestions() {
+  const configs = [
+    {
+      input: document.querySelector("#consultationForm textarea[name=chiefComplaint]"),
+      suggestBox: document.querySelector("#consultationIcd11AutoSuggest"),
+      searchEl: document.querySelector("#consultationIcd11Search"),
+      resultsEl: document.querySelector("#consultationIcd11Results"),
+      builderEl: document.querySelector("#consultationIcd11Builder"),
+      extEl: document.querySelector("#consultationIcd11Extensions"),
+      exprEl: document.querySelector("#consultationIcd11ExpressionPreview"),
+      displayEl: document.querySelector("#consultationIcd11DisplayPreview"),
+      codeHidden: document.querySelector("#consultationIcd11CodeHidden"),
+      displayHidden: document.querySelector("#consultationIcd11DisplayHidden")
+    },
+    {
+      input: document.querySelector("#encounterForm textarea[name=chiefComplaint]"),
+      suggestBox: document.querySelector("#encounterIcd11AutoSuggest"),
+      searchEl: document.querySelector("#icd11Search"),
+      resultsEl: document.querySelector("#icd11Results"),
+      builderEl: document.querySelector("#icd11Builder"),
+      extEl: document.querySelector("#icd11Extensions"),
+      exprEl: document.querySelector("#icd11ExpressionPreview"),
+      displayEl: document.querySelector("#icd11DisplayPreview"),
+      codeHidden: document.querySelector("#icd11CodeHidden"),
+      displayHidden: document.querySelector("#icd11DisplayHidden")
+    }
+  ];
+
+  configs.forEach(cfg => {
+    if (!cfg.input || !cfg.suggestBox) return;
+
+    cfg.input.addEventListener("input", debounce(async () => {
+      const text = cfg.input.value.trim();
+      if (text.length < 3) {
+        cfg.suggestBox.style.display = "none";
+        return;
+      }
+      try {
+        const res = await api(`/api/icd11/suggest?symptoms=${encodeURIComponent(text)}`);
+        if (res.suggestion) {
+          const sug = res.suggestion;
+          cfg.suggestBox.innerHTML = `
+            <strong>💡 Suggested Diagnosis:</strong> ${sug.code} — ${sug.title} 
+            <button type="button" class="text-btn" style="color:var(--brand-dark); font-weight:700; margin-left:8px; text-decoration:underline; cursor:pointer;" id="apply_sug_${sug.code}">Apply Diagnosis ✓</button>
+          `;
+          cfg.suggestBox.style.display = "block";
+
+          const btn = cfg.suggestBox.querySelector("button");
+          btn.addEventListener("click", () => {
+            cfg.searchEl.value = `${sug.code} — ${sug.title}`;
+            cfg.resultsEl.innerHTML = "";
+            cfg.codeHidden.value = sug.code;
+            cfg.displayHidden.value = sug.title;
+            cfg.exprEl.textContent = sug.code;
+            cfg.displayEl.textContent = sug.title;
+            if (sug.allowedExtensions && sug.allowedExtensions.length) {
+              cfg.builderEl.style.display = "block";
+              const groups = {};
+              sug.allowedExtensions.forEach(c => {
+                const d = EXT_DEFS[c]; if (!d) return;
+                (groups[d.axis] = groups[d.axis]||[]).push({code:c,...d});
+              });
+              cfg.extEl.innerHTML = Object.entries(groups).map(([axis,items]) => `
+                <div class="icd11-extension-group">
+                  <h5>${axis}</h5>
+                  ${items.map(it=>`<label class="icd11-extension-option">
+                    <input type="radio" name="axis_${axis.replace(/\s+/g,'_')}_${Math.random().toString(36).slice(2)}" value="${it.code}" data-title="${it.title}" />
+                    <span>${it.title}</span></label>`).join("")}
+                  <label class="icd11-extension-option">
+                    <input type="radio" name="axis_${axis.replace(/\s+/g,'_')}_${Math.random().toString(36).slice(2)}" value="" checked />
+                    <span style="color:var(--muted)">None</span></label>
+                </div>`).join("");
+              cfg.extEl.querySelectorAll("input[type=radio]").forEach(el => el.addEventListener("change", () => {
+                let expr = sug.code, disp = sug.title;
+                cfg.extEl.querySelectorAll("input[type=radio]:checked").forEach(rad => {
+                  if (rad.value) { expr += "&"+rad.value; disp += ", "+rad.dataset.title; }
+                });
+                cfg.exprEl.textContent = expr; cfg.displayEl.textContent = disp;
+                cfg.codeHidden.value = expr; cfg.displayHidden.value = disp;
+              }));
+            } else {
+              cfg.builderEl.style.display = "none";
+            }
+            cfg.suggestBox.style.display = "none";
+            showToast("Suggested diagnosis applied.");
+          });
+        } else {
+          cfg.suggestBox.style.display = "none";
+        }
+      } catch (err) {
+        console.error("Suggestion error:", err);
+      }
+    }, 500));
+  });
+}
+
+function debounce(fn, delay) {
+  let timer = null;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+wireIcd11SymptomSuggestions();
 
 
