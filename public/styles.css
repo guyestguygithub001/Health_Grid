@@ -208,7 +208,7 @@ body {
 .signal-list  { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 .quality-list { padding: 12px; display: flex; flex-direction: column; gap: 4px; }
 
-.record, .signal, .ai-card {
+.record, .signal, .smart-card {
   background: #f8fafc;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -449,11 +449,11 @@ textarea { resize: vertical; min-height: 60px; }
   display: flex; align-items: center; justify-content: center;
 }
 
-/* ── AI Output ───────────────────────────────────────────── */
-.ai-output { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-.ai-card { font-size: 13px; }
-.ai-card ul { margin: 6px 0 0 16px; }
-.ai-card li { margin-bottom: 4px; }
+/* ── Smart Output ───────────────────────────────────────────── */
+.smart-output { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.smart-card { font-size: 13px; }
+.smart-card ul { margin: 6px 0 0 16px; }
+.smart-card li { margin-bottom: 4px; }
 
 /* ── Report Grid ─────────────────────────────────────────── */
 .report-grid {
@@ -647,18 +647,18 @@ canvas { max-width: 100%; }
 .lab-test-input-row { display: grid; grid-template-columns: 1fr 80px 100px 110px 30px; gap: 6px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line); }
 .lab-test-input-row input, .lab-test-input-row select { padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; font-size: 12px; }
 
-/* ── AI Suite Panels ─────────────────────────────────────── */
-.ai-panel {
+/* ── Smart Clinical Tools Panels ─────────────────────────────────────── */
+.smart-panel {
   background: linear-gradient(135deg, #eff6ff, #f0fdf4);
   border: 1px solid #bfdbfe; border-radius: 12px;
   padding: 16px; margin-top: 14px;
   animation: fadeSlideIn .3s ease;
 }
-.ai-panel .ai-panel-title {
+.smart-panel .smart-panel-title {
   font-size: 12px; font-weight: 700; text-transform: uppercase;
   letter-spacing: .06em; color: var(--brand); margin-bottom: 10px;
 }
-.ai-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 10px 0 4px; }
+.smart-section-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 10px 0 4px; }
 
 /* ── Drug Alert Cards ────────────────────────────────────── */
 .drug-alert-card {
@@ -720,22 +720,22 @@ canvas { max-width: 100%; }
 .timeline-item.billing::before { background: #f59e0b; }
 .timeline-item.admission::before { background: #ef4444; }
 
-/* ── Diff/New Clinical Section in AI Suite ────────────────────── */
-.ai-tool-grid {
+/* ── Diff/New Clinical Section in Smart Clinical Tools ────────────────────── */
+.smart-tool-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px; margin-bottom: 20px;
 }
-.ai-tool-card {
+.smart-tool-card {
   padding: 18px; border-radius: 14px;
   background: linear-gradient(135deg, var(--surface), #f0f9ff);
   border: 1px solid var(--line);
   cursor: pointer; transition: transform .2s, box-shadow .2s;
   text-align: center;
 }
-.ai-tool-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(37,99,235,.15); border-color: var(--brand); }
-.ai-tool-card .tool-icon { font-size: 32px; margin-bottom: 8px; }
-.ai-tool-card .tool-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
-.ai-tool-card .tool-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
+.smart-tool-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(37,99,235,.15); border-color: var(--brand); }
+.smart-tool-card .tool-icon { font-size: 32px; margin-bottom: 8px; }
+.smart-tool-card .tool-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+.smart-tool-card .tool-desc { font-size: 11px; color: var(--muted); line-height: 1.4; }
 
 /* ── Discharge Summary Output ────────────────────────────── */
 #dischargeModalBody .discharge-section { margin-bottom: 14px; }
@@ -1025,17 +1025,29 @@ canvas { max-width: 100%; }
   font-size: 12px;
   font-weight: 600;
   color: var(--ink2);
-  padding: 6px 12px;
+  padding: 8px 14px;
   border-radius: 20px;
   background: #f1f5f9;
   border: 1px solid var(--line);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.summary-metric-pill:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+  border-color: var(--brand);
 }
 .summary-metric-pill.warning { background: #fffbeb; color: #d97706; border-color: #fde68a; }
+.summary-metric-pill.warning:hover { border-color: #d97706; box-shadow: 0 8px 16px rgba(217, 119, 6, 0.15); }
+
 .summary-metric-pill.danger { background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
+.summary-metric-pill.danger:hover { border-color: #dc2626; box-shadow: 0 8px 16px rgba(220, 38, 38, 0.15); }
+
 .summary-metric-pill.success { background: #f0fdf4; color: #16a34a; border-color: #bbf7d0; }
+.summary-metric-pill.success:hover { border-color: #16a34a; box-shadow: 0 8px 16px rgba(22, 163, 74, 0.15); }
 
 /* ── Collapsible Dashboard Panels ────────────────────────── */
 .collapsible-dashboard-panel {
@@ -1208,14 +1220,14 @@ tbody tr:hover td:first-child {
 .panel:hover .panel-head::after { left: 200%; }
 
 /* ── 5. Record / Signal cards: left-border reveal ────────── */
-.record, .signal, .ai-card {
+.record, .signal, .smart-card {
   position: relative;
   transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease, background 0.25s ease;
   border-left-width: 3px;
   border-left-color: transparent;
   border-left-style: solid;
 }
-.record:hover, .signal:hover, .ai-card:hover {
+.record:hover, .signal:hover, .smart-card:hover {
   border-left-color: var(--brand);
   background: #f0f9ff;
   transform: translateX(4px);

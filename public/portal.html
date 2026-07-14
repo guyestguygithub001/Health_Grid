@@ -131,9 +131,14 @@
     /* Cards list */
     .record-card {
       background: #fff; border: 1px solid #E2E8F0; border-radius: 12px;
-      padding: 18px 20px; margin-bottom: 10px; transition: all 0.2s;
+      padding: 18px 20px; margin-bottom: 10px; cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .record-card:hover { border-color: #BFDBFE; }
+    .record-card:hover {
+      border-color: #3B82F6;
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 10px 25px rgba(37,99,235,0.1);
+    }
     .record-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
     .record-card-title { font-size: 14px; font-weight: 600; color: #0F172A; }
     .record-card-date { font-size: 12px; color: #94A3B8; }
@@ -584,7 +589,7 @@
     // Consultations
     const consultEl = document.getElementById("consultList");
     consultEl.innerHTML = consultations.length ? consultations.slice(0,8).map(c => `
-      <div class="record-card reveal">
+      <div class="record-card reveal" onclick="alert('Viewing Medical Report:\\n\\nConsultation ID: ${c.id}\\nDate: ${c.date}\\nDiagnosis: ${c.assessment || c.icd11Display || 'Pending'}\\n\\nFull clinical notes and prescriptions are available at the facility.')">
         <div class="record-card-top">
           <span class="record-card-title">🩺 ${c.chiefComplaint || "Consultation"}</span>
           <span class="record-card-date">${c.date || ""}</span>
@@ -615,7 +620,7 @@
     // Lab Results
     const labEl = document.getElementById("labList");
     labEl.innerHTML = labResults.length ? labResults.slice(0,6).map(l => `
-      <div class="record-card reveal">
+      <div class="record-card reveal" onclick="alert('Viewing Lab Report:\\n\\nTest: ${l.testName || l.test}\\nDate: ${l.date}\\nResult: ${l.result || 'Pending'}\\nStatus: ${l.status}\\n\\nPlease consult your physician for interpretation.')">
         <div class="record-card-top">
           <span class="record-card-title">🧪 ${l.testName || l.test || "Laboratory Test"}</span>
           <span class="badge ${badgeClass(l.status)}">${l.status || "Resulted"}</span>

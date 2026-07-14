@@ -99,13 +99,13 @@
       <section id="dashboard" class="view active">
         <!-- Minimalist State Network Summary Banner -->
         <div class="summary-banner">
-          <div class="summary-metric-pill">🏢 <strong id="metricFacilities">0</strong> Connected Facilities</div>
-          <div class="summary-metric-pill">🌿 <strong id="metricPhcs">0</strong> Active PHCs</div>
-          <div class="summary-metric-pill">👤 <strong id="metricPatients">0</strong> Registered Patients</div>
-          <div class="summary-metric-pill">🛏 <strong id="metricAdmissions">0</strong> Inpatients</div>
-          <div class="summary-metric-pill warning">⚠️ <strong id="metricUrgent">0</strong> Urgent Actions</div>
-          <div class="summary-metric-pill danger">🚨 <strong id="metricCriticalLabs">0</strong> Critical Labs</div>
-          <div class="summary-metric-pill success">💳 <strong id="metricCollection">0%</strong> Revenue</div>
+          <div class="summary-metric-pill" onclick="switchView('clinical')" title="View Facilities">🏢 <strong id="metricFacilities">0</strong> Connected Facilities</div>
+          <div class="summary-metric-pill success" onclick="switchView('phc')" title="View Active PHCs">🌿 <strong id="metricPhcs">0</strong> Active PHCs</div>
+          <div class="summary-metric-pill" onclick="switchView('patients')" title="View Patients">👤 <strong id="metricPatients">0</strong> Registered Patients</div>
+          <div class="summary-metric-pill" onclick="switchView('beds')" title="View Inpatients">🛏 <strong id="metricAdmissions">0</strong> Inpatients</div>
+          <div class="summary-metric-pill warning" onclick="switchView('consultations')" title="View Triage">⚠️ <strong id="metricUrgent">0</strong> Urgent Actions</div>
+          <div class="summary-metric-pill danger" onclick="switchView('labresults')" title="View Labs">🚨 <strong id="metricCriticalLabs">0</strong> Critical Labs</div>
+          <div class="summary-metric-pill" onclick="switchView('billing')" title="View Billing">💳 <strong id="metricCollection">0%</strong> Revenue</div>
         </div>
 
         <div class="panel onboarding-launcher" style="margin-bottom: 20px; padding: 20px; background: linear-gradient(135deg, #0e7490, #0891b2); color: #fff; border: none; border-radius: 16px; box-shadow: 0 10px 25px rgba(8,145,178,0.25);">
@@ -151,7 +151,7 @@
             <div class="path-step-card" onclick="switchView('support')">
               <div class="step-badge">7</div>
               <strong>Discharge</strong>
-              <span>AI Suite</span>
+              <span>Smart Clinical Tools</span>
             </div>
           </div>
         </div>
