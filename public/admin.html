@@ -438,6 +438,7 @@
           <article class="module-card"><span>THR</span><h3>Theatre</h3><p>Procedure booking, consent, checklist, operative notes.</p></article>
           <article class="module-card"><span>CLA</span><h3>Claims</h3><p>PLASCHEMA/NHIA eligibility, claim bundles, approvals, audit trail.</p></article>
           <article class="module-card"><span>REF</span><h3>Referrals</h3><p>PHC-to-hospital escalation, feedback loop, transport notes.</p></article>
+          <article class="module-card"><span>PSY</span><h3>Psychiatry</h3><p>Mental status exam, counseling, therapy plans, cognitive assessments.</p></article>
         </div>
 
         <section class="panel reveal">
@@ -1142,6 +1143,183 @@
               </div>
 
               <button class="primary-btn" type="submit">Save ANC Record</button>
+            </form>
+          </section>
+        </div>
+        <div class="onboarding-footer">
+          <button class="secondary-btn onboarding-prev-btn" onclick="switchView('clinical')" type="button">← Back to Clinical Units</button>
+          <button class="primary-btn onboarding-next-btn" onclick="switchView('dashboard')" type="button">📋 Exit to Hub</button>
+        </div>
+      </section>
+
+      <!-- 🧠 Psychiatry View 🧠 -->
+      <section id="psychiatry" class="view">
+        <div class="split-grid wide-left">
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div><span class="eyebrow">Registry</span><h2>Psychiatric Consultation Logs</h2></div>
+            </div>
+            <div id="psychiatryLogTable" class="table-wrap">
+              <p style="padding:20px;color:var(--muted);text-align:center;">No psychiatry records logged.</p>
+            </div>
+          </section>
+
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div><span class="eyebrow">Psychiatric assessment</span><h2>Mental Status Exam &amp; Plan</h2></div>
+            </div>
+            <form id="psychiatryPageForm" class="stack-form">
+              <label>Patient<select id="psyPatient" name="patientId"></select></label>
+              <label>Facility<select id="psyFacility" name="facilityId"></select></label>
+              
+              <h3 style="margin-top: 15px; margin-bottom: 10px; font-size: 13px; border-bottom: 1px solid #E2E8F0; padding-bottom: 4px; color: var(--brand-dark);">Mental Status Examination (MSE)</h3>
+              
+              <div class="form-row">
+                <label>Appearance &amp; Behavior
+                  <select name="appearance" required>
+                    <option>Normal (groomed, cooperative, good eye contact)</option>
+                    <option>Disheveled / Poor grooming</option>
+                    <option>Agitated / Hyperactive</option>
+                    <option>Guarded / Hostile</option>
+                    <option>Catatonic / Stuporous</option>
+                  </select>
+                </label>
+                <label>Speech
+                  <select name="speech" required>
+                    <option>Normal (fluent, average rate/volume)</option>
+                    <option>Pressured / Rapid</option>
+                    <option>Slow / Slurred</option>
+                    <option>Monotonous / Flat</option>
+                    <option>Incoherent / Mute</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="form-row">
+                <label>Mood &amp; Affect
+                  <select name="moodAffect" required>
+                    <option>Euthymic (stable, congruent affect)</option>
+                    <option>Depressed / Dysphoric</option>
+                    <option>Anxious / Tense</option>
+                    <option>Manic / Euphoric</option>
+                    <option>Flat / Blunted affect</option>
+                    <option>Labile (rapidly changing)</option>
+                  </select>
+                </label>
+                <label>Thought Process
+                  <select name="thoughtProcess" required>
+                    <option>Linear (logical, goal-directed)</option>
+                    <option>Circumstantial / Tangential</option>
+                    <option>Flight of Ideas / Rapid thoughts</option>
+                    <option>Loose Associations / Incoherent</option>
+                    <option>Thought Blocking</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="form-row">
+                <label>Thought Content
+                  <select name="thoughtContent" required>
+                    <option>Normal (no delusions or suicidality)</option>
+                    <option>Suicidal Ideation (active/passive)</option>
+                    <option>Homicidal / Aggressive thoughts</option>
+                    <option>Delusions / Paranoia</option>
+                    <option>Obsessive / Compulsive content</option>
+                  </select>
+                </label>
+                <label>Perception
+                  <select name="perception" required>
+                    <option>Normal (no hallucinations)</option>
+                    <option>Auditory Hallucinations</option>
+                    <option>Visual Hallucinations</option>
+                    <option>Tactile / Somatic Hallucinations</option>
+                    <option>Illusions / Depersonalization</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="form-row">
+                <label>Cognition &amp; Orientation
+                  <select name="cognition" required>
+                    <option>Oriented x3 (Person, Place, Time)</option>
+                    <option>Disoriented (Partial/Complete)</option>
+                    <option>Memory impairment (Short/Long term)</option>
+                    <option>Attention / Concentration deficit</option>
+                  </select>
+                </label>
+                <label>Insight &amp; Judgment
+                  <select name="insight" required>
+                    <option>Intact / Good insight</option>
+                    <option>Partial / Limited insight</option>
+                    <option>Poor / Absent insight</option>
+                  </select>
+                </label>
+              </div>
+
+              <!-- PHQ-9 Depression Screener Grid -->
+              <div class="phq-calculator" style="margin: 15px 0; padding: 15px; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px;">
+                <h4 style="margin-top:0; margin-bottom:10px; color:var(--brand-dark); font-size:13px; font-weight:600;">PHQ-9 Depression Severity Calculator</h4>
+                <p style="font-size:11px; color:var(--muted); margin-bottom:12px; line-height:1.3;">Rate symptoms over the past 2 weeks (0 = Not at all, 1 = Several days, 2 = More than half the days, 3 = Nearly every day):</p>
+                
+                <div class="phq-question-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11px;">
+                  <span>1. Little interest or pleasure in doing things</span>
+                  <select class="phq-val" name="phq_1" style="width:50px; padding:2px;"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                </div>
+                <div class="phq-question-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11px;">
+                  <span>2. Feeling down, depressed, or hopeless</span>
+                  <select class="phq-val" name="phq_2" style="width:50px; padding:2px;"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                </div>
+                <div class="phq-question-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11px;">
+                  <span>3. Trouble falling/staying asleep, or sleeping too much</span>
+                  <select class="phq-val" name="phq_3" style="width:50px; padding:2px;"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                </div>
+                <div class="phq-question-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11px;">
+                  <span>4. Feeling tired or having little energy</span>
+                  <select class="phq-val" name="phq_4" style="width:50px; padding:2px;"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                </div>
+                <div class="phq-question-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11px;">
+                  <span>5. Poor appetite or overeating</span>
+                  <select class="phq-val" name="phq_5" style="width:50px; padding:2px;"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                </div>
+                <div class="phq-question-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11px;">
+                  <span>6. Feeling bad about yourself or that you are a failure</span>
+                  <select class="phq-val" name="phq_6" style="width:50px; padding:2px;"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                </div>
+                <div class="phq-question-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11px;">
+                  <span>7. Trouble concentrating on things (e.g. reading)</span>
+                  <select class="phq-val" name="phq_7" style="width:50px; padding:2px;"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                </div>
+                <div class="phq-question-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11px;">
+                  <span>8. Moving/speaking slowly, or being fidgety/restless</span>
+                  <select class="phq-val" name="phq_8" style="width:50px; padding:2px;"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                </div>
+                <div class="phq-question-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; font-size:11px;">
+                  <span>9. Thoughts of self-harm or that you would be better off dead</span>
+                  <select class="phq-val" name="phq_9" style="width:50px; padding:2px;"><option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option></select>
+                </div>
+
+                <div id="phqScoreAlert" style="margin-top:10px; padding:8px 12px; border-radius:6px; background:#EFF6FF; border:1px solid #BFDBFE; color:#1E40AF; display:flex; align-items:center; gap:8px;">
+                  <span style="font-size:16px;">📊</span>
+                  <div>
+                    <strong style="font-size:12px;">PHQ-9 Score: <span id="phqScore">0</span>/27</strong>
+                    <div id="phqInterpretation" style="font-size:11px; margin-top:1px;">Minimal or no depression. Monitor patient.</div>
+                  </div>
+                </div>
+              </div>
+
+              <label>DSM-5 / ICD-11 Diagnosis
+                <input name="chiefComplaint" placeholder="e.g. F32.1 Moderate Depressive Episode, F41.1 Generalized Anxiety" required />
+              </label>
+
+              <label>Obstetric / Psychiatric History notes
+                <textarea name="assessment" rows="2" placeholder="Brief psychiatric history, past medications, family history..." required></textarea>
+              </label>
+              
+              <label>Pharmacotherapy &amp; Psychotherapy Plan
+                <textarea name="plan" rows="2" placeholder="e.g. Fluoxetine 20mg daily, schedule Cognitive Behavioral Therapy (CBT) sessions..." required></textarea>
+              </label>
+
+              <button class="primary-btn" type="submit">Save Psychiatry Record</button>
             </form>
           </section>
         </div>

@@ -1395,3 +1395,61 @@ tr.urgent-row td:first-child { box-shadow: inset 3px 0 0 var(--danger) !importan
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
+/* ── Psychiatry PHQ-9 Calculator ────────────────────────────── */
+.phq-calculator {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+.phq-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.phq-row:last-child {
+  border-bottom: none;
+}
+.phq-row:nth-child(even) {
+  background: #f8fafc;
+}
+.phq-row span {
+  font-size: 13px;
+  color: var(--ink);
+  flex: 1;
+  padding-right: 15px;
+}
+.phq-row select {
+  width: 140px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+  flex-shrink: 0;
+}
+.phq-score-alert {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+  padding: 15px 20px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #1E40AF;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+.phq-score-alert .score-display {
+  font-size: 24px;
+  font-weight: 700;
+}
+.phq-score-alert .score-text {
+  font-size: 14px;
+  opacity: 0.9;
+}
+

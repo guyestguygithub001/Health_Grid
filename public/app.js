@@ -92,7 +92,8 @@ const titles = {
   maternity:     "ANC & Maternity Registry",
   immunization:  "Child & Maternal Immunization",
   theatre:       "Operative Theatre Scheduler",
-  referrals:     "Hospital Continuity Referrals"
+  referrals:     "Hospital Continuity Referrals",
+  psychiatry:    "Psychiatry & Behavioral Health Desk"
 };
 
 const apiStatus = document.querySelector("#apiStatus");
@@ -160,7 +161,7 @@ function fillSelects() {
   const fp = optionHtml(state.facilities, f => `${f.name} — ${f.lga}`);
   const pp = optionHtml(state.patients,   p => `${p.name} (${p.id})`);
 
-  ["patientFacility","encounterFacility","orderFacility","consultationFacility","aptFacility","labFacility","admitBed","triFacility","emrFacility","phaFacility","radFacility","matFacility","immFacility","thrFacility","refFacility"].forEach(id => {
+  ["patientFacility","encounterFacility","orderFacility","consultationFacility","aptFacility","labFacility","admitBed","triFacility","emrFacility","phaFacility","radFacility","matFacility","immFacility","thrFacility","refFacility","psyFacility"].forEach(id => {
     const el = document.querySelector(`#${id}`);
     if (!el) return;
     if (id === "admitBed") {
@@ -169,7 +170,7 @@ function fillSelects() {
       el.innerHTML = fp;
     }
   });
-  ["encounterPatient","orderPatient","consultationPatient","aptPatient","labPatient","admitPatient","triPatient","emrPatient","phaPatient","radPatient","matPatient","immPatient","thrPatient","refPatient"].forEach(id => {
+  ["encounterPatient","orderPatient","consultationPatient","aptPatient","labPatient","admitPatient","triPatient","emrPatient","phaPatient","radPatient","matPatient","immPatient","thrPatient","refPatient","psyPatient"].forEach(id => {
     const el = document.querySelector(`#${id}`);
     if (el) el.innerHTML = pp;
   });
@@ -1658,6 +1659,7 @@ document.querySelectorAll(".module-card").forEach(card => {
     else if (code === "THR") switchView("theatre");
     else if (code === "CLA") switchView("billing");
     else if (code === "REF") switchView("referrals");
+    else if (code === "PSY") switchView("psychiatry");
   });
 });
 
@@ -2465,6 +2467,7 @@ loadAllNewData = async function() {
   renderImmunizationLog();
   renderTheatreLog();
   renderReferralsLog();
+  renderPsychiatryLog();
 };
 
 // ── NEW VIEWS RENDERING LOGS ──────────────────────────────────
@@ -2611,7 +2614,8 @@ function wireFormSubmits() {
     { id: "maternityPageForm", unit: "ANC", msg: "Maternity ANC check completed." },
     { id: "immunizationPageForm", unit: "Immunization", msg: "Vaccination dose recorded." },
     { id: "theatrePageForm", unit: "Theatre", msg: "Operative procedure logged." },
-    { id: "referralsPageForm", unit: "Referrals", msg: "Outpatient referral issued." }
+    { id: "referralsPageForm", unit: "Referrals", msg: "Outpatient referral issued." },
+    { id: "psychiatryPageForm", unit: "Psychiatry", msg: "Psychiatry consultation saved." }
   ];
 
   formMap.forEach(({ id, unit, msg }) => {
@@ -2635,7 +2639,11 @@ function wireFormSubmits() {
         gcs: f.gcs || "",
         visitType: f.visitType || "", parity: f.parity || "", ga: f.ga || "", fhr: f.fhr || "",
         drugCategory: f.drugCategory || "", procedureCategory: f.procedureCategory || "",
-        anaesthesia: f.anaesthesia || "", destination: f.destination || ""
+        anaesthesia: f.anaesthesia || "", destination: f.destination || "",
+        // Psychiatry MSE fields
+        appearance: f.appearance || "", speech: f.speech || "", moodAffect: f.moodAffect || "",
+        thoughtProcess: f.thoughtProcess || "", thoughtContent: f.thoughtContent || "",
+        perception: f.perception || "", cognition: f.cognition || "", insight: f.insight || ""
       };
       try {
         await api("/api/encounters", { method: "POST", body: JSON.stringify(payload) });
@@ -3134,5 +3142,73 @@ function initMaternitySmartFeatures() {
 }
 
 initMaternitySmartFeatures();
+
+function initPsychiatrySmartFeatures() {
+  const phqSelects = document.querySelectorAll(".phq-val");
+  const scoreSpan = document.getElementById("phqScore");
+  const interpDiv = document.getElementById("phqInterpretation");
+  const alertBox = document.getElementById("phqScoreAlert");
+
+  function calculateScore() {
+    let score = 0;
+    phqSelects.forEach(sel => {
+      score += parseInt(sel.value) || 0;
+    });
+    if (scoreSpan) scoreSpan.textContent = score;
+    
+    if (!interpDiv || !alertBox) return;
+
+    if (score <= 4) {
+      alertBox.style.backgroundColor = "#EFF6FF";
+      alertBox.style.borderColor = "#BFDBFE";
+      alertBox.style.color = "#1E40AF";
+      interpDiv.textContent = "Minimal or no depression. Monitor patient.";
+    } else if (score <= 9) {
+      alertBox.style.backgroundColor = "#FFFBEB";
+      alertBox.style.borderColor = "#FDE68A";
+      alertBox.style.color = "#92400E";
+      interpDiv.textContent = "Mild depression. Offer counseling or support.";
+    } else if (score <= 14) {
+      alertBox.style.backgroundColor = "#FFFBEB";
+      alertBox.style.borderColor = "#FDE68A";
+      alertBox.style.color = "#92400E";
+      interpDiv.textContent = "Moderate depression. Consider counseling, therapy, or pharmacotherapy.";
+    } else if (score <= 19) {
+      alertBox.style.backgroundColor = "#FEF2F2";
+      alertBox.style.borderColor = "#FCA5A5";
+      alertBox.style.color = "#991B1B";
+      interpDiv.textContent = "Moderately severe depression. Active treatment (pharmacotherapy and/or psychotherapy) indicated.";
+    } else {
+      alertBox.style.backgroundColor = "#FEF2F2";
+      alertBox.style.borderColor = "#FCA5A5";
+      alertBox.style.color = "#991B1B";
+      interpDiv.textContent = "Severe depression. Immediate intervention required (pharmacotherapy, intensive specialist referral).";
+    }
+  }
+
+  phqSelects.forEach(sel => {
+    sel.addEventListener("change", calculateScore);
+  });
+}
+
+function renderPsychiatryLog() {
+  const el = document.querySelector("#psychiatryLogTable");
+  if (!el) return;
+  const psy = (state.encounters || []).filter(e => e.unit === "Psychiatry");
+  if (!psy.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No psychiatry records logged.</p>'; return; }
+  el.innerHTML = `
+    <table><thead><tr><th>Date</th><th>Patient</th><th>Diagnosis</th><th>MSE Mood</th><th>Plan / Recommendations</th></tr></thead>
+    <tbody>
+      ${psy.map(e => `<tr>
+        <td>${e.date}</td>
+        <td><strong>${patientName(e.patientId)}</strong></td>
+        <td>${e.chiefComplaint || "Unspecified"}</td>
+        <td>${e.moodAffect || "Normal"}</td>
+        <td>${e.plan || "No plan logged."}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
+initPsychiatrySmartFeatures();
 
 
