@@ -2619,7 +2619,8 @@ function wireFormSubmits() {
     if (!el) return;
     el.addEventListener("submit", async e => {
       e.preventDefault();
-      const f = formToObject(e.currentTarget);
+      const formEl = e.currentTarget;
+      const f = formToObject(formEl);
       const payload = {
         patientId: f.patientId, facilityId: f.facilityId, unit,
         chiefComplaint: f.chiefComplaint || f.procedureCategory || f.visitType || "",
@@ -2641,8 +2642,8 @@ function wireFormSubmits() {
         showToast(msg);
         
         if (id === "maternityPageForm") {
-          const autoAuth = e.currentTarget.querySelector('input[name="autoPriorAuth"]')?.checked;
-          const syncPortal = e.currentTarget.querySelector('input[name="syncPortal"]')?.checked;
+          const autoAuth = formEl.querySelector('input[name="autoPriorAuth"]')?.checked;
+          const syncPortal = formEl.querySelector('input[name="syncPortal"]')?.checked;
           
           if (autoAuth) {
             setTimeout(() => {
@@ -2656,7 +2657,7 @@ function wireFormSubmits() {
           }
         }
         
-        e.currentTarget.reset();
+        formEl.reset();
         await loadData();
       } catch(err) { showToast("Submission failed: " + err.message); }
     });
