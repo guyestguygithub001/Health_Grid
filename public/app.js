@@ -2,6 +2,69 @@
 //  PlateauCare EHR — Application JavaScript (Complete)
 // ============================================================
 
+// ── Login / Session Controller ─────────────────────────────
+(function initLogin() {
+  const loginScreen = document.getElementById("loginScreen");
+  const loginForm   = document.getElementById("loginForm");
+  const loginError  = document.getElementById("loginError");
+  const loginBtn    = document.getElementById("loginBtn");
+
+  function showLogin() {
+    loginScreen.style.display = "flex";
+    document.getElementById("loginUser").value = "";
+    document.getElementById("loginPass").value = "";
+    loginError.style.display = "none";
+    setTimeout(() => document.getElementById("loginUser").focus(), 50);
+  }
+
+  function hideLogin() {
+    loginScreen.style.display = "none";
+  }
+
+  // Expose so api() can call it on 401
+  window.showLoginScreen = showLogin;
+
+  loginForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const user = document.getElementById("loginUser").value.trim();
+    const pass = document.getElementById("loginPass").value;
+    const encoded = btoa(user + ":" + pass);
+    loginBtn.disabled = true;
+    loginBtn.textContent = "Signing in…";
+    loginError.style.display = "none";
+    try {
+      const res = await fetch("/api/summary", {
+        headers: { "Authorization": "Basic " + encoded, "Content-Type": "application/json" }
+      });
+      if (res.status === 401) {
+        loginError.style.display = "block";
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Sign In";
+        return;
+      }
+      // Credentials valid — store and proceed
+      sessionStorage.setItem("ehr_creds", encoded);
+      hideLogin();
+    } catch (err) {
+      loginError.textContent = "Could not reach server. Please try again.";
+      loginError.style.display = "block";
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Sign In";
+    }
+  });
+
+  // On page load: check if we already have valid credentials stored
+  const stored = sessionStorage.getItem("ehr_creds");
+  if (!stored) {
+    showLogin();
+  } else {
+    // Quick validate stored creds
+    fetch("/api/summary", { headers: { "Authorization": "Basic " + stored } })
+      .then(r => { if (r.status === 401) { sessionStorage.removeItem("ehr_creds"); showLogin(); } })
+      .catch(() => { /* server may not be up yet; keep session */ });
+  }
+})();
+
 const state = {
   facilities: [], patients: [], encounters: [], orders: [],
   reports: null, summary: null, consultations: [], billing: [],
@@ -18,7 +81,7 @@ const titles = {
   labresults:    "Laboratory Results",
   orders:        "Orders & Referrals",
   billing:       "Billing & Revenue Gateway",
-  ai:            "AI Clinical Suite",
+  support:        "Decision Support & Clinical Tools",
   analytics:     "Analytics Dashboard",
   phc:           "PHC Network",
   reports:       "Reports & Quality",
@@ -45,8 +108,20 @@ function showToast(msg) {
 }
 
 async function api(path, opts = {}) {
-  const res = await fetch(path, { headers: {"Content-Type":"application/json"}, ...opts });
-  if (!res.ok) throw new Error(`API ${res.status}`);
+  const creds = sessionStorage.getItem("ehr_creds") || "";
+  const headers = { "Content-Type": "application/json" };
+  if (creds) headers["Authorization"] = "Basic " + creds;
+  const res = await fetch(path, { headers, ...opts });
+  if (res.status === 401) {
+    sessionStorage.removeItem("ehr_creds");
+    showLoginScreen();
+    throw new Error("Session expired. Please log in again.");
+  }
+  if (!res.ok) {
+    let msg = `Server error ${res.status}`;
+    try { const j = await res.clone().json(); msg = j.error || msg; } catch(_){}
+    throw new Error(msg);
+  }
   return res.json();
 }
 
@@ -466,8 +541,19 @@ document.querySelector("#patientSearch").addEventListener("input", e => renderPa
 // ---------------------------------------------------------------
 document.querySelector("#patientForm").addEventListener("submit", async e => {
   e.preventDefault();
-  await api("/api/patients", {method:"POST", body:JSON.stringify(formToObject(e.currentTarget))});
-  e.currentTarget.reset(); showToast("Patient registered."); await loadData();
+  const btn = e.currentTarget.querySelector("button[type=submit]");
+  if (btn) { btn.disabled = true; btn.textContent = "Saving…"; }
+  try {
+    await api("/api/patients", { method: "POST", body: JSON.stringify(formToObject(e.currentTarget)) });
+    e.currentTarget.reset();
+    showToast("✅ Patient registered successfully.");
+    await loadData();
+  } catch (err) {
+    showToast("❌ Save failed: " + err.message);
+    console.error("Patient save error:", err);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = "Save Patient"; }
+  }
 });
 
 // ---------------------------------------------------------------
