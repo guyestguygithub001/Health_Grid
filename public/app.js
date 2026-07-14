@@ -19,6 +19,7 @@
 
   function hideLogin() {
     loginScreen.style.display = "none";
+    if (typeof loadData === "function") loadData();
   }
 
   // Expose so api() can call it on 401
@@ -508,6 +509,7 @@ async function loadData() {
     renderPatients(document.querySelector("#patientSearch")?.value||"");
     renderOrders(); renderReports(); renderConsultations(); renderBilling();
   } catch(err) {
+    if (err.message === "Session expired. Please log in again.") return;
     apiStatus.textContent = "Offline";
     apiStatus.style.background = "#ffe4e6";
     showToast("Backend not reachable. Check server.");
