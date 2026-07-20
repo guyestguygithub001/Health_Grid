@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SmartClinic Telehealth — Plateau State EHR</title>
-  <meta name="description" content="Secure WebRTC-powered telehealth consultation platform for Plateau State Health Services. Real-time video, AI transcription, e-prescribing." />
+  <title>SmartClinic EMR Module — Plateau State EHR</title>
+  <meta name="description" content="Secure WebRTC-powered EMR Module platform for Plateau State Health Services. Real-time video, AI transcription, e-prescribing." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
@@ -19,8 +19,8 @@
       --success: #10b981;
       --warning: #f59e0b;
       --danger: #ef4444;
-      --telehealth: #8b5cf6;
-      --telehealth-light: #a78bfa;
+      --emr: #8b5cf6;
+      --emr-light: #a78bfa;
       --text: #e2e8f0;
       --muted: #64748b;
       --muted-light: #94a3b8;
@@ -47,18 +47,18 @@
     .header-brand { display: flex; align-items: center; gap: 12px; }
     .header-brand .logo {
       width: 36px; height: 36px;
-      background: linear-gradient(135deg, var(--telehealth), var(--brand));
+      background: linear-gradient(135deg, var(--emr), var(--brand));
       border-radius: 8px; display: flex; align-items: center; justify-content: center;
       font-size: 18px;
     }
     .header-brand h1 { font-size: 18px; font-weight: 700; }
-    .header-brand span { color: var(--telehealth-light); }
+    .header-brand span { color: var(--emr-light); }
     .header-nav { display: flex; gap: 8px; align-items: center; }
     .btn { padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; font-family: inherit; transition: all 0.2s; }
     .btn-primary { background: var(--brand); color: white; }
     .btn-primary:hover { background: var(--brand-dark); transform: translateY(-1px); }
-    .btn-telehealth { background: var(--telehealth); color: white; }
-    .btn-telehealth:hover { background: #7c3aed; transform: translateY(-1px); }
+    .btn-emr { background: var(--emr); color: white; }
+    .btn-emr:hover { background: #7c3aed; transform: translateY(-1px); }
     .btn-ghost { background: transparent; color: var(--muted-light); border: 1px solid var(--border); }
     .btn-ghost:hover { background: var(--bg-elevated); color: var(--text); }
     .btn-danger { background: var(--danger); color: white; }
@@ -82,7 +82,7 @@
       content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
       background: var(--brand);
     }
-    .kpi-card.tele::before { background: var(--telehealth); }
+    .kpi-card.tele::before { background: var(--emr); }
     .kpi-card.success::before { background: var(--success); }
     .kpi-card.warning::before { background: var(--warning); }
     .kpi-card .kpi-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
@@ -96,7 +96,7 @@
     }
     .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
     .card-head h2 { font-size: 16px; font-weight: 700; }
-    .eyebrow { font-size: 11px; color: var(--telehealth-light); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 4px; }
+    .eyebrow { font-size: 11px; color: var(--emr-light); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 4px; }
     
     /* ── Video Consultation Interface ───────────────── */
     .video-grid {
@@ -165,10 +165,10 @@
       background: var(--bg-elevated); border: 1px solid var(--border);
       cursor: pointer; transition: all 0.2s;
     }
-    .waiting-patient:hover { border-color: var(--telehealth); }
+    .waiting-patient:hover { border-color: var(--emr); }
     .waiting-patient .avatar {
       width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg, var(--telehealth), var(--brand));
+      background: linear-gradient(135deg, var(--emr), var(--brand));
       display: flex; align-items: center; justify-content: center;
       font-weight: 700; font-size: 13px; flex-shrink: 0;
     }
@@ -190,7 +190,7 @@
       resize: vertical; min-height: 80px;
       transition: border 0.2s;
     }
-    .clinical-note-area:focus { outline: none; border-color: var(--telehealth); }
+    .clinical-note-area:focus { outline: none; border-color: var(--emr); }
 
     /* ── Prescription Builder ────────────────────────── */
     .rx-list { display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto; }
@@ -214,7 +214,7 @@
     /* ── Tabs ────────────────────────────────────────── */
     .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
     .tab { padding: 8px 14px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
-    .tab.active { color: var(--telehealth); border-color: var(--telehealth); }
+    .tab.active { color: var(--emr); border-color: var(--emr); }
     .tab-pane { display: none; }
     .tab-pane.active { display: block; }
 
@@ -249,7 +249,7 @@
 
     /* ── Intake Form ─────────────────────────────────── */
     .intake-section { background: var(--bg-elevated); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
-    .intake-section h4 { font-size: 12px; font-weight: 700; color: var(--telehealth-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+    .intake-section h4 { font-size: 12px; font-weight: 700; color: var(--emr-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
 
     /* ── Alert bar ───────────────────────────────────── */
     .alert-bar {
@@ -316,14 +316,14 @@
     <div class="header-brand">
       <div class="logo">🎥</div>
       <div>
-        <h1>SmartClinic <span>Telehealth</span></h1>
+        <h1>SmartClinic <span>EMR Module</span></h1>
       </div>
     </div>
     <nav class="header-nav">
       <a href="/admin.html" style="text-decoration:none;">
         <button class="btn btn-ghost">← Admin Dashboard</button>
       </a>
-      <button class="btn btn-telehealth" id="newSessionBtn">New Session</button>
+      <button class="btn btn-emr" id="newSessionBtn">New Session</button>
       <span id="liveIndicator" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--success);">
         <span style="width:8px;height:8px;background:var(--success);border-radius:50%;display:inline-block;"></span>
         Live
@@ -334,7 +334,7 @@
   <!-- Create Session Modal -->
   <div class="modal-bg" id="newSessionModal">
     <div class="modal fade-in">
-      <h2>📋 Schedule Telehealth Session</h2>
+      <h2>📋 Schedule EMR Module Session</h2>
       <div class="form-grid-2">
         <div class="form-row">
           <label>Patient ID</label>
@@ -365,7 +365,7 @@
       </div>
       <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal('newSessionModal')">Cancel</button>
-        <button class="btn btn-telehealth" id="createSessionBtn">Create Session</button>
+        <button class="btn btn-emr" id="createSessionBtn">Create Session</button>
       </div>
     </div>
   </div>
@@ -373,7 +373,7 @@
   <!-- Join Call Modal -->
   <div class="modal-bg" id="joinCallModal">
     <div class="modal fade-in" style="width:640px;">
-      <h2>🎥 Telehealth Video Consultation</h2>
+      <h2>🎥 EMR Module Video Consultation</h2>
       <div id="callSessionInfo" style="margin-bottom:16px;"></div>
       
       <!-- Mini video view -->
@@ -497,14 +497,14 @@
             </div>
             <div class="intake-section">
               <h4>Pain Level (0–10)</h4>
-              <input type="range" id="intakePain" min="0" max="10" value="0" style="width:100%;accent-color:var(--telehealth);" />
-              <span id="intakePainVal" style="font-size:13px;color:var(--telehealth);">0/10</span>
+              <input type="range" id="intakePain" min="0" max="10" value="0" style="width:100%;accent-color:var(--emr);" />
+              <span id="intakePainVal" style="font-size:13px;color:var(--emr);">0/10</span>
             </div>
             <div class="intake-section">
               <h4>Allergies</h4>
               <input type="text" id="intakeAllergies" placeholder="Known drug or food allergies..." />
             </div>
-            <button class="btn btn-telehealth" style="width:100%;margin-top:8px;" onclick="submitIntake()">Submit Intake to Provider</button>
+            <button class="btn btn-emr" style="width:100%;margin-top:8px;" onclick="submitIntake()">Submit Intake to Provider</button>
           </div>
         </div>
 
@@ -513,7 +513,7 @@
       <!-- All Sessions Table -->
       <div class="card">
         <div class="card-head">
-          <div><span class="eyebrow">Session Registry</span><h2>All Telehealth Sessions</h2></div>
+          <div><span class="eyebrow">Session Registry</span><h2>All EMR Module Sessions</h2></div>
           <div style="display:flex;gap:8px;">
             <select id="sessionFilter" onchange="renderSessions()" style="width:auto;padding:8px 12px;">
               <option value="">All Statuses</option>
@@ -521,7 +521,7 @@
               <option value="active">Active</option>
               <option value="ended">Ended</option>
             </select>
-            <button class="btn btn-telehealth" onclick="openModal('newSessionModal')">+ New Session</button>
+            <button class="btn btn-emr" onclick="openModal('newSessionModal')">+ New Session</button>
           </div>
         </div>
         <div id="sessionsTableContainer">
@@ -586,7 +586,7 @@
 
     // ─── Load Sessions ────────────────────────────────────────────────────────
     async function loadSessions() {
-      const data = await api("/api/v1/telehealth/sessions");
+      const data = await api("/api/v1/emr/sessions");
       sessions = (data?.data || data || []);
       renderKPIs();
       renderWaitingRoom();
@@ -653,7 +653,7 @@
                 <td>${dur}</td>
                 <td>${(s.scheduledTime || s.createdAt || "").slice(0,16).replace("T"," ")}</td>
                 <td>
-                  ${s.status !== "ended" ? `<button class="btn btn-telehealth" style="padding:5px 12px;font-size:11px;" onclick="joinSession('${s.id}')">Join</button>` : ""}
+                  ${s.status !== "ended" ? `<button class="btn btn-emr" style="padding:5px 12px;font-size:11px;" onclick="joinSession('${s.id}')">Join</button>` : ""}
                   ${s.status === "waiting" ? `<button class="btn btn-danger" style="padding:5px 10px;font-size:11px;margin-left:4px;" onclick="cancelSession('${s.id}')">Cancel</button>` : ""}
                 </td>
               </tr>`;
@@ -671,7 +671,7 @@
       if (!patientId) { alert("Please enter a Patient ID"); return; }
       const btn = document.getElementById("createSessionBtn");
       btn.textContent = "Creating...";
-      const result = await api("/api/v1/telehealth/sessions", {
+      const result = await api("/api/v1/emr/sessions", {
         method: "POST",
         body: JSON.stringify({ patientId, doctorId, scheduledTime, reason })
       });
@@ -696,7 +696,7 @@
       renderRxList();
 
       // Update session status to active
-      await api(`/api/v1/telehealth/sessions/${sessionId}`, {
+      await api(`/api/v1/emr/sessions/${sessionId}`, {
         method: "PATCH",
         body: JSON.stringify({ status: "active" })
       });
@@ -719,7 +719,7 @@
 
     async function cancelSession(sessionId) {
       if (!confirm("Cancel this session?")) return;
-      await api(`/api/v1/telehealth/sessions/${sessionId}`, {
+      await api(`/api/v1/emr/sessions/${sessionId}`, {
         method: "PATCH",
         body: JSON.stringify({ status: "cancelled" })
       });
@@ -743,7 +743,7 @@
       if (!currentSession) return;
       clearInterval(callTimer);
       clearInterval(vitalsInterval);
-      await api(`/api/v1/telehealth/sessions/${currentSession.id}`, {
+      await api(`/api/v1/emr/sessions/${currentSession.id}`, {
         method: "PATCH",
         body: JSON.stringify({ status: "ended", notes: document.getElementById("callNotes").value })
       });
@@ -811,7 +811,7 @@
     async function saveConsultation() {
       if (!currentSession) return;
       const notes = document.getElementById("callNotes").value;
-      await api(`/api/v1/telehealth/sessions/${currentSession.id}`, {
+      await api(`/api/v1/emr/sessions/${currentSession.id}`, {
         method: "PATCH",
         body: JSON.stringify({ notes, prescriptions: rxItems })
       });
@@ -888,17 +888,17 @@
     function refreshWaitingRoom() { loadSessions(); }
 
     // ─── Real-time SSE connection ─────────────────────────────────────────────
-    function connectTelehealthStream() {
+    function connectEMR ModuleStream() {
       if (eventSource) eventSource.close();
       try {
-        eventSource = new EventSource(`/api/v1/stream/telehealth`);
+        eventSource = new EventSource(`/api/v1/stream/emr`);
         eventSource.onmessage = (e) => {
           const msg = JSON.parse(e.data);
           if (msg.event === "session:new" || msg.event === "session:updated") {
             loadSessions();
           }
         };
-        eventSource.onerror = () => setTimeout(connectTelehealthStream, 5000);
+        eventSource.onerror = () => setTimeout(connectEMR ModuleStream, 5000);
       } catch(e) { /* SSE not supported */ }
     }
 
@@ -915,7 +915,7 @@
 
     // ─── Init ─────────────────────────────────────────────────────────────────
     loadSessions();
-    connectTelehealthStream();
+    connectEMR ModuleStream();
     setInterval(loadSessions, 30000);
   </script>
 </body>

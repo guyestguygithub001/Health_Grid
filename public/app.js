@@ -179,6 +179,8 @@ function switchView(id) {
   // Scroll view content container back to the top
   const viewEl = document.getElementById(id);
   if (viewEl) viewEl.scrollTop = 0;
+
+  if (typeof updateWizardFooter === "function") updateWizardFooter(id);
 }
 
 // ---------------------------------------------------------------
@@ -525,15 +527,22 @@ async function loadData() {
     apiStatus.textContent = "Online";
     apiStatus.style.background = "#e0f2fe";
     [state.summary, state.facilities, state.patients, state.encounters,
-     state.orders, state.reports, state.consultations, state.billing] = await Promise.all([
+     state.orders, state.reports, state.consultations, state.billing,
+     state.referrals, state.claims, state.kpi, state.theatreBookings] = await Promise.all([
       api("/api/summary"), api("/api/facilities"), api("/api/patients"),
       api("/api/encounters"), api("/api/orders"), api("/api/reports"),
-      api("/api/consultations"), api("/api/billing")
+      api("/api/consultations"), api("/api/billing"),
+      api("/api/v1/referrals").catch(() => ({ data: [] })).then(r => r.data || []),
+      api("/api/v1/billing/claims").catch(() => ({ data: [] })).then(r => r.data || []),
+      api("/api/v1/analytics/kpi").catch(() => ({ data: {} })).then(r => r.data || {}),
+      api("/api/theatre").catch(() => [])
     ]);
     fillSelects();
     renderSummary(); renderEncounters(); renderFacilities();
     renderPatients(document.querySelector("#patientSearch")?.value||"");
     renderOrders(); renderReports(); renderConsultations(); renderBilling();
+    renderTheatreBookings(); renderReferralsView(); renderClaimsView();
+    if(typeof renderEnterpriseAnalytics === "function") renderEnterpriseAnalytics();
   } catch(err) {
     if (err.message === "Session expired. Please log in again.") return;
     apiStatus.textContent = "Offline";
@@ -2667,9 +2676,22 @@ function wireFormSubmits() {
     { id: "maternityPageForm", unit: "ANC", msg: "Maternity ANC check completed." },
     { id: "immunizationPageForm", unit: "Immunization", msg: "Vaccination dose recorded." },
     { id: "theatrePageForm", unit: "Theatre", msg: "Operative procedure logged." },
-    { id: "referralsPageForm", unit: "Referrals", msg: "Outpatient referral issued." },
+    { id: "theatrePageForm", unit: "Theatre", msg: "Operative procedure logged." },
+    { id: "referralsPageForm", unit: "Referrals", msg: "Outbound referral requested." },
     { id: "psychiatryPageForm", unit: "Psychiatry", msg: "Psychiatry consultation saved." }
   ];
+
+  // Update consultation wizard context on click
+  document.getElementById("consultationForm")?.addEventListener("click", e => {
+    if (e.target.tagName === "BUTTON" && e.target.textContent.includes("Next")) {
+      const patSelect = document.getElementById("consultationPatient");
+      const patName = patSelect.options[patSelect.selectedIndex]?.text || "Unknown";
+      const ctx2 = document.getElementById("conContextName");
+      const ctx3 = document.getElementById("conContextName3");
+      if (ctx2) ctx2.textContent = patName;
+      if (ctx3) ctx3.textContent = patName;
+    }
+  });
 
   formMap.forEach(({ id, unit, msg }) => {
     const el = document.querySelector(`#${id}`);
@@ -3314,4 +3336,326 @@ window.loadData = async function() {
 // Apply patch if locally scoped
 loadData = window.loadData;
 
+// ── ENTERPRISE RENDERERS ────────────────────────────────────
+function renderTheatreBookings() {
+  const el = document.getElementById("theatreBookingsList");
+  if (!el) return;
+  const data = state.theatreBookings || [];
+  if (!data.length) {
+    el.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">No theatre bookings found.</td></tr>';
+    return;
+  }
+  el.innerHTML = data.map(b => `
+    <tr>
+      <td><strong>${b.procedure}</strong></td>
+      <td>${b.patientName || patientName(b.patientId)}</td>
+      <td>${b.surgeonId} / ${b.theatreRoom}</td>
+      <td>${b.scheduledDate}</td>
+      <td><span class="${badgeClass(b.status)}">${b.status}</span></td>
+    </tr>
+  `).join("");
+}
 
+function renderReferralsView() {
+  const el = document.getElementById("referralsList");
+  if (!el) return;
+  const data = state.referrals || [];
+  if (!data.length) {
+    el.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">No outbound referrals found.</td></tr>';
+    return;
+  }
+  el.innerHTML = data.map(r => `
+    <tr>
+      <td><code>${r.id}</code></td>
+      <td><strong>${r.patientName || patientName(r.patientId)}</strong></td>
+      <td>${r.toFacility} — ${r.toSpecialty}</td>
+      <td><span class="${badgeClass(r.urgency)}">${r.urgency}</span></td>
+      <td><span class="${badgeClass(r.status)}">${r.status}</span></td>
+    </tr>
+  `).join("");
+}
+
+function renderClaimsView() {
+  const el = document.getElementById("claimsList");
+  if (!el) return;
+  const data = state.claims || [];
+  if (!data.length) {
+    el.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--muted);">No insurance claims found.</td></tr>';
+    return;
+  }
+  el.innerHTML = data.map(c => `
+    <tr>
+      <td><code>${c.id}</code></td>
+      <td><strong>${c.insurer}</strong></td>
+      <td>${c.billCount} bills</td>
+      <td>₦${c.totalClaimed.toLocaleString()}</td>
+      <td><span class="${badgeClass(c.status)}">${c.status}</span></td>
+    </tr>
+  `).join("");
+}
+
+function searchLiveHospitals() {
+  const query = document.getElementById("referralHospitalSearch").value.toLowerCase();
+  const list = [
+    { name: "National Hospital Abuja", loc: "Abuja, FCT", beds: 14, status: "Accepting" },
+    { name: "Lagos University Teaching Hospital (LUTH)", loc: "Idi-Araba, Lagos", beds: 4, status: "Accepting" },
+    { name: "Jos University Teaching Hospital (JUTH)", loc: "Jos, Plateau", beds: 0, status: "Full" },
+    { name: "Federal Medical Centre Asaba", loc: "Asaba, Delta", beds: 22, status: "Accepting" },
+    { name: "Aminu Kano Teaching Hospital (AKTH)", loc: "Kano", beds: 8, status: "Accepting" }
+  ];
+  const matched = list.filter(h => h.name.toLowerCase().includes(query) || h.loc.toLowerCase().includes(query));
+  
+  if (!matched.length) {
+    showToast("No partner hospitals found matching your search.");
+    return;
+  }
+  
+  const formatted = matched.map(h => `${h.name} (${h.loc}) - ${h.status === 'Accepting' ? '✅ '+h.beds+' beds available' : '❌ Full capacity'}`).join("\\n");
+  alert("Live Hospital Availability:\\n\\n" + formatted);
+}
+
+function renderEnterpriseAnalytics() {
+  // Try to update existing old charts with live KPI data if possible
+  const kpi = state.kpi;
+  if (!kpi) return;
+  
+  // E.g., Revenue Breakdown
+  const revCard = document.querySelector("#revenueAmount");
+  if (revCard && kpi.revenue) revCard.textContent = "₦" + kpi.revenue.toLocaleString();
+}
+
+
+
+
+
+// ── UNIFIED WIZARD LOGIC ────────────────────────────────────
+const wizardSequence = [
+  {
+    "id": "dashboard",
+    "label": "🏥 Dashboard"
+  },
+  {
+    "id": "patients",
+    "label": "👤 Intake & Patients"
+  },
+  {
+    "id": "appointments",
+    "label": "📅 Booking"
+  },
+  {
+    "id": "consultations",
+    "label": "🩺 Consultation"
+  },
+  {
+    "id": "clinical",
+    "label": "🏨 Clinical Units"
+  },
+  {
+    "id": "records",
+    "label": "📁 Records"
+  },
+  {
+    "id": "beds",
+    "label": "🛏 Ward / Beds"
+  },
+  {
+    "id": "labresults",
+    "label": "🧪 Diagnostics"
+  },
+  {
+    "id": "orders",
+    "label": "📋 Orders"
+  },
+  {
+    "id": "billing",
+    "label": "💰 Billing"
+  },
+  {
+    "id": "support",
+    "label": "🤖 Decision Support"
+  },
+  {
+    "id": "phc",
+    "label": "🌿 PHC Network"
+  },
+  {
+    "id": "reports",
+    "label": "📑 Reports"
+  },
+  {
+    "id": "analytics",
+    "label": "📊 Analytics"
+  },
+  {
+    "id": "theatre",
+    "label": "🎭 Theatre / OR"
+  },
+  {
+    "id": "referrals",
+    "label": "↗ Referrals"
+  },
+  {
+    "id": "claims",
+    "label": "🏦 Claims & HMO"
+  }
+];
+
+function updateWizardFooter(viewId) {
+  const currentIndex = wizardSequence.findIndex(s => s.id === viewId);
+  if (currentIndex === -1) return; // Not in wizard
+
+  const footer = document.getElementById("globalWizardFooter");
+  const backBtn = document.getElementById("wizardBackBtn");
+  const nextBtn = document.getElementById("wizardNextBtn");
+  const progText = document.getElementById("wizardProgressText");
+  const sidebar = document.getElementById("wizardSidebar");
+
+  if (!footer) return;
+
+  // Render Sidebar Progress
+  if (sidebar) {
+    sidebar.innerHTML = wizardSequence.map((step, idx) => {
+      let iconColor = idx < currentIndex ? 'var(--brand)' : (idx === currentIndex ? '#fff' : 'rgba(0,0,0,0.4)');
+      let bgColor = idx < currentIndex ? 'rgba(59,130,246,0.1)' : (idx === currentIndex ? 'var(--brand)' : 'transparent');
+      let textColor = '#fff';
+      let fontWeight = idx <= currentIndex ? '700' : '400';
+      return `<div style="padding: 12px 20px; display: flex; align-items: center; gap: 10px; background: ${bgColor}; color: ${textColor}; font-weight: ${fontWeight}; border-radius: 8px; margin-bottom: 4px; transition: all 0.2s; cursor: pointer;" onclick="if(${idx} <= ${currentIndex}) switchView('${step.id}')">
+        <span style="display:flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:50%;background:${iconColor === '#fff' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.05)'};font-size:12px;">${idx+1}</span>
+        ${step.label}
+      </div>`;
+    }).join("");
+  }
+
+  // Update Buttons
+  progText.textContent = `Step ${currentIndex + 1} of ${wizardSequence.length}`;
+  
+  if (currentIndex === 0) {
+    backBtn.style.visibility = 'hidden';
+  } else {
+    backBtn.style.visibility = 'visible';
+    backBtn.textContent = '← Back to ' + wizardSequence[currentIndex - 1].label.replace(/[^a-zA-Z ]/g, "").trim();
+  }
+
+  if (currentIndex === wizardSequence.length - 1) {
+    nextBtn.textContent = 'Finish Journey ✓';
+    nextBtn.onclick = () => { showToast('Journey Complete!'); switchView('dashboard'); };
+  } else {
+    nextBtn.textContent = 'Next: ' + wizardSequence[currentIndex + 1].label.replace(/[^a-zA-Z ]/g, "").trim() + ' →';
+    nextBtn.onclick = () => switchView(wizardSequence[currentIndex + 1].id);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  switchView('dashboard');
+});
+
+// --- NEW ARCHITECTURE LOGIC ---
+
+function switchSystemModule(type) {
+  document.querySelectorAll('.module-toggle').forEach(btn => btn.classList.remove('active'));
+  if(type === 'EMR') {
+    document.getElementById('emrModuleToggle').classList.add('active');
+    document.getElementById('emrModuleToggle').style.background = '#fff';
+    document.getElementById('emrModuleToggle').style.color = 'var(--brand-dark)';
+    document.getElementById('phcModuleToggle').style.background = 'transparent';
+    document.getElementById('phcModuleToggle').style.color = 'var(--muted)';
+    showToast('Switched to EMR Unit Module');
+  } else {
+    document.getElementById('phcModuleToggle').classList.add('active');
+    document.getElementById('phcModuleToggle').style.background = '#fff';
+    document.getElementById('phcModuleToggle').style.color = 'var(--brand-dark)';
+    document.getElementById('emrModuleToggle').style.background = 'transparent';
+    document.getElementById('emrModuleToggle').style.color = 'var(--muted)';
+    showToast('Switched to Primary Healthcare Module');
+    switchView('phc');
+  }
+}
+
+function lookupPhcReferral() {
+  const input = document.getElementById('phcReferenceInput').value;
+  const resultDiv = document.getElementById('phcLookupResult');
+  
+  if(!input) {
+    showToast('Please enter a PHC Reference Number', 'warning');
+    return;
+  }
+  
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML = '🔄 Searching PHC Registry...';
+  
+  setTimeout(() => {
+    resultDiv.innerHTML = `✅ Found Patient: <strong>Musa Ibrahim (Age 42)</strong><br>
+    <span style="font-weight:400; color:#4b5563;">Referred from: Mangu PHC Centre<br>
+    Primary Diagnosis: Severe Malaria with suspected typhoid.</span>`;
+    showToast('PHC Records synced successfully');
+  }, 1200);
+}
+
+function startGuidedTour() {
+  const steps = [
+    { target: 'dashboard', text: 'Welcome to the EMR Module! Click the giant button to start a new patient journey.' },
+    { target: 'sidebarToggleBtn', text: 'You can toggle the unified navigation sidebar here to see your exact location.' },
+    { target: 'phcReferenceInput', text: 'Doctors: Use this PHC Reference lookup to seamlessly pull data for referred outpatients.' },
+    { target: 'encounterForm', text: 'Clinical Workflow: Ensure every patient is booked primarily to GOPD before transferring.' }
+  ];
+  
+  let currentStep = 0;
+  
+  const overlay = document.createElement('div');
+  overlay.id = 'tourOverlay';
+  overlay.style = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:9999; display:flex; align-items:center; justify-content:center; flex-direction:column; color:#fff; text-align:center; padding:20px;';
+  
+  const box = document.createElement('div');
+  box.style = 'background:#fff; color:#111; padding:30px; border-radius:12px; max-width:400px; box-shadow:0 10px 40px rgba(0,0,0,0.5);';
+  
+  const textElem = document.createElement('p');
+  textElem.style = 'font-size:16px; margin-bottom:20px;';
+  
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'primary-btn';
+  nextBtn.textContent = 'Next Step';
+  
+  const closeBtn = document.createElement('button');
+  closeBtn.className = 'secondary-btn';
+  closeBtn.textContent = 'Skip Tour';
+  closeBtn.style.marginTop = '10px';
+  
+  box.appendChild(textElem);
+  box.appendChild(nextBtn);
+  box.appendChild(document.createElement('br'));
+  box.appendChild(closeBtn);
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  
+  function renderStep() {
+    if(currentStep >= steps.length) {
+      document.body.removeChild(overlay);
+      showToast('Guided tour completed!');
+      return;
+    }
+    textElem.textContent = steps[currentStep].text;
+    
+    const el = document.getElementById(steps[currentStep].target);
+    if(el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const origOutline = el.style.outline;
+      const origPosition = el.style.position;
+      const origZindex = el.style.zIndex;
+      
+      el.style.outline = '4px solid #f59e0b';
+      el.style.position = 'relative';
+      el.style.zIndex = '10000';
+      
+      setTimeout(() => { 
+        el.style.outline = origOutline; 
+        el.style.position = origPosition;
+        el.style.zIndex = origZindex;
+      }, 2500);
+    }
+  }
+  
+  nextBtn.onclick = () => { currentStep++; renderStep(); };
+  closeBtn.onclick = () => { document.body.removeChild(overlay); showToast('Tour skipped'); };
+  
+  renderStep();
+}

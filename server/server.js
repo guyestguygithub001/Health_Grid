@@ -797,6 +797,8 @@ async function handleApi(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/billing") { sendJson(res, 200, data.billing); return; }
   if (req.method === "POST" && url.pathname === "/api/billing") { const body = await collectBody(req); const bill = createAutoBill(data, body.patientId, body.service, body.description); writeData(data); sendJson(res, 201, bill); return; }
   if (req.method === "POST" && url.pathname === "/api/billing/status") { const body = await collectBody(req); const bill = data.billing.find(b => b.id === body.id); if (bill) { bill.status = body.status; writeData(data); sendJson(res, 200, bill); } else sendJson(res, 404, { error: "Bill not found" }); return; }
+  // ── Theatre
+  if (req.method === "GET" && url.pathname === "/api/theatre") { sendJson(res, 200, data.theatreBookings || []); return; }
   // ── Consultations
   if (req.method === "GET" && url.pathname === "/api/consultations") { sendJson(res, 200, data.consultations); return; }
   if (req.method === "POST" && url.pathname === "/api/consultations") {
@@ -955,11 +957,21 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const pathname = url.pathname;
 
+  // CORS preflight
+  if (req.method === "OPTIONS") {
+    res.writeHead(204, {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET,POST,PATCH,PUT,DELETE,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type,Authorization,x-user-id,x-user-role"
+    });
+    res.end();
+    return;
+  }
+
   try {
-    // ── 1. Public static pages (no auth needed) ──────────
-    if (!pathname.startsWith("/api/") && (
-      pathname === "/" || pathname === "/index.html" || pathname === "/portal.html"
-    )) {
+    // ── 1. ALL static files served without auth ──────────
+    // Auth is handled in JS by individual pages
+    if (!pathname.startsWith("/api/") && !pathname.startsWith("/fhir/")) {
       serveStatic(req, res, url);
       return;
     }
@@ -970,9 +982,24 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // ── 3. All other routes require admin auth ─────────────
+    // ── 3. Login endpoint (unauthenticated) ────────────────
+    if (req.method === "POST" && pathname === "/api/v1/auth/login") {
+      const body = await collectBody(req);
+      const validUser = process.env.APP_USER || "guyestguy";
+      const validPass = process.env.APP_PASS || "guyestguygithub001";
+      if (body.username === validUser && body.password === validPass) {
+        const token = Buffer.from(`${body.username}:${body.password}`).toString("base64");
+        sendJson(res, 200, { success: true, token, username: body.username, role: "system_admin", userId: "USR-0001" });
+      } else {
+        sendJson(res, 401, { success: false, error: "Invalid credentials" });
+      }
+      return;
+    }
+
+    // ── 4. All other API routes require admin auth ─────────
     let b64 = (req.headers.authorization || "").split(" ")[1] || "";
-    if (!b64 && pathname === "/api/stream" && url.searchParams.has("token")) {
+    // Accept token as query param (for SSE streams, public links)
+    if (!b64 && url.searchParams.has("token")) {
       b64 = url.searchParams.get("token");
     }
     const decoded = Buffer.from(b64, "base64").toString();
@@ -980,9 +1007,9 @@ const server = http.createServer(async (req, res) => {
     const login    = decoded.slice(0, colonIdx);
     const password = decoded.slice(colonIdx + 1);
     if (login !== (process.env.APP_USER || "guyestguy") || password !== (process.env.APP_PASS || "guyestguygithub001")) {
-      res.statusCode = 401;
-      res.setHeader("WWW-Authenticate", 'Basic realm="PlateauCare EHR"');
-      res.end("Access denied");
+      // Return JSON 401 WITHOUT WWW-Authenticate — prevents browser Basic Auth popup
+      res.writeHead(401, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+      res.end(JSON.stringify({ success: false, error: "Unauthorized", code: "SEC-001" }));
       return;
     }
 

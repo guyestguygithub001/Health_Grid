@@ -1453,3 +1453,25 @@ tr.urgent-row td:first-child { box-shadow: inset 3px 0 0 var(--danger) !importan
   opacity: 0.9;
 }
 
+/* ── INTERACTIVE EFFECTS ─────────────────────────────── */
+.interactive-card, .stat-card, .panel, .facility-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+.interactive-card:hover, .stat-card:hover, .panel:hover, .facility-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow: 0 12px 24px -8px rgba(0,0,0,0.15);
+  border-color: var(--brand-light);
+}
+.stat-card:active, .facility-card:active {
+  transform: translateY(0) scale(0.98);
+}
+.data-table tbody tr {
+  transition: background 0.2s ease, transform 0.2s ease;
+  cursor: pointer;
+}
+.data-table tbody tr:hover {
+  background: var(--brand-light);
+  transform: scale(1.005);
+}
+
