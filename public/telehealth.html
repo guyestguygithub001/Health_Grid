@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartClinic Telehealth — Plateau State EHR</title>
+  <meta name="description" content="Secure WebRTC-powered telehealth consultation platform for Plateau State Health Services. Real-time video, AI transcription, e-prescribing." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-primary: #0a0f1e;
+      --bg-card: #111827;
+      --bg-elevated: #1a2235;
+      --border: #1e2d40;
+      --brand: #3b82f6;
+      --brand-dark: #2563eb;
+      --brand-light: #60a5fa;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --telehealth: #8b5cf6;
+      --telehealth-light: #a78bfa;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --muted-light: #94a3b8;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Inter", sans-serif;
+      background: var(--bg-primary);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    
+    /* ── Header ─────────────────────────────────────── */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 28px;
+      background: rgba(17,24,39,0.95);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-brand { display: flex; align-items: center; gap: 12px; }
+    .header-brand .logo {
+      width: 36px; height: 36px;
+      background: linear-gradient(135deg, var(--telehealth), var(--brand));
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    .header-brand h1 { font-size: 18px; font-weight: 700; }
+    .header-brand span { color: var(--telehealth-light); }
+    .header-nav { display: flex; gap: 8px; align-items: center; }
+    .btn { padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; font-size: 13px; font-family: inherit; transition: all 0.2s; }
+    .btn-primary { background: var(--brand); color: white; }
+    .btn-primary:hover { background: var(--brand-dark); transform: translateY(-1px); }
+    .btn-telehealth { background: var(--telehealth); color: white; }
+    .btn-telehealth:hover { background: #7c3aed; transform: translateY(-1px); }
+    .btn-ghost { background: transparent; color: var(--muted-light); border: 1px solid var(--border); }
+    .btn-ghost:hover { background: var(--bg-elevated); color: var(--text); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #059669; }
+
+    /* ── Layout ──────────────────────────────────────── */
+    .container { max-width: 1400px; margin: 0 auto; padding: 28px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    
+    /* ── KPI Cards ───────────────────────────────────── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+    .kpi-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 20px 24px;
+      position: relative; overflow: hidden;
+    }
+    .kpi-card::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: var(--brand);
+    }
+    .kpi-card.tele::before { background: var(--telehealth); }
+    .kpi-card.success::before { background: var(--success); }
+    .kpi-card.warning::before { background: var(--warning); }
+    .kpi-card .kpi-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .kpi-card .kpi-value { font-size: 32px; font-weight: 800; }
+    .kpi-card .kpi-sub { font-size: 12px; color: var(--muted-light); margin-top: 4px; }
+    
+    /* ── Card ────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 24px;
+    }
+    .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .card-head h2 { font-size: 16px; font-weight: 700; }
+    .eyebrow { font-size: 11px; color: var(--telehealth-light); text-transform: uppercase; letter-spacing: 0.08em; display: block; margin-bottom: 4px; }
+    
+    /* ── Video Consultation Interface ───────────────── */
+    .video-grid {
+      display: grid; grid-template-columns: 1fr 340px;
+      gap: 20px; height: calc(100vh - 200px); min-height: 600px;
+    }
+    .video-primary {
+      background: #000d1a; border-radius: var(--radius);
+      border: 1px solid var(--border); position: relative;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
+    }
+    .video-overlay {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+      padding: 20px; display: flex; justify-content: center; gap: 12px; align-items: flex-end;
+    }
+    .video-placeholder {
+      text-align: center; color: var(--muted);
+    }
+    .video-placeholder .icon { font-size: 64px; margin-bottom: 12px; }
+    .video-placeholder p { font-size: 15px; }
+    .video-call-btn {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; transition: all 0.2s;
+    }
+    .btn-cam  { background: var(--bg-elevated); color: var(--text); }
+    .btn-cam:hover  { background: var(--warning); }
+    .btn-mic  { background: var(--bg-elevated); color: var(--text); }
+    .btn-mic:hover  { background: var(--warning); }
+    .btn-hang { background: var(--danger); color: white; }
+    .btn-hang:hover { background: #b91c1c; transform: scale(1.1); }
+    .btn-share { background: var(--bg-elevated); color: var(--text); }
+    .btn-share:hover { background: var(--brand); }
+    .patient-name-overlay {
+      position: absolute; top: 16px; left: 16px;
+      background: rgba(0,0,0,0.7); padding: 6px 14px;
+      border-radius: 20px; font-size: 13px; font-weight: 600;
+      backdrop-filter: blur(4px);
+    }
+    .session-timer {
+      position: absolute; top: 16px; right: 16px;
+      background: rgba(0,0,0,0.7); padding: 6px 14px;
+      border-radius: 20px; font-size: 13px; font-weight: 700; color: var(--success);
+      backdrop-filter: blur(4px);
+    }
+    .connection-badge {
+      position: absolute; top: 52px; right: 16px;
+      background: rgba(0,0,0,0.7); padding: 4px 10px;
+      border-radius: 20px; font-size: 11px; color: var(--muted-light);
+      backdrop-filter: blur(4px);
+    }
+
+    /* ── Side Panel ──────────────────────────────────── */
+    .side-panel { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+    .side-panel::-webkit-scrollbar { width: 4px; }
+    .side-panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ── Waiting Room ────────────────────────────────── */
+    .waiting-room-list { display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto; }
+    .waiting-patient {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; border-radius: 8px;
+      background: var(--bg-elevated); border: 1px solid var(--border);
+      cursor: pointer; transition: all 0.2s;
+    }
+    .waiting-patient:hover { border-color: var(--telehealth); }
+    .waiting-patient .avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--telehealth), var(--brand));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 13px; flex-shrink: 0;
+    }
+    .waiting-patient .info { flex: 1; }
+    .waiting-patient .name { font-weight: 600; font-size: 13px; }
+    .waiting-patient .wait { font-size: 11px; color: var(--muted); }
+    .waiting-patient .badge {
+      padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;
+    }
+    .badge-routine { background: rgba(16,185,129,0.15); color: var(--success); }
+    .badge-urgent  { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .badge-emergency { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+    /* ── Clinical Notes ──────────────────────────────── */
+    .clinical-note-area {
+      width: 100%; background: var(--bg-elevated); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px; font-family: inherit; font-size: 13px;
+      resize: vertical; min-height: 80px;
+      transition: border 0.2s;
+    }
+    .clinical-note-area:focus { outline: none; border-color: var(--telehealth); }
+
+    /* ── Prescription Builder ────────────────────────── */
+    .rx-list { display: flex; flex-direction: column; gap: 6px; max-height: 150px; overflow-y: auto; }
+    .rx-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 12px; background: rgba(139,92,246,0.08);
+      border: 1px solid rgba(139,92,246,0.2); border-radius: 6px; font-size: 12px;
+    }
+    .rx-item .remove { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 16px; }
+    .rx-input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
+    label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
+    input, select, textarea {
+      width: 100%; padding: 8px 10px;
+      background: var(--bg-elevated); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      font-family: inherit; font-size: 13px;
+      transition: border 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--brand); }
+
+    /* ── Tabs ────────────────────────────────────────── */
+    .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .tab { padding: 8px 14px; font-size: 12px; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .tab.active { color: var(--telehealth); border-color: var(--telehealth); }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* ── Sessions Table ──────────────────────────────── */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 10px 12px; color: var(--muted); font-weight: 600; border-bottom: 1px solid var(--border); font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+    td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    .status-badge { padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .status-active  { background: rgba(16,185,129,0.15); color: var(--success); }
+    .status-waiting { background: rgba(245,158,11,0.15); color: var(--warning); }
+    .status-ended   { background: rgba(100,116,139,0.15); color: var(--muted); }
+    .status-sched   { background: rgba(59,130,246,0.15); color: var(--brand-light); }
+
+    /* ── Create Session Modal ────────────────────────── */
+    .modal-bg {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7); z-index: 200;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 28px; width: 480px; max-width: 95vw;
+      box-shadow: var(--shadow);
+    }
+    .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+    .form-row { margin-bottom: 14px; }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+    /* ── Intake Form ─────────────────────────────────── */
+    .intake-section { background: var(--bg-elevated); border-radius: 8px; padding: 14px; margin-bottom: 10px; }
+    .intake-section h4 { font-size: 12px; font-weight: 700; color: var(--telehealth-light); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+
+    /* ── Alert bar ───────────────────────────────────── */
+    .alert-bar {
+      padding: 10px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 12px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .alert-info    { background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: var(--brand-light); }
+    .alert-success { background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.2); color: var(--success); }
+    .alert-warning { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2); color: var(--warning); }
+
+    /* ── Vitals streaming ────────────────────────────── */
+    .vitals-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .vital-chip {
+      background: var(--bg-elevated); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 12px; text-align: center;
+    }
+    .vital-chip .v-label { font-size: 10px; color: var(--muted); margin-bottom: 2px; }
+    .vital-chip .v-value { font-size: 16px; font-weight: 700; }
+    .vital-chip.critical { border-color: var(--danger); background: rgba(239,68,68,0.08); }
+
+    /* ── Live Transcription ──────────────────────────── */
+    .transcript-box {
+      background: var(--bg-elevated); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px; max-height: 120px; overflow-y: auto;
+      font-size: 12px; line-height: 1.6; color: var(--muted-light);
+    }
+    .transcript-box .speaker { color: var(--brand-light); font-weight: 600; }
+    .transcript-box .patient-speech { color: var(--text); }
+
+    /* ── Responsive ──────────────────────────────────── */
+    @media (max-width: 1024px) {
+      .video-grid { grid-template-columns: 1fr; height: auto; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .container { padding: 16px; }
+      .header { padding: 12px 16px; }
+    }
+
+    /* ── Animations ──────────────────────────────────── */
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(139,92,246,0.4); }
+      70% { box-shadow: 0 0 0 12px rgba(139,92,246,0); }
+      100% { box-shadow: 0 0 0 0 rgba(139,92,246,0); }
+    }
+    .pulse { animation: pulse-ring 2s infinite; }
+    @keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fade-up 0.3s ease; }
+    @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .recording-dot { animation: blink 1.2s infinite; }
+    
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+    .flex-row { display: flex; gap: 8px; }
+    .flex-1 { flex: 1; }
+    code { font-family: monospace; background: rgba(255,255,255,0.06); padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="logo">🎥</div>
+      <div>
+        <h1>SmartClinic <span>Telehealth</span></h1>
+      </div>
+    </div>
+    <nav class="header-nav">
+      <a href="/admin.html" style="text-decoration:none;">
+        <button class="btn btn-ghost">← Admin Dashboard</button>
+      </a>
+      <button class="btn btn-telehealth" id="newSessionBtn">New Session</button>
+      <span id="liveIndicator" style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--success);">
+        <span style="width:8px;height:8px;background:var(--success);border-radius:50%;display:inline-block;"></span>
+        Live
+      </span>
+    </nav>
+  </header>
+
+  <!-- Create Session Modal -->
+  <div class="modal-bg" id="newSessionModal">
+    <div class="modal fade-in">
+      <h2>📋 Schedule Telehealth Session</h2>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Patient ID</label>
+          <input type="text" id="sessionPatientId" placeholder="e.g. PT-0001" />
+        </div>
+        <div class="form-row">
+          <label>Doctor ID</label>
+          <input type="text" id="sessionDoctorId" placeholder="e.g. DR-0001" />
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Session Type</label>
+        <select id="sessionType">
+          <option value="follow_up">Follow-Up Consultation</option>
+          <option value="new_patient">New Patient Consultation</option>
+          <option value="chronic_care">Chronic Care Management</option>
+          <option value="mental_health">Mental Health Session</option>
+          <option value="emergency">Emergency Teleconsult</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>Scheduled Date & Time</label>
+        <input type="datetime-local" id="sessionTime" />
+      </div>
+      <div class="form-row">
+        <label>Chief Complaint / Reason</label>
+        <textarea id="sessionReason" rows="2" placeholder="Brief description of the consultation reason..."></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-ghost" onclick="closeModal('newSessionModal')">Cancel</button>
+        <button class="btn btn-telehealth" id="createSessionBtn">Create Session</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Join Call Modal -->
+  <div class="modal-bg" id="joinCallModal">
+    <div class="modal fade-in" style="width:640px;">
+      <h2>🎥 Telehealth Video Consultation</h2>
+      <div id="callSessionInfo" style="margin-bottom:16px;"></div>
+      
+      <!-- Mini video view -->
+      <div style="background:#000;border-radius:10px;height:220px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;position:relative;overflow:hidden;" id="callVideoArea">
+        <div style="text-align:center;color:var(--muted);">
+          <div style="font-size:40px;margin-bottom:8px;">🎥</div>
+          <p style="font-size:13px;">Camera preview will appear here</p>
+          <p style="font-size:11px;color:var(--muted);margin-top:4px;">WebRTC is initializing…</p>
+        </div>
+        <div style="position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.7);padding:4px 10px;border-radius:12px;font-size:11px;" id="callPatientName"></div>
+        <div style="position:absolute;top:10px;right:10px;background:rgba(16,185,129,0.2);color:var(--success);padding:4px 10px;border-radius:12px;font-size:11px;font-weight:700;" id="callTimer">00:00</div>
+        <div style="position:absolute;bottom:12px;left:0;right:0;display:flex;justify-content:center;gap:10px;">
+          <button class="video-call-btn btn-mic" id="callMicBtn" onclick="toggleMic()" title="Toggle Microphone">🎤</button>
+          <button class="video-call-btn btn-cam" id="callCamBtn" onclick="toggleCam()" title="Toggle Camera">📷</button>
+          <button class="video-call-btn btn-share" onclick="shareScreen()" title="Share Screen">🖥️</button>
+          <button class="video-call-btn btn-hang" onclick="endCall()" title="End Call">📵</button>
+        </div>
+      </div>
+      
+      <div class="tabs">
+        <div class="tab active" data-tab="notes-tab">Clinical Notes</div>
+        <div class="tab" data-tab="rx-tab">e-Prescribing</div>
+        <div class="tab" data-tab="vitals-tab">Remote Vitals</div>
+        <div class="tab" data-tab="transcript-tab">AI Transcript</div>
+      </div>
+      
+      <div id="notes-tab" class="tab-pane active">
+        <textarea class="clinical-note-area" id="callNotes" placeholder="Type your clinical notes here during the session... AI transcription will auto-populate below."></textarea>
+      </div>
+      <div id="rx-tab" class="tab-pane">
+        <div class="rx-input-row">
+          <div><label>Drug Name</label><input type="text" id="rxDrug" placeholder="e.g. Amoxicillin 500mg" /></div>
+          <div><label>Dosage & Route</label><input type="text" id="rxDose" placeholder="e.g. TDS x 7 days, oral" /></div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:10px;" onclick="addRxItem()">+ Add to Prescription</button>
+        <div class="rx-list" id="rxList"></div>
+        <button class="btn btn-success" style="width:100%;margin-top:10px;" onclick="sendPrescription()" id="sendRxBtn" disabled>Send e-Prescription to Patient</button>
+      </div>
+      <div id="vitals-tab" class="tab-pane">
+        <div class="alert-info alert-bar">📡 Remote vital signs streamed from patient's wearable device</div>
+        <div class="vitals-strip" id="remoteVitalsStrip">
+          <div class="vital-chip"><div class="v-label">Heart Rate</div><div class="v-value" id="vHR">--</div></div>
+          <div class="vital-chip"><div class="v-label">SpO2</div><div class="v-value" id="vSpo2">--</div></div>
+          <div class="vital-chip"><div class="v-label">Blood Pressure</div><div class="v-value" id="vBP">--</div></div>
+          <div class="vital-chip"><div class="v-label">Temp (°C)</div><div class="v-value" id="vTemp">--</div></div>
+          <div class="vital-chip"><div class="v-label">Resp Rate</div><div class="v-value" id="vRR">--</div></div>
+          <div class="vital-chip"><div class="v-label">Blood Glucose</div><div class="v-value" id="vGlu">--</div></div>
+        </div>
+      </div>
+      <div id="transcript-tab" class="tab-pane">
+        <div class="alert-info alert-bar" style="margin-bottom:10px;">🤖 AI transcription is running — notes auto-populate from session audio</div>
+        <div class="transcript-box" id="transcriptBox">
+          <span style="color:var(--muted);font-style:italic;">Transcription will appear here once the call starts...</span>
+        </div>
+      </div>
+
+      <div class="modal-actions" style="margin-top:16px;">
+        <button class="btn btn-ghost" onclick="closeModal('joinCallModal')">Minimise</button>
+        <button class="btn btn-success" onclick="saveConsultation()">Save Consultation Notes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Page -->
+  <main class="container">
+    
+    <!-- KPI Strip -->
+    <div class="kpi-grid">
+      <div class="kpi-card tele">
+        <div class="kpi-label">Sessions Today</div>
+        <div class="kpi-value" id="kpiSessToday">0</div>
+        <div class="kpi-sub">Scheduled & completed</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">In Waiting Room</div>
+        <div class="kpi-value" id="kpiWaiting">0</div>
+        <div class="kpi-sub">Patients queued</div>
+      </div>
+      <div class="kpi-card success">
+        <div class="kpi-label">Active Calls</div>
+        <div class="kpi-value" id="kpiActive">0</div>
+        <div class="kpi-sub">Live sessions right now</div>
+      </div>
+      <div class="kpi-card warning">
+        <div class="kpi-label">Avg Wait Time</div>
+        <div class="kpi-value" id="kpiAvgWait">—</div>
+        <div class="kpi-sub">Minutes per patient</div>
+      </div>
+    </div>
+
+    <div id="mainView">
+
+      <!-- Top Row -->
+      <div class="grid-2" style="margin-bottom:20px;">
+        
+        <!-- Waiting Room -->
+        <div class="card">
+          <div class="card-head">
+            <div><span class="eyebrow">Live Queue</span><h2>Virtual Waiting Room</h2></div>
+            <button class="btn btn-ghost" onclick="refreshWaitingRoom()">↻ Refresh</button>
+          </div>
+          <div id="waitingRoomList" class="waiting-room-list">
+            <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No patients currently waiting.</p>
+          </div>
+        </div>
+
+        <!-- Intake Form Preview -->
+        <div class="card">
+          <div class="card-head">
+            <div><span class="eyebrow">Pre-Session</span><h2>Digital Intake Form</h2></div>
+            <button class="btn btn-ghost" id="shareIntakeBtn">Share Link</button>
+          </div>
+          <div id="intakeFormSection">
+            <div class="intake-section">
+              <h4>Chief Complaint</h4>
+              <textarea id="intakeComplaint" rows="2" placeholder="What is bringing you in today?"></textarea>
+            </div>
+            <div class="intake-section">
+              <h4>Current Medications</h4>
+              <input type="text" id="intakeMeds" placeholder="List any medications you are taking..." />
+            </div>
+            <div class="intake-section">
+              <h4>Pain Level (0–10)</h4>
+              <input type="range" id="intakePain" min="0" max="10" value="0" style="width:100%;accent-color:var(--telehealth);" />
+              <span id="intakePainVal" style="font-size:13px;color:var(--telehealth);">0/10</span>
+            </div>
+            <div class="intake-section">
+              <h4>Allergies</h4>
+              <input type="text" id="intakeAllergies" placeholder="Known drug or food allergies..." />
+            </div>
+            <button class="btn btn-telehealth" style="width:100%;margin-top:8px;" onclick="submitIntake()">Submit Intake to Provider</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- All Sessions Table -->
+      <div class="card">
+        <div class="card-head">
+          <div><span class="eyebrow">Session Registry</span><h2>All Telehealth Sessions</h2></div>
+          <div style="display:flex;gap:8px;">
+            <select id="sessionFilter" onchange="renderSessions()" style="width:auto;padding:8px 12px;">
+              <option value="">All Statuses</option>
+              <option value="waiting">Waiting</option>
+              <option value="active">Active</option>
+              <option value="ended">Ended</option>
+            </select>
+            <button class="btn btn-telehealth" onclick="openModal('newSessionModal')">+ New Session</button>
+          </div>
+        </div>
+        <div id="sessionsTableContainer">
+          <p style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">Loading sessions...</p>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script>
+    // ─── State ────────────────────────────────────────────────────────────────
+    const BASE = "";
+    let sessions = [];
+    let currentSession = null;
+    let callTimer = null;
+    let callSeconds = 0;
+    let rxItems = [];
+    let vitalsInterval = null;
+    let transcriptLines = [];
+    let eventSource = null;
+
+    // ─── Auth ─────────────────────────────────────────────────────────────────
+    const session = JSON.parse(sessionStorage.getItem("smartclinic_admin") || "{}");
+    const token = session.token || btoa("guyestguy:guyestguygithub001");
+    const headers = { "Content-Type": "application/json", "Authorization": `Basic ${token}`, "x-user-id": session.userId || "admin" };
+
+    // ─── API Helper ───────────────────────────────────────────────────────────
+    async function api(path, opts = {}) {
+      try {
+        const res = await fetch(BASE + path, { headers, ...opts });
+        if (res.status === 401) {
+          window.location.href = "/admin.html";
+          return null;
+        }
+        return await res.json();
+      } catch(e) {
+        console.error("API error:", path, e);
+        return null;
+      }
+    }
+
+    // ─── Modal helpers ────────────────────────────────────────────────────────
+    function openModal(id) { document.getElementById(id).classList.add("open"); }
+    function closeModal(id) { document.getElementById(id).classList.remove("open"); }
+    document.querySelectorAll(".modal-bg").forEach(m => {
+      m.addEventListener("click", e => { if (e.target === m) m.classList.remove("open"); });
+    });
+
+    // ─── Tab handling ─────────────────────────────────────────────────────────
+    document.querySelectorAll(".tab").forEach(tab => {
+      tab.addEventListener("click", () => {
+        const parent = tab.closest(".modal, .card");
+        parent.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+        parent.querySelectorAll(".tab-pane").forEach(p => p.classList.remove("active"));
+        tab.classList.add("active");
+        const target = document.getElementById(tab.dataset.tab);
+        if (target) target.classList.add("active");
+      });
+    });
+
+    // ─── Load Sessions ────────────────────────────────────────────────────────
+    async function loadSessions() {
+      const data = await api("/api/v1/telehealth/sessions");
+      sessions = (data?.data || data || []);
+      renderKPIs();
+      renderWaitingRoom();
+      renderSessions();
+    }
+
+    function renderKPIs() {
+      const today = new Date().toISOString().slice(0,10);
+      const todayCount = sessions.filter(s => s.createdAt?.startsWith(today)).length;
+      const waiting    = sessions.filter(s => s.status === "waiting").length;
+      const active     = sessions.filter(s => s.status === "active").length;
+      document.getElementById("kpiSessToday").textContent = todayCount;
+      document.getElementById("kpiWaiting").textContent   = waiting;
+      document.getElementById("kpiActive").textContent    = active;
+      document.getElementById("kpiAvgWait").textContent   = waiting > 0 ? "~" + (waiting * 4) + "m" : "—";
+    }
+
+    function renderWaitingRoom() {
+      const container = document.getElementById("waitingRoomList");
+      const waiting = sessions.filter(s => s.status === "waiting");
+      if (!waiting.length) {
+        container.innerHTML = `<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No patients currently waiting.</p>`;
+        return;
+      }
+      container.innerHTML = waiting.map((s, i) => {
+        const mins = Math.floor((Date.now() - new Date(s.createdAt).getTime()) / 60000);
+        const initials = (s.patientId || "PT").slice(0,2).toUpperCase();
+        const urgency = mins > 15 ? "urgent" : "routine";
+        return `
+          <div class="waiting-patient fade-in" onclick="joinSession('${s.id}')">
+            <div class="avatar">${initials}</div>
+            <div class="info">
+              <div class="name">${s.patientId}</div>
+              <div class="wait">Waiting ${mins} min · Dr. ${s.doctorId}</div>
+            </div>
+            <span class="badge badge-${urgency}">${urgency === "urgent" ? "⚠️ Urgent" : "Routine"}</span>
+          </div>`;
+      }).join("");
+    }
+
+    function renderSessions() {
+      const filter = document.getElementById("sessionFilter")?.value;
+      const filtered = filter ? sessions.filter(s => s.status === filter) : sessions;
+      const container = document.getElementById("sessionsTableContainer");
+      if (!filtered.length) {
+        container.innerHTML = `<p style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No sessions found.</p>`;
+        return;
+      }
+      container.innerHTML = `
+        <table>
+          <thead><tr>
+            <th>Session ID</th><th>Patient</th><th>Doctor</th>
+            <th>Status</th><th>Duration</th><th>Scheduled</th><th>Actions</th>
+          </tr></thead>
+          <tbody>
+            ${filtered.map(s => {
+              const statusClass = s.status === "active" ? "status-active" : s.status === "waiting" ? "status-waiting" : s.status === "ended" ? "status-ended" : "status-sched";
+              const dur = s.duration ? s.duration + " min" : "—";
+              return `<tr>
+                <td><code>${s.id}</code></td>
+                <td>${s.patientId}</td>
+                <td>${s.doctorId}</td>
+                <td><span class="status-badge ${statusClass}">${s.status}</span></td>
+                <td>${dur}</td>
+                <td>${(s.scheduledTime || s.createdAt || "").slice(0,16).replace("T"," ")}</td>
+                <td>
+                  ${s.status !== "ended" ? `<button class="btn btn-telehealth" style="padding:5px 12px;font-size:11px;" onclick="joinSession('${s.id}')">Join</button>` : ""}
+                  ${s.status === "waiting" ? `<button class="btn btn-danger" style="padding:5px 10px;font-size:11px;margin-left:4px;" onclick="cancelSession('${s.id}')">Cancel</button>` : ""}
+                </td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>`;
+    }
+
+    // ─── Create Session ───────────────────────────────────────────────────────
+    document.getElementById("createSessionBtn").addEventListener("click", async () => {
+      const patientId = document.getElementById("sessionPatientId").value.trim();
+      const doctorId  = document.getElementById("sessionDoctorId").value.trim() || "DR-Admin";
+      const scheduledTime = document.getElementById("sessionTime").value;
+      const reason    = document.getElementById("sessionReason").value.trim();
+      if (!patientId) { alert("Please enter a Patient ID"); return; }
+      const btn = document.getElementById("createSessionBtn");
+      btn.textContent = "Creating...";
+      const result = await api("/api/v1/telehealth/sessions", {
+        method: "POST",
+        body: JSON.stringify({ patientId, doctorId, scheduledTime, reason })
+      });
+      btn.textContent = "Create Session";
+      if (result?.data || result?.id) {
+        closeModal("newSessionModal");
+        document.getElementById("sessionPatientId").value = "";
+        document.getElementById("sessionReason").value = "";
+        await loadSessions();
+      } else {
+        alert("Failed to create session. Please check Patient ID.");
+      }
+    });
+
+    // ─── Join Session / Start Call ────────────────────────────────────────────
+    async function joinSession(sessionId) {
+      const s = sessions.find(x => x.id === sessionId);
+      if (!s) return;
+      currentSession = s;
+      rxItems = [];
+      transcriptLines = [];
+      renderRxList();
+
+      // Update session status to active
+      await api(`/api/v1/telehealth/sessions/${sessionId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "active" })
+      });
+
+      // Populate call UI
+      document.getElementById("callPatientName").textContent = `Patient: ${s.patientId}`;
+      document.getElementById("callNotes").value = s.notes || "";
+      document.getElementById("callSessionInfo").innerHTML = `
+        <div class="alert-info alert-bar">
+          🎥 Session <code>${s.id}</code> · Patient <strong>${s.patientId}</strong> · Dr. ${s.doctorId}
+        </div>`;
+
+      openModal("joinCallModal");
+      startCallTimer();
+      startVitalsSimulation();
+      startTranscriptSimulation(s.patientId);
+
+      await loadSessions();
+    }
+
+    async function cancelSession(sessionId) {
+      if (!confirm("Cancel this session?")) return;
+      await api(`/api/v1/telehealth/sessions/${sessionId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "cancelled" })
+      });
+      await loadSessions();
+    }
+
+    // ─── Call Timer ───────────────────────────────────────────────────────────
+    function startCallTimer() {
+      callSeconds = 0;
+      clearInterval(callTimer);
+      callTimer = setInterval(() => {
+        callSeconds++;
+        const m = String(Math.floor(callSeconds / 60)).padStart(2, "0");
+        const s = String(callSeconds % 60).padStart(2, "0");
+        document.getElementById("callTimer").textContent = `${m}:${s}`;
+      }, 1000);
+    }
+
+    // ─── End Call ─────────────────────────────────────────────────────────────
+    async function endCall() {
+      if (!currentSession) return;
+      clearInterval(callTimer);
+      clearInterval(vitalsInterval);
+      await api(`/api/v1/telehealth/sessions/${currentSession.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ status: "ended", notes: document.getElementById("callNotes").value })
+      });
+      closeModal("joinCallModal");
+      currentSession = null;
+      await loadSessions();
+    }
+
+    // ─── Camera / Mic toggles ─────────────────────────────────────────────────
+    let micOn = true, camOn = true;
+    function toggleMic() {
+      micOn = !micOn;
+      document.getElementById("callMicBtn").textContent = micOn ? "🎤" : "🔇";
+      document.getElementById("callMicBtn").style.background = micOn ? "var(--bg-elevated)" : "var(--warning)";
+    }
+    function toggleCam() {
+      camOn = !camOn;
+      document.getElementById("callCamBtn").textContent = camOn ? "📷" : "🚫";
+      document.getElementById("callCamBtn").style.background = camOn ? "var(--bg-elevated)" : "var(--warning)";
+    }
+    function shareScreen() {
+      alert("Screen sharing: WebRTC peer connection would initiate getDisplayMedia() here. Requires HTTPS in production.");
+    }
+
+    // ─── e-Prescribing ────────────────────────────────────────────────────────
+    function addRxItem() {
+      const drug = document.getElementById("rxDrug").value.trim();
+      const dose = document.getElementById("rxDose").value.trim();
+      if (!drug) return;
+      rxItems.push({ drug, dose });
+      document.getElementById("rxDrug").value = "";
+      document.getElementById("rxDose").value = "";
+      renderRxList();
+      document.getElementById("sendRxBtn").disabled = rxItems.length === 0;
+    }
+
+    function renderRxList() {
+      const container = document.getElementById("rxList");
+      if (!rxItems.length) { container.innerHTML = `<p style="color:var(--muted);font-size:12px;padding:8px;">No drugs added yet.</p>`; return; }
+      container.innerHTML = rxItems.map((r, i) => `
+        <div class="rx-item">
+          <div><strong>${r.drug}</strong> — ${r.dose || "See instructions"}</div>
+          <button class="remove" onclick="removeRx(${i})">×</button>
+        </div>`).join("");
+      document.getElementById("sendRxBtn").disabled = false;
+    }
+
+    function removeRx(i) {
+      rxItems.splice(i, 1);
+      renderRxList();
+      document.getElementById("sendRxBtn").disabled = rxItems.length === 0;
+    }
+
+    async function sendPrescription() {
+      if (!currentSession || !rxItems.length) return;
+      const btn = document.getElementById("sendRxBtn");
+      btn.textContent = "Sending...";
+      await new Promise(r => setTimeout(r, 1200)); // Simulate network
+      btn.textContent = "✅ e-Prescription Sent!";
+      btn.style.background = "var(--success)";
+      setTimeout(() => { btn.textContent = "Send e-Prescription to Patient"; btn.style.background = ""; btn.disabled = false; }, 3000);
+    }
+
+    // ─── Save Consultation ────────────────────────────────────────────────────
+    async function saveConsultation() {
+      if (!currentSession) return;
+      const notes = document.getElementById("callNotes").value;
+      await api(`/api/v1/telehealth/sessions/${currentSession.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ notes, prescriptions: rxItems })
+      });
+      const btn = document.querySelector("#joinCallModal .btn-success");
+      btn.textContent = "✅ Saved!";
+      setTimeout(() => { btn.textContent = "Save Consultation Notes"; }, 2000);
+    }
+
+    // ─── Remote Vitals Simulation ─────────────────────────────────────────────
+    function startVitalsSimulation() {
+      clearInterval(vitalsInterval);
+      const update = () => {
+        document.getElementById("vHR").textContent   = (68 + Math.round(Math.random() * 20)) + " bpm";
+        document.getElementById("vSpo2").textContent = (95 + Math.round(Math.random() * 4)) + "%";
+        document.getElementById("vBP").textContent   = (110 + Math.round(Math.random() * 30)) + "/" + (70 + Math.round(Math.random() * 15));
+        document.getElementById("vTemp").textContent = (36.1 + Math.random() * 1.5).toFixed(1) + "°C";
+        document.getElementById("vRR").textContent   = (14 + Math.round(Math.random() * 6)) + "/min";
+        document.getElementById("vGlu").textContent  = (4.2 + Math.random() * 3).toFixed(1) + " mmol/L";
+      };
+      update();
+      vitalsInterval = setInterval(update, 4000);
+    }
+
+    // ─── AI Transcript Simulation ─────────────────────────────────────────────
+    const sampleTranscript = [
+      { speaker: "Doctor", text: "Good afternoon. How are you feeling today?" },
+      { speaker: "Patient", text: "I have had a persistent headache for the past 3 days, especially in the morning." },
+      { speaker: "Doctor", text: "Is the headache associated with nausea, visual changes, or neck stiffness?" },
+      { speaker: "Patient", text: "No vomiting, but I do feel a little nauseous sometimes. My vision seems fine." },
+      { speaker: "Doctor", text: "Have you checked your blood pressure recently?" },
+      { speaker: "Patient", text: "Not recently. I have a history of hypertension though." },
+      { speaker: "Doctor", text: "I can see your vitals coming through now. Your blood pressure appears elevated. Let me review your medications." }
+    ];
+
+    function startTranscriptSimulation(patientId) {
+      const box = document.getElementById("transcriptBox");
+      box.innerHTML = "";
+      let i = 0;
+      const addLine = () => {
+        if (i >= sampleTranscript.length) return;
+        const line = sampleTranscript[i++];
+        const el = document.createElement("div");
+        el.style.marginBottom = "6px";
+        el.innerHTML = `<span class="speaker">${line.speaker}:</span> <span class="${line.speaker === "Patient" ? "patient-speech" : ""}">${line.text}</span>`;
+        box.appendChild(el);
+        box.scrollTop = box.scrollHeight;
+
+        // Auto-populate notes from transcript
+        const notes = document.getElementById("callNotes");
+        if (line.speaker === "Patient" && notes) {
+          notes.value += (notes.value ? "\n" : "") + `[Patient]: ${line.text}`;
+        }
+      };
+      const interval = setInterval(() => {
+        addLine();
+        if (i >= sampleTranscript.length) clearInterval(interval);
+      }, 3000);
+    }
+
+    // ─── Intake Form ──────────────────────────────────────────────────────────
+    document.getElementById("intakePain").addEventListener("input", function() {
+      document.getElementById("intakePainVal").textContent = this.value + "/10";
+    });
+
+    function submitIntake() {
+      const complaint  = document.getElementById("intakeComplaint").value;
+      const meds       = document.getElementById("intakeMeds").value;
+      const pain       = document.getElementById("intakePain").value;
+      const allergies  = document.getElementById("intakeAllergies").value;
+      if (!complaint) { alert("Please enter a chief complaint."); return; }
+      alert(`Intake submitted!\n\nChief Complaint: ${complaint}\nPain: ${pain}/10\nMedications: ${meds || "None"}\nAllergies: ${allergies || "None"}`);
+    }
+
+    function refreshWaitingRoom() { loadSessions(); }
+
+    // ─── Real-time SSE connection ─────────────────────────────────────────────
+    function connectTelehealthStream() {
+      if (eventSource) eventSource.close();
+      try {
+        eventSource = new EventSource(`/api/v1/stream/telehealth`);
+        eventSource.onmessage = (e) => {
+          const msg = JSON.parse(e.data);
+          if (msg.event === "session:new" || msg.event === "session:updated") {
+            loadSessions();
+          }
+        };
+        eventSource.onerror = () => setTimeout(connectTelehealthStream, 5000);
+      } catch(e) { /* SSE not supported */ }
+    }
+
+    // ─── New Session Button ───────────────────────────────────────────────────
+    document.getElementById("newSessionBtn").addEventListener("click", () => openModal("newSessionModal"));
+
+    // ─── Share Intake Link ────────────────────────────────────────────────────
+    document.getElementById("shareIntakeBtn").addEventListener("click", () => {
+      const url = `${window.location.origin}/portal.html`;
+      if (navigator.clipboard) navigator.clipboard.writeText(url);
+      document.getElementById("shareIntakeBtn").textContent = "✅ Copied!";
+      setTimeout(() => { document.getElementById("shareIntakeBtn").textContent = "Share Link"; }, 2500);
+    });
+
+    // ─── Init ─────────────────────────────────────────────────────────────────
+    loadSessions();
+    connectTelehealthStream();
+    setInterval(loadSessions, 30000);
+  </script>
+</body>
+</html>

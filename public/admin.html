@@ -59,19 +59,30 @@
       </div>
 
       <nav class="nav-menu" aria-label="Primary">
-        <button class="nav-item active" data-view="dashboard">📊 Dashboard</button>
+        <button class="nav-item active" data-view="dashboard">🏥 Dashboard</button>
         <button class="nav-item" data-view="patients">👤 Patients</button>
         <button class="nav-item" data-view="appointments">📅 Appointments</button>
         <button class="nav-item" data-view="consultations">🩺 Consultations</button>
-        <button class="nav-item" data-view="clinical">🏥 Clinical Units</button>
+        <button class="nav-item" data-view="clinical">🏨 Clinical Units</button>
         <button class="nav-item" data-view="beds">🛏 Ward / Beds</button>
         <button class="nav-item" data-view="labresults">🧪 Lab Results</button>
         <button class="nav-item" data-view="orders">📋 Orders</button>
-        <button class="nav-item" data-view="billing">💳 Billing</button>
-        <button class="nav-item" data-view="support">🧠 Decision Support</button>
-        <button class="nav-item" data-view="analytics">📈 Analytics</button>
+        <button class="nav-item" data-view="billing">💰 Billing</button>
+        <button class="nav-item" data-view="support">🤖 Decision Support</button>
+        <button class="nav-item" data-view="analytics">📊 Analytics</button>
         <button class="nav-item" data-view="phc">🌿 PHC Network</button>
         <button class="nav-item" data-view="reports">📑 Reports</button>
+        <div style="margin: 8px 0; height: 1px; background: rgba(255,255,255,0.06);"></div>
+        <div style="padding: 6px 12px; font-size: 9px; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.08em;">Enterprise Modules</div>
+        <a href="/telehealth.html" style="text-decoration:none; display:block;">
+          <button class="nav-item" style="width:100%; background:rgba(139,92,246,0.12); border-left: 3px solid #8b5cf6;">🎥 Telehealth Platform</button>
+        </a>
+        <a href="/analytics.html" style="text-decoration:none; display:block;">
+          <button class="nav-item" style="width:100%; background:rgba(6,182,212,0.1); border-left: 3px solid #06b6d4;">📈 KPI Analytics</button>
+        </a>
+        <button class="nav-item" onclick="switchView('theatre')" style="background:rgba(239,68,68,0.08); border-left: 3px solid #ef4444;">🏥 Theatre / OR</button>
+        <button class="nav-item" onclick="switchView('referrals')" style="background:rgba(245,158,11,0.08); border-left: 3px solid #f59e0b;">↗ Referrals</button>
+        <button class="nav-item" onclick="switchView('claims')" style="background:rgba(16,185,129,0.08); border-left: 3px solid #10b981;">🏦 Claims & HMO</button>
       </nav>
 
       <div class="sidebar-card">
@@ -426,19 +437,19 @@
 
       <section id="clinical" class="view">
         <div class="module-grid reveal">
-          <article class="module-card"><span>TRI</span><h3>Triage</h3><p>Arrival time, vital signs, acuity, danger signs, queue routing.</p></article>
-          <article class="module-card"><span>OPD</span><h3>Outpatient</h3><p>SOAP notes, diagnosis, prescriptions, labs, follow-up.</p></article>
-          <article class="module-card"><span>EMR</span><h3>Emergency</h3><p>Resus notes, trauma, stroke/chest pain pathway, handover.</p></article>
-          <article class="module-card"><span>IPD</span><h3>Wards</h3><p>Admissions, nursing charts, ward rounds, discharge summaries.</p></article>
-          <article class="module-card"><span>LAB</span><h3>Laboratory</h3><p>Requests, specimen tracking, results, critical value alerts.</p></article>
-          <article class="module-card"><span>PHA</span><h3>Pharmacy</h3><p>Prescriptions, allergy checks, stock, dispensing, counselling.</p></article>
-          <article class="module-card"><span>RAD</span><h3>Radiology</h3><p>Imaging requests, reports, clinical indications, scheduling.</p></article>
-          <article class="module-card"><span>MAT</span><h3>ANC and Maternity</h3><p>ANC risk, labour, delivery, postnatal, PMTCT, referral alerts.</p></article>
-          <article class="module-card"><span>IMM</span><h3>Immunization</h3><p>Child schedule, defaulters, cold-chain notes, outreach line lists.</p></article>
-          <article class="module-card"><span>THR</span><h3>Theatre</h3><p>Procedure booking, consent, checklist, operative notes.</p></article>
-          <article class="module-card"><span>CLA</span><h3>Claims</h3><p>PLASCHEMA/NHIA eligibility, claim bundles, approvals, audit trail.</p></article>
-          <article class="module-card"><span>REF</span><h3>Referrals</h3><p>PHC-to-hospital escalation, feedback loop, transport notes.</p></article>
-          <article class="module-card"><span>PSY</span><h3>Psychiatry</h3><p>Mental status exam, counseling, therapy plans, cognitive assessments.</p></article>
+          <article class="module-card" onclick="switchView('triage')"><span>TRI</span><h3>Triage</h3><p>Arrival time, vital signs, acuity, danger signs, queue routing.</p></article>
+          <article class="module-card" onclick="switchView('clinical')"><span>OPD</span><h3>Outpatient</h3><p>SOAP notes, diagnosis, prescriptions, labs, follow-up.</p></article>
+          <article class="module-card" onclick="switchView('emergency')"><span>EMR</span><h3>Emergency</h3><p>Resus notes, trauma, stroke/chest pain pathway, handover.</p></article>
+          <article class="module-card" onclick="switchView('wards')"><span>IPD</span><h3>Wards</h3><p>Admissions, nursing charts, ward rounds, discharge summaries.</p></article>
+          <article class="module-card" onclick="switchView('laboratory')"><span>LAB</span><h3>Laboratory</h3><p>Requests, specimen tracking, results, critical value alerts.</p></article>
+          <article class="module-card" onclick="switchView('pharmacy')"><span>PHA</span><h3>Pharmacy</h3><p>Prescriptions, allergy checks, stock, dispensing, counselling.</p></article>
+          <article class="module-card" onclick="switchView('radiology')"><span>RAD</span><h3>Radiology</h3><p>Imaging requests, reports, clinical indications, scheduling.</p></article>
+          <article class="module-card" onclick="switchView('maternity')"><span>MAT</span><h3>ANC and Maternity</h3><p>ANC risk, labour, delivery, postnatal, PMTCT, referral alerts.</p></article>
+          <article class="module-card" onclick="switchView('immunization')"><span>IMM</span><h3>Immunization</h3><p>Child schedule, defaulters, cold-chain notes, outreach line lists.</p></article>
+          <article class="module-card" onclick="switchView('theatre')"><span>THR</span><h3>Theatre</h3><p>Procedure booking, consent, checklist, operative notes.</p></article>
+          <article class="module-card" onclick="switchView('claims')"><span>CLA</span><h3>Claims</h3><p>PLASCHEMA/NHIA eligibility, claim bundles, approvals, audit trail.</p></article>
+          <article class="module-card" onclick="switchView('referrals')"><span>REF</span><h3>Referrals</h3><p>PHC-to-hospital escalation, feedback loop, transport notes.</p></article>
+          <article class="module-card" onclick="switchView('psychiatry')"><span>PSY</span><h3>Psychiatry</h3><p>Mental status exam, counseling, therapy plans, cognitive assessments.</p></article>
         </div>
 
         <section class="panel reveal">
@@ -501,17 +512,35 @@
           <section class="panel reveal">
             <div class="panel-head">
               <div>
-                <span class="eyebrow">Primary care</span>
-                <h2>PHC Operating Model</h2>
+                <span class="eyebrow">Community Outreach</span>
+                <h2>PHC Patient Registration</h2>
               </div>
             </div>
-            <div class="workflow">
-              <div><strong>1. Community capture</strong><span>Registration, household, risk group, insurance.</span></div>
-              <div><strong>2. Triage and PHC care</strong><span>Vitals, malaria, ANC, immunization, minor ailments.</span></div>
-              <div><strong>3. Referral escalation</strong><span>Danger signs routed to general/specialist hospitals.</span></div>
-              <div><strong>4. Feedback and follow-up</strong><span>Hospital outcome returns to PHC for continuity.</span></div>
-              <div><strong>5. State reporting</strong><span>Routine indicators, outbreak signals, stock and quality.</span></div>
+            <form id="phcRegisterForm" class="encounter-form">
+              <label>Full Name<input type="text" id="phcName" placeholder="e.g. Maryam Musa" required /></label>
+              <label>Phone Number<input type="tel" id="phcPhone" placeholder="080..." required /></label>
+              <div class="vitals-grid">
+                <label>Age<input type="number" id="phcAge" placeholder="Years" required /></label>
+                <label>Sex
+                  <select id="phcSex" required>
+                    <option value="Female">Female</option>
+                    <option value="Male">Male</option>
+                  </select>
+                </label>
+              </div>
+              <label>Community / Settlement<input type="text" id="phcCommunity" placeholder="e.g. Bukuru" required /></label>
+              <button type="submit" class="btn">Register & Sync to State Database</button>
+            </form>
+          </section>
+          
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Real-time</span>
+                <h2>Recent PHC Enrollments</h2>
+              </div>
             </div>
+            <div id="phcPatientList" class="record-list"></div>
           </section>
           <section class="panel reveal">
             <div class="panel-head">
@@ -1492,6 +1521,56 @@
         <div class="onboarding-footer">
           <button class="secondary-btn onboarding-prev-btn" onclick="switchView('clinical')" type="button">← Back to Clinical Units</button>
           <button class="primary-btn onboarding-next-btn" onclick="switchView('dashboard')" type="button">📋 Exit to Hub</button>
+        </div>
+      </section>
+
+      <!-- IMMUNIZATION -->
+      <section id="immunization" class="view">
+        <div class="split-grid reveal">
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div><span class="eyebrow">Preventative</span><h2>Immunization Log</h2></div>
+            </div>
+            <div id="immunizationLogTable" class="record-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- THEATRE -->
+      <section id="theatre" class="view">
+        <div class="split-grid reveal">
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div><span class="eyebrow">Surgical</span><h2>Theatre Register</h2></div>
+            </div>
+            <div id="theatreLogTable" class="record-list"></div>
+          </section>
+        </div>
+      </section>
+
+      <!-- CLAIMS -->
+      <section id="claims" class="view">
+        <div class="split-grid reveal">
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div><span class="eyebrow">Insurance</span><h2>Claims & HMO</h2></div>
+            </div>
+            <div id="claimsLogTable" class="record-list">
+              <p style="padding:20px;color:var(--muted);text-align:center;">No pending claims bundles.</p>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <!-- REFERRALS -->
+      <section id="referrals" class="view">
+        <div class="split-grid reveal">
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div><span class="eyebrow">Network</span><h2>Inbound/Outbound Referrals</h2></div>
+            </div>
+            <div id="referralsLogTable" class="record-list"></div>
+          </section>
         </div>
       </section>
 

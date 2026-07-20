@@ -2,6 +2,9 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 
+// ── SmartClinic Enterprise Module ─────────────────────────────
+const enterprise = require("./enterprise");
+
 const PORT = process.env.PORT || 8082;
 const ROOT = process.cwd();
 const PUBLIC_DIR = path.join(ROOT, "public");
@@ -21,6 +24,18 @@ if (process.env.VERCEL) {
     DATA_FILE = tmpPath;
   } catch (err) {
     console.warn("Failed to set up /tmp database, using memory fallback:", err);
+  }
+}
+
+// ── SSE Real-time Broadcaster ──────────────────────────────
+const sseClients = new Set();
+function broadcastUpdate(type) {
+  for (const client of sseClients) {
+    try {
+      client.write(`data: ${JSON.stringify({ type, timestamp: Date.now() })}\n\n`);
+    } catch(err) {
+      sseClients.delete(client);
+    }
   }
 }
 
@@ -63,23 +78,61 @@ function readData() {
   }
 }
 
-function writeData(d) {
+const zlib = require('zlib');
+
+let isWriting = false;
+let writeQueued = false;
+
+async function writeData(d) {
   memoryDb = d;
-  try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(d, null, 2), "utf8");
-  } catch (err) {
-    console.error("Write data failed, keeping in memory:", err);
+  broadcastUpdate("update");
+  
+  if (isWriting) {
+    writeQueued = true;
+    return;
   }
+  
+  isWriting = true;
+  do {
+    writeQueued = false;
+    try {
+      await fs.promises.writeFile(DATA_FILE, JSON.stringify(memoryDb, null, 2), "utf8");
+    } catch (err) {
+      console.error("Async write failed:", err);
+    }
+  } while (writeQueued);
+  
+  isWriting = false;
 }
 
+// Share writeData with enterprise module for consistent async DB writes
+enterprise.setWriteData(writeData);
+
 function sendJson(res, status, body) {
-  res.writeHead(status, {
+  const raw = JSON.stringify(body);
+  const headers = {
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type"
-  });
-  res.end(JSON.stringify(body));
+  };
+
+  const acceptEncoding = (res.req && res.req.headers['accept-encoding']) || "";
+  if (acceptEncoding.includes("gzip") && raw.length > 500) {
+    zlib.gzip(raw, (err, result) => {
+      if (err) {
+        res.writeHead(status, headers);
+        res.end(raw);
+      } else {
+        headers["Content-Encoding"] = "gzip";
+        res.writeHead(status, headers);
+        res.end(result);
+      }
+    });
+  } else {
+    res.writeHead(status, headers);
+    res.end(raw);
+  }
 }
 
 function collectBody(req) {
@@ -918,7 +971,10 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ── 3. All other routes require admin auth ─────────────
-    const b64 = (req.headers.authorization || "").split(" ")[1] || "";
+    let b64 = (req.headers.authorization || "").split(" ")[1] || "";
+    if (!b64 && pathname === "/api/stream" && url.searchParams.has("token")) {
+      b64 = url.searchParams.get("token");
+    }
     const decoded = Buffer.from(b64, "base64").toString();
     const colonIdx = decoded.indexOf(":");
     const login    = decoded.slice(0, colonIdx);
@@ -927,6 +983,26 @@ const server = http.createServer(async (req, res) => {
       res.statusCode = 401;
       res.setHeader("WWW-Authenticate", 'Basic realm="PlateauCare EHR"');
       res.end("Access denied");
+      return;
+    }
+
+    if (pathname === "/api/stream") {
+      res.writeHead(200, {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "Connection": "keep-alive",
+        "Access-Control-Allow-Origin": "*"
+      });
+      res.write("data: connected\n\n");
+      sseClients.add(res);
+      req.on("close", () => sseClients.delete(res));
+      return;
+    }
+
+    if (pathname.startsWith("/api/v1/") || pathname.startsWith("/fhir/r6/")) {
+      const data = readData();
+      const user = req.headers["x-user-id"] || "admin";
+      await enterprise.handleEnterpriseApi(req, res, url, data, user);
       return;
     }
 

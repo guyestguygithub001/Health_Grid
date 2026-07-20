@@ -17,9 +17,32 @@
     setTimeout(() => document.getElementById("loginUser").focus(), 50);
   }
 
+  let evtSource = null;
+  function connectStream() {
+    if (evtSource) return;
+    const creds = sessionStorage.getItem("ehr_creds");
+    if (!creds) return;
+    evtSource = new EventSource("/api/stream?token=" + creds);
+    evtSource.onmessage = (e) => {
+      if (e.data === "connected") return;
+      try {
+        const msg = JSON.parse(e.data);
+        if (msg.type === "update" && typeof loadData === "function") {
+          loadData(); // Seamlessly update UI
+        }
+      } catch (err) {}
+    };
+    evtSource.onerror = () => {
+      evtSource.close();
+      evtSource = null;
+      setTimeout(connectStream, 5000); // Reconnect on failure
+    };
+  }
+
   function hideLogin() {
     loginScreen.style.display = "none";
     if (typeof loadData === "function") loadData();
+    connectStream();
   }
 
   // Expose so api() can call it on 401
@@ -61,7 +84,10 @@
   } else {
     // Quick validate stored creds
     fetch("/api/summary", { headers: { "Authorization": "Basic " + stored } })
-      .then(r => { if (r.status === 401) { sessionStorage.removeItem("ehr_creds"); showLogin(); } })
+      .then(r => { 
+        if (r.status === 401) { sessionStorage.removeItem("ehr_creds"); showLogin(); }
+        else { connectStream(); }
+      })
       .catch(() => { /* server may not be up yet; keep session */ });
   }
 })();
@@ -562,6 +588,31 @@ document.querySelector("#patientForm").addEventListener("submit", async e => {
     if (btn) { btn.disabled = false; btn.textContent = "Save Patient"; }
   }
 });
+
+// ---------------------------------------------------------------
+//  PHC Registration submit
+// ---------------------------------------------------------------
+const phcRegForm = document.querySelector("#phcRegisterForm");
+if (phcRegForm) {
+  phcRegForm.addEventListener("submit", async e => {
+    e.preventDefault();
+    const payload = {
+      name: document.getElementById("phcName").value.trim(),
+      phone: document.getElementById("phcPhone").value.trim(),
+      age: document.getElementById("phcAge").value,
+      sex: document.getElementById("phcSex").value,
+      community: document.getElementById("phcCommunity").value.trim(),
+      facilityId: "FAC-PHC" // Indicate it's a PHC outreach
+    };
+    const btn = e.currentTarget.querySelector("button[type=submit]");
+    btn.textContent = "Registering...";
+    await api("/api/patient/register", { method: "POST", body: JSON.stringify(payload) });
+    e.currentTarget.reset();
+    btn.textContent = "Register & Sync to State Database";
+    showToast("PHC Patient Registered!"); 
+    // Note: Real-time broadcast will automatically trigger loadData()
+  });
+}
 
 // ---------------------------------------------------------------
 //  New Encounter submit
@@ -3211,6 +3262,56 @@ function renderPsychiatryLog() {
     </tbody></table>`;
 }
 
+function renderPhcLog() {
+  const el = document.querySelector("#phcPatientList");
+  if (!el) return;
+  const phcPatients = (state.patients || []).filter(p => p.facilityId === "FAC-PHC");
+  if (!phcPatients.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No recent PHC registrations.</p>'; return; }
+  el.innerHTML = `
+    <table><thead><tr><th>Patient ID</th><th>Name</th><th>Age/Sex</th><th>Community</th><th>Reg. Date</th></tr></thead>
+    <tbody>
+      ${phcPatients.map(p => `<tr>
+        <td><code>${p.id}</code></td>
+        <td><strong>${p.name}</strong></td>
+        <td>${p.age} / ${p.sex}</td>
+        <td>${p.community || "-"}</td>
+        <td>${(p.lastVisit || "").substring(0,10)}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
+function renderClaimsLog() {
+  const el = document.querySelector("#claimsLogTable");
+  if (!el) return;
+  const claims = (state.billing || []).filter(b => b.insurance && b.insurance !== "Private Pay");
+  if (!claims.length) { el.innerHTML = '<p style="padding:20px;color:var(--muted);text-align:center;">No pending claims bundles.</p>'; return; }
+  el.innerHTML = `
+    <table><thead><tr><th>Date</th><th>Patient</th><th>Insurer</th><th>Total (₦)</th><th>Status</th></tr></thead>
+    <tbody>
+      ${claims.map(b => `<tr>
+        <td>${b.date}</td>
+        <td><strong>${patientName(b.patientId)}</strong></td>
+        <td>${b.insurance || "NHIA"}</td>
+        <td>${Number(b.totalAmount||0).toLocaleString()}</td>
+        <td><span class="badge warning">${b.status || "Pending Auth"}</span></td>
+      </tr>`).join("")}
+    </tbody></table>`;
+}
+
 initPsychiatrySmartFeatures();
+
+// Patch loadData to render our new UI tables
+const origLoadDataPtr = window.loadData || loadData;
+window.loadData = async function() {
+  await origLoadDataPtr();
+  renderPhcLog();
+  renderClaimsLog();
+  if(typeof renderImmunizationLog === 'function') renderImmunizationLog();
+  if(typeof renderTheatreLog === 'function') renderTheatreLog();
+  if(typeof renderReferralsLog === 'function') renderReferralsLog();
+  if(typeof renderPsychiatryLog === 'function') renderPsychiatryLog();
+}
+// Apply patch if locally scoped
+loadData = window.loadData;
 
 

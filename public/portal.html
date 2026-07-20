@@ -439,6 +439,10 @@
         return;
       }
       
+      // Auto-fill login form in case they log out
+      document.getElementById("loginPhone").value = phone;
+      document.getElementById("loginPatId").value = json.patient.id;
+      
       // Auto-login upon success
       saveSession({ phone, patientId: json.patient.id, patientName: json.patient.name });
       patientSession = { phone, patientId: json.patient.id, patientName: json.patient.name };
