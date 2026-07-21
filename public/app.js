@@ -317,21 +317,13 @@ function renderPatients(filter = "") {
             border-radius: 16px;
             padding: 20px;
             cursor: pointer;
-            transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s ease, border-color 0.2s;
+            transition: box-shadow 0.2s ease, border-color 0.2s;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             position: relative;
             overflow: hidden;
           "
-          onmouseenter="
-            this.style.transform='translateY(-6px) scale(1.01)';
-            this.style.boxShadow='0 16px 40px rgba(59,130,246,0.14)';
-            this.style.borderColor='#bfdbfe';
-          "
-          onmouseleave="
-            this.style.transform='translateY(0) scale(1)';
-            this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)';
-            this.style.borderColor='#f1f5f9';
-          "
+          onmouseenter="this.style.boxShadow='0 4px 20px rgba(59,130,246,0.1)';this.style.borderColor='#bfdbfe';"
+          onmouseleave="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)';this.style.borderColor='#f1f5f9';"
         >
           <!-- Decorative top strip -->
           <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,hsl(${avatarHue(p.name)},70%,55%),hsl(${avatarHue(p.name)+40},80%,65%));"></div>
