@@ -288,23 +288,192 @@ function renderPatients(filter = "") {
   const q = filter.toLowerCase();
   const patients = state.patients.filter(p =>
     [p.name,p.lga,p.community,p.risk,p.insurance].join(" ").toLowerCase().includes(q));
+
+  const riskColor = r => r === "High" ? "#dc2626" : r === "Routine" ? "#059669" : "#d97706";
+  const riskBg   = r => r === "High" ? "#fef2f2" : r === "Routine" ? "#f0fdf4" : "#fffbeb";
+  const initials  = name => name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  const avatarHue = name => [...name].reduce((a,c)=>a+c.charCodeAt(0),0) % 360;
+
+  if (!patients.length) {
+    document.querySelector("#patientTable").innerHTML =
+      `<div style="text-align:center;padding:60px 20px;color:var(--muted);font-size:15px;">No patients found.</div>`;
+    return;
+  }
+
   document.querySelector("#patientTable").innerHTML = `
-    <table><thead><tr>
-      <th>ID</th><th>Patient</th><th>Location</th><th>Risk</th><th>Facility</th><th>Insurance</th><th>Actions</th>
-    </tr></thead><tbody>
-      ${patients.map(p => `<tr>
-        <td>${p.id}</td>
-        <td><strong>${p.name}</strong><br>${p.sex}, ${p.age} yrs${p.bloodGroup ? ` &bull; ${p.bloodGroup}` : ""}</td>
-        <td>${p.community}<br><span style="color:var(--muted);font-size:12px;">${p.lga}</span></td>
-        <td><span class="${badgeClass(p.risk==="Routine"?"Routine":"Urgent")}">${p.risk}</span></td>
-        <td>${facilityName(p.facilityId)}</td>
-        <td>${p.insurance}</td>
-        <td>
-          <button class="text-btn" onclick="showPatientTimeline('${p.id}')">Timeline</button> | 
-          <button class="text-btn" style="color:var(--brand); font-weight:600;" onclick="openEditRecordModal('patients','${p.id}')">Edit</button>
-        </td>
-      </tr>`).join("")}
-    </tbody></table>`;
+    <div style="
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      padding: 4px 2px 24px;
+    ">
+      ${patients.map(p => `
+        <div
+          class="patient-card-interactive"
+          onclick="openPatientWorkflow('${p.id}')"
+          style="
+            background: #fff;
+            border: 1px solid #f1f5f9;
+            border-radius: 16px;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.22s cubic-bezier(.34,1.56,.64,1), box-shadow 0.22s ease, border-color 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+          "
+          onmouseenter="
+            this.style.transform='translateY(-6px) scale(1.01)';
+            this.style.boxShadow='0 16px 40px rgba(59,130,246,0.14)';
+            this.style.borderColor='#bfdbfe';
+          "
+          onmouseleave="
+            this.style.transform='translateY(0) scale(1)';
+            this.style.boxShadow='0 2px 8px rgba(0,0,0,0.05)';
+            this.style.borderColor='#f1f5f9';
+          "
+        >
+          <!-- Decorative top strip -->
+          <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,hsl(${avatarHue(p.name)},70%,55%),hsl(${avatarHue(p.name)+40},80%,65%));"></div>
+
+          <!-- Header row -->
+          <div style="display:flex;align-items:center;gap:12px;margin-top:4px;margin-bottom:14px;">
+            <div style="
+              width:44px;height:44px;border-radius:12px;flex-shrink:0;
+              background:linear-gradient(135deg,hsl(${avatarHue(p.name)},65%,52%),hsl(${avatarHue(p.name)+40},75%,62%));
+              display:flex;align-items:center;justify-content:center;
+              color:#fff;font-size:15px;font-weight:700;letter-spacing:0.02em;
+              box-shadow:0 4px 12px hsla(${avatarHue(p.name)},60%,55%,0.35);
+            ">${initials(p.name)}</div>
+            <div style="flex:1;min-width:0;">
+              <div style="font-weight:700;font-size:14px;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.name}</div>
+              <div style="font-size:12px;color:#64748b;margin-top:1px;">${p.sex || "—"}, ${p.age} yrs ${p.bloodGroup ? "· " + p.bloodGroup : ""}</div>
+            </div>
+            <span style="
+              background:${riskBg(p.risk)};color:${riskColor(p.risk)};
+              font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;
+              text-transform:uppercase;letter-spacing:0.06em;flex-shrink:0;
+            ">${p.risk || "—"}</span>
+          </div>
+
+          <!-- Info rows -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+            <div style="background:#f8fafc;border-radius:8px;padding:8px 10px;">
+              <div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">ID</div>
+              <div style="font-size:12px;font-weight:600;color:#334155;">${p.id}</div>
+            </div>
+            <div style="background:#f8fafc;border-radius:8px;padding:8px 10px;">
+              <div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">LGA</div>
+              <div style="font-size:12px;font-weight:600;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.lga || "—"}</div>
+            </div>
+            <div style="background:#f8fafc;border-radius:8px;padding:8px 10px;grid-column:1/-1;">
+              <div style="font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;">Insurance</div>
+              <div style="font-size:12px;font-weight:600;color:#334155;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${p.insurance || "—"}</div>
+            </div>
+          </div>
+
+          <!-- Footer action bar -->
+          <div style="display:flex;gap:8px;border-top:1px solid #f1f5f9;padding-top:12px;">
+            <button onclick="event.stopPropagation();showPatientTimeline('${p.id}')" style="flex:1;padding:7px;border:1px solid #e2e8f0;background:#fff;border-radius:8px;font-size:12px;font-weight:600;color:#475569;cursor:pointer;transition:background 0.15s;" onmouseenter="this.style.background='#f1f5f9'" onmouseleave="this.style.background='#fff'">📋 Timeline</button>
+            <button onclick="event.stopPropagation();openEditRecordModal('patients','${p.id}')" style="flex:1;padding:7px;border:1px solid #bfdbfe;background:#eff6ff;border-radius:8px;font-size:12px;font-weight:600;color:#1d4ed8;cursor:pointer;transition:background 0.15s;" onmouseenter="this.style.background='#dbeafe'" onmouseleave="this.style.background='#eff6ff'">✏️ Edit</button>
+            <button onclick="event.stopPropagation();openPatientWorkflow('${p.id}')" style="flex:1;padding:7px;border:none;background:linear-gradient(135deg,#3b82f6,#6366f1);border-radius:8px;font-size:12px;font-weight:600;color:#fff;cursor:pointer;transition:opacity 0.15s;box-shadow:0 2px 8px rgba(99,102,241,0.3);" onmouseenter="this.style.opacity='0.85'" onmouseleave="this.style.opacity='1'">→ Open</button>
+          </div>
+        </div>
+      `).join("")}
+    </div>`;
+}
+
+// ── Patient Workflow Modal ─────────────────────────────────────────
+function openPatientWorkflow(patientId) {
+  const p = state.patients.find(x => x.id === patientId);
+  if (!p) return;
+
+  const initials  = name => name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  const avatarHue = name => [...name].reduce((a,c)=>a+c.charCodeAt(0),0) % 360;
+  const riskColor = r => r === "High" ? "#dc2626" : r === "Routine" ? "#059669" : "#d97706";
+
+  // Remove any existing modal
+  const old = document.getElementById("patientWorkflowModal");
+  if (old) old.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "patientWorkflowModal";
+  modal.style = "position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,0.6);backdrop-filter:blur(6px);";
+  modal.onclick = e => { if (e.target === modal) modal.remove(); };
+
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:24px;max-width:620px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 30px 80px rgba(0,0,0,0.25);animation:modalIn 0.25s cubic-bezier(.34,1.56,.64,1);">
+      <style>@keyframes modalIn{from{opacity:0;transform:scale(0.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}</style>
+
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,hsl(${avatarHue(p.name)},65%,52%),hsl(${avatarHue(p.name)+40},75%,62%));padding:28px 28px 22px;border-radius:24px 24px 0 0;position:relative;">
+        <button onclick="document.getElementById('patientWorkflowModal').remove()" style="position:absolute;top:16px;right:16px;background:rgba(255,255,255,0.2);border:none;color:#fff;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;">×</button>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="width:60px;height:60px;border-radius:16px;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;">${initials(p.name)}</div>
+          <div>
+            <div style="font-size:22px;font-weight:800;color:#fff;">${p.name}</div>
+            <div style="color:rgba(255,255,255,0.8);font-size:13px;margin-top:2px;">${p.id} · ${p.sex || "—"}, ${p.age} yrs · Blood: ${p.bloodGroup || "Unknown"}</div>
+            <span style="background:rgba(255,255,255,0.25);color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;margin-top:6px;">${p.risk || "Routine"} Risk</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#f1f5f9;">
+        <div style="background:#fff;padding:16px;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:#1d4ed8;">1</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:2px;">Visits</div>
+        </div>
+        <div style="background:#fff;padding:16px;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:#059669;">Active</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:2px;">Status</div>
+        </div>
+        <div style="background:#fff;padding:16px;text-align:center;">
+          <div style="font-size:20px;font-weight:800;color:#d97706;">GOPD</div>
+          <div style="font-size:11px;color:#94a3b8;margin-top:2px;">Last Clinic</div>
+        </div>
+      </div>
+
+      <!-- Details -->
+      <div style="padding:24px 28px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+          ${[
+            ["📍 LGA", p.lga || "—"],
+            ["🏥 Facility", p.facilityId || "—"],
+            ["🛡 Insurance", p.insurance || "—"],
+            ["🏘 Community", p.community || "—"],
+          ].map(([label,val])=>`
+            <div style="background:#f8fafc;border-radius:10px;padding:12px 14px;">
+              <div style="font-size:11px;color:#94a3b8;font-weight:600;margin-bottom:3px;">${label}</div>
+              <div style="font-size:13px;font-weight:600;color:#334155;">${val}</div>
+            </div>
+          `).join("")}
+        </div>
+
+        <!-- Workflow Actions -->
+        <div style="font-size:12px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:12px;">Clinical Workflow</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          ${[
+            ["📅","Book Appointment","appointments","#eff6ff","#1d4ed8"],
+            ["🩺","Start Consultation","consultations","#f0fdf4","#059669"],
+            ["🧪","View Lab Results","labresults","#fefce8","#ca8a04"],
+            ["💰","Billing & Payments","billing","#fdf4ff","#9333ea"],
+            ["🛏","Admit to Ward","beds","#fff7ed","#ea580c"],
+            ["📋","View Orders","orders","#f0f9ff","#0284c7"],
+          ].map(([icon,label,view,bg,color])=>`
+            <button onclick="document.getElementById('patientWorkflowModal').remove();switchView('${view}')"
+              style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:${bg};border:1px solid ${color}22;border-radius:10px;cursor:pointer;text-align:left;transition:transform 0.15s,box-shadow 0.15s;"
+              onmouseenter="this.style.transform='translateY(-2px)';this.style.boxShadow='0 6px 16px ${color}22'"
+              onmouseleave="this.style.transform='';this.style.boxShadow=''">
+              <span style="font-size:20px;">${icon}</span>
+              <span style="font-size:13px;font-weight:600;color:${color};">${label}</span>
+            </button>
+          `).join("")}
+        </div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(modal);
 }
 
 // ---------------------------------------------------------------
