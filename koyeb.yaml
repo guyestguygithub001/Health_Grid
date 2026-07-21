@@ -1,0 +1,30 @@
+# Koyeb deployment config
+# https://www.koyeb.com/docs/reference/koyeb.yaml
+
+name: health-grid-ehr
+
+services:
+  - name: api
+    type: web
+    git:
+      repository: github.com/guyestguygithub001/Health_Grid
+      branch: main
+    build:
+      buildCommand: npm install
+    run:
+      runCommand: node server/server.js
+    ports:
+      - port: 8082
+        protocol: http
+    env:
+      - key: DATABASE_URL
+        value: ""        # Set this in Koyeb dashboard after getting it from Supabase
+      - key: APP_USER
+        value: guyestguy
+      - key: APP_PASS
+        value: guyestguygithub001
+      - key: NODE_ENV
+        value: production
+    health_checks:
+      - path: /api/summary
+        port: 8082
