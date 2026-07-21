@@ -51,10 +51,9 @@
   <div class="app-shell">
     <aside class="sidebar">
       <div class="brand">
-        <div class="logo">PC</div>
+        <div class="logo" style="background:linear-gradient(135deg,#3b82f6,#6366f1); color:#fff; border-radius:10px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800;">HG</div>
         <div class="brand-text">
-          <h1>PlateauCare</h1>
-          <span>Unified Flow</span>
+          <h1 style="color:#fff; font-size:15px; font-weight:700;">Health Grid</h1>
         </div>
       </div>
       <nav class="sidebar" id="wizardSidebar" style="padding: 10px;">
@@ -72,46 +71,42 @@
     </aside>
 
     <main class="main">
-      <header class="topbar">
-        <div style="display:flex; align-items:center; gap:12px; flex: 1;">
-          <button id="sidebarToggleBtn" type="button" style="background:none; border:none; font-size:20px; cursor:pointer; color:var(--ink); padding:4px 8px; margin-right:4px;" title="Toggle Sidebar">☰</button>
-          <div>
-            <span class="eyebrow">Plateau State health system</span>
-            <h1 id="viewTitle">State Command Dashboard</h1>
-          </div>
+      <header class="topbar" style="padding: 10px 20px;">
+        <div style="display:flex; align-items:center; flex: 1;">
+          <button id="sidebarToggleBtn" type="button" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--ink); padding:4px;" title="Toggle Sidebar">☰</button>
         </div>
         
-        <div class="module-toggle-group" style="display:flex; background:rgba(0,0,0,0.05); padding:4px; border-radius:8px; border: 1px solid var(--line);">
-          <button id="emrModuleToggle" class="module-toggle active" onclick="switchSystemModule('EMR')" style="padding:8px 16px; border:none; background:#fff; color:var(--brand-dark); border-radius:6px; font-weight:700; box-shadow:0 2px 4px rgba(0,0,0,0.1); cursor:pointer; transition: all 0.2s;">EMR Unit Module</button>
-          <button id="phcModuleToggle" class="module-toggle" onclick="switchSystemModule('PHC')" style="padding:8px 16px; border:none; background:transparent; color:var(--muted); font-weight:600; cursor:pointer; transition: all 0.2s;">Primary Healthcare Module</button>
+        <div class="module-toggle-group" style="display:flex; background:rgba(0,0,0,0.03); padding:4px; border-radius:30px; border: 1px solid rgba(0,0,0,0.05);">
+          <button id="emrModuleToggle" class="module-toggle active" onclick="switchSystemModule('EMR')" style="padding:6px 20px; border:none; background:#fff; color:var(--brand-dark); border-radius:20px; font-weight:600; font-size: 13px; box-shadow:0 1px 3px rgba(0,0,0,0.05); cursor:pointer; transition: all 0.2s;">EMR Unit</button>
+          <button id="phcModuleToggle" class="module-toggle" onclick="switchSystemModule('PHC')" style="padding:6px 20px; border:none; background:transparent; color:var(--muted); font-weight:500; font-size: 13px; cursor:pointer; transition: all 0.2s;">PHC Module</button>
         </div>
 
-        <div class="top-actions" style="flex: 1; justify-content: flex-end;">
-          <button id="tourStartBtn" class="icon-btn" onclick="startGuidedTour()" style="background:var(--brand); color:#fff; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">❓ Help / Tour</button>
-          <span id="apiStatus" class="status-pill">Connecting</span>
-          <button id="refreshBtn" class="icon-btn" type="button" title="Refresh data">Refresh</button>
+        <div class="top-actions" style="flex: 1; justify-content: flex-end; gap: 15px; opacity: 0.6;">
+          <button id="tourStartBtn" class="icon-btn" onclick="startGuidedTour()" style="background:none; color:var(--ink); border:none; padding:0; cursor:pointer; font-size:14px;" title="Help & Tour">❓</button>
+          <span id="apiStatus" style="font-size: 12px; font-weight: 500;">Offline</span>
+          <button id="refreshBtn" class="icon-btn" type="button" title="Refresh data" style="background:none; border:none; padding:0; cursor:pointer; font-size:14px;">🔄</button>
         </div>
       </header>
 
       <section id="dashboard" class="view active">
-        <!-- Minimalist State Network Summary Banner -->
-        <div class="summary-banner">
-          <div class="summary-metric-pill" onclick="switchView('clinical')" title="View Facilities">🏢 <strong id="metricFacilities">0</strong> Connected Facilities</div>
-          <div class="summary-metric-pill success" onclick="switchView('phc')" title="View Active PHCs">🌿 <strong id="metricPhcs">0</strong> Active PHCs</div>
-          <div class="summary-metric-pill" onclick="switchView('patients')" title="View Patients">👤 <strong id="metricPatients">0</strong> Registered Patients</div>
-          <div class="summary-metric-pill" onclick="switchView('beds')" title="View Inpatients">🛏 <strong id="metricAdmissions">0</strong> Inpatients</div>
-          <div class="summary-metric-pill warning" onclick="switchView('consultations')" title="View Triage">⚠️ <strong id="metricUrgent">0</strong> Urgent Actions</div>
-          <div class="summary-metric-pill danger" onclick="switchView('labresults')" title="View Labs">🚨 <strong id="metricCriticalLabs">0</strong> Critical Labs</div>
-          <div class="summary-metric-pill" onclick="switchView('billing')" title="View Billing">💳 <strong id="metricCollection">0%</strong> Revenue</div>
-        </div>
+        <div class="panel onboarding-launcher" style="margin: 0; padding: 60px 40px; background: linear-gradient(135deg, #1e3a8a 0%, #4f46e5 60%, #7c3aed 100%); color: #fff; border: none; border-radius: 0; box-shadow: none; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; position: relative; overflow: hidden;">
+          
+          <!-- Background Illustration -->
+          <div style="position:absolute; inset:0; background-image: url('/assets/dashboard_bg.jpg'); background-size: cover; background-position: center; opacity: 0.12; pointer-events:none;"></div>
+          
+          <!-- Subtle floating decorative circles -->
+          <div style="position:absolute; width:400px; height:400px; border-radius:50%; background:rgba(255,255,255,0.03); top:-100px; right:-100px; pointer-events:none;"></div>
+          <div style="position:absolute; width:250px; height:250px; border-radius:50%; background:rgba(255,255,255,0.04); bottom:-60px; left:-60px; pointer-events:none;"></div>
 
-        <div class="panel onboarding-launcher" style="margin-top: 40px; padding: 40px; background: linear-gradient(135deg, var(--brand), #4f46e5); color: #fff; border: none; border-radius: 20px; box-shadow: 0 15px 35px rgba(79,70,229,0.3); text-align: center;">
-          <span class="badge warning" style="background:#fffbeb; color:#d97706; padding:6px 12px; margin-bottom:12px; display:inline-block; font-size:14px;">Unified Linear Workflow Active</span>
-          <h1 style="color:#fff; margin:0 0 10px; font-size:32px; font-weight:800;">Start New Patient Journey</h1>
-          <p style="color:#e2e8f0; font-size:16px; margin:0 auto 30px; max-width:600px;">Begin a guided, step-by-step clinical process. You will be routed through Intake, Booking, Consultation, Diagnostics, Ward, and Billing seamlessly.</p>
-          <div style="display: flex; justify-content: center; gap: 20px;">
-            <button class="primary-btn" onclick="switchView('patients')" style="background:#fff; color:var(--brand); border:none; padding:16px 32px; font-weight:800; border-radius:12px; cursor:pointer; font-size:18px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); transition:transform .2s;">🚀 Start Step 1: Patient Intake</button>
-            <button class="secondary-btn" onclick="window.location.href='/emr.html'" style="background:rgba(255,255,255,0.15); border:1px solid rgba(255,255,255,0.4); color:#fff; padding:16px 32px; font-weight:700; border-radius:12px; cursor:pointer; font-size:18px; transition:transform .2s;">🖥️ Launch EMR Module</button>
+          <!-- Content -->
+          <div style="position:relative; z-index:1; max-width: 640px;">
+
+            <h1 id="dashGreeting" style="color:#fff; margin:0 0 12px; font-size:52px; font-weight:800; line-height:1.1; letter-spacing:-0.02em;">Good Morning.</h1>
+            <p style="color:rgba(255,255,255,0.65); font-size:17px; margin:0 auto 50px; font-weight:400; line-height:1.6;">How would you like to proceed today?</p>
+            <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+              <button onclick="switchView('patients')" style="background:#fff; color:#1e3a8a; border:none; padding:16px 36px; font-weight:700; border-radius:50px; cursor:pointer; font-size:16px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); transition:transform .2s, box-shadow .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 12px 40px rgba(0,0,0,0.3)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 8px 30px rgba(0,0,0,0.2)'">EHR / PHC Module</button>
+              <button onclick="window.location.href='/emr.html'" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:16px 36px; font-weight:600; border-radius:50px; cursor:pointer; font-size:16px; transition:transform .2s, background .2s;" onmouseover="this.style.transform='translateY(-2px)';this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.transform='translateY(0)';this.style.background='rgba(255,255,255,0.12)'">🖥️ EMR Module</button>
+            </div>
           </div>
         </div>
       </section>
@@ -1461,7 +1456,7 @@
       </section>
 
     <!-- GLOBAL WIZARD FOOTER -->
-    <div id="globalWizardFooter" style="position: sticky; bottom: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); padding: 15px 30px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; z-index: 100;">
+    <div id="globalWizardFooter" style="position: sticky; bottom: 0; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); padding: 12px 30px; border-top: 1px solid var(--line); display: flex; justify-content: center; gap: 40px; align-items: center; z-index: 100;">
       <button id="wizardBackBtn" class="secondary-btn" style="min-width: 120px;" onclick="wizardGoBack()">← Back</button>
       <div id="wizardProgressText" style="font-size: 14px; font-weight: 600; color: var(--brand);">Step 1 of 12</div>
       <button id="wizardNextBtn" class="primary-btn" style="min-width: 150px;" onclick="wizardGoNext()">Next Step →</button>

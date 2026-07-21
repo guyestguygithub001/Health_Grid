@@ -180,6 +180,17 @@ function switchView(id) {
   const viewEl = document.getElementById(id);
   if (viewEl) viewEl.scrollTop = 0;
 
+  // ── Dashboard immersion mode ──────────────────────────────
+  // Directly show/hide chrome elements so no white leaks through
+  const topbar  = document.querySelector(".topbar");
+  const footer  = document.getElementById("globalWizardFooter");
+  const onDash  = id === "dashboard";
+
+  document.body.classList.toggle("dashboard-active", onDash);
+
+  if (topbar) topbar.style.display  = onDash ? "none" : "";
+  if (footer) footer.style.display  = onDash ? "none" : "";
+
   if (typeof updateWizardFooter === "function") updateWizardFooter(id);
 }
 
@@ -3533,21 +3544,32 @@ function updateWizardFooter(viewId) {
     backBtn.style.visibility = 'hidden';
   } else {
     backBtn.style.visibility = 'visible';
-    backBtn.textContent = '← Back to ' + wizardSequence[currentIndex - 1].label.replace(/[^a-zA-Z ]/g, "").trim();
+    backBtn.textContent = '← Back';
   }
 
   if (currentIndex === wizardSequence.length - 1) {
-    nextBtn.textContent = 'Finish Journey ✓';
+    nextBtn.textContent = 'Finish ✓';
     nextBtn.onclick = () => { showToast('Journey Complete!'); switchView('dashboard'); };
   } else {
-    nextBtn.textContent = 'Next: ' + wizardSequence[currentIndex + 1].label.replace(/[^a-zA-Z ]/g, "").trim() + ' →';
+    nextBtn.textContent = 'Next →';
     nextBtn.onclick = () => switchView(wizardSequence[currentIndex + 1].id);
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   switchView('dashboard');
+  setDashboardGreeting();
 });
+
+function setDashboardGreeting() {
+  const el = document.getElementById('dashGreeting');
+  if (!el) return;
+  const hour = new Date().getHours();
+  let greeting = 'Good Morning.';
+  if (hour >= 12 && hour < 17) greeting = 'Good Afternoon.';
+  else if (hour >= 17) greeting = 'Good Evening.';
+  el.textContent = greeting;
+}
 
 // --- NEW ARCHITECTURE LOGIC ---
 
