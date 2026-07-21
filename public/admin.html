@@ -49,7 +49,7 @@
   </div>
 
   <div class="app-shell">
-    <aside class="sidebar">
+    <aside class="sidebar" id="appSidebar" style="display:none;">
       <div class="brand">
         <div class="logo" style="background:linear-gradient(135deg,#3b82f6,#6366f1); color:#fff; border-radius:10px; width:36px; height:36px; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800;">HG</div>
         <div class="brand-text">
@@ -71,7 +71,7 @@
     </aside>
 
     <main class="main">
-      <header class="topbar" style="padding: 10px 20px;">
+      <header class="topbar" id="appTopbar" style="padding: 10px 20px; display:none;">
         <div style="display:flex; align-items:center; flex: 1;">
           <button id="sidebarToggleBtn" type="button" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--ink); padding:4px;" title="Toggle Sidebar">☰</button>
         </div>
@@ -1456,7 +1456,7 @@
       </section>
 
     <!-- GLOBAL WIZARD FOOTER -->
-    <div id="globalWizardFooter" style="position: sticky; bottom: 0; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); padding: 12px 30px; border-top: 1px solid var(--line); display: flex; justify-content: center; gap: 40px; align-items: center; z-index: 100;">
+    <div id="globalWizardFooter" style="position: sticky; bottom: 0; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); padding: 12px 30px; border-top: 1px solid var(--line); display: none; justify-content: center; gap: 40px; align-items: center; z-index: 100;">
       <button id="wizardBackBtn" class="secondary-btn" style="min-width: 120px;" onclick="wizardGoBack()">← Back</button>
       <div id="wizardProgressText" style="font-size: 14px; font-weight: 600; color: var(--brand);">Step 1 of 12</div>
       <button id="wizardNextBtn" class="primary-btn" style="min-width: 150px;" onclick="wizardGoNext()">Next Step →</button>

@@ -181,17 +181,17 @@ function switchView(id) {
   if (viewEl) viewEl.scrollTop = 0;
 
   // ── Dashboard immersion mode ──────────────────────────────
-  // Directly show/hide chrome elements so no white leaks through
-  const topbar  = document.querySelector(".topbar");
+  // Use explicit IDs — bulletproof targeting, no selector ambiguity
+  const topbar  = document.getElementById("appTopbar");
   const footer  = document.getElementById("globalWizardFooter");
-  const sidebar = document.querySelector(".app-shell > aside.sidebar");
+  const sidebar = document.getElementById("appSidebar");
   const onDash  = id === "dashboard";
 
   document.body.classList.toggle("dashboard-active", onDash);
 
-  if (topbar)  topbar.style.display  = onDash ? "none" : "";
-  if (footer)  footer.style.display  = onDash ? "none" : "";
-  if (sidebar) sidebar.style.display = onDash ? "none" : "";
+  if (topbar)  topbar.style.display  = onDash ? "none" : "flex";
+  if (footer)  footer.style.display  = onDash ? "none" : "flex";
+  if (sidebar) sidebar.style.display = onDash ? "none" : "flex";
 
   if (typeof updateWizardFooter === "function") updateWizardFooter(id);
 }
