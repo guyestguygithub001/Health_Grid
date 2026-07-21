@@ -3732,6 +3732,14 @@ function setDashboardGreeting() {
   if (hour >= 12 && hour < 17) greeting = 'Good Afternoon.';
   else if (hour >= 17) greeting = 'Good Evening.';
   el.textContent = greeting;
+
+  // Randomize background illustration
+  const bgEl = document.getElementById('dashboardBackground');
+  if (bgEl) {
+    const bgs = ['dashboard_bg.jpg', 'dashboard_bg_2.jpg', 'dashboard_bg_3.jpg'];
+    const randomBg = bgs[Math.floor(Math.random() * bgs.length)];
+    bgEl.style.backgroundImage = `url('/assets/${randomBg}')`;
+  }
 }
 
 // --- NEW ARCHITECTURE LOGIC ---
