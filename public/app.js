@@ -3725,21 +3725,40 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function setDashboardGreeting() {
-  const el = document.getElementById('dashGreeting');
-  if (!el) return;
-  const hour = new Date().getHours();
-  let greeting = 'Good Morning.';
-  if (hour >= 12 && hour < 17) greeting = 'Good Afternoon.';
-  else if (hour >= 17) greeting = 'Good Evening.';
-  el.textContent = greeting;
+  const greetEl  = document.getElementById('dashGreeting');
+  const iconEl   = document.getElementById('dashGreetingIcon');
+  const subEl    = document.getElementById('dashSubGreeting');
+  const bgEl     = document.getElementById('dashboardBackground');
+  if (!greetEl) return;
 
-  // Randomize background illustration
-  const bgEl = document.getElementById('dashboardBackground');
-  if (bgEl) {
-    const bgs = ['dashboard_bg.jpg', 'dashboard_bg_2.jpg', 'dashboard_bg_3.jpg'];
-    const randomBg = bgs[Math.floor(Math.random() * bgs.length)];
-    bgEl.style.backgroundImage = `url('/assets/${randomBg}')`;
+  const hour = new Date().getHours();
+
+  // ── Time slots ────────────────────────────────────────────
+  // Each entry: [hour_start, icon, greeting, sub_message, bg_file]
+  const slots = [
+    [0,  '🌙', 'Still up?',        'You\'re burning the midnight oil. Take it easy.',      'dashboard_bg_3.jpg'],
+    [5,  '🌅', 'Good Dawn.',       'Early start. The system is ready when you are.',       'dashboard_bg.jpg'  ],
+    [7,  '☕', 'Good Morning.',    'Start your day strong. Patients are waiting.',         'dashboard_bg.jpg'  ],
+    [10, '🌤️', 'Good Morning.',   'Mid-morning check-in. Everything looks on track.',    'dashboard_bg_2.jpg'],
+    [12, '🍪', 'Good Afternoon.', 'Keep up the great work. Halfway through the day.',     'dashboard_bg_2.jpg'],
+    [15, '☀️', 'Good Afternoon.', 'Hope the afternoon is going smoothly.',                'dashboard_bg_3.jpg'],
+    [17, '👋', 'Hi there!',       'Winding down? Make sure records are up to date.',      'dashboard_bg_3.jpg'],
+    [19, '🌆', 'Good Evening.',   'Evening shift. You\'ve got this.',                      'dashboard_bg.jpg'  ],
+    [21, '🌙', 'Good Night.',     'It\'s late. Wrap up and rest well.',                   'dashboard_bg_2.jpg'],
+  ];
+
+  // Find the right slot — last slot whose start hour <= current hour
+  let chosen = slots[0];
+  for (const slot of slots) {
+    if (hour >= slot[0]) chosen = slot;
   }
+
+  const [, icon, greeting, sub, bg] = chosen;
+
+  if (iconEl)  iconEl.textContent = icon;
+  if (greetEl) greetEl.textContent = greeting;
+  if (subEl)   subEl.textContent  = sub;
+  if (bgEl)    bgEl.style.backgroundImage = `url('/assets/${bg}')`;
 }
 
 // --- NEW ARCHITECTURE LOGIC ---

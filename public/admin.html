@@ -101,11 +101,14 @@
           <!-- Content -->
           <div style="position:relative; z-index:1; max-width: 640px;">
 
-            <h1 id="dashGreeting" style="color:#fff; margin:0 0 12px; font-size:52px; font-weight:800; line-height:1.1; letter-spacing:-0.02em;">Good Morning.</h1>
-            <p style="color:rgba(255,255,255,0.65); font-size:17px; margin:0 auto 50px; font-weight:400; line-height:1.6;">How would you like to proceed today?</p>
+            <!-- Icon beside greeting -->
+            <div id="dashGreetingIcon" style="font-size:56px; margin-bottom:12px; line-height:1;">☕</div>
+            <h1 id="dashGreeting" style="color:#fff; margin:0 0 10px; font-size:52px; font-weight:800; line-height:1.1; letter-spacing:-0.02em;">Good Morning.</h1>
+            <p id="dashSubGreeting" style="color:rgba(255,255,255,0.6); font-size:15px; margin:0 auto 50px; font-weight:400; line-height:1.6;">How would you like to proceed today?</p>
+
             <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
-              <button onclick="switchView('patients')" style="background:#fff; color:#1e3a8a; border:none; padding:16px 36px; font-weight:700; border-radius:50px; cursor:pointer; font-size:16px; box-shadow: 0 8px 30px rgba(0,0,0,0.2); transition:transform .2s, box-shadow .2s;">EHR / PHC Module</button>
-              <button onclick="window.location.href='/emr.html'" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:16px 36px; font-weight:600; border-radius:50px; cursor:pointer; font-size:16px; transition:transform .2s, background .2s;">🖥️ EMR Module</button>
+              <button onclick="switchView('patients')" style="background:#fff; color:#1e3a8a; border:none; padding:16px 36px; font-weight:700; border-radius:50px; cursor:pointer; font-size:16px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);">EHR / PHC Module</button>
+              <button onclick="window.location.href='/emr.html'" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:16px 36px; font-weight:600; border-radius:50px; cursor:pointer; font-size:16px;">🖥️ EMR Module</button>
             </div>
           </div>
         </div>
