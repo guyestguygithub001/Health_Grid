@@ -184,12 +184,14 @@ function switchView(id) {
   // Directly show/hide chrome elements so no white leaks through
   const topbar  = document.querySelector(".topbar");
   const footer  = document.getElementById("globalWizardFooter");
+  const sidebar = document.querySelector(".app-shell > aside.sidebar");
   const onDash  = id === "dashboard";
 
   document.body.classList.toggle("dashboard-active", onDash);
 
-  if (topbar) topbar.style.display  = onDash ? "none" : "";
-  if (footer) footer.style.display  = onDash ? "none" : "";
+  if (topbar)  topbar.style.display  = onDash ? "none" : "";
+  if (footer)  footer.style.display  = onDash ? "none" : "";
+  if (sidebar) sidebar.style.display = onDash ? "none" : "";
 
   if (typeof updateWizardFooter === "function") updateWizardFooter(id);
 }
