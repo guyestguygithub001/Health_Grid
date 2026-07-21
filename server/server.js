@@ -1,29 +1,123 @@
 const http = require("http");
-const fs = require("fs");
+const fs   = require("fs");
 const path = require("path");
+const zlib = require("zlib");
 
 // ── SmartClinic Enterprise Module ─────────────────────────────
 const enterprise = require("./enterprise");
 
-const PORT = process.env.PORT || 8082;
-const ROOT = process.cwd();
+const PORT       = process.env.PORT || 8082;
+const ROOT       = process.cwd();
 const PUBLIC_DIR = path.join(ROOT, "public");
-let DATA_FILE = path.join(ROOT, "server", "data.json");
-let memoryDb = null;
 
-if (process.env.VERCEL) {
-  const tmpPath = path.join("/tmp", "data.json");
+// ── PostgreSQL (cloud) vs JSON-file (local) adapter ───────────
+// When DATABASE_URL is set (Render / any cloud), use Postgres.
+// Otherwise fall back to the local data.json file so local dev still works.
+const USE_PG = !!process.env.DATABASE_URL;
+let pgPool = null;
+
+if (USE_PG) {
+  const { Pool } = require("pg");
+  pgPool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }   // required by Render's managed Postgres
+  });
+  console.log("[DB] Using PostgreSQL");
+} else {
+  console.log("[DB] Using local data.json");
+}
+
+// ── Local JSON file fallback (unchanged from original) ────────
+let DATA_FILE = path.join(ROOT, "server", "data.json");
+let memoryDb  = null;
+
+function _loadSeed() {
+  try { return require("./data.json"); } catch (_) {}
   try {
-    if (!fs.existsSync(tmpPath)) {
-      // Look for data.json at compile or runtime path
-      const sourcePath = fs.existsSync(DATA_FILE) ? DATA_FILE : path.join(__dirname, "data.json");
-      if (fs.existsSync(sourcePath)) {
-        fs.copyFileSync(sourcePath, tmpPath);
-      }
-    }
-    DATA_FILE = tmpPath;
-  } catch (err) {
-    console.warn("Failed to set up /tmp database, using memory fallback:", err);
+    const sf = path.join(ROOT, "server", "seed_data.json");
+    return JSON.parse(fs.readFileSync(sf, "utf8"));
+  } catch (_) {}
+  return { patients:[], encounters:[], admissions:[], billing:[], facilities:[],
+           orders:[], appointments:[], labResults:[], beds:[], consultations:[] };
+}
+
+function _readFile() {
+  if (memoryDb) return memoryDb;
+  try {
+    const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+    return data;
+  } catch (_) {
+    const seed = _loadSeed();
+    memoryDb = seed;
+    fs.writeFileSync(DATA_FILE, JSON.stringify(seed, null, 2), "utf8");
+    return seed;
+  }
+}
+
+let _fileWriting = false, _fileQueued = false;
+async function _writeFile(d) {
+  memoryDb = d;
+  if (_fileWriting) { _fileQueued = true; return; }
+  _fileWriting = true;
+  do {
+    _fileQueued = false;
+    try { await fs.promises.writeFile(DATA_FILE, JSON.stringify(memoryDb, null, 2), "utf8"); }
+    catch (err) { console.error("File write failed:", err); }
+  } while (_fileQueued);
+  _fileWriting = false;
+}
+
+// ── PostgreSQL helpers ────────────────────────────────────────
+async function _initPg() {
+  // Single-row JSON store: id=1 always holds the entire DB as one JSONB value
+  await pgPool.query(`
+    CREATE TABLE IF NOT EXISTS store (
+      id   INTEGER PRIMARY KEY DEFAULT 1,
+      data JSONB NOT NULL
+    );
+  `);
+  const { rowCount } = await pgPool.query("SELECT 1 FROM store WHERE id=1");
+  if (rowCount === 0) {
+    // Seed from local data.json on first boot
+    const seed = _loadSeed();
+    await pgPool.query("INSERT INTO store(id,data) VALUES(1,$1)", [JSON.stringify(seed)]);
+    console.log("[DB] Seeded initial data from data.json");
+  }
+}
+
+async function _readPg() {
+  const { rows } = await pgPool.query("SELECT data FROM store WHERE id=1");
+  return rows[0]?.data || _loadSeed();
+}
+
+async function _writePg(d) {
+  await pgPool.query("UPDATE store SET data=$1 WHERE id=1", [JSON.stringify(d)]);
+}
+
+// ── Public API used by every route ───────────────────────────
+function readData() {
+  // Sync shim for Postgres path — routes that need async must await readDataAsync()
+  // For backwards compatibility, local path stays synchronous
+  if (!USE_PG) return _readFile();
+  // For PG, return the in-memory cache (populated after initDb)
+  if (memoryDb) return memoryDb;
+  throw new Error("DB not ready — call readDataAsync()");
+}
+
+async function readDataAsync() {
+  if (!USE_PG) return _readFile();
+  const data = await _readPg();
+  memoryDb = data;          // refresh cache
+  return data;
+}
+
+async function writeData(d) {
+  memoryDb = d;
+  broadcastUpdate("update");
+  if (USE_PG) {
+    await _writePg(d);
+  } else {
+    await _writeFile(d);
   }
 }
 
@@ -31,79 +125,20 @@ if (process.env.VERCEL) {
 const sseClients = new Set();
 function broadcastUpdate(type) {
   for (const client of sseClients) {
-    try {
-      client.write(`data: ${JSON.stringify({ type, timestamp: Date.now() })}\n\n`);
-    } catch(err) {
-      sseClients.delete(client);
-    }
+    try { client.write(`data: ${JSON.stringify({ type, timestamp: Date.now() })}\n\n`); }
+    catch (_) { sseClients.delete(client); }
   }
 }
 
 const mimeTypes = {
   ".html": "text/html; charset=utf-8",
-  ".css": "text/css; charset=utf-8",
-  ".js": "text/javascript; charset=utf-8",
+  ".css":  "text/css; charset=utf-8",
+  ".js":   "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".svg": "image/svg+xml"
+  ".png":  "image/png",
+  ".jpg":  "image/jpeg",
+  ".svg":  "image/svg+xml"
 };
-
-// ─── Data Helpers ───────────────────────────────────────────
-function readData() {
-  if (memoryDb) return memoryDb;
-  try {
-    const raw = fs.readFileSync(DATA_FILE, "utf8");
-    const data = JSON.parse(raw);
-    if (process.env.VERCEL) memoryDb = data;
-    return data;
-  } catch (err) {
-    try {
-      console.warn("data.json not found, using bundled copy:", err.message);
-      const seed = require("./data.json");
-      writeData(seed);
-      return seed;
-    } catch (_) {
-      try {
-        const seedFile = path.join(ROOT, "server", "seed_data.json");
-        const seed = JSON.parse(fs.readFileSync(seedFile, "utf8"));
-        writeData(seed);
-        return seed;
-      } catch (__) {
-        console.error("All data sources missing, using empty schema:", err.message);
-        const empty = { patients: [], encounters: [], admissions: [], billing: [], facilities: [], orders: [], appointments: [], labResults: [], beds: [], consultations: [] };
-        return empty;
-      }
-    }
-  }
-}
-
-const zlib = require('zlib');
-
-let isWriting = false;
-let writeQueued = false;
-
-async function writeData(d) {
-  memoryDb = d;
-  broadcastUpdate("update");
-  
-  if (isWriting) {
-    writeQueued = true;
-    return;
-  }
-  
-  isWriting = true;
-  do {
-    writeQueued = false;
-    try {
-      await fs.promises.writeFile(DATA_FILE, JSON.stringify(memoryDb, null, 2), "utf8");
-    } catch (err) {
-      console.error("Async write failed:", err);
-    }
-  } while (writeQueued);
-  
-  isWriting = false;
-}
 
 // Share writeData with enterprise module for consistent async DB writes
 enterprise.setWriteData(writeData);
@@ -667,7 +702,7 @@ function checkDrugInteractions(drugs, patientAllergies = []) {
 
 // ─── Request Handler ─────────────────────────────────────────
 async function handleApi(req, res, url) {
-  const data = readData();
+  const data = await readDataAsync();
   if (!data.consultations) data.consultations = [];
   if (!data.billing) data.billing = [];
   if (!data.appointments) data.appointments = [];
@@ -869,7 +904,7 @@ function serveStatic(req, res, url) {
 
 // ─── Patient Auth API ────────────────────────────────────────
 async function handlePatientApi(req, res, url) {
-  const data = readData();
+  const data = await readDataAsync();
 
   // POST /api/patient/register  { name, phone, age, sex, lga, community }
   if (req.method === "POST" && url.pathname === "/api/patient/register") {
@@ -1027,7 +1062,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (pathname.startsWith("/api/v1/") || pathname.startsWith("/fhir/r6/")) {
-      const data = readData();
+      const data = await readDataAsync();
       const user = req.headers["x-user-id"] || "admin";
       await enterprise.handleEnterpriseApi(req, res, url, data, user);
       return;
@@ -1040,7 +1075,19 @@ const server = http.createServer(async (req, res) => {
 });
 
 if (require.main === module) {
-  server.listen(PORT, () => { console.log(`PlateauCare EHR running at http://localhost:${PORT}`); });
+  async function startServer() {
+    if (USE_PG) {
+      console.log("[DB] Initialising PostgreSQL...");
+      await _initPg();
+      // Warm the in-memory cache
+      memoryDb = await _readPg();
+      console.log("[DB] PostgreSQL ready.");
+    }
+    server.listen(PORT, () => {
+      console.log(`Health Grid EHR running at http://localhost:${PORT}`);
+    });
+  }
+  startServer().catch(err => { console.error("Startup error:", err); process.exit(1); });
 }
 
 module.exports = server;

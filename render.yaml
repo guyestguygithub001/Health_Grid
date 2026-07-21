@@ -1,0 +1,27 @@
+# Render.com deployment blueprint
+# This file tells Render how to build and run Health Grid EHR
+
+services:
+  - type: web
+    name: health-grid-ehr
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server/server.js
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: health-grid-db
+          property: connectionString
+      - key: APP_USER
+        value: guyestguy
+      - key: APP_PASS
+        value: guyestguygithub001
+      - key: NODE_ENV
+        value: production
+    autoDeploy: true
+
+databases:
+  - name: health-grid-db
+    plan: free
+    databaseName: healthgrid
+    user: healthgrid

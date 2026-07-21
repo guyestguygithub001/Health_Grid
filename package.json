@@ -1,25 +1,19 @@
 {
-  "name": "plateau-ehr",
+  "name": "health-grid-ehr",
   "version": "1.0.0",
-  "description": "Plateau State hospital and PHC EHR prototype with AI medical scrub/inquiry support.",
+  "description": "Health Grid — Plateau State hospital and PHC EHR system",
   "main": "server/server.js",
   "scripts": {
-    "dev": "next dev -p 8082",
-    "build": "next build",
-    "start": "next start -p 8082"
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
   },
-  "keywords": [
-    "ehr",
-    "hospital",
-    "phc",
-    "plateau-state",
-    "healthcare"
-  ],
+  "keywords": ["ehr", "hospital", "phc", "plateau-state", "healthcare"],
   "author": "Daniel Kingsley Ene",
   "license": "MIT",
   "dependencies": {
-    "next": "^16.2.10",
-    "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "pg": "^8.11.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
