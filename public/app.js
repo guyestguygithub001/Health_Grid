@@ -193,6 +193,9 @@ function switchView(id) {
   if (footer)  footer.style.display  = onDash ? "none" : "flex";
   if (sidebar) sidebar.style.display = onDash ? "none" : "flex";
 
+  // Always refresh greeting when dashboard is shown
+  if (onDash && typeof setDashboardGreeting === "function") setDashboardGreeting();
+
   if (typeof updateWizardFooter === "function") updateWizardFooter(id);
 }
 
@@ -3720,8 +3723,7 @@ function updateWizardFooter(viewId) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  switchView('dashboard');
-  setDashboardGreeting();
+  switchView('dashboard'); // setDashboardGreeting is called inside switchView
 });
 
 function setDashboardGreeting() {
