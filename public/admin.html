@@ -115,15 +115,31 @@
       </section>
 
       <section id="patients" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link active" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
+
+        <div class="ehr-workflow">
+          <div class="ehr-step active" onclick="switchView('patients')">
+            <div class="ehr-icon">👤</div>
+            <div class="ehr-title">Seamless Patient Intake</div>
+            <div class="ehr-desc">Optimized presentation layers and patient portals capture data accurately without exposing backend complexity.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('consultations')">
+            <div class="ehr-icon">🩺</div>
+            <div class="ehr-title">Real-Time ICD-11 Diagnosis</div>
+            <div class="ehr-desc">Live API integration automates clinical coding and validation for immediate diagnostic accuracy.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('fhir')">
+            <div class="ehr-icon">🔗</div>
+            <div class="ehr-title">API-First FHIR Data Flow</div>
+            <div class="ehr-desc">Standardized REST frameworks enable real-time interoperability between hospitals, labs, and pharmacies.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('security')">
+            <div class="ehr-icon">🔒</div>
+            <div class="ehr-title">AES-256 Encrypted Security</div>
+            <div class="ehr-desc">A dedicated security layer protects the database against compromise using high-level encryption and audit trails.</div>
+          </div>
         </div>
+
+        
         <div class="split-grid wide-left">
 
           <section class="panel reveal">
@@ -155,15 +171,31 @@
         </section>
 
       <section id="consultations" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link active" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
+
+        <div class="ehr-workflow">
+          <div class="ehr-step " onclick="switchView('patients')">
+            <div class="ehr-icon">👤</div>
+            <div class="ehr-title">Seamless Patient Intake</div>
+            <div class="ehr-desc">Optimized presentation layers and patient portals capture data accurately without exposing backend complexity.</div>
+          </div>
+          <div class="ehr-step active" onclick="switchView('consultations')">
+            <div class="ehr-icon">🩺</div>
+            <div class="ehr-title">Real-Time ICD-11 Diagnosis</div>
+            <div class="ehr-desc">Live API integration automates clinical coding and validation for immediate diagnostic accuracy.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('fhir')">
+            <div class="ehr-icon">🔗</div>
+            <div class="ehr-title">API-First FHIR Data Flow</div>
+            <div class="ehr-desc">Standardized REST frameworks enable real-time interoperability between hospitals, labs, and pharmacies.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('security')">
+            <div class="ehr-icon">🔒</div>
+            <div class="ehr-title">AES-256 Encrypted Security</div>
+            <div class="ehr-desc">A dedicated security layer protects the database against compromise using high-level encryption and audit trails.</div>
+          </div>
         </div>
+
+        
         <div class="split-grid wide-left">
           <section class="panel reveal">
             <div class="panel-head">
@@ -303,6 +335,156 @@
           </section>
         </div>
         </section>
+
+
+      <section id="fhir" class="view">
+
+        <div class="ehr-workflow">
+          <div class="ehr-step " onclick="switchView('patients')">
+            <div class="ehr-icon">👤</div>
+            <div class="ehr-title">Seamless Patient Intake</div>
+            <div class="ehr-desc">Optimized presentation layers and patient portals capture data accurately without exposing backend complexity.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('consultations')">
+            <div class="ehr-icon">🩺</div>
+            <div class="ehr-title">Real-Time ICD-11 Diagnosis</div>
+            <div class="ehr-desc">Live API integration automates clinical coding and validation for immediate diagnostic accuracy.</div>
+          </div>
+          <div class="ehr-step active" onclick="switchView('fhir')">
+            <div class="ehr-icon">🔗</div>
+            <div class="ehr-title">API-First FHIR Data Flow</div>
+            <div class="ehr-desc">Standardized REST frameworks enable real-time interoperability between hospitals, labs, and pharmacies.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('security')">
+            <div class="ehr-icon">🔒</div>
+            <div class="ehr-title">AES-256 Encrypted Security</div>
+            <div class="ehr-desc">A dedicated security layer protects the database against compromise using high-level encryption and audit trails.</div>
+          </div>
+        </div>
+
+        <div class="split-grid reveal">
+          <section class="panel reveal" style="grid-column: span 2;">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Interoperability</span>
+                <h2>FHIR Data Flow Engine</h2>
+              </div>
+            </div>
+            <div style="background: #1e293b; border-radius: 12px; padding: 24px; color: #e2e8f0; font-family: monospace; font-size: 13px; overflow-x: auto; position: relative;">
+              <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 8px;">
+                <span style="background: rgba(16,185,129,0.2); color: #10b981; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; font-family: sans-serif;">LIVE SYNC</span>
+              </div>
+              <pre id="fhirMockData">
+{
+  "resourceType": "Bundle",
+  "type": "transaction",
+  "entry": [
+    {
+      "resource": {
+        "resourceType": "Patient",
+        "id": "PT-SYNC-...",
+        "active": true,
+        "name": [{"use": "official", "text": "Awaiting Data..."}]
+      }
+    }
+  ]
+}
+              </pre>
+            </div>
+            <div class="kpi-grid" style="margin-top: 24px;">
+               <div class="kpi-card success"><div class="kpi-label">Pharmacies Synced</div><div class="kpi-value">42</div></div>
+               <div class="kpi-card success"><div class="kpi-label">Labs Interfaced</div><div class="kpi-value">18</div></div>
+               <div class="kpi-card"><div class="kpi-label">Active Webhooks</div><div class="kpi-value">128</div></div>
+               <div class="kpi-card tele"><div class="kpi-label">FHIR Resources</div><div class="kpi-value">1.4M</div></div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="security" class="view">
+
+        <div class="ehr-workflow">
+          <div class="ehr-step " onclick="switchView('patients')">
+            <div class="ehr-icon">👤</div>
+            <div class="ehr-title">Seamless Patient Intake</div>
+            <div class="ehr-desc">Optimized presentation layers and patient portals capture data accurately without exposing backend complexity.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('consultations')">
+            <div class="ehr-icon">🩺</div>
+            <div class="ehr-title">Real-Time ICD-11 Diagnosis</div>
+            <div class="ehr-desc">Live API integration automates clinical coding and validation for immediate diagnostic accuracy.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('fhir')">
+            <div class="ehr-icon">🔗</div>
+            <div class="ehr-title">API-First FHIR Data Flow</div>
+            <div class="ehr-desc">Standardized REST frameworks enable real-time interoperability between hospitals, labs, and pharmacies.</div>
+          </div>
+          <div class="ehr-step active" onclick="switchView('security')">
+            <div class="ehr-icon">🔒</div>
+            <div class="ehr-title">AES-256 Encrypted Security</div>
+            <div class="ehr-desc">A dedicated security layer protects the database against compromise using high-level encryption and audit trails.</div>
+          </div>
+        </div>
+
+        <div class="split-grid reveal">
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Zero-Trust</span>
+                <h2>Security & Encryption Status</h2>
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <div style="padding: 20px; border-radius: 12px; background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; gap: 16px;">
+                <div style="font-size: 32px;">🛡️</div>
+                <div>
+                  <h3 style="margin: 0 0 4px; font-size: 16px; color: var(--ink);">AES-256 Database Encryption</h3>
+                  <p style="margin: 0; font-size: 13px; color: var(--muted);">All records are currently encrypted at rest using military-grade AES-256.</p>
+                </div>
+              </div>
+              <div style="padding: 20px; border-radius: 12px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; align-items: center; gap: 16px;">
+                <div style="font-size: 32px;">🔑</div>
+                <div>
+                  <h3 style="margin: 0 0 4px; font-size: 16px; color: var(--ink);">Role-Based Access Control (RBAC)</h3>
+                  <p style="margin: 0; font-size: 13px; color: var(--muted);">Strict identity verification enforced on all API endpoints.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Compliance</span>
+                <h2>Immutable Audit Trail</h2>
+              </div>
+            </div>
+            <div class="record-list" id="auditTrailList">
+              <div class="record-item" style="display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom: 1px solid var(--line);">
+                 <div>
+                   <div style="font-weight: 600; font-size: 13px;">Login Successful (System Admin)</div>
+                   <div style="font-size: 11px; color: var(--muted);">IP: 192.168.1.1 — Role: SuperAdmin</div>
+                 </div>
+                 <div style="font-size: 11px; color: var(--muted);">Just now</div>
+              </div>
+              <div class="record-item" style="display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom: 1px solid var(--line);">
+                 <div>
+                   <div style="font-weight: 600; font-size: 13px;">FHIR Bundle Export</div>
+                   <div style="font-size: 11px; color: var(--muted);">Target: National Registry API</div>
+                 </div>
+                 <div style="font-size: 11px; color: var(--muted);">2 mins ago</div>
+              </div>
+              <div class="record-item" style="display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom: 1px solid var(--line);">
+                 <div>
+                   <div style="font-weight: 600; font-size: 13px;">Patient Record Decrypted</div>
+                   <div style="font-size: 11px; color: var(--muted);">Dr. Admin accessed PT-0012</div>
+                 </div>
+                 <div style="font-size: 11px; color: var(--muted);">15 mins ago</div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
 
       <section id="clinical" class="view">
         <div class="module-grid reveal">
@@ -455,15 +637,7 @@
       </section>
 
       <section id="support" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link active" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
-        </div>
+        
         <div class="split-grid reveal">
           <section class="panel reveal">
             <div class="panel-head">
@@ -527,15 +701,7 @@
       </section>
 
       <section id="billing" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link active" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
-        </div>
+        
         <div class="metric-grid reveal">
           <article class="metric">
             <span>Outstanding Billing</span>
@@ -575,15 +741,7 @@
 
       <!-- ── Appointments View ──────────────────────────────── -->
       <section id="appointments" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link active" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
-        </div>
+        
         <div class="split-grid wide-left">
           <section class="panel reveal">
             <div class="panel-head">
@@ -612,15 +770,7 @@
 
       <!-- ── Lab Results View ───────────────────────────────── -->
       <section id="labresults" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link active" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
-        </div>
+        
         <div class="split-grid wide-left">
           <section class="panel reveal">
             <div class="panel-head"><div><span class="eyebrow">Diagnostics</span><h2>Laboratory Results</h2></div></div>
@@ -644,15 +794,7 @@
 
       <!-- ── Beds / Ward View ──────────────────────────────── -->
       <section id="beds" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link" data-step-view="appointments"><span class="step-num">2</span> Scheduling</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link active" data-step-view="beds"><span class="step-num">5</span> Ward & Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support & Discharge</button>
-        </div>
+        
         <div class="panel reveal">
           <div class="panel-head">
             <div><span class="eyebrow">Inpatient management</span><h2>Ward & Bed Census</h2></div>
@@ -712,15 +854,7 @@
       <!-- ── Triage View ───────────────────────────────────── -->
       <!-- ── Triage & Emergency View ──────────────────────── -->
       <section id="triage" class="view">
-        <div class="onboarding-steps">
-          <button class="step-link" data-step-view="patients"><span class="step-num">1</span> Patient Intake</button>
-          <button class="step-link active" data-step-view="triage"><span class="step-num">2</span> Triage &amp; A&amp;E</button>
-          <button class="step-link" data-step-view="consultations"><span class="step-num">3</span> Consultation</button>
-          <button class="step-link" data-step-view="labresults"><span class="step-num">4</span> Lab Results</button>
-          <button class="step-link" data-step-view="beds"><span class="step-num">5</span> Ward &amp; Beds</button>
-          <button class="step-link" data-step-view="billing"><span class="step-num">6</span> Billing</button>
-          <button class="step-link" data-step-view="support"><span class="step-num">7</span> Decision Support &amp; Discharge</button>
-        </div>
+        
 
         <!-- Combined Command Header / Sub-tabs -->
         <div class="command-tabs">

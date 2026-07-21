@@ -3608,72 +3608,20 @@ function renderEnterpriseAnalytics() {
 // ── UNIFIED WIZARD LOGIC ────────────────────────────────────
 const wizardSequence = [
   {
-    "id": "dashboard",
-    "label": "🏥 Dashboard"
-  },
-  {
     "id": "patients",
-    "label": "👤 Intake & Patients"
-  },
-  {
-    "id": "appointments",
-    "label": "📅 Booking"
+    "label": "Step 1: Patient Intake"
   },
   {
     "id": "consultations",
-    "label": "🩺 Consultation"
+    "label": "Step 2: ICD-11 Diagnosis"
   },
   {
-    "id": "clinical",
-    "label": "🏨 Clinical Units"
+    "id": "fhir",
+    "label": "Step 3: FHIR Data Flow"
   },
   {
-    "id": "records",
-    "label": "📁 Records"
-  },
-  {
-    "id": "beds",
-    "label": "🛏 Ward / Beds"
-  },
-  {
-    "id": "labresults",
-    "label": "🧪 Diagnostics"
-  },
-  {
-    "id": "orders",
-    "label": "📋 Orders"
-  },
-  {
-    "id": "billing",
-    "label": "💰 Billing"
-  },
-  {
-    "id": "support",
-    "label": "🤖 Decision Support"
-  },
-  {
-    "id": "phc",
-    "label": "🌿 PHC Network"
-  },
-  {
-    "id": "reports",
-    "label": "📑 Reports"
-  },
-  {
-    "id": "analytics",
-    "label": "📊 Analytics"
-  },
-  {
-    "id": "theatre",
-    "label": "🎭 Theatre / OR"
-  },
-  {
-    "id": "referrals",
-    "label": "↗ Referrals"
-  },
-  {
-    "id": "claims",
-    "label": "🏦 Claims & HMO"
+    "id": "security",
+    "label": "Step 4: Encrypted Security"
   }
 ];
 
