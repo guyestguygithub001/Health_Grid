@@ -174,7 +174,10 @@ function formToObject(form) {
 function switchView(id) {
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
   document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.view === id));
-  document.querySelector("#viewTitle").textContent = titles[id] || "PlateauCare EHR";
+  const viewTitleEl = document.querySelector("#viewTitle");
+  if (viewTitleEl) {
+    viewTitleEl.textContent = titles[id] || "PlateauCare EHR";
+  }
 
   // Scroll view content container back to the top
   const viewEl = document.getElementById(id);
@@ -3608,20 +3611,20 @@ function renderEnterpriseAnalytics() {
 // ── UNIFIED WIZARD LOGIC ────────────────────────────────────
 const wizardSequence = [
   {
-    "id": "patients",
-    "label": "Step 1: Patient Intake"
+    "id": "mpi",
+    "label": "Step 1: MPI Onboarding"
   },
   {
-    "id": "consultations",
-    "label": "Step 2: ICD-11 Diagnosis"
+    "id": "triage",
+    "label": "Step 2: Clinical Encounter"
   },
   {
-    "id": "fhir",
-    "label": "Step 3: FHIR Data Flow"
+    "id": "pharmacy",
+    "label": "Step 3: Circular Pharmacy"
   },
   {
-    "id": "security",
-    "label": "Step 4: Encrypted Security"
+    "id": "epidemic",
+    "label": "Step 4: Epidemic Intelligence"
   }
 ];
 
@@ -3670,8 +3673,43 @@ function updateWizardFooter(viewId) {
   }
 }
 
+function wizardGoBack() {
+  const currentView = document.querySelector('.view.active');
+  if (!currentView) return switchView('dashboard');
+  
+  const currentIndex = wizardSequence.findIndex(s => s.id === currentView.id);
+  
+  if (currentIndex > 0) {
+    switchView(wizardSequence[currentIndex - 1].id);
+  } else {
+    // If on the first step of the wizard, go back to dashboard
+    switchView('dashboard');
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  switchView('dashboard'); // setDashboardGreeting is called inside switchView
+  // Check for URL parameters for the "tour" functionality
+  const params = new URLSearchParams(window.location.search);
+  const viewParam = params.get('view');
+  
+  if (viewParam) {
+    switchView(viewParam);
+  } else {
+    switchView('dashboard'); // setDashboardGreeting is called inside switchView
+  }
+});
+
+// Intercept Backspace to prevent browser history navigation and use our router
+document.addEventListener("keydown", (e) => {
+  if (e.key === 'Backspace') {
+    const activeElement = document.activeElement;
+    const isInput = activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.isContentEditable;
+    
+    if (!isInput) {
+      e.preventDefault(); // Stop browser from navigating back
+      wizardGoBack(); // Use our internal router
+    }
+  }
 });
 
 function setDashboardGreeting() {
@@ -3722,6 +3760,8 @@ function switchSystemModule(type) {
     document.getElementById('phcModuleToggle').style.background = 'transparent';
     document.getElementById('phcModuleToggle').style.color = 'var(--muted)';
     showToast('Switched to EMR Unit Module');
+    // Default EMR view
+    window.location.href = '/emr.html';
   } else {
     document.getElementById('phcModuleToggle').classList.add('active');
     document.getElementById('phcModuleToggle').style.background = '#fff';
@@ -3729,7 +3769,8 @@ function switchSystemModule(type) {
     document.getElementById('emrModuleToggle').style.background = 'transparent';
     document.getElementById('emrModuleToggle').style.color = 'var(--muted)';
     showToast('Switched to Primary Healthcare Module');
-    switchView('phc');
+    // Launch the new offline-first GHG workflow
+    switchView('mpi');
   }
 }
 

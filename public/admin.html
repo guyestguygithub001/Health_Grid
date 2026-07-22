@@ -3,9 +3,32 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PlateauCare EHR | Hospitals and PHCs</title>
+  <title>The Global Health Grid | Hospitals and PHCs</title>
   <meta name="description" content="A Plateau State hospital and PHC electronic health record prototype with clinical, operational, reporting, and clinical documentation audit modules." />
   <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ef4444; transition: .4s; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+    input:checked + .slider { background-color: #10b981; }
+    input:checked + .slider:before { transform: translateX(20px); }
+    .slider.round { border-radius: 20px; }
+    .slider.round:before { border-radius: 50%; }
+    
+    .ehr-workflow { border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); background: #fafafa; }
+    .ehr-step { border-radius: 4px; border: 1px solid transparent; }
+    .ehr-step.active { background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); }
+    .ehr-icon { border-radius: 8px; font-size: 28px; background: transparent; border: none; box-shadow: none; }
+    .ehr-step.active .ehr-icon { background: rgba(59,130,246,0.1); color: #3b82f6; transform: none; box-shadow: none; }
+    
+    /* Branding Update */
+    .brand-text h1 { font-family: monospace; letter-spacing: -0.5px; }
+    .logo { border-radius: 50% !important; background: #0f172a !important; border: 2px solid #3b82f6; }
+    #dashGreetingIcon { font-size: 72px; }
+    #dashboardBackground { background-image: url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=2000') !important; opacity: 0.2 !important; mix-blend-mode: overlay; filter: grayscale(1); }
+  </style>
 </head>
 <body>
 
@@ -18,8 +41,8 @@
     <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:48px 44px;max-width:420px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,0.4);">
       <div style="text-align:center;margin-bottom:32px;">
         <div style="display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);border-radius:12px;font-weight:900;font-size:20px;color:#fff;margin-bottom:16px;">PC</div>
-        <h2 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 4px;">PlateauCare EHR</h2>
-        <p style="color:rgba(255,255,255,0.5);font-size:13px;margin:0;">Plateau State Health Information System</p>
+        <h2 style="color:#fff;font-size:22px;font-weight:700;margin:0 0 4px;">The Global Health Grid</h2>
+        <p style="color:rgba(255,255,255,0.5);font-size:13px;margin:0;">Adaptive, Offline-First, AI-Augmented Ecosystem</p>
       </div>
       <form id="loginForm" autocomplete="on">
         <div style="margin-bottom:16px;">
@@ -107,258 +130,296 @@
             <p id="dashSubGreeting" style="color:rgba(255,255,255,0.6); font-size:15px; margin:0 auto 50px; font-weight:400; line-height:1.6;">How would you like to proceed today?</p>
 
             <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
-              <button onclick="switchView('patients')" style="background:#fff; color:#1e3a8a; border:none; padding:16px 36px; font-weight:700; border-radius:50px; cursor:pointer; font-size:16px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);">EHR / PHC Module</button>
+              <button onclick="switchView('mpi')" style="background:#fff; color:#1e3a8a; border:none; padding:16px 36px; font-weight:700; border-radius:50px; cursor:pointer; font-size:16px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);">EHR / PHC Module</button>
               <button onclick="window.location.href='/emr.html'" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:16px 36px; font-weight:600; border-radius:50px; cursor:pointer; font-size:16px;">🖥️ EMR Module</button>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="patients" class="view">
+      
+      <section id="mpi" class="view">
 
         <div class="ehr-workflow">
-          <div class="ehr-step active" onclick="switchView('patients')">
-            <div class="ehr-icon">👤</div>
-            <div class="ehr-title">Seamless Patient Intake</div>
-            <div class="ehr-desc">Optimized presentation layers and patient portals capture data accurately without exposing backend complexity.</div>
+          <div class="ehr-step active" onclick="switchView('mpi')">
+            <div class="ehr-icon">🌍</div>
+            <div class="ehr-title">MPI Onboarding</div>
+            <div class="ehr-desc">Offline biometrics cache, SDOH capture, and Global UUID v7 creation.</div>
           </div>
-          <div class="ehr-step " onclick="switchView('consultations')">
-            <div class="ehr-icon">🩺</div>
-            <div class="ehr-title">Real-Time ICD-11 Diagnosis</div>
-            <div class="ehr-desc">Live API integration automates clinical coding and validation for immediate diagnostic accuracy.</div>
+          <div class="ehr-step " onclick="switchView('triage')">
+            <div class="ehr-icon">🧠</div>
+            <div class="ehr-title">Clinical Encounter</div>
+            <div class="ehr-desc">Explainable AI triage engine and offline-first CRDT vector clock syncing.</div>
           </div>
-          <div class="ehr-step " onclick="switchView('fhir')">
-            <div class="ehr-icon">🔗</div>
-            <div class="ehr-title">API-First FHIR Data Flow</div>
-            <div class="ehr-desc">Standardized REST frameworks enable real-time interoperability between hospitals, labs, and pharmacies.</div>
+          <div class="ehr-step " onclick="switchView('pharmacy')">
+            <div class="ehr-icon">💊</div>
+            <div class="ehr-title">Circular Pharmacy</div>
+            <div class="ehr-desc">Zero-stock AI substitution, inventory microservices, and geo-transfer.</div>
           </div>
-          <div class="ehr-step " onclick="switchView('security')">
-            <div class="ehr-icon">🔒</div>
-            <div class="ehr-title">AES-256 Encrypted Security</div>
-            <div class="ehr-desc">A dedicated security layer protects the database against compromise using high-level encryption and audit trails.</div>
+          <div class="ehr-step " onclick="switchView('epidemic')">
+            <div class="ehr-icon">📡</div>
+            <div class="ehr-title">Epidemic Intelligence</div>
+            <div class="ehr-desc">Kafka anomaly detection, WHO GOARN alerts, and Drone logistics.</div>
           </div>
         </div>
 
-        
-        <div class="split-grid wide-left">
-
+        <div class="split-grid wide-left reveal">
           <section class="panel reveal">
-            <div class="panel-head">
+            <div class="panel-head" style="display:flex; justify-content:space-between; align-items:center;">
               <div>
-                <span class="eyebrow">Quick capture</span>
-                <h2>Register Patient</h2>
+                <span class="eyebrow">Workflow 1: First Mile</span>
+                <h2>MPI Onboarding & Demographics</h2>
+              </div>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:12px; font-weight:600; color:var(--muted);">Network:</span>
+                <label class="switch">
+                  <input type="checkbox" id="networkToggle" checked onchange="toggleNetworkMode(this)">
+                  <span class="slider round"></span>
+                </label>
+                <span id="networkStatus" style="font-size:12px; font-weight:bold; color:#10b981;">ONLINE</span>
               </div>
             </div>
-            <form id="patientForm" class="stack-form">
-              <label>Full Name<input name="name" required placeholder="Patient full name" /></label>
-              <div class="form-row">
-                <label>Sex<select name="sex"><option>Female</option><option>Male</option><option>Other</option></select></label>
-                <label>Age<input name="age" type="number" min="0" required placeholder="0" /></label>
-              </div>
-              <label>Phone<input name="phone" placeholder="Phone or guardian contact" /></label>
-              <div class="form-row">
-                <label>LGA<input name="lga" placeholder="Jos North" /></label>
-                <label>Community<input name="community" placeholder="Community" /></label>
-              </div>
-              <label>Facility<select id="patientFacility" name="facilityId"></select></label>
-              <label>Insurance<select name="insurance"><option>PLASCHEMA</option><option>NHIA</option><option>Basic Health Care Provision Fund</option><option>Private Pay</option></select></label>
-              <label>Risk Group<input name="risk" placeholder="Routine, Pregnancy, Under-5, Hypertension..." /></label>
-              <label>Allergies<input name="allergies" placeholder="Comma-separated allergies" /></label>
-              <button class="primary-btn" type="submit">Save Patient</button>
-            </form>
-          </section>
-        </div>
-        </section>
-
-      <section id="consultations" class="view">
-
-        <div class="ehr-workflow">
-          <div class="ehr-step " onclick="switchView('patients')">
-            <div class="ehr-icon">👤</div>
-            <div class="ehr-title">Seamless Patient Intake</div>
-            <div class="ehr-desc">Optimized presentation layers and patient portals capture data accurately without exposing backend complexity.</div>
-          </div>
-          <div class="ehr-step active" onclick="switchView('consultations')">
-            <div class="ehr-icon">🩺</div>
-            <div class="ehr-title">Real-Time ICD-11 Diagnosis</div>
-            <div class="ehr-desc">Live API integration automates clinical coding and validation for immediate diagnostic accuracy.</div>
-          </div>
-          <div class="ehr-step " onclick="switchView('fhir')">
-            <div class="ehr-icon">🔗</div>
-            <div class="ehr-title">API-First FHIR Data Flow</div>
-            <div class="ehr-desc">Standardized REST frameworks enable real-time interoperability between hospitals, labs, and pharmacies.</div>
-          </div>
-          <div class="ehr-step " onclick="switchView('security')">
-            <div class="ehr-icon">🔒</div>
-            <div class="ehr-title">AES-256 Encrypted Security</div>
-            <div class="ehr-desc">A dedicated security layer protects the database against compromise using high-level encryption and audit trails.</div>
-          </div>
-        </div>
-
-        
-        <div class="split-grid wide-left">
-          <section class="panel reveal">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Interactive Clinic Module</span>
-                <h2>New Consultation Entry</h2>
-              </div>
+            
+            <div id="biometricCacheOverlay" style="display:none; padding:12px; background:rgba(245,158,11,0.1); border:1px dashed #f59e0b; border-radius:8px; margin-bottom:20px; font-size:13px; color:#b45309; font-weight:600;">
+              ⚠️ OFFLINE MODE: Relying on Local Biometric Cache (SQLite Encrypted)
             </div>
-            <form id="consultationForm" class="encounter-form">
-              <!-- Internal Step 1: Demographics & Vitals -->
-              <div id="conStep1" class="con-step">
-                <div style="background:rgba(16,185,129,0.1); border:1px dashed #10b981; padding:15px; border-radius:8px; margin-bottom:15px;">
-                  <h4 style="margin:0 0 10px; color:#065f46; font-size:14px; font-weight:700;">🌿 Inbound PHC Referral Lookup</h4>
-                  <p style="font-size:12px; color:#065f46; margin:0 0 10px 0;">Doctor Portal Access: Enter the patient number from Primary Healthcare to pull up medical history seamlessly.</p>
-                  <div style="display:flex; gap:10px;">
-                    <input type="text" id="phcReferenceInput" placeholder="Enter PHC Patient Number (e.g. PHC-8842)" style="flex:1; padding:10px; border:1px solid #10b981; border-radius:6px; background:#fff;" />
-                    <button type="button" class="primary-btn" onclick="lookupPhcReferral()" style="background:#10b981; border-color:#10b981;">Pull Records</button>
-                  </div>
-                  <div id="phcLookupResult" style="margin-top:10px; font-size:13px; color:#065f46; font-weight:600; display:none;"></div>
-                </div>
+
+            <form id="mpiForm" class="stack-form" onsubmit="handleMpiSubmit(event)">
+              <div style="background:#f8fafc; padding:16px; border-radius:12px; margin-bottom:16px; border:1px solid var(--line);">
+                <h4 style="margin:0 0 12px; font-size:14px;">National ID / Biometrics</h4>
                 <div class="form-row">
-                  <label>Select Patient<select id="consultationPatient" name="patientId" required></select></label>
-                  <label>Select Facility<select id="consultationFacility" name="facilityId" required></select></label>
+                  <input type="text" id="mpiNin" placeholder="Scan National ID or QR" />
+                  <button type="button" class="primary-btn" onclick="queryNationalId()" style="background:#475569; border-color:#475569;">Query ID API</button>
                 </div>
-                <!-- Editable Selected Patient Details -->
-                <div id="consultationPatientEditCard" class="patient-edit-card" style="display:none; background:var(--brand-light); border-left:4px solid var(--brand); padding:15px; border-radius:6px; margin-bottom:15px;">
-                  <h4 style="margin:0 0 10px; font-size:13px; color:var(--brand-dark); text-transform:uppercase; letter-spacing:0.05em; font-weight:700;">Patient Context</h4>
-                  <div class="vitals-grid compact" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap:10px;">
-                    <label>Age (Yrs)<input type="number" id="conPatAge" style="width:100%;" /></label>
-                    <label>Sex
-                      <select id="conPatSex" style="width:100%;"><option>Male</option><option>Female</option></select>
-                    </label>
-                    <label>Risk<select id="conPatRisk" style="width:100%;"><option>Routine</option><option>High</option></select></label>
-                  </div>
-                </div>
-                <div class="form-row">
-                  <label>Consulting Doctor<input name="doctorName" placeholder="Dr. Name" required /></label>
-                  <label>Specialty
-                    <select name="specialty">
-                      <option>General Medicine</option>
-                      <option>Obstetrics & Gynecology</option>
-                      <option>Pediatrics</option>
-                    </select>
-                  </label>
-                </div>
-                <h4 style="width: 100%; margin: 15px 0 5px; font-size: 13px; color: var(--brand-dark); font-weight: 700; text-transform: uppercase;">Clinical Vitals</h4>
-                <div class="vitals-grid compact" style="margin-bottom: 15px;">
-                  <label>Temp (°C)<input type="number" step="0.1" name="temperature" placeholder="36.5" /></label>
-                  <label>BP<input name="bp" placeholder="120/80" /></label>
-                  <label>Pulse<input type="number" name="pulse" placeholder="72" /></label>
-                  <label>SpO2 (%)<input type="number" name="spo2" placeholder="98" /></label>
-                </div>
-                <div class="button-row" style="margin-top:16px;">
-                  <button class="primary-btn" type="button" onclick="document.getElementById('conStep1').style.display='none'; document.getElementById('conStep2').style.display='block';">Next: Clinical Exam →</button>
-                </div>
+              </div>
+              
+              <label>Full Name<input id="mpiName" required placeholder="Enter Name" /></label>
+              <div class="form-row">
+                <label>Age<input type="number" id="mpiAge" required placeholder="0" /></label>
+                <label>Sex<select id="mpiSex"><option>Female</option><option>Male</option></select></label>
               </div>
 
-              <!-- Internal Step 2: Clinical Examination -->
-              <div id="conStep2" class="con-step" style="display:none;">
-                <div style="padding:10px; background:rgba(59,130,246,0.1); border-radius:8px; margin-bottom:15px; font-size:13px; color:var(--brand-dark);">
-                  <strong>Patient Context:</strong> <span id="conContextName">Select a patient</span>
-                </div>
-                <label>Chief Complaint / Symptoms
-                  <textarea name="chiefComplaint" rows="2" placeholder="Presenting symptoms and timeline" required></textarea>
-                </label>
-                <label>History of Presenting Illness
-                  <textarea name="historyOfPresentingComplaint" rows="2" placeholder="Detailed history of symptoms"></textarea>
-                </label>
-                <label>Past Medical & Surgical History
-                  <textarea name="pastMedicalHistory" rows="2" placeholder="PMH, drug history, past surgeries"></textarea>
-                </label>
-                <label>Clinical Examination & Findings
-                  <textarea name="examinationFindings" rows="2" placeholder="Objective physical examination findings"></textarea>
-                </label>
-                <div class="button-row" style="margin-top:16px;">
-                  <button class="secondary-btn" type="button" onclick="document.getElementById('conStep2').style.display='none'; document.getElementById('conStep1').style.display='block';">← Back</button>
-                  <button class="primary-btn" type="button" onclick="document.getElementById('conStep2').style.display='none'; document.getElementById('conStep3').style.display='block';">Next: Diagnosis & Plan →</button>
-                </div>
+              <div style="background:rgba(59,130,246,0.05); padding:16px; border-radius:12px; margin-top:16px; border:1px solid rgba(59,130,246,0.1);">
+                <h4 style="margin:0 0 8px; font-size:14px; color:#1d4ed8;">Social Determinants of Health (SDOH)</h4>
+                <label style="font-size:13px; margin-bottom:4px;">Did you eat today?</label>
+                <select id="mpiFood" style="margin-bottom:12px;"><option value="yes">Yes, sufficient food</option><option value="no">No, food insecurity</option></select>
+                <label style="font-size:13px; margin-bottom:4px;">Access to clean water?</label>
+                <select id="mpiWater"><option value="yes">Yes</option><option value="no">No access</option></select>
               </div>
-
-              <!-- Internal Step 3: Diagnosis, Plan, Prescription -->
-              <div id="conStep3" class="con-step" style="display:none;">
-                <div style="padding:10px; background:rgba(59,130,246,0.1); border-radius:8px; margin-bottom:15px; font-size:13px; color:var(--brand-dark);">
-                  <strong>Patient Context:</strong> <span id="conContextName3">Select a patient</span>
-                </div>
-                <div class="icd11-module">
-                  <span class="eyebrow" style="color:var(--brand); font-weight:600; margin-bottom:8px; display:block;">ICD-11 Interoperability Standard</span>
-                  <label>Search ICD-11 Diagnosis
-                    <input type="text" id="consultationIcd11Search" placeholder="Type to search..." autocomplete="off" style="width:100%; padding:10px; border:1px solid var(--line); border-radius:6px; margin-top:4px;" />
-                  </label>
-                  <div id="consultationIcd11AutoSuggest" style="font-size:12px; margin-top:5px; margin-bottom:10px; display:none; background:#ecfdf5; padding:8px; border-radius:6px; border:1px solid #a7f3d0; color:#065f46;"></div>
-                  <div id="consultationIcd11Results" class="icd11-search-results"></div>
-                  <div id="consultationIcd11Builder" class="icd11-builder" style="display: none;">
-                    <h4 style="margin:10px 0; font-size:14px; color:var(--brand-dark);">Selected Diagnosis</h4>
-                    <code id="consultationIcd11ExpressionPreview">Unspecified</code>
-                    <br><span id="consultationIcd11DisplayPreview">Unspecified</span>
-                    <input type="hidden" name="icd11Code" id="consultationIcd11CodeHidden" />
-                    <input type="hidden" name="icd11Display" id="consultationIcd11DisplayHidden" />
-                  </div>
-                </div>
-                <label>Assessment & Impressions
-                  <textarea name="assessment" rows="2" placeholder="Working assessment"></textarea>
-                </label>
-                <label>Plan & Management
-                  <textarea name="plan" rows="2" placeholder="Management protocol"></textarea>
-                </label>
-                <div class="panel-inner" style="border:1px solid var(--line); border-radius:8px; padding:12px; margin-top:14px; background:#fbfcfc;">
-                  <span class="eyebrow" style="margin-bottom:8px;">Prescriptions</span>
-                  <div id="prescriptionList" style="display:grid; gap:8px; margin-bottom:10px;"></div>
-                  <button type="button" class="secondary-btn" id="addPrescriptionBtn" style="min-height:32px; font-size:12px; padding:0 10px;">+ Add Medication</button>
-                </div>
-                <label style="margin-top:14px; font-weight: 600; color: var(--brand-dark);">Transfer / Push to Specialty Clinic
-                  <select name="transferSpecialty" style="background:#e0e7ff; border-color:var(--brand-light);">
-                    <option value="">-- No Transfer (Discharge or Continue Management) --</option>
-                    <option value="SOPD">Surgical Outpatient Department (SOPD)</option>
-                    <option value="MOPD">Medical Outpatient Department (MOPD)</option>
-                    <option value="EYE">Eye Clinic</option>
-                    <option value="OTHER">Other Specialized Clinics</option>
-                  </select>
-                </label>
-                <div class="button-row" style="margin-top:16px;">
-                  <button class="secondary-btn" type="button" onclick="document.getElementById('conStep3').style.display='none'; document.getElementById('conStep2').style.display='block';">← Back</button>
-                  <button class="primary-btn" type="submit">Submit Consultation</button>
-                </div>
-              </div>
+              
+              <button class="primary-btn" type="submit" style="margin-top:20px;">Generate UUID v7 & Create MPI</button>
             </form>
           </section>
 
           <section class="panel reveal">
             <div class="panel-head">
               <div>
-                <span class="eyebrow">Consultation database</span>
-                <h2>Consultation History</h2>
+                <span class="eyebrow">Local Cache</span>
+                <h2>MPI Sync Status</h2>
               </div>
             </div>
-            <div id="consultationList" class="record-list" style="max-height: 800px; overflow-y: auto;"></div>
+            <div id="mpiConsole" style="background:#0f172a; border-radius:12px; padding:16px; font-family:monospace; color:#10b981; font-size:12px; min-height:200px; overflow-y:auto;">
+              > System ready...
+            </div>
+            <div id="qrWalletContainer" style="margin-top:20px; text-align:center; display:none;">
+              <h4 style="margin:0 0 10px; font-size:14px;">Digital Wallet QR</h4>
+              <img id="patientQr" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=UUID" style="border-radius:12px; border:4px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.1);" />
+              <p id="patientUuidDisplay" style="margin-top:8px; font-size:11px; color:var(--muted); font-family:monospace;"></p>
+            </div>
           </section>
         </div>
-        </section>
+      </section>
 
-
-      <section id="fhir" class="view">
+      <section id="triage" class="view">
 
         <div class="ehr-workflow">
-          <div class="ehr-step " onclick="switchView('patients')">
-            <div class="ehr-icon">👤</div>
-            <div class="ehr-title">Seamless Patient Intake</div>
-            <div class="ehr-desc">Optimized presentation layers and patient portals capture data accurately without exposing backend complexity.</div>
+          <div class="ehr-step " onclick="switchView('mpi')">
+            <div class="ehr-icon">🌍</div>
+            <div class="ehr-title">MPI Onboarding</div>
+            <div class="ehr-desc">Offline biometrics cache, SDOH capture, and Global UUID v7 creation.</div>
           </div>
-          <div class="ehr-step " onclick="switchView('consultations')">
-            <div class="ehr-icon">🩺</div>
-            <div class="ehr-title">Real-Time ICD-11 Diagnosis</div>
-            <div class="ehr-desc">Live API integration automates clinical coding and validation for immediate diagnostic accuracy.</div>
+          <div class="ehr-step active" onclick="switchView('triage')">
+            <div class="ehr-icon">🧠</div>
+            <div class="ehr-title">Clinical Encounter</div>
+            <div class="ehr-desc">Explainable AI triage engine and offline-first CRDT vector clock syncing.</div>
           </div>
-          <div class="ehr-step active" onclick="switchView('fhir')">
-            <div class="ehr-icon">🔗</div>
-            <div class="ehr-title">API-First FHIR Data Flow</div>
-            <div class="ehr-desc">Standardized REST frameworks enable real-time interoperability between hospitals, labs, and pharmacies.</div>
+          <div class="ehr-step " onclick="switchView('pharmacy')">
+            <div class="ehr-icon">💊</div>
+            <div class="ehr-title">Circular Pharmacy</div>
+            <div class="ehr-desc">Zero-stock AI substitution, inventory microservices, and geo-transfer.</div>
           </div>
-          <div class="ehr-step " onclick="switchView('security')">
-            <div class="ehr-icon">🔒</div>
-            <div class="ehr-title">AES-256 Encrypted Security</div>
-            <div class="ehr-desc">A dedicated security layer protects the database against compromise using high-level encryption and audit trails.</div>
+          <div class="ehr-step " onclick="switchView('epidemic')">
+            <div class="ehr-icon">📡</div>
+            <div class="ehr-title">Epidemic Intelligence</div>
+            <div class="ehr-desc">Kafka anomaly detection, WHO GOARN alerts, and Drone logistics.</div>
+          </div>
+        </div>
+
+        <div class="split-grid wide-left reveal">
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Workflow 2: Offline-First</span>
+                <h2>Clinical Encounter & XAI Triage</h2>
+              </div>
+            </div>
+            
+            <div style="display:flex; gap:12px; margin-bottom:20px;">
+              <input type="text" id="triageQrInput" placeholder="Scan Patient QR / UUID" style="flex:1;" />
+              <button class="primary-btn" onclick="loadTriagePatient()">Load Local Cache</button>
+            </div>
+
+            <div id="triageFormContainer" style="opacity:0.5; pointer-events:none; transition:0.3s;">
+              <form id="triageForm" class="stack-form" onsubmit="runXaiTriage(event)">
+                <h4 style="margin:0 0 10px; font-size:14px; border-bottom:1px solid var(--line); padding-bottom:8px;">Vital Signs</h4>
+                <div class="form-row">
+                  <label>Heart Rate<input type="number" id="triageHr" placeholder="bpm" required/></label>
+                  <label>Temp (°C)<input type="number" step="0.1" id="triageTemp" placeholder="36.5" required/></label>
+                  <label>SpO2 (%)<input type="number" id="triageSpo2" placeholder="98" required/></label>
+                </div>
+                
+                <h4 style="margin:16px 0 10px; font-size:14px; border-bottom:1px solid var(--line); padding-bottom:8px;">Symptoms & SDOH</h4>
+                <label>Primary Symptoms<input type="text" id="triageSymptoms" placeholder="E.g., Fever, fatigue, wound" required/></label>
+                <div class="form-row" style="margin-top:12px;">
+                   <label>Food Status<select id="triageFood"><option value="secure">Secure</option><option value="insecure">Insecure (SDOH Risk)</option></select></label>
+                   <label>Water Status<select id="triageWater"><option value="secure">Clean</option><option value="insecure">Unclean (SDOH Risk)</option></select></label>
+                </div>
+                
+                <button type="submit" class="primary-btn" style="background:#6366f1; border-color:#6366f1; margin-top:20px; width:100%;">Run AI Lite Model</button>
+              </form>
+            </div>
+          </section>
+
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">XAI Engine</span>
+                <h2>AI Triage Output</h2>
+              </div>
+            </div>
+            <div id="xaiOutput" style="display:none; flex-direction:column; gap:16px;">
+              <div id="xaiUrgencyBox" style="padding:24px; border-radius:12px; text-align:center; color:#fff; font-weight:bold; font-size:18px;">
+                <!-- Filled via JS -->
+              </div>
+              <div style="background:#f8fafc; border-radius:12px; padding:16px; border:1px solid var(--line);">
+                <h4 style="margin:0 0 8px; font-size:12px; text-transform:uppercase; color:var(--muted);">Explanation (XAI)</h4>
+                <p id="xaiExplanation" style="margin:0; font-size:14px; color:var(--ink); font-style:italic;"></p>
+              </div>
+              
+              <div id="xaiActionContainer" style="display:flex; gap:12px; margin-top:8px;">
+                <!-- Filled via JS -->
+              </div>
+              <div id="syncVectorStatus" style="font-size:11px; color:var(--muted); text-align:center; margin-top:12px; font-family:monospace;">
+                Vector Clock: { node: "chw-tablet", counter: 1 } -> Pending Sync
+              </div>
+            </div>
+            <div id="xaiPlaceholder" style="text-align:center; color:var(--muted); padding:40px 20px;">
+              <div style="font-size:40px; margin-bottom:16px; opacity:0.5;">🤖</div>
+              <p>Awaiting vital signs and SDOH inputs for local inference.</p>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="pharmacy" class="view">
+
+        <div class="ehr-workflow">
+          <div class="ehr-step " onclick="switchView('mpi')">
+            <div class="ehr-icon">🌍</div>
+            <div class="ehr-title">MPI Onboarding</div>
+            <div class="ehr-desc">Offline biometrics cache, SDOH capture, and Global UUID v7 creation.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('triage')">
+            <div class="ehr-icon">🧠</div>
+            <div class="ehr-title">Clinical Encounter</div>
+            <div class="ehr-desc">Explainable AI triage engine and offline-first CRDT vector clock syncing.</div>
+          </div>
+          <div class="ehr-step active" onclick="switchView('pharmacy')">
+            <div class="ehr-icon">💊</div>
+            <div class="ehr-title">Circular Pharmacy</div>
+            <div class="ehr-desc">Zero-stock AI substitution, inventory microservices, and geo-transfer.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('epidemic')">
+            <div class="ehr-icon">📡</div>
+            <div class="ehr-title">Epidemic Intelligence</div>
+            <div class="ehr-desc">Kafka anomaly detection, WHO GOARN alerts, and Drone logistics.</div>
+          </div>
+        </div>
+
+        <div class="split-grid wide-left reveal">
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Workflow 3: Circular Supply</span>
+                <h2>Prescription Engine</h2>
+              </div>
+            </div>
+            <div class="stack-form">
+              <label>Drug Selection
+                <select id="pharmaDrug">
+                  <option value="Amoxicillin">Amoxicillin 500mg</option>
+                  <option value="Artemether-Lumefantrine">Artemether-Lumefantrine (ACT)</option>
+                  <option value="Paracetamol">Paracetamol 1000mg</option>
+                  <option value="ORS">ORS Sachets</option>
+                </select>
+              </label>
+              <button class="primary-btn" onclick="queryPharmacyInventory()" style="margin-top:16px;">Query Inventory Microservice</button>
+            </div>
+
+            <div id="pharmaProcessVisual" style="margin-top:30px; display:none; flex-direction:column; gap:12px;">
+               <!-- Animated steps populated via JS -->
+            </div>
+          </section>
+
+          <section class="panel reveal">
+            <div class="panel-head">
+              <div>
+                <span class="eyebrow">Facility Stock</span>
+                <h2>Live Inventory</h2>
+              </div>
+            </div>
+            <div class="kpi-grid">
+               <div class="kpi-card"><div class="kpi-label">Amoxicillin</div><div class="kpi-value" style="color:#10b981;">142</div></div>
+               <div class="kpi-card"><div class="kpi-label">Artemether (ACT)</div><div class="kpi-value" id="stockACT" style="color:#ef4444;">0</div></div>
+               <div class="kpi-card"><div class="kpi-label">Paracetamol</div><div class="kpi-value">5,020</div></div>
+               <div class="kpi-card"><div class="kpi-label">ORS</div><div class="kpi-value">84</div></div>
+            </div>
+            
+            <div style="margin-top:24px; padding:16px; border:1px solid #e2e8f0; border-radius:12px;">
+              <h4 style="margin:0 0 12px; font-size:14px;">National Warehouse (Within 10km)</h4>
+              <div style="display:flex; justify-content:space-between; font-size:13px; padding-bottom:8px; border-bottom:1px solid #f1f5f9; margin-bottom:8px;">
+                <span>Central Hub A</span><span style="color:#10b981; font-weight:bold;">ACT: 400</span>
+              </div>
+              <div style="display:flex; justify-content:space-between; font-size:13px;">
+                <span>Warehouse B</span><span style="color:#10b981; font-weight:bold;">ACT: 1200</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="epidemic" class="view">
+
+        <div class="ehr-workflow">
+          <div class="ehr-step " onclick="switchView('mpi')">
+            <div class="ehr-icon">🌍</div>
+            <div class="ehr-title">MPI Onboarding</div>
+            <div class="ehr-desc">Offline biometrics cache, SDOH capture, and Global UUID v7 creation.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('triage')">
+            <div class="ehr-icon">🧠</div>
+            <div class="ehr-title">Clinical Encounter</div>
+            <div class="ehr-desc">Explainable AI triage engine and offline-first CRDT vector clock syncing.</div>
+          </div>
+          <div class="ehr-step " onclick="switchView('pharmacy')">
+            <div class="ehr-icon">💊</div>
+            <div class="ehr-title">Circular Pharmacy</div>
+            <div class="ehr-desc">Zero-stock AI substitution, inventory microservices, and geo-transfer.</div>
+          </div>
+          <div class="ehr-step active" onclick="switchView('epidemic')">
+            <div class="ehr-icon">📡</div>
+            <div class="ehr-title">Epidemic Intelligence</div>
+            <div class="ehr-desc">Kafka anomaly detection, WHO GOARN alerts, and Drone logistics.</div>
           </div>
         </div>
 
@@ -366,127 +427,51 @@
           <section class="panel reveal" style="grid-column: span 2;">
             <div class="panel-head">
               <div>
-                <span class="eyebrow">Interoperability</span>
-                <h2>FHIR Data Flow Engine</h2>
+                <span class="eyebrow">Workflow 4: Kafka Streams</span>
+                <h2>Epidemic Intelligence & Surveillance</h2>
               </div>
             </div>
-            <div style="background: #1e293b; border-radius: 12px; padding: 24px; color: #e2e8f0; font-family: monospace; font-size: 13px; overflow-x: auto; position: relative;">
-              <div style="position: absolute; top: 12px; right: 12px; display: flex; gap: 8px;">
-                <span style="background: rgba(16,185,129,0.2); color: #10b981; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; font-family: sans-serif;">LIVE SYNC</span>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:20px; margin-bottom:24px;">
+              <div style="background:#fef2f2; border:1px solid #fca5a5; padding:16px; border-radius:12px;">
+                <h4 style="margin:0 0 8px; color:#b91c1c; font-size:13px;">Ingress: CHW Network</h4>
+                <div id="ingressChw" style="font-family:monospace; font-size:12px; color:#991b1b; min-height:60px;">Listening...</div>
               </div>
-              <pre id="fhirMockData">
-{
-  "resourceType": "Bundle",
-  "type": "transaction",
-  "entry": [
-    {
-      "resource": {
-        "resourceType": "Patient",
-        "id": "PT-SYNC-...",
-        "active": true,
-        "name": [{"use": "official", "text": "Awaiting Data..."}]
-      }
-    }
-  ]
-}
-              </pre>
+              <div style="background:#fff7ed; border:1px solid #fdba74; padding:16px; border-radius:12px;">
+                <h4 style="margin:0 0 8px; color:#c2410c; font-size:13px;">Ingress: Pharmacies</h4>
+                <div id="ingressPharm" style="font-family:monospace; font-size:12px; color:#9a3412; min-height:60px;">Listening...</div>
+              </div>
+              <div style="background:#eff6ff; border:1px solid #93c5fd; padding:16px; border-radius:12px;">
+                <h4 style="margin:0 0 8px; color:#1d4ed8; font-size:13px;">Ingress: Labs</h4>
+                <div id="ingressLab" style="font-family:monospace; font-size:12px; color:#1e3a8a; min-height:60px;">Listening...</div>
+              </div>
             </div>
-            <div class="kpi-grid" style="margin-top: 24px;">
-               <div class="kpi-card success"><div class="kpi-label">Pharmacies Synced</div><div class="kpi-value">42</div></div>
-               <div class="kpi-card success"><div class="kpi-label">Labs Interfaced</div><div class="kpi-value">18</div></div>
-               <div class="kpi-card"><div class="kpi-label">Active Webhooks</div><div class="kpi-value">128</div></div>
-               <div class="kpi-card tele"><div class="kpi-label">FHIR Resources</div><div class="kpi-value">1.4M</div></div>
+
+            <div style="background:#1e293b; padding:20px; border-radius:12px; color:#fff; position:relative; overflow:hidden;">
+              <div style="position:absolute; top:16px; right:16px; background:#ef4444; color:#fff; padding:4px 8px; font-size:10px; font-weight:bold; border-radius:4px; animation:pulse 2s infinite;">LIVE KAFKA ETL</div>
+              <h3 style="margin:0 0 16px; font-size:15px; color:#94a3b8;">Event Stream Processor</h3>
+              
+              <div id="kafkaConsole" style="background:#000; padding:16px; border-radius:8px; font-family:monospace; font-size:12px; color:#10b981; height:150px; overflow-y:auto; line-height:1.6;">
+                [Kafka] Connecting to stream...
+              </div>
+              
+              <div style="margin-top:20px; display:flex; gap:16px; align-items:center;">
+                <button class="primary-btn" onclick="triggerOutbreakSimulation()" style="background:#ef4444; border-color:#ef4444;">Simulate Cholera Cluster</button>
+                <div id="goarnAlertStatus" style="font-size:13px; color:#fbbf24; font-weight:bold; display:none;">⚠️ OUTBREAK SIGNAL GENERATED: Duty Epidemiologist Review Required</div>
+              </div>
+            </div>
+            
+            <div id="droneActionPanel" style="margin-top:24px; padding:20px; background:rgba(16,185,129,0.1); border:1px solid #10b981; border-radius:12px; display:none; align-items:center; justify-content:space-between;">
+              <div>
+                <h3 style="margin:0 0 4px; color:#065f46; font-size:16px;">Human-In-The-Loop: GOARN Triggered</h3>
+                <p style="margin:0; font-size:13px; color:#065f46;">Outbreak approved. Alerts dispatched to 50km radius.</p>
+              </div>
+              <button class="primary-btn" onclick="deployDrones()" style="background:#10b981; border-color:#10b981;">Deploy Diagnostic Drones (Logistics API)</button>
             </div>
           </section>
         </div>
       </section>
-
-      <section id="security" class="view">
-
-        <div class="ehr-workflow">
-          <div class="ehr-step " onclick="switchView('patients')">
-            <div class="ehr-icon">👤</div>
-            <div class="ehr-title">Seamless Patient Intake</div>
-            <div class="ehr-desc">Optimized presentation layers and patient portals capture data accurately without exposing backend complexity.</div>
-          </div>
-          <div class="ehr-step " onclick="switchView('consultations')">
-            <div class="ehr-icon">🩺</div>
-            <div class="ehr-title">Real-Time ICD-11 Diagnosis</div>
-            <div class="ehr-desc">Live API integration automates clinical coding and validation for immediate diagnostic accuracy.</div>
-          </div>
-          <div class="ehr-step " onclick="switchView('fhir')">
-            <div class="ehr-icon">🔗</div>
-            <div class="ehr-title">API-First FHIR Data Flow</div>
-            <div class="ehr-desc">Standardized REST frameworks enable real-time interoperability between hospitals, labs, and pharmacies.</div>
-          </div>
-          <div class="ehr-step active" onclick="switchView('security')">
-            <div class="ehr-icon">🔒</div>
-            <div class="ehr-title">AES-256 Encrypted Security</div>
-            <div class="ehr-desc">A dedicated security layer protects the database against compromise using high-level encryption and audit trails.</div>
-          </div>
-        </div>
-
-        <div class="split-grid reveal">
-          <section class="panel reveal">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Zero-Trust</span>
-                <h2>Security & Encryption Status</h2>
-              </div>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-              <div style="padding: 20px; border-radius: 12px; background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; gap: 16px;">
-                <div style="font-size: 32px;">🛡️</div>
-                <div>
-                  <h3 style="margin: 0 0 4px; font-size: 16px; color: var(--ink);">AES-256 Database Encryption</h3>
-                  <p style="margin: 0; font-size: 13px; color: var(--muted);">All records are currently encrypted at rest using military-grade AES-256.</p>
-                </div>
-              </div>
-              <div style="padding: 20px; border-radius: 12px; background: rgba(59, 130, 246, 0.05); border: 1px solid rgba(59, 130, 246, 0.2); display: flex; align-items: center; gap: 16px;">
-                <div style="font-size: 32px;">🔑</div>
-                <div>
-                  <h3 style="margin: 0 0 4px; font-size: 16px; color: var(--ink);">Role-Based Access Control (RBAC)</h3>
-                  <p style="margin: 0; font-size: 13px; color: var(--muted);">Strict identity verification enforced on all API endpoints.</p>
-                </div>
-              </div>
-            </div>
-          </section>
-          <section class="panel reveal">
-            <div class="panel-head">
-              <div>
-                <span class="eyebrow">Compliance</span>
-                <h2>Immutable Audit Trail</h2>
-              </div>
-            </div>
-            <div class="record-list" id="auditTrailList">
-              <div class="record-item" style="display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom: 1px solid var(--line);">
-                 <div>
-                   <div style="font-weight: 600; font-size: 13px;">Login Successful (System Admin)</div>
-                   <div style="font-size: 11px; color: var(--muted);">IP: 192.168.1.1 — Role: SuperAdmin</div>
-                 </div>
-                 <div style="font-size: 11px; color: var(--muted);">Just now</div>
-              </div>
-              <div class="record-item" style="display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom: 1px solid var(--line);">
-                 <div>
-                   <div style="font-weight: 600; font-size: 13px;">FHIR Bundle Export</div>
-                   <div style="font-size: 11px; color: var(--muted);">Target: National Registry API</div>
-                 </div>
-                 <div style="font-size: 11px; color: var(--muted);">2 mins ago</div>
-              </div>
-              <div class="record-item" style="display:flex; justify-content:space-between; align-items:center; padding: 12px 0; border-bottom: 1px solid var(--line);">
-                 <div>
-                   <div style="font-weight: 600; font-size: 13px;">Patient Record Decrypted</div>
-                   <div style="font-size: 11px; color: var(--muted);">Dr. Admin accessed PT-0012</div>
-                 </div>
-                 <div style="font-size: 11px; color: var(--muted);">15 mins ago</div>
-              </div>
-            </div>
-          </section>
-        </div>
-      </section>
-
-
-      <section id="clinical" class="view">
+<section id="clinical" class="view">
         <div class="module-grid reveal">
           <article class="module-card" onclick="switchView('triage')"><span>TRI</span><h3>Triage</h3><p>Arrival time, vital signs, acuity, danger signs, queue routing.</p></article>
           <article class="module-card" onclick="switchView('clinical')"><span>OPD</span><h3>Outpatient</h3><p>SOAP notes, diagnosis, prescriptions, labs, follow-up.</p></article>
@@ -1693,11 +1678,103 @@
             <button class="secondary-btn" type="button" onclick="document.getElementById('editRecordModal').style.display='none'">Cancel</button>
           </div>
         </form>
+  <!-- ── Patient Timeline Modal ────────────────────────────── -->
+  <div id="timelineModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:780px;">
+      <div class="modal-header">
+        <h3 id="timelineModalTitle">Patient Timeline</h3>
+        <button type="button" onclick="document.getElementById('timelineModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+      </div>
+      <div class="modal-body" id="timelineModalBody" style="padding:20px;"></div>
+    </div>
+  </div>
+
+  <!-- ── EWS / Sepsis Alert Modal ──────────────────────────── -->
+  <div id="ewsModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:560px;">
+      <div class="modal-header">
+        <h3>⚠️ Early Warning Score (Sepsis Risk)</h3>
+        <button type="button" onclick="document.getElementById('ewsModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+      </div>
+      <div class="modal-body" id="ewsModalBody" style="padding:20px;"></div>
+    </div>
+  </div>
+
+  <!-- ── Drug Checker Modal ────────────────────────────────── -->
+  <div id="drugModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:540px;">
+      <div class="modal-header">
+        <h3>💊 Drug Interaction & Allergy Check</h3>
+        <button type="button" onclick="document.getElementById('drugModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <form id="drugCheckForm" class="stack-form">
+          <label>Drugs to Check (one per line)
+            <textarea id="drugCheckInput" rows="4" placeholder="e.g.\nWarfarin\nAspirin\nAmlodipine"></textarea>
+          </label>
+          <label>Patient Allergies (comma-separated)
+            <input id="drugAllergyInput" placeholder="Penicillin, Sulfa..." />
+          </label>
+          <button class="primary-btn" type="submit">Check Interactions</button>
+        </form>
+        <div id="drugCheckResults" style="margin-top:16px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Discharge Summary Modal ───────────────────────────── -->
+  <div id="dischargeModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content" style="max-width:700px;">
+      <div class="modal-header">
+        <h3>📋 Clinical Discharge Summary</h3>
+        <button type="button" onclick="document.getElementById('dischargeModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+      </div>
+      <div class="modal-body" id="dischargeModalBody" style="padding:20px;font-family:monospace;font-size:13px;line-height:1.8;"></div>
+    </div>
+  </div>
+
+  <!-- Clinical Unit Form Modal -->
+  <div id="unitModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content" style="max-height: 90vh;">
+      <div class="modal-header">
+        <h3 id="unitModalTitle">Clinical Unit Form</h3>
+        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer;" onclick="document.getElementById('unitModal').style.display='none'">×</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 20px; background: white; color: var(--ink);">
+        <form id="unitModalForm" class="stack-form">
+          <div id="unitFormContent"></div>
+          <div class="button-row" style="margin-top: 20px;">
+            <button class="primary-btn" type="submit">Submit Record & Bill</button>
+            <button class="secondary-btn" type="button" onclick="document.getElementById('unitModal').style.display='none'">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generic Edit Record Modal -->
+  <div id="editRecordModal" class="modal-overlay" style="display: none; z-index: 10000;">
+    <div class="modal-content" style="max-width: 600px; max-height: 90vh;">
+      <div class="modal-header">
+        <h3 id="editRecordModalTitle">Edit Record</h3>
+        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer; color:#fff;" onclick="document.getElementById('editRecordModal').style.display='none'">×</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 20px; background: white; color: var(--ink);">
+        <form id="editRecordForm" class="stack-form">
+          <input type="hidden" id="editRecordCollection" />
+          <input type="hidden" id="editRecordId" />
+          <div id="editRecordFields"></div>
+          <div class="button-row" style="margin-top: 20px;">
+            <button class="primary-btn" type="submit">Save Changes</button>
+            <button class="secondary-btn" type="button" onclick="document.getElementById('editRecordModal').style.display='none'">Cancel</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="ghg-workflows.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
