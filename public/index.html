@@ -10,7 +10,7 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: #F0F4FF; color: #0F172A; line-height: 1.6; min-height: 100vh; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(160deg, #0B1426 0%, #0f2347 55%, #0B2458 100%); background-attachment: fixed; color: #fff; line-height: 1.6; min-height: 100vh; }
 
     /* ── NAV ─────────────────────────────────────────────── */
     nav {
@@ -41,12 +41,11 @@
     }
     .nav-cta:hover { background: #1d4ed8 !important; color: #fff !important; transform: translateY(-1px); }
 
-    /* ── HERO ────────────────────────────────────────────── */
     .hero {
       min-height: 100vh; display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       padding: 100px 6vw 60px;
-      background: linear-gradient(160deg, #0B1426 0%, #0f2347 55%, #0B2458 100%);
+      background: transparent;
       position: relative; overflow: hidden;
     }
     .hero::before {
@@ -85,6 +84,7 @@
       background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
       border-radius: 20px; padding: 36px 32px; text-decoration: none;
       cursor: pointer; transition: all 0.3s; display: flex; flex-direction: column;
+      align-items: center; text-align: center;
       backdrop-filter: blur(12px); position: relative; overflow: hidden;
     }
     .pcard::before {
@@ -122,30 +122,30 @@
     /* ── STATS BAR ───────────────────────────────────────── */
     .stats-bar {
       display: flex; justify-content: center; gap: 0;
-      background: #fff; border-top: 1px solid #E2E8F0;
+      background: transparent; border-top: 1px solid rgba(255,255,255,0.1);
     }
     .stat {
       flex: 1; max-width: 200px; padding: 32px 24px; text-align: center;
-      border-right: 1px solid #E2E8F0;
+      border-right: 1px solid rgba(255,255,255,0.1);
     }
     .stat:last-child { border-right: none; }
-    .stat-num { font-size: 28px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em; }
-    .stat-label { font-size: 12px; color: #94A3B8; font-weight: 500; margin-top: 2px; }
+    .stat-num { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+    .stat-label { font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 500; margin-top: 2px; }
 
     /* ── FEATURES ────────────────────────────────────────── */
-    .features { padding: 80px 6vw; background: #fff; }
+    .features { padding: 80px 6vw; background: transparent; }
     .features-header { text-align: center; margin-bottom: 52px; }
-    .features-header h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; color: #0F172A; letter-spacing: -0.02em; }
-    .features-header p { color: #64748B; margin-top: 10px; font-size: 15px; }
+    .features-header h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+    .features-header p { color: rgba(255,255,255,0.6); margin-top: 10px; font-size: 15px; }
     .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto; }
     .feat {
-      padding: 28px; border-radius: 16px; background: #F8FAFF;
-      border: 1px solid #E2ECF9; transition: all 0.25s;
+      padding: 28px; border-radius: 16px; background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1); transition: all 0.25s;
     }
-    .feat:hover { border-color: #BFDBFE; box-shadow: 0 8px 24px rgba(37,99,235,0.08); transform: translateY(-2px); }
+    .feat:hover { border-color: rgba(255,255,255,0.2); box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translateY(-2px); }
     .feat-icon { font-size: 28px; margin-bottom: 14px; display: block; }
-    .feat h3 { font-size: 14px; font-weight: 700; color: #0F172A; margin-bottom: 6px; }
-    .feat p { font-size: 13px; color: #64748B; line-height: 1.55; }
+    .feat h3 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .feat p { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.55; }
 
     /* ── FOOTER ──────────────────────────────────────────── */
     footer {
@@ -166,29 +166,16 @@
 </head>
 <body>
 
-  <!-- ── NAV ─────────────────────────────────────── -->
-  <nav>
-    <a class="nav-brand" href="/">
-      <div class="nav-mark">PC</div>
-      <span class="nav-name">Plateau<span>Care</span></span>
-    </a>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="portal.html" class="nav-cta">Patient Login</a>
-    </div>
-  </nav>
-
   <!-- ── HERO ─────────────────────────────────────── -->
   <section class="hero reveal">
-    <div class="hero-badge">Plateau State Ministry of Health</div>
-    <h1>Your Health Records,<br /><span>Anywhere You Are</span></h1>
-    <p>Integrated electronic health records for patients, clinicians, and administrators across Plateau State hospitals and PHCs.</p>
+    <h1 style="font-weight: 400; font-size: 2.2rem; margin-bottom: 12px;">Your Health Records, Anywhere You Are</h1>
+    <p style="font-weight: 300; font-size: 1.1rem; opacity: 0.7;">Integrated electronic health records for patients, clinicians, and administrators across Plateau State hospitals and PHCs.</p>
 
     <div class="portal-cards reveal">
       <a class="pcard patient" href="portal.html">
         <div class="pcard-icon">🏥</div>
         <h2>Patient Portal</h2>
-        <p>View your health history, appointments, lab results, prescriptions, and billing — all in one place.</p>
+        <p>View your health history, appointments, lab results, prescriptions, and billing all in one place.</p>
         <span class="pcard-btn">Access Patient Portal →</span>
       </a>
       <a class="pcard admin" href="admin.html">
@@ -212,7 +199,7 @@
   <section class="features" id="features">
     <div class="features-header">
       <h2>Everything in One System</h2>
-      <p>Designed for Plateau State's unique health landscape — from referral hospitals to rural PHCs.</p>
+      <p>Designed for Plateau State's unique health landscape from referral hospitals to rural PHCs.</p>
     </div>
     <div class="features-grid reveal">
       <div class="feat"><span class="feat-icon">🩺</span><h3>Clinical Consultations</h3><p>Full SOAP notes with ICD-11 coded diagnoses, prescriptions, and referrals.</p></div>

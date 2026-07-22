@@ -1,39 +1,30 @@
 Global Health Grid (GHG) Project Documentation
 
-Hi everyone, welcome to the repo for the Global Health Grid. We recently overhauled the entire system, transitioning it from the legacy PlateauCare EMR into a fully adaptive, offline-first health grid. I wanted to drop a quick update here on how everything is structured now and what has been built.
+Hey team, welcome to the main repo for the Global Health Grid project. We recently did a massive overhaul, moving away from the old PlateauCare EMR into a much more robust, offline-first health grid. I'm dropping a quick update here to explain the structure and what we just finished building.
 
-What We Just Built
+What We Built So Far
 
-We totally deconstructed the old system to focus on reality: low-bandwidth, rural health workers, and offline capabilities. The core application is now built around four main workflows instead of a standard CRUD interface.
+We rebuilt the system around the reality of the ground: bad internet, rural clinics, and high-stakes data. 
 
-1. MPI Onboarding and Demographics
-We added an offline toggle so community health workers can use the system without internet. When it goes offline, it falls back to a local SQLite encrypted biometric cache. We also added social determinants of health (like food and water insecurity) straight into the intake forms, and we generate a UUID v7 for every patient so they get a digital wallet QR code. This completely fixes the ghost patient problem.
+1. Core Workflows
+We set up the main onboarding so community health workers can jump straight into offline mode if the connection drops. The vitals triage system now has a local model that immediately calculates risk levels and geo-tags referrals. The pharmacy also has a zero-stock substitution engine, so if a clinic is out of meds, it finds it at the nearest warehouse and texts the patient a pickup code.
 
-2. Clinical Encounter and Triage
-We built an offline triage system that runs a local explainable AI model. When a nurse enters vitals and flags something like food insecurity, the AI engine immediately calculates risk. If someone hits the red urgency threshold, it bypasses the normal pharmacy loop and creates a geo-tagged referral note for the nearest secondary facility.
+2. UI & Aesthetic Overhaul
+The interface was moved to a sleek, dark mode command center design. The blues blend smoothly from the hero section all the way down, making it super clean and easy on the eyes. The portal cards have nice fluid animations when you hover over them. I also went through and fixed all the routing bugs—like the backspace key kicking you out—so navigating between the EMR and PHC modules is flawless now. The dashboard even greets you dynamically based on the exact time of day.
 
-3. Circular Pharmacy
-This replaces the old inventory system. We added a zero-stock substitution engine. If you prescribe a drug and the local clinic is out of stock, the system queries the network within a 10km radius. It finds the medication at a nearby warehouse, reserves it, and sends the patient an SMS with an e-transfer code to pick it up.
-
-4. Epidemic Intelligence
-We wired up a simulated real-time event listener using a mock Kafka stream. As data flows in from the clinics, pharmacies, and labs, the admin dashboard listens for anomalies. We added a button to simulate a cholera outbreak, which instantly triggers a WHO GOARN alert and surfaces the logistics API to deploy drones.
-
-Navigation and UI Fixes
-
-The UI has been migrated to a dark, hexagonal command center aesthetic. During the rebuild, some of the navigation paths broke, but I just went through and fixed all of them.
-
-- The backspace key on your keyboard is now intercepted. It won't accidentally kick you out of the single page app or dump you back to the login screen anymore; it gracefully slides you back to the main dashboard.
-- The top navigation bar module toggles now correctly switch you between the EMR unit and the new offline-first PHC workflow.
-- We added URL parameter routing so you can jump straight into specific views like billing or appointments if you need to.
+3. Security & Database Hardening (The Big One)
+This is the most critical update. Since we can't afford data races or security breaches, I built a custom ACID compliance wrapper directly into the node server. 
+- Rate limiting is active, so nobody can spam our endpoints.
+- We have optimistic locking and transaction wrappers. If a nurse tries to save a patient record, the system clones the memory state, attempts the save, and silently rolls it back if anything goes wrong. No partial data saves.
+- I added idempotency keys to the frontend fetch calls. If someone double-clicks the save button because of lag, the server catches the duplicate key and ignores the second request.
+- Finally, there's dirty form protection. If a doctor is halfway through typing SOAP notes and accidentally clicks a navigation button, the browser will stop them and ask for confirmation before leaving the page.
 
 How to Run It
 
-You don't need any external databases to spin this up locally. 
+You don't need docker or any external database setups to run this locally. It's completely self-contained.
 
-Just run "npm install" if you haven't already.
-Then run "node server/server.js" to start the server.
-By default, it will listen on port 8085 (or whichever port you pass in your environment variables). 
+1. Run `npm install` just to be safe.
+2. Run `node server/server.js` to boot it up.
+3. It defaults to port 8085. Just open `http://localhost:8085` in your browser.
 
-Once it's running, open your browser to localhost:8085 and you can explore the staff dashboard by going to the admin page.
-
-That's it for the latest major update. Let me know if you run into any bugs or routing issues.
+That's it for the latest sprint. Let me know if you run into any weird UI glitches or routing issues.

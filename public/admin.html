@@ -28,11 +28,20 @@
     .logo { border-radius: 50% !important; background: #0f172a !important; border: 2px solid #3b82f6; }
     #dashGreetingIcon { font-size: 72px; }
     #dashboardBackground { background-image: url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=2000') !important; opacity: 0.2 !important; mix-blend-mode: overlay; filter: grayscale(1); }
+    
+    /* Fluid button hover animation */
+    .module-btn {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .module-btn:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3) !important;
+    }
   </style>
 </head>
 <body>
 
-  <!-- ── LOGIN SCREEN ─────────────────────────────────────── -->
+  <!-- ÔöÇÔöÇ LOGIN SCREEN ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
   <div id="loginScreen" style="
     display:none; position:fixed; inset:0; z-index:9999;
     background:linear-gradient(135deg,#0a1628 0%,#0f2347 60%,#1a3a5c 100%);
@@ -66,7 +75,7 @@
         </button>
       </form>
       <p style="text-align:center;margin-top:20px;color:rgba(255,255,255,0.3);font-size:11px;">
-        Plateau State Ministry of Health &nbsp;·&nbsp; Secure Clinical Access
+        Plateau State Ministry of Health &nbsp;┬À&nbsp; Secure Clinical Access
       </p>
     </div>
   </div>
@@ -96,7 +105,7 @@
     <main class="main">
       <header class="topbar" id="appTopbar" style="padding: 10px 20px; display:none;">
         <div style="display:flex; align-items:center; flex: 1;">
-          <button id="sidebarToggleBtn" type="button" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--ink); padding:4px;" title="Toggle Sidebar">☰</button>
+          <button id="sidebarToggleBtn" type="button" style="background:none; border:none; font-size:24px; cursor:pointer; color:var(--ink); padding:4px;" title="Toggle Sidebar">Ôÿ░</button>
         </div>
         
         <div class="module-toggle-group" style="display:flex; background:rgba(0,0,0,0.03); padding:4px; border-radius:30px; border: 1px solid rgba(0,0,0,0.05);">
@@ -105,14 +114,14 @@
         </div>
 
         <div class="top-actions" style="flex: 1; justify-content: flex-end; gap: 15px; opacity: 0.6;">
-          <button id="tourStartBtn" class="icon-btn" onclick="startGuidedTour()" style="background:none; color:var(--ink); border:none; padding:0; cursor:pointer; font-size:14px;" title="Help & Tour">❓</button>
+          <button id="tourStartBtn" class="icon-btn" onclick="startGuidedTour()" style="background:none; color:var(--ink); border:none; padding:0; cursor:pointer; font-size:14px;" title="Help & Tour">ÔØô</button>
           <span id="apiStatus" style="font-size: 12px; font-weight: 500;">Offline</span>
-          <button id="refreshBtn" class="icon-btn" type="button" title="Refresh data" style="background:none; border:none; padding:0; cursor:pointer; font-size:14px;">🔄</button>
+          <button id="refreshBtn" class="icon-btn" type="button" title="Refresh data" style="background:none; border:none; padding:0; cursor:pointer; font-size:14px;">­ƒöä</button>
         </div>
       </header>
 
       <section id="dashboard" class="view active">
-        <div class="panel onboarding-launcher" style="margin: 0; padding: 60px 40px; background: linear-gradient(135deg, #1e3a8a 0%, #4f46e5 60%, #7c3aed 100%); color: #fff; border: none; border-radius: 0; box-shadow: none; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; position: relative; overflow: hidden;">
+        <div class="onboarding-launcher" style="margin: 0; padding: 60px 40px; background: linear-gradient(135deg, #1e3a8a 0%, #4f46e5 60%, #7c3aed 100%); color: #fff; border: none; border-radius: 0; box-shadow: none; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; position: relative; overflow: hidden;">
           
           <!-- Background Illustration -->
           <div id="dashboardBackground" style="position:absolute; inset:0; background-image: url('/assets/dashboard_bg.jpg'); background-size: cover; background-position: center; opacity: 0.12; pointer-events:none;"></div>
@@ -125,13 +134,13 @@
           <div style="position:relative; z-index:1; max-width: 640px;">
 
             <!-- Icon beside greeting -->
-            <div id="dashGreetingIcon" style="font-size:56px; margin-bottom:12px; line-height:1;">☕</div>
+            <div id="dashGreetingIcon" style="font-size:56px; margin-bottom:12px; line-height:1;">Ôÿò</div>
             <h1 id="dashGreeting" style="color:#fff; margin:0 0 10px; font-size:52px; font-weight:800; line-height:1.1; letter-spacing:-0.02em;">Good Morning.</h1>
             <p id="dashSubGreeting" style="color:rgba(255,255,255,0.6); font-size:15px; margin:0 auto 50px; font-weight:400; line-height:1.6;">How would you like to proceed today?</p>
 
             <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
-              <button onclick="switchView('mpi')" style="background:#fff; color:#1e3a8a; border:none; padding:16px 36px; font-weight:700; border-radius:50px; cursor:pointer; font-size:16px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);">EHR / PHC Module</button>
-              <button onclick="window.location.href='/emr.html'" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:16px 36px; font-weight:600; border-radius:50px; cursor:pointer; font-size:16px;">🖥️ EMR Module</button>
+              <button onclick="switchView('mpi')" class="module-btn" style="background:#fff; color:#1e3a8a; border:none; padding:16px 36px; font-weight:700; border-radius:50px; cursor:pointer; font-size:16px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);">EHR / PHC Module</button>
+              <button onclick="window.location.href='/emr.html'" class="module-btn" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.3); color:#fff; padding:16px 36px; font-weight:600; border-radius:50px; cursor:pointer; font-size:16px;">🖥️ EMR Module</button>
             </div>
           </div>
         </div>
@@ -142,22 +151,22 @@
 
         <div class="ehr-workflow">
           <div class="ehr-step active" onclick="switchView('mpi')">
-            <div class="ehr-icon">🌍</div>
+            <div class="ehr-icon">­ƒîì</div>
             <div class="ehr-title">MPI Onboarding</div>
             <div class="ehr-desc">Offline biometrics cache, SDOH capture, and Global UUID v7 creation.</div>
           </div>
           <div class="ehr-step " onclick="switchView('triage')">
-            <div class="ehr-icon">🧠</div>
+            <div class="ehr-icon">­ƒºá</div>
             <div class="ehr-title">Clinical Encounter</div>
             <div class="ehr-desc">Explainable AI triage engine and offline-first CRDT vector clock syncing.</div>
           </div>
           <div class="ehr-step " onclick="switchView('pharmacy')">
-            <div class="ehr-icon">💊</div>
+            <div class="ehr-icon">­ƒÆè</div>
             <div class="ehr-title">Circular Pharmacy</div>
             <div class="ehr-desc">Zero-stock AI substitution, inventory microservices, and geo-transfer.</div>
           </div>
           <div class="ehr-step " onclick="switchView('epidemic')">
-            <div class="ehr-icon">📡</div>
+            <div class="ehr-icon">­ƒôí</div>
             <div class="ehr-title">Epidemic Intelligence</div>
             <div class="ehr-desc">Kafka anomaly detection, WHO GOARN alerts, and Drone logistics.</div>
           </div>
@@ -181,7 +190,7 @@
             </div>
             
             <div id="biometricCacheOverlay" style="display:none; padding:12px; background:rgba(245,158,11,0.1); border:1px dashed #f59e0b; border-radius:8px; margin-bottom:20px; font-size:13px; color:#b45309; font-weight:600;">
-              ⚠️ OFFLINE MODE: Relying on Local Biometric Cache (SQLite Encrypted)
+              ÔÜá´©Å OFFLINE MODE: Relying on Local Biometric Cache (SQLite Encrypted)
             </div>
 
             <form id="mpiForm" class="stack-form" onsubmit="handleMpiSubmit(event)">
@@ -234,22 +243,22 @@
 
         <div class="ehr-workflow">
           <div class="ehr-step " onclick="switchView('mpi')">
-            <div class="ehr-icon">🌍</div>
+            <div class="ehr-icon">­ƒîì</div>
             <div class="ehr-title">MPI Onboarding</div>
             <div class="ehr-desc">Offline biometrics cache, SDOH capture, and Global UUID v7 creation.</div>
           </div>
           <div class="ehr-step active" onclick="switchView('triage')">
-            <div class="ehr-icon">🧠</div>
+            <div class="ehr-icon">­ƒºá</div>
             <div class="ehr-title">Clinical Encounter</div>
             <div class="ehr-desc">Explainable AI triage engine and offline-first CRDT vector clock syncing.</div>
           </div>
           <div class="ehr-step " onclick="switchView('pharmacy')">
-            <div class="ehr-icon">💊</div>
+            <div class="ehr-icon">­ƒÆè</div>
             <div class="ehr-title">Circular Pharmacy</div>
             <div class="ehr-desc">Zero-stock AI substitution, inventory microservices, and geo-transfer.</div>
           </div>
           <div class="ehr-step " onclick="switchView('epidemic')">
-            <div class="ehr-icon">📡</div>
+            <div class="ehr-icon">­ƒôí</div>
             <div class="ehr-title">Epidemic Intelligence</div>
             <div class="ehr-desc">Kafka anomaly detection, WHO GOARN alerts, and Drone logistics.</div>
           </div>
@@ -274,7 +283,7 @@
                 <h4 style="margin:0 0 10px; font-size:14px; border-bottom:1px solid var(--line); padding-bottom:8px;">Vital Signs</h4>
                 <div class="form-row">
                   <label>Heart Rate<input type="number" id="triageHr" placeholder="bpm" required/></label>
-                  <label>Temp (°C)<input type="number" step="0.1" id="triageTemp" placeholder="36.5" required/></label>
+                  <label>Temp (┬░C)<input type="number" step="0.1" id="triageTemp" placeholder="36.5" required/></label>
                   <label>SpO2 (%)<input type="number" id="triageSpo2" placeholder="98" required/></label>
                 </div>
                 
@@ -314,7 +323,7 @@
               </div>
             </div>
             <div id="xaiPlaceholder" style="text-align:center; color:var(--muted); padding:40px 20px;">
-              <div style="font-size:40px; margin-bottom:16px; opacity:0.5;">🤖</div>
+              <div style="font-size:40px; margin-bottom:16px; opacity:0.5;">­ƒñû</div>
               <p>Awaiting vital signs and SDOH inputs for local inference.</p>
             </div>
           </section>
@@ -325,22 +334,22 @@
 
         <div class="ehr-workflow">
           <div class="ehr-step " onclick="switchView('mpi')">
-            <div class="ehr-icon">🌍</div>
+            <div class="ehr-icon">­ƒîì</div>
             <div class="ehr-title">MPI Onboarding</div>
             <div class="ehr-desc">Offline biometrics cache, SDOH capture, and Global UUID v7 creation.</div>
           </div>
           <div class="ehr-step " onclick="switchView('triage')">
-            <div class="ehr-icon">🧠</div>
+            <div class="ehr-icon">­ƒºá</div>
             <div class="ehr-title">Clinical Encounter</div>
             <div class="ehr-desc">Explainable AI triage engine and offline-first CRDT vector clock syncing.</div>
           </div>
           <div class="ehr-step active" onclick="switchView('pharmacy')">
-            <div class="ehr-icon">💊</div>
+            <div class="ehr-icon">­ƒÆè</div>
             <div class="ehr-title">Circular Pharmacy</div>
             <div class="ehr-desc">Zero-stock AI substitution, inventory microservices, and geo-transfer.</div>
           </div>
           <div class="ehr-step " onclick="switchView('epidemic')">
-            <div class="ehr-icon">📡</div>
+            <div class="ehr-icon">­ƒôí</div>
             <div class="ehr-title">Epidemic Intelligence</div>
             <div class="ehr-desc">Kafka anomaly detection, WHO GOARN alerts, and Drone logistics.</div>
           </div>
@@ -402,22 +411,22 @@
 
         <div class="ehr-workflow">
           <div class="ehr-step " onclick="switchView('mpi')">
-            <div class="ehr-icon">🌍</div>
+            <div class="ehr-icon">­ƒîì</div>
             <div class="ehr-title">MPI Onboarding</div>
             <div class="ehr-desc">Offline biometrics cache, SDOH capture, and Global UUID v7 creation.</div>
           </div>
           <div class="ehr-step " onclick="switchView('triage')">
-            <div class="ehr-icon">🧠</div>
+            <div class="ehr-icon">­ƒºá</div>
             <div class="ehr-title">Clinical Encounter</div>
             <div class="ehr-desc">Explainable AI triage engine and offline-first CRDT vector clock syncing.</div>
           </div>
           <div class="ehr-step " onclick="switchView('pharmacy')">
-            <div class="ehr-icon">💊</div>
+            <div class="ehr-icon">­ƒÆè</div>
             <div class="ehr-title">Circular Pharmacy</div>
             <div class="ehr-desc">Zero-stock AI substitution, inventory microservices, and geo-transfer.</div>
           </div>
           <div class="ehr-step active" onclick="switchView('epidemic')">
-            <div class="ehr-icon">📡</div>
+            <div class="ehr-icon">­ƒôí</div>
             <div class="ehr-title">Epidemic Intelligence</div>
             <div class="ehr-desc">Kafka anomaly detection, WHO GOARN alerts, and Drone logistics.</div>
           </div>
@@ -457,7 +466,7 @@
               
               <div style="margin-top:20px; display:flex; gap:16px; align-items:center;">
                 <button class="primary-btn" onclick="triggerOutbreakSimulation()" style="background:#ef4444; border-color:#ef4444;">Simulate Cholera Cluster</button>
-                <div id="goarnAlertStatus" style="font-size:13px; color:#fbbf24; font-weight:bold; display:none;">⚠️ OUTBREAK SIGNAL GENERATED: Duty Epidemiologist Review Required</div>
+                <div id="goarnAlertStatus" style="font-size:13px; color:#fbbf24; font-weight:bold; display:none;">ÔÜá´©Å OUTBREAK SIGNAL GENERATED: Duty Epidemiologist Review Required</div>
               </div>
             </div>
             
@@ -636,7 +645,7 @@
                 <textarea name="chiefComplaint" rows="3" placeholder="Enter the patient's presenting complaint (e.g. headache, shortness of breath, fever, chest pain...)"></textarea>
               </label>
               <div class="vitals-grid compact">
-                <label>Temp (°C)<input name="temperature" placeholder="e.g. 37.2" /></label>
+                <label>Temp (┬░C)<input name="temperature" placeholder="e.g. 37.2" /></label>
                 <label>BP (mmHg)<input name="bp" placeholder="e.g. 120/80" /></label>
                 <label>Pulse (bpm)<input name="pulse" placeholder="e.g. 80" /></label>
                 <label>Resp (/min)<input name="respiration" placeholder="e.g. 18" /></label>
@@ -690,22 +699,22 @@
         <div class="metric-grid reveal">
           <article class="metric">
             <span>Outstanding Billing</span>
-            <strong id="billingOutstanding">₦0</strong>
+            <strong id="billingOutstanding">Ôéª0</strong>
             <small>Pending patient balances</small>
           </article>
           <article class="metric">
             <span>Collected / Paid</span>
-            <strong id="billingCollected" style="color: var(--success);">₦0</strong>
+            <strong id="billingCollected" style="color: var(--success);">Ôéª0</strong>
             <small>Total revenue collected</small>
           </article>
           <article class="metric">
             <span>Insurance Claims</span>
-            <strong id="billingClaims" style="color: var(--blue);">₦0</strong>
+            <strong id="billingClaims" style="color: var(--blue);">Ôéª0</strong>
             <small>Pending insurance payouts</small>
           </article>
           <article class="metric">
             <span>Total Bills Issued</span>
-            <strong id="billingTotal">₦0</strong>
+            <strong id="billingTotal">Ôéª0</strong>
             <small>Cumulative services billed</small>
           </article>
         </div>
@@ -724,7 +733,7 @@
         </div>
         </section>
 
-      <!-- ── Appointments View ──────────────────────────────── -->
+      <!-- ÔöÇÔöÇ Appointments View ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="appointments" class="view">
         
         <div class="split-grid wide-left">
@@ -753,7 +762,7 @@
         </div>
         </section>
 
-      <!-- ── Lab Results View ───────────────────────────────── -->
+      <!-- ÔöÇÔöÇ Lab Results View ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="labresults" class="view">
         
         <div class="split-grid wide-left">
@@ -777,16 +786,16 @@
         </div>
         </section>
 
-      <!-- ── Beds / Ward View ──────────────────────────────── -->
+      <!-- ÔöÇÔöÇ Beds / Ward View ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="beds" class="view">
         
         <div class="panel reveal">
           <div class="panel-head">
             <div><span class="eyebrow">Inpatient management</span><h2>Ward & Bed Census</h2></div>
             <div style="display:flex;gap:8px;">
-              <span class="badge success" style="padding:6px 12px;">🟢 Vacant</span>
-              <span class="badge danger" style="padding:6px 12px;">🔴 Occupied</span>
-              <span class="badge warning" style="padding:6px 12px;">🟡 Maintenance</span>
+              <span class="badge success" style="padding:6px 12px;">­ƒƒó Vacant</span>
+              <span class="badge danger" style="padding:6px 12px;">­ƒö┤ Occupied</span>
+              <span class="badge warning" style="padding:6px 12px;">­ƒƒí Maintenance</span>
             </div>
           </div>
           <div id="bedGrid" class="bed-grid"></div>
@@ -808,7 +817,7 @@
         </div>
         </section>
 
-      <!-- ── Analytics View ────────────────────────────────── -->
+      <!-- ÔöÇÔöÇ Analytics View ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="analytics" class="view">
         <div class="split-grid reveal" style="margin-bottom:16px;">
           <section class="panel reveal" style="padding:20px;">
@@ -836,15 +845,15 @@
         </div>
       </section>
 
-      <!-- ── Triage View ───────────────────────────────────── -->
-      <!-- ── Triage & Emergency View ──────────────────────── -->
+      <!-- ÔöÇÔöÇ Triage View ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
+      <!-- ÔöÇÔöÇ Triage & Emergency View ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="triage" class="view">
         
 
         <!-- Combined Command Header / Sub-tabs -->
         <div class="command-tabs">
-          <button type="button" class="command-tab-btn active" id="tabTriageBtn" onclick="switchTriageSubTab('triage')">🩺 Standard Triage Intake</button>
-          <button type="button" class="command-tab-btn" id="tabEmergencyBtn" onclick="switchTriageSubTab('emergency')">🚨 A&amp;E Emergency Resus Bay</button>
+          <button type="button" class="command-tab-btn active" id="tabTriageBtn" onclick="switchTriageSubTab('triage')">­ƒ®║ Standard Triage Intake</button>
+          <button type="button" class="command-tab-btn" id="tabEmergencyBtn" onclick="switchTriageSubTab('emergency')">­ƒÜ¿ A&amp;E Emergency Resus Bay</button>
         </div>
 
         <div class="split-grid wide-left">
@@ -869,7 +878,7 @@
                 <label>Patient<select id="triPatient" name="patientId"></select></label>
                 <label>Facility<select id="triFacility" name="facilityId"></select></label>
                 <div class="vitals-grid">
-                  <label>Temp (°C)<input name="temperature" type="number" step="0.1" placeholder="37.0" required /></label>
+                  <label>Temp (┬░C)<input name="temperature" type="number" step="0.1" placeholder="37.0" required /></label>
                   <label>BP (mmHg)<input name="bp" placeholder="120/80" required /></label>
                   <label>Pulse (bpm)<input name="pulse" type="number" placeholder="80" required /></label>
                   <label>Resp (/min)<input name="respiration" type="number" placeholder="18" required /></label>
@@ -903,7 +912,7 @@
                 <label>Patient<select id="emrPatient" name="patientId"></select></label>
                 <label>Facility<select id="emrFacility" name="facilityId"></select></label>
                 <div class="vitals-grid">
-                  <label>Temp (°C)<input name="temperature" type="number" step="0.1" placeholder="37.0" /></label>
+                  <label>Temp (┬░C)<input name="temperature" type="number" step="0.1" placeholder="37.0" /></label>
                   <label>BP (mmHg)<input name="bp" placeholder="120/80" required /></label>
                   <label>Pulse (bpm)<input name="pulse" type="number" placeholder="90" required /></label>
                   <label>Resp (/min)<input name="respiration" type="number" placeholder="22" required /></label>
@@ -919,19 +928,19 @@
                   </label>
                   <label>Glasgow Coma Scale (GCS)
                     <select name="gcs" required>
-                      <option value="15">15 — Fully Awake</option>
-                      <option value="14">14 — Mild Impairment</option>
-                      <option value="13">13 — Mild Impairment</option>
-                      <option value="12">12 — Moderate Impairment</option>
-                      <option value="11">11 — Moderate Impairment</option>
-                      <option value="10">10 — Moderate Impairment</option>
-                      <option value="9">9 — Moderate Impairment</option>
-                      <option value="8">8 — Severe Injury (Comatose)</option>
-                      <option value="7">7 — Severe Injury (Comatose)</option>
-                      <option value="6">6 — Severe Injury (Comatose)</option>
-                      <option value="5">5 — Severe Injury (Comatose)</option>
-                      <option value="4">4 — Severe Injury (Comatose)</option>
-                      <option value="3">3 — Brain Death / No Response</option>
+                      <option value="15">15 ÔÇö Fully Awake</option>
+                      <option value="14">14 ÔÇö Mild Impairment</option>
+                      <option value="13">13 ÔÇö Mild Impairment</option>
+                      <option value="12">12 ÔÇö Moderate Impairment</option>
+                      <option value="11">11 ÔÇö Moderate Impairment</option>
+                      <option value="10">10 ÔÇö Moderate Impairment</option>
+                      <option value="9">9 ÔÇö Moderate Impairment</option>
+                      <option value="8">8 ÔÇö Severe Injury (Comatose)</option>
+                      <option value="7">7 ÔÇö Severe Injury (Comatose)</option>
+                      <option value="6">6 ÔÇö Severe Injury (Comatose)</option>
+                      <option value="5">5 ÔÇö Severe Injury (Comatose)</option>
+                      <option value="4">4 ÔÇö Severe Injury (Comatose)</option>
+                      <option value="3">3 ÔÇö Brain Death / No Response</option>
                     </select>
                   </label>
                 </div>
@@ -959,7 +968,7 @@
 
         </section>
 
-      <!-- ── Pharmacy View ─────────────────────────────────── -->
+      <!-- ÔöÇÔöÇ Pharmacy View ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="pharmacy" class="view">
         <div class="split-grid wide-left">
           <section class="panel reveal">
@@ -988,7 +997,7 @@
               <label>Dispensing Status
                 <select name="status">
                   <option value="Closed">Fully Dispensed</option>
-                  <option value="Open">Pending — Awaiting Stock</option>
+                  <option value="Open">Pending ÔÇö Awaiting Stock</option>
                   <option value="Urgent">Partial Dispense</option>
                 </select>
               </label>
@@ -1004,7 +1013,7 @@
         </div>
         </section>
 
-      <!-- ── Radiology View ────────────────────────────────── -->
+      <!-- ÔöÇÔöÇ Radiology View ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="radiology" class="view">
         <div class="split-grid wide-left">
           <section class="panel reveal">
@@ -1054,7 +1063,7 @@
         </div>
         </section>
 
-      <!-- ── ANC & Maternity View ──────────────────────────── -->
+      <!-- ÔöÇÔöÇ ANC & Maternity View ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="maternity" class="view">
         <div class="split-grid wide-left">
           <section class="panel reveal">
@@ -1094,7 +1103,7 @@
 
               <!-- Point-of-Care Insights Banner -->
               <div id="matInsightsBanner" class="clinical-insight-banner" style="display: none;">
-                <span class="insight-icon">💡</span>
+                <span class="insight-icon">­ƒÆí</span>
                 <div class="insight-content">
                   <strong class="insight-title" id="matInsightTitle">Automated Clinical Insight</strong>
                   <p class="insight-desc" id="matInsightDesc">Analyzing vitals...</p>
@@ -1108,7 +1117,7 @@
               <div class="smart-action-row" style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
                 <label style="margin:0;">Obstetric Assessment & Risks</label>
                 <button type="button" class="secondary-btn" id="btnAutoStructureMatNote" style="padding: 4px 10px; font-size: 11px;">
-                  ✨ Auto-Structure Note
+                  Ô£¿ Auto-Structure Note
                 </button>
               </div>
               <textarea name="assessment" rows="3" placeholder="Fetal lie, presentation, fetal heart rate stable, urine protein negative..." required></textarea>
@@ -1134,7 +1143,7 @@
         </div>
         </section>
 
-      <!-- 🧠 Psychiatry View 🧠 -->
+      <!-- ­ƒºá Psychiatry View ­ƒºá -->
       <section id="psychiatry" class="view">
         <div class="split-grid wide-left">
           <section class="panel reveal">
@@ -1281,7 +1290,7 @@
                 </div>
 
                 <div id="phqScoreAlert" style="margin-top:10px; padding:8px 12px; border-radius:6px; background:#EFF6FF; border:1px solid #BFDBFE; color:#1E40AF; display:flex; align-items:center; gap:8px;">
-                  <span style="font-size:16px;">📊</span>
+                  <span style="font-size:16px;">­ƒôè</span>
                   <div>
                     <strong style="font-size:12px;">PHQ-9 Score: <span id="phqScore">0</span>/27</strong>
                     <div id="phqInterpretation" style="font-size:11px; margin-top:1px;">Minimal or no depression. Monitor patient.</div>
@@ -1307,7 +1316,7 @@
         </div>
         </section>
 
-      <!-- ── Immunization View ──────────────────────────────── -->
+      <!-- ÔöÇÔöÇ Immunization View ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="immunization" class="view">
         <div class="split-grid wide-left">
           <section class="panel reveal">
@@ -1328,14 +1337,14 @@
               <div class="form-row">
                 <label>Antigen / Vaccine
                   <select name="chiefComplaint" required>
-                    <option>BCG (TB) — At Birth</option>
-                    <option>OPV0 (Polio) — At Birth</option>
+                    <option>BCG (TB) ÔÇö At Birth</option>
+                    <option>OPV0 (Polio) ÔÇö At Birth</option>
                     <option>OPV1 / Pentavalent 1 (6 Weeks)</option>
                     <option>OPV2 / Pentavalent 2 (10 Weeks)</option>
                     <option>OPV3 / Pentavalent 3 / IPV / PCV (14 Weeks)</option>
                     <option>Measles Dose 1 / Yellow Fever (9 Months)</option>
                     <option>Measles Dose 2 / Meningitis (15 Months)</option>
-                    <option>Tetanus Toxoid (TT) — Maternal</option>
+                    <option>Tetanus Toxoid (TT) ÔÇö Maternal</option>
                   </select>
                 </label>
                 <label>Series / Dose Status
@@ -1359,7 +1368,7 @@
         </div>
         </section>
 
-      <!-- ── Theatre View ──────────────────────────────────── -->
+      <!-- ÔöÇÔöÇ Theatre View ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="theatre" class="view">
         <div class="split-grid wide-left">
           <section class="panel reveal">
@@ -1412,7 +1421,7 @@
         </div>
         </section>
 
-      <!-- ── Referrals View ────────────────────────────────── -->
+      <!-- ÔöÇÔöÇ Referrals View ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="referrals" class="view">
         <div class="split-grid wide-left">
           <section class="panel reveal">
@@ -1442,11 +1451,11 @@
               </label>
               <label>Reason for Referral
                 <select name="chiefComplaint" required>
-                  <option value="Severe pre-eclampsia — requires urgent stabilisation">Severe pre-eclampsia</option>
+                  <option value="Severe pre-eclampsia ÔÇö requires urgent stabilisation">Severe pre-eclampsia</option>
                   <option value="Severe malaria with complications">Severe malaria with complications</option>
                   <option value="Emergency surgical intervention required">Emergency surgical intervention</option>
                   <option value="Neonatal intensive care required">Neonatal intensive care required</option>
-                  <option value="Specialist review — chronic disease management">Specialist review — chronic disease</option>
+                  <option value="Specialist review ÔÇö chronic disease management">Specialist review ÔÇö chronic disease</option>
                 </select>
               </label>
               <label>Clinical Status at Transfer
@@ -1462,7 +1471,7 @@
         </section>
 
 
-      <!-- ── ENTERPRISE: THEATRE / OR ─────────────────────── -->
+      <!-- ÔöÇÔöÇ ENTERPRISE: THEATRE / OR ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="theatre" class="view">
         <div class="split-grid wide-left">
           <section class="panel reveal">
@@ -1493,7 +1502,7 @@
         </div>
       </section>
 
-      <!-- ── ENTERPRISE: REFERRALS ────────────────────────── -->
+      <!-- ÔöÇÔöÇ ENTERPRISE: REFERRALS ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="referrals" class="view">
         <div class="split-grid wide-left">
           <section class="panel reveal">
@@ -1530,7 +1539,7 @@
         </div>
       </section>
 
-      <!-- ── ENTERPRISE: CLAIMS & HMO ─────────────────────── -->
+      <!-- ÔöÇÔöÇ ENTERPRISE: CLAIMS & HMO ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
       <section id="claims" class="view">
         <div class="split-grid wide-left">
           <section class="panel reveal">
@@ -1548,7 +1557,7 @@
                     <th>Claim ID</th>
                     <th>HMO / Insurer</th>
                     <th>Bills Count</th>
-                    <th>Total Claimed (₦)</th>
+                    <th>Total Claimed (Ôéª)</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -1579,42 +1588,42 @@
 
     <!-- GLOBAL WIZARD FOOTER -->
     <div id="globalWizardFooter" style="position: sticky; bottom: 0; background: rgba(255,255,255,0.92); backdrop-filter: blur(8px); padding: 12px 30px; border-top: 1px solid var(--line); display: none; justify-content: center; gap: 40px; align-items: center; z-index: 100;">
-      <button id="wizardBackBtn" class="secondary-btn" style="min-width: 120px;" onclick="wizardGoBack()">← Back</button>
+      <button id="wizardBackBtn" class="secondary-btn" style="min-width: 120px;" onclick="wizardGoBack()">ÔåÉ Back</button>
       <div id="wizardProgressText" style="font-size: 14px; font-weight: 600; color: var(--brand);">Step 1 of 12</div>
-      <button id="wizardNextBtn" class="primary-btn" style="min-width: 150px;" onclick="wizardGoNext()">Next Step →</button>
+      <button id="wizardNextBtn" class="primary-btn" style="min-width: 150px;" onclick="wizardGoNext()">Next Step ÔåÆ</button>
     </div>
 
     </main>
   </div>
 
-  <!-- ── Patient Timeline Modal ────────────────────────────── -->
+  <!-- ÔöÇÔöÇ Patient Timeline Modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
   <div id="timelineModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:780px;">
       <div class="modal-header">
         <h3 id="timelineModalTitle">Patient Timeline</h3>
-        <button type="button" onclick="document.getElementById('timelineModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+        <button type="button" onclick="document.getElementById('timelineModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">├ù</button>
       </div>
       <div class="modal-body" id="timelineModalBody" style="padding:20px;"></div>
     </div>
   </div>
 
-  <!-- ── EWS / Sepsis Alert Modal ──────────────────────────── -->
+  <!-- ÔöÇÔöÇ EWS / Sepsis Alert Modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
   <div id="ewsModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:560px;">
       <div class="modal-header">
-        <h3>⚠️ Early Warning Score (Sepsis Risk)</h3>
-        <button type="button" onclick="document.getElementById('ewsModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+        <h3>ÔÜá´©Å Early Warning Score (Sepsis Risk)</h3>
+        <button type="button" onclick="document.getElementById('ewsModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">├ù</button>
       </div>
       <div class="modal-body" id="ewsModalBody" style="padding:20px;"></div>
     </div>
   </div>
 
-  <!-- ── Drug Checker Modal ────────────────────────────────── -->
+  <!-- ÔöÇÔöÇ Drug Checker Modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
   <div id="drugModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:540px;">
       <div class="modal-header">
-        <h3>💊 Drug Interaction & Allergy Check</h3>
-        <button type="button" onclick="document.getElementById('drugModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+        <h3>­ƒÆè Drug Interaction & Allergy Check</h3>
+        <button type="button" onclick="document.getElementById('drugModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">├ù</button>
       </div>
       <div class="modal-body" style="padding:20px;">
         <form id="drugCheckForm" class="stack-form">
@@ -1631,12 +1640,12 @@
     </div>
   </div>
 
-  <!-- ── Discharge Summary Modal ───────────────────────────── -->
+  <!-- ÔöÇÔöÇ Discharge Summary Modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
   <div id="dischargeModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:700px;">
       <div class="modal-header">
-        <h3>📋 Clinical Discharge Summary</h3>
-        <button type="button" onclick="document.getElementById('dischargeModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+        <h3>­ƒôï Clinical Discharge Summary</h3>
+        <button type="button" onclick="document.getElementById('dischargeModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">├ù</button>
       </div>
       <div class="modal-body" id="dischargeModalBody" style="padding:20px;font-family:monospace;font-size:13px;line-height:1.8;"></div>
     </div>
@@ -1647,7 +1656,7 @@
     <div class="modal-content" style="max-height: 90vh;">
       <div class="modal-header">
         <h3 id="unitModalTitle">Clinical Unit Form</h3>
-        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer;" onclick="document.getElementById('unitModal').style.display='none'">×</button>
+        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer;" onclick="document.getElementById('unitModal').style.display='none'">├ù</button>
       </div>
       <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 20px; background: white; color: var(--ink);">
         <form id="unitModalForm" class="stack-form">
@@ -1666,7 +1675,7 @@
     <div class="modal-content" style="max-width: 600px; max-height: 90vh;">
       <div class="modal-header">
         <h3 id="editRecordModalTitle">Edit Record</h3>
-        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer; color:#fff;" onclick="document.getElementById('editRecordModal').style.display='none'">×</button>
+        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer; color:#fff;" onclick="document.getElementById('editRecordModal').style.display='none'">├ù</button>
       </div>
       <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 20px; background: white; color: var(--ink);">
         <form id="editRecordForm" class="stack-form">
@@ -1678,34 +1687,34 @@
             <button class="secondary-btn" type="button" onclick="document.getElementById('editRecordModal').style.display='none'">Cancel</button>
           </div>
         </form>
-  <!-- ── Patient Timeline Modal ────────────────────────────── -->
+  <!-- ÔöÇÔöÇ Patient Timeline Modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
   <div id="timelineModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:780px;">
       <div class="modal-header">
         <h3 id="timelineModalTitle">Patient Timeline</h3>
-        <button type="button" onclick="document.getElementById('timelineModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+        <button type="button" onclick="document.getElementById('timelineModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">├ù</button>
       </div>
       <div class="modal-body" id="timelineModalBody" style="padding:20px;"></div>
     </div>
   </div>
 
-  <!-- ── EWS / Sepsis Alert Modal ──────────────────────────── -->
+  <!-- ÔöÇÔöÇ EWS / Sepsis Alert Modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
   <div id="ewsModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:560px;">
       <div class="modal-header">
-        <h3>⚠️ Early Warning Score (Sepsis Risk)</h3>
-        <button type="button" onclick="document.getElementById('ewsModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+        <h3>ÔÜá´©Å Early Warning Score (Sepsis Risk)</h3>
+        <button type="button" onclick="document.getElementById('ewsModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">├ù</button>
       </div>
       <div class="modal-body" id="ewsModalBody" style="padding:20px;"></div>
     </div>
   </div>
 
-  <!-- ── Drug Checker Modal ────────────────────────────────── -->
+  <!-- ÔöÇÔöÇ Drug Checker Modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
   <div id="drugModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:540px;">
       <div class="modal-header">
-        <h3>💊 Drug Interaction & Allergy Check</h3>
-        <button type="button" onclick="document.getElementById('drugModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+        <h3>­ƒÆè Drug Interaction & Allergy Check</h3>
+        <button type="button" onclick="document.getElementById('drugModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">├ù</button>
       </div>
       <div class="modal-body" style="padding:20px;">
         <form id="drugCheckForm" class="stack-form">
@@ -1722,12 +1731,12 @@
     </div>
   </div>
 
-  <!-- ── Discharge Summary Modal ───────────────────────────── -->
+  <!-- ÔöÇÔöÇ Discharge Summary Modal ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
   <div id="dischargeModal" class="modal-overlay" style="display:none;">
     <div class="modal-content" style="max-width:700px;">
       <div class="modal-header">
-        <h3>📋 Clinical Discharge Summary</h3>
-        <button type="button" onclick="document.getElementById('dischargeModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">×</button>
+        <h3>­ƒôï Clinical Discharge Summary</h3>
+        <button type="button" onclick="document.getElementById('dischargeModal').style.display='none'" style="color:#fff;font-size:22px;border:none;background:none;cursor:pointer;">├ù</button>
       </div>
       <div class="modal-body" id="dischargeModalBody" style="padding:20px;font-family:monospace;font-size:13px;line-height:1.8;"></div>
     </div>
@@ -1738,7 +1747,7 @@
     <div class="modal-content" style="max-height: 90vh;">
       <div class="modal-header">
         <h3 id="unitModalTitle">Clinical Unit Form</h3>
-        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer;" onclick="document.getElementById('unitModal').style.display='none'">×</button>
+        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer;" onclick="document.getElementById('unitModal').style.display='none'">├ù</button>
       </div>
       <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 20px; background: white; color: var(--ink);">
         <form id="unitModalForm" class="stack-form">
@@ -1757,7 +1766,7 @@
     <div class="modal-content" style="max-width: 600px; max-height: 90vh;">
       <div class="modal-header">
         <h3 id="editRecordModalTitle">Edit Record</h3>
-        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer; color:#fff;" onclick="document.getElementById('editRecordModal').style.display='none'">×</button>
+        <button type="button" style="border:none; background:none; font-size:24px; cursor:pointer; color:#fff;" onclick="document.getElementById('editRecordModal').style.display='none'">├ù</button>
       </div>
       <div class="modal-body" style="overflow-y: auto; flex: 1; padding: 20px; background: white; color: var(--ink);">
         <form id="editRecordForm" class="stack-form">
@@ -1774,7 +1783,12 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="ghg-workflows.js"></script>
-  <script src="app.js"></script>
+  <script src="ghg-workflows.js?v=1"></script>
+  <script src="app.js?v=3"></script>
+  <script>
+    if (typeof setDashboardGreeting === 'function') {
+      setDashboardGreeting();
+    }
+  </script>
 </body>
 </html>

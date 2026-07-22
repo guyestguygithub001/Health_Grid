@@ -137,9 +137,17 @@ function showToast(msg, duration = 2800) {
 
 async function api(path, opts = {}) {
   const creds = sessionStorage.getItem("ehr_creds") || "";
-  const headers = { "Content-Type": "application/json" };
+  const headers = { "Content-Type": "application/json", ...opts.headers };
   if (creds) headers["Authorization"] = "Basic " + creds;
-  const res = await fetch(path, { headers, ...opts });
+  
+  // Add an idempotency key to prevent double-submits on bad connections
+  if (opts.method && ["POST", "PUT", "PATCH"].includes(opts.method.toUpperCase())) {
+    headers["Idempotency-Key"] = "IDEM-" + Math.random().toString(36).substr(2, 9) + Date.now();
+  }
+  
+  opts.headers = headers;
+  
+  const res = await fetch(path, opts);
   if (res.status === 401) {
     sessionStorage.removeItem("ehr_creds");
     showLoginScreen();
@@ -172,6 +180,14 @@ function formToObject(form) {
 }
 
 function switchView(id) {
+  // If the user has unsaved changes in a form, warn them before navigating away
+  if (window.isFormDirty) {
+    if (!confirm("You have unsaved changes. Are you sure you want to leave this page?")) {
+      return;
+    }
+    window.isFormDirty = false; // Reset if they choose to leave
+  }
+
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === id));
   document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.view === id));
   const viewTitleEl = document.querySelector("#viewTitle");
@@ -3688,6 +3704,25 @@ function wizardGoBack() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Setup dirty form tracking across the app
+  window.isFormDirty = false;
+  document.addEventListener("input", (e) => {
+    if (e.target.closest('form')) {
+      window.isFormDirty = true;
+    }
+  });
+  window.addEventListener("beforeunload", (e) => {
+    if (window.isFormDirty) {
+      e.preventDefault();
+      e.returnValue = '';
+    }
+  });
+
+  // Reset dirty flag when any form successfully submits
+  document.addEventListener("submit", () => {
+    window.isFormDirty = false;
+  });
+
   // Check for URL parameters for the "tour" functionality
   const params = new URLSearchParams(window.location.search);
   const viewParam = params.get('view');
@@ -3721,21 +3756,20 @@ function setDashboardGreeting() {
 
   const hour = new Date().getHours();
 
-  // ── Time slots ────────────────────────────────────────────
+  // ── Time slots ──
   // Each entry: [hour_start, icon, greeting, sub_message, bg_file]
   const slots = [
-    [0,  '🌙', 'Still up?',        'You\'re burning the midnight oil. Take it easy.',      'dashboard_bg_3.jpg'],
-    [5,  '🌅', 'Good Dawn.',       'Early start. The system is ready when you are.',       'dashboard_bg.jpg'  ],
-    [7,  '☕', 'Good Morning.',    'Start your day strong. Patients are waiting.',         'dashboard_bg.jpg'  ],
-    [10, '🌤️', 'Good Morning.',   'Mid-morning check-in. Everything looks on track.',    'dashboard_bg_2.jpg'],
-    [12, '🍪', 'Good Afternoon.', 'Keep up the great work. Halfway through the day.',     'dashboard_bg_2.jpg'],
-    [15, '☀️', 'Good Afternoon.', 'Hope the afternoon is going smoothly.',                'dashboard_bg_3.jpg'],
-    [17, '👋', 'Hi there!',       'Winding down? Make sure records are up to date.',      'dashboard_bg_3.jpg'],
-    [19, '🌆', 'Good Evening.',   'Evening shift. You\'ve got this.',                      'dashboard_bg.jpg'  ],
-    [21, '🌙', 'Good Night.',     'It\'s late. Wrap up and rest well.',                   'dashboard_bg_2.jpg'],
+    [0,  '🌙', 'Still up?',        'Burning the midnight oil...',        'dashboard_bg_3.jpg'],
+    [5,  '🌅', 'Good Dawn.',       'Early start...',                     'dashboard_bg.jpg'  ],
+    [7,  '☕', 'Good Morning.',    'Start your day strong...',           'dashboard_bg.jpg'  ],
+    [10, '🌤️', 'Good Morning.',   'Mid-morning check-in...',            'dashboard_bg_2.jpg'],
+    [12, '🍪', 'Good Afternoon.', 'Halfway through the day...',         'dashboard_bg_2.jpg'],
+    [15, '☀️', 'Good Afternoon.', 'Hope the afternoon is smooth...',    'dashboard_bg_3.jpg'],
+    [17, '👋', 'Hi there!',       'Winding down?...',                   'dashboard_bg_3.jpg'],
+    [19, '🌆', 'Good Evening.',   'Evening shift...',                   'dashboard_bg.jpg'  ],
+    [21, '🌙', 'Good Night.',     'It\'s late. Rest well...',           'dashboard_bg_2.jpg']
   ];
 
-  // Find the right slot — last slot whose start hour <= current hour
   let chosen = slots[0];
   for (const slot of slots) {
     if (hour >= slot[0]) chosen = slot;
@@ -3748,6 +3782,13 @@ function setDashboardGreeting() {
   if (subEl)   subEl.textContent  = sub;
   if (bgEl)    bgEl.style.backgroundImage = `url('/assets/${bg}')`;
 }
+
+// Ensure it dynamically updates if left open
+setInterval(() => {
+  if (document.body.classList.contains("dashboard-active") && typeof setDashboardGreeting === "function") {
+    setDashboardGreeting();
+  }
+}, 60000);
 
 // --- NEW ARCHITECTURE LOGIC ---
 
@@ -3769,7 +3810,7 @@ function switchSystemModule(type) {
     document.getElementById('emrModuleToggle').style.background = 'transparent';
     document.getElementById('emrModuleToggle').style.color = 'var(--muted)';
     showToast('Switched to Primary Healthcare Module');
-    // Launch the new offline-first GHG workflow
+    // Launch the offline-first PHC workflow
     switchView('mpi');
   }
 }
