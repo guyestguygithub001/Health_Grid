@@ -200,12 +200,17 @@
         <div class="login-field">
           <label>Phone Number</label>
           <input id="loginPhone" type="tel" placeholder="e.g. 08012345678" autocomplete="tel" required />
-          <div class="login-hint">The phone number used during registration</div>
         </div>
         <div class="login-field">
           <label>Patient ID (Password)</label>
           <input id="loginPatId" type="text" placeholder="e.g. PT-0001" autocomplete="off" required />
-          <div class="login-hint">Your Patient ID — provided at registration</div>
+        </div>
+
+        <div style="margin: 14px 0 18px; display: flex; align-items: center; justify-content: center; text-align: center; gap: 8px;">
+          <input type="checkbox" id="patLoginLegalConsent" style="margin: 0; cursor: pointer;" required />
+          <label for="patLoginLegalConsent" style="font-size: 11px; color: rgba(255,255,255,0.75); cursor: pointer; font-weight: 400;">
+            I agree to <a href="legal.html" target="_blank" style="color:#10B981; text-decoration:none; font-weight:600;">Terms</a> · <a href="legal.html#privacy" target="_blank" style="color:#10B981; text-decoration:none; font-weight:600;">Privacy</a> · <a href="legal.html#disclaimer" target="_blank" style="color:#10B981; text-decoration:none; font-weight:600;">Disclaimer</a> <span style="opacity:0.65;">(18+)</span>
+          </label>
         </div>
         <div id="loginError" class="login-error hidden">Invalid phone number or Patient ID. Please check and try again.</div>
         <button class="login-btn" id="loginBtn" type="submit">Sign In to My Health Portal</button>
@@ -247,6 +252,12 @@
               <option value="Female" style="color:#000;">Female</option>
             </select>
           </div>
+        </div>
+        <div class="login-field" style="margin-top:14px; margin-bottom:16px; text-align:center; display:flex; align-items:center; justify-content:center; gap:8px;">
+          <input type="checkbox" id="patRegLegalConsent" style="margin:0; cursor:pointer;" required />
+          <label for="patRegLegalConsent" style="font-size:11px; color:rgba(255,255,255,0.75); cursor:pointer; font-weight:400;">
+            I agree to <a href="legal.html" target="_blank" style="color:#60a5fa; text-decoration:none; font-weight:600;">Terms</a> · <a href="legal.html#privacy" target="_blank" style="color:#60a5fa; text-decoration:none; font-weight:600;">Privacy</a> · <a href="legal.html#disclaimer" target="_blank" style="color:#60a5fa; text-decoration:none; font-weight:600;">Disclaimer</a> <span style="opacity:0.65;">(18+)</span>
+          </label>
         </div>
         <div id="regError" class="login-error hidden">Please fill in all required fields.</div>
         <button class="login-btn" id="regBtn" type="submit" style="background: linear-gradient(135deg, #2563EB, #1D4ED8);">Create Patient Account</button>
@@ -408,11 +419,17 @@
 
   registerForm.addEventListener("submit", async e => {
     e.preventDefault();
+    const consent = document.getElementById("patRegLegalConsent");
+    if (consent && !consent.checked) {
+      regError.textContent = "You must explicitly agree to the Terms of Service, Privacy Policy, and Medical Disclaimer.";
+      regError.classList.remove("hidden");
+      return;
+    }
     const name = document.getElementById("regName").value.trim();
     const phone = document.getElementById("regPhone").value.trim();
     const age = document.getElementById("regAge").value;
     const sex = document.getElementById("regSex").value;
-    
+
     if (!name || !phone || !age || !sex) {
       regError.textContent = "Please fill in all required fields.";
       regError.classList.remove("hidden");
@@ -469,6 +486,12 @@
   // ── Login ─────────────────────────────────────────────
   loginForm.addEventListener("submit", async e => {
     e.preventDefault();
+    const consent = document.getElementById("patLoginLegalConsent");
+    if (consent && !consent.checked) {
+      loginError.textContent = "You must explicitly agree to the Terms of Service, Privacy Policy, and Medical Disclaimer.";
+      loginError.classList.remove("hidden");
+      return;
+    }
     const phone    = document.getElementById("loginPhone").value.trim();
     const patientId = document.getElementById("loginPatId").value.trim().toUpperCase();
     loginError.classList.add("hidden");

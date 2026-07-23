@@ -50,6 +50,12 @@
 
   loginForm.addEventListener("submit", async e => {
     e.preventDefault();
+    const consent = document.getElementById("loginLegalConsent");
+    if (consent && !consent.checked) {
+      loginError.textContent = "You must explicitly agree to the Terms of Service, Privacy Policy, and Medical Disclaimer before signing in.";
+      loginError.style.display = "block";
+      return;
+    }
     const user = document.getElementById("loginUser").value.trim();
     const pass = document.getElementById("loginPass").value;
     const encoded = btoa(user + ":" + pass);

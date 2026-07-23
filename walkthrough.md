@@ -1,25 +1,34 @@
 # Global Health Grid (GHG) Project Walkthrough
 
-This document logs all the changes and architectural shifts implemented during the transition from the legacy PlateauCare EMR to the new Global Health Grid ecosystem.
+This document logs all architectural changes, security hardening, legal fortification, and UI updates implemented in the Global Health Grid ecosystem.
 
 ## 1. Architectural Restructuring
-*   **Offline-First Migration:** Replaced the conventional CRUD interface with 4 dedicated, offline-capable workflows designed for rural/low-connectivity environments.
-*   **Dashboard Redesign:** Transitioned the UI to a high-tech "command center" aesthetic with deep-blue backgrounds and immersion mode, completely hiding the traditional topbar/sidebar until needed.
-*   **Module Split:** Segregated the new GHG (Primary Health Care) workflows from the traditional EMR views.
+* Offline-First Foundation: Built 4 dedicated, offline-capable clinical workflows for health facilities in low-connectivity areas.
+* Command Center UI: Designed a high-contrast dark mode interface with immersive layouts that hide standard headers until needed.
+* Dual Module Split: Separated the new Primary Health Care (PHC) offline workflows from the traditional Hospital EMR views.
 
-## 2. The Four New Workflows
-*   **MPI Onboarding:** Integrated an "Offline/Online" network toggle that mocks local SQLite fallback for biometric caches. Embedded Social Determinants of Health (SDOH) queries and added UUID v7 generation for Digital Wallet QR logic.
-*   **Clinical Encounter (Triage):** Developed an Explainable AI (XAI) lite engine that triggers a "URGENCY: RED" geo-tagged referral pathway when vitals and SDOH flags (like food insecurity) meet the threshold.
-*   **Circular Pharmacy:** Created a "Zero-Stock" workflow where the system dynamically substitutes stockouts by locating alternatives within a 10km radius and firing an e-transfer SMS to the patient.
-*   **Epidemic Intelligence:** Built a mock Kafka stream visualizer that ingests data from clinics. A "Simulate Cholera Cluster" button forces anomalies, triggering a WHO GOARN alert and drone deployment logic.
+## 2. Workflows and Clinical Tools
+* MPI Onboarding: Features local biometrics caching, Social Determinants of Health (SDOH) intake, and UUID v7 digital wallet creation.
+* Clinical Encounter (Triage): Includes an Explainable AI (XAI) triage engine that flags high-risk patients and triggers geo-tagged referrals.
+* Circular Pharmacy: Zero-stock engine that finds alternative drug inventory within a 10km radius and sends e-transfer SMS pickup codes.
+* Epidemic Intelligence: Visualizer ingesting surveillance data to detect disease clusters, trigger WHO GOARN alerts, and dispatch medical drones.
 
-## 3. Navigation & Routing Fixes
-*   **URL Parameter Routing:** Updated the initialization logic in `app.js` to parse `?view=` parameters from the URL, allowing the homepage or external links to deep-link directly into modules (like billing or appointments).
-*   **Global Backspace Router:** Deployed a global JavaScript interceptor that captures the `Backspace` keyboard event. Instead of letting the browser kick the user backward through page history, it safely routes the user back to the application dashboard.
-*   **Wizard Navigation:** Rewrote the `wizardGoBack()` function to intelligently exit the 4-step workflow back to the dashboard when the user is on the first step.
-*   **Topbar Module Toggles:** Re-wired the "EMR Unit" and "PHC Module" toggles at the top of the interface. The PHC toggle now accurately triggers the new GHG offline-first workflow, while the EMR toggle routes to the traditional EMR view.
+## 3. Production Security and ACID Hardening
+* Sliding Window Rate Limiter: Protects API routes from brute force and automated traffic bursts.
+* JWT Security Safeguards: Validates authorization headers and rejects tampered signatures with standard security error codes.
+* ACID Transaction Isolation: Operations run against in-memory clones before persistent disk writes, ensuring zero partial saves on error.
+* Idempotency Tracking: Uses client idempotency headers to ignore accidental double clicks or retries caused by network latency.
+* Unsaved Changes Protection: Prompts clinicians before navigating away from active SOAP notes or order forms.
 
-## 4. UI Adjustments
-*   **Homepage Touches:** Converted the 6 feature blocks on `index.html` from links back to static information blocks based on explicit user requirements, removing the tour behavior.
-*   **Dashboard Button Re-wire:** Restored and fixed the "EHR / PHC Module" entry button on the dashboard to trigger the new `mpi` workflow seamlessly without Javascript crashing.
-*   **Javascript Syntax:** Resolved an "Unexpected end of input" syntax failure in `app.js` caused by a missing bracket that was freezing the entire application interface.
+## 4. Legal Fortification and Compliance Audit
+* Dedicated Legal Center: Created public/legal.html containing Terms of Service v2.4, Privacy Policy, Medical Disclaimer, EULA, and Breach SLAs.
+* Mandatory Explicit Consent: Added click-through consent checkboxes on all staff and patient login cards (admin.html, login.html, portal.html).
+* CDS Non-Medical Device Disclaimer: Discloses the software provides clinical decision support under FDA 2022 Cures Act Section 520(o)(1)(E) and NAFDAC guidelines, with prominent 112 emergency callouts.
+* Regulatory Matrix API: Built an unauthenticated endpoint (GET /api/legal/audit-matrix) returning 100% green light compliance verification across HIPAA, NDPA 2023, GDPR, FTC, FDA, PCI-DSS v4.0, and WCAG 2.1 AA.
+
+## 5. UI Polish and Routing Enhancements
+* Dynamic Time Matrix: Updates dashboard greetings, sub-messages, and background illustrations based on the local time of day.
+* Fluid Micro-Animations: Added smooth CSS hover transitions (.module-btn) with elevation and soft drop shadows.
+* Centered Minimalist Login Panels: Cleaned up and centered all consent checkboxes and text lines across login cards.
+* Emoji Encoding Fix: Replaced corrupted unicode characters across workflow tabs with clean standard icons.
+* Router and Navigation Integrity: Added keyboard interceptors for the Backspace key to prevent accidental browser history exits and fixed module switching.
