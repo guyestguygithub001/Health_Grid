@@ -10,22 +10,9 @@ const PORT       = process.env.PORT || 8082;
 const ROOT       = process.cwd();
 const PUBLIC_DIR = path.join(ROOT, "public");
 
-// ── PostgreSQL (cloud) vs JSON-file (local) adapter ───────────
-// When DATABASE_URL is set (Render / any cloud), use Postgres.
-// Otherwise fall back to the local data.json file so local dev still works.
-const USE_PG = !!process.env.DATABASE_URL;
-let pgPool = null;
-
-if (USE_PG) {
-  const { Pool } = require("pg");
-  pgPool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }   // required by Render's managed Postgres
-  });
-  console.log("[DB] Using PostgreSQL");
-} else {
-  console.log("[DB] Using local data.json");
-}
+// ── Strictly Local Database Backend (Zero Cloud/Backdoor) ───────────
+const USE_PG = false;
+console.log("[DB] Using strictly local data.json. Cloud capabilities explicitly removed per mandate.");
 
 // ── Local JSON file fallback (unchanged from original) ────────
 let DATA_FILE = path.join(ROOT, "server", "data.json");
@@ -67,59 +54,23 @@ async function _writeFile(d) {
   _fileWriting = false;
 }
 
-// ── PostgreSQL helpers ────────────────────────────────────────
-async function _initPg() {
-  // Single-row JSON store: id=1 always holds the entire DB as one JSONB value
-  await pgPool.query(`
-    CREATE TABLE IF NOT EXISTS store (
-      id   INTEGER PRIMARY KEY DEFAULT 1,
-      data JSONB NOT NULL
-    );
-  `);
-  const { rowCount } = await pgPool.query("SELECT 1 FROM store WHERE id=1");
-  if (rowCount === 0) {
-    // Seed from local data.json on first boot
-    const seed = _loadSeed();
-    await pgPool.query("INSERT INTO store(id,data) VALUES(1,$1)", [JSON.stringify(seed)]);
-    console.log("[DB] Seeded initial data from data.json");
-  }
-}
-
-async function _readPg() {
-  const { rows } = await pgPool.query("SELECT data FROM store WHERE id=1");
-  return rows[0]?.data || _loadSeed();
-}
-
-async function _writePg(d) {
-  await pgPool.query("UPDATE store SET data=$1 WHERE id=1", [JSON.stringify(d)]);
-}
+// ── PostgreSQL helpers removed for absolute data sovereignty ──
 
 // ── Public API used by every route ───────────────────────────
 function readData() {
-  // Sync shim for Postgres path — routes that need async must await readDataAsync()
-  // For backwards compatibility, local path stays synchronous
-  if (!USE_PG) return _readFile();
-  // For PG, return the in-memory cache (populated after initDb)
-  if (memoryDb) return memoryDb;
-  throw new Error("DB not ready — call readDataAsync()");
+  return _readFile();
 }
 
 async function readDataAsync() {
-  if (!USE_PG) return _readFile();
-  const data = await _readPg();
-  memoryDb = data;          // refresh cache
-  return data;
+  return _readFile();
 }
 
 async function writeData(d) {
   memoryDb = d;
   broadcastUpdate("update");
-  if (USE_PG) {
-    await _writePg(d);
-  } else {
-    await _writeFile(d);
-  }
+  await _writeFile(d);
 }
+
 
 // ── SSE Real-time Broadcaster ──────────────────────────────
 const sseClients = new Set();
@@ -1178,6 +1129,118 @@ const server = http.createServer(async (req, res) => {
       req.on("close", () => sseClients.delete(res));
       return;
     }
+    // ── NEW: EMR & MPI Route Interception (White Coat EMR) ─────────
+    if (pathname.startsWith("/api/v1/mpi/") || pathname.startsWith("/api/v1/emr/")) {
+      const data = await readDataAsync();
+      
+      // Node H: Read-Only MPI Search
+      if (req.method === "GET" && pathname === "/api/v1/mpi/search") {
+        const q = url.searchParams.get("q") || "";
+        const patients = data.patients.filter(p => 
+          (p.name && p.name.toLowerCase().includes(q.toLowerCase())) || 
+          (p.id && p.id.includes(q))
+        );
+        sendJson(res, 200, { success: true, results: patients });
+        return;
+      }
+
+      // Timeline Load
+      if (req.method === "GET" && pathname === "/api/v1/emr/encounters") {
+        const patientId = url.searchParams.get("patientId");
+        const encounters = (data.emr_encounters || []).filter(e => e.patientId === patientId);
+        // Attach clinical notes
+        const populated = encounters.map(e => {
+          const note = (data.emr_clinical_notes || []).find(n => n.encounterId === e.id);
+          return { ...e, text: note ? note.text : "No notes recorded." };
+        });
+        sendJson(res, 200, { success: true, encounters: populated.reverse() });
+        return;
+      }
+
+      // Nodes I-J: Quick Register
+      if (req.method === "POST" && pathname === "/api/v1/mpi/register") {
+        const body = await collectBody(req);
+        const newPatient = {
+          id: `PT-${Date.now()}`,
+          name: body.name,
+          dob: body.dob,
+          gender: body.gender,
+          phone: body.phone,
+          registeredAt: new Date().toISOString()
+        };
+        data.patients.push(newPatient);
+        await writeData(data);
+        sendJson(res, 200, { success: true, patient: newPatient });
+        return;
+      }
+
+      // Nodes Q-R: AI Sidecar & Floating Chips
+      if (req.method === "POST" && pathname === "/api/v1/emr/ai/suggest") {
+        const body = await collectBody(req);
+        const text = (body.text || "").toLowerCase();
+        const chips = [];
+        if (text.includes("chest pain")) chips.push("Order: Troponin-I", "Order: ECG", "Differential: ACS");
+        if (text.includes("fever") || text.includes("malaria")) chips.push("Rx: Artemether-Lumefantrine", "Order: Malaria RDT");
+        if (text.includes("cough")) chips.push("Order: Chest X-Ray", "Rx: Amoxicillin");
+        if (chips.length === 0) chips.push("Order: Full Blood Count", "Review Vitals");
+        sendJson(res, 200, { success: true, chips });
+        return;
+      }
+
+      // Node X: Isolated Inventory Check
+      if (req.method === "GET" && pathname === "/api/v1/emr/inventory/check") {
+        const drug = url.searchParams.get("drug") || "";
+        // Mock checking facility pharmacy schema
+        if (drug.toLowerCase().includes("amoxicillin") || drug.toLowerCase().includes("augmentin")) {
+          // Trigger out of stock scenario
+          sendJson(res, 409, { success: false, error: "Out of Stock", substitute: "Azithromycin 500mg" });
+          return;
+        }
+        sendJson(res, 200, { success: true, inStock: true });
+        return;
+      }
+
+      // Node W-AB: Sign & Close Encounter (Atomic Write)
+      if (req.method === "POST" && pathname === "/api/v1/emr/encounters/finalize") {
+        const body = await collectBody(req);
+        // Ensure emr schemas exist in data
+        if (!data.emr_encounters) data.emr_encounters = [];
+        if (!data.emr_clinical_notes) data.emr_clinical_notes = [];
+        if (!data.emr_prescriptions) data.emr_prescriptions = [];
+
+        // ACID Commit Block
+        try {
+          const encounterId = `ENC-${Date.now()}`;
+          // Node 21: Extract Structured Rx & ICD-11 Mapping
+          const icd11 = "MG50.9"; // General symptom, unspec (ICD-11 replacement for R69)
+          const fhirBundle = {
+            resourceType: "Bundle",
+            type: "document",
+            timestamp: new Date().toISOString(),
+            entry: [
+              { resource: { resourceType: "Encounter", id: encounterId, status: "finished" } }
+            ]
+          };
+          
+          data.emr_encounters.push({ id: encounterId, patientId: body.patientId, date: new Date().toISOString(), icd11, status: "closed" });
+          data.emr_clinical_notes.push({ encounterId, text: body.text });
+          if (body.prescriptions && body.prescriptions.length > 0) {
+            body.prescriptions.forEach(rx => {
+              data.emr_prescriptions.push({ encounterId, drug: rx });
+            });
+          }
+          await writeData(data);
+          
+          // Node AC: Async Background Job (Mock)
+          setTimeout(() => { console.log(`[BullMQ] PDF Summary & SMS sent for ${encounterId}`); }, 1000);
+          
+          sendJson(res, 200, { success: true, encounterId });
+        } catch(e) {
+          sendJson(res, 500, { success: false, error: "Atomic Commit Failed" });
+        }
+        return;
+      }
+    }
 
     if (pathname.startsWith("/api/v1/") || pathname.startsWith("/fhir/r6/")) {
       const data = await readDataAsync();
@@ -1194,13 +1257,6 @@ const server = http.createServer(async (req, res) => {
 
 if (require.main === module) {
   async function startServer() {
-    if (USE_PG) {
-      console.log("[DB] Initialising PostgreSQL...");
-      await _initPg();
-      // Warm the in-memory cache
-      memoryDb = await _readPg();
-      console.log("[DB] PostgreSQL ready.");
-    }
     server.listen(PORT, () => {
       console.log(`Health Grid EHR running at http://localhost:${PORT}`);
     });

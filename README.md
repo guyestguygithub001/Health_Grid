@@ -33,6 +33,12 @@ We conducted a comprehensive legal audit and built a dedicated Legal and Complia
 * Minimalist Consent Checkboxes: Streamlined consent text across all login panels (admin.html, login.html, portal.html) into a centered, minimal agreement line: "I agree to Terms · Privacy · Disclaimer (18+)".
 * Corrected Unicode Emojis: Replaced all corrupted character codes across the EHR workflow tabs with standard icons.
 
+5. EMR Module Overhaul: SPA Navigation & Outpatient Clinics
+* We transformed the EMR module (`emr.html`) into a true Single Page Application (SPA) with a permanent, ultra-clean dark sidebar.
+* Introduced a **Clinics Dashboard** housing GOPD, SOPD, MOPD, ENT, and Eye Clinic.
+* Implemented the missing **Node AD Post-Encounter UI**, breaking the aggressive encounter loop and enabling smooth transitions to Pharmacy and Lab queues.
+* Integrated **Records Sub-Units** into each clinical workspace as toggleable tabs for easy historical review without navigating away from the active consult.
+
 How to Run Locally
 
 1. Run `npm install` to install dependencies.

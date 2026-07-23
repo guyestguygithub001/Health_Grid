@@ -7,11 +7,20 @@
     "start": "node server/server.js",
     "dev": "node server/server.js"
   },
-  "keywords": ["ehr", "hospital", "phc", "plateau-state", "healthcare"],
+  "keywords": [
+    "ehr",
+    "hospital",
+    "phc",
+    "plateau-state",
+    "healthcare"
+  ],
   "author": "Daniel Kingsley Ene",
   "license": "MIT",
   "dependencies": {
-    "pg": "^8.11.3"
+    "pg": "^8.11.3",
+    "sql.js": "^1.14.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1"
   },
   "engines": {
     "node": ">=18.0.0"
