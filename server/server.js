@@ -3,8 +3,10 @@ const fs   = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 
-// ── SmartClinic Enterprise Module ─────────────────────────────
+// ── SmartClinic Enterprise Modules ────────────────────────────
 const enterprise = require("./enterprise");
+const sessionManager = require("./sessionManager");
+const aiService = require("./aiService");
 
 const PORT       = process.env.PORT || 8082;
 const ROOT       = process.cwd();
@@ -1082,8 +1084,8 @@ const server = http.createServer(async (req, res) => {
     // ── 3. Login endpoint (unauthenticated) ────────────────
     if (req.method === "POST" && pathname === "/api/v1/auth/login") {
       const body = await collectBody(req);
-      const validUser = process.env.APP_USER || "guyestguy";
-      const validPass = process.env.APP_PASS || "guyestguygithub001";
+      const validUser = process.env.APP_USER || "admin";
+      const validPass = process.env.APP_PASS || "secure_admin_password";
       if (body.username === validUser && body.password === validPass) {
         const token = Buffer.from(`${body.username}:${body.password}`).toString("base64");
         sendJson(res, 200, { success: true, token, username: body.username, role: "system_admin", userId: "USR-0001" });
@@ -1110,7 +1112,7 @@ const server = http.createServer(async (req, res) => {
     const colonIdx = decoded.indexOf(":");
     const login    = decoded.slice(0, colonIdx);
     const password = decoded.slice(colonIdx + 1);
-    if (login !== (process.env.APP_USER || "guyestguy") || password !== (process.env.APP_PASS || "guyestguygithub001")) {
+    if (login !== (process.env.APP_USER || "admin") || password !== (process.env.APP_PASS || "secure_admin_password")) {
       // Return JSON 401 WITHOUT WWW-Authenticate — prevents browser Basic Auth popup
       res.writeHead(401, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
       res.end(JSON.stringify({ success: false, error: "Unauthorized", code: "SEC-001" }));
@@ -1174,16 +1176,16 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
-      // Nodes Q-R: AI Sidecar & Floating Chips
+      // Nodes Q-R: AI Sidecar & Floating Chips (Protected by Omni-Shield)
       if (req.method === "POST" && pathname === "/api/v1/emr/ai/suggest") {
         const body = await collectBody(req);
-        const text = (body.text || "").toLowerCase();
-        const chips = [];
-        if (text.includes("chest pain")) chips.push("Order: Troponin-I", "Order: ECG", "Differential: ACS");
-        if (text.includes("fever") || text.includes("malaria")) chips.push("Rx: Artemether-Lumefantrine", "Order: Malaria RDT");
-        if (text.includes("cough")) chips.push("Order: Chest X-Ray", "Rx: Amoxicillin");
-        if (chips.length === 0) chips.push("Order: Full Blood Count", "Review Vitals");
-        sendJson(res, 200, { success: true, chips });
+        const result = await aiService.getClinicalSuggestions(body.text || "");
+        
+        if (!result.success) {
+          sendJson(res, 403, result);
+        } else {
+          sendJson(res, 200, result);
+        }
         return;
       }
 

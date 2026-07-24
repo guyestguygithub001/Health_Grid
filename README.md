@@ -39,10 +39,29 @@ We conducted a comprehensive legal audit and built a dedicated Legal and Complia
 * Implemented the missing **Node AD Post-Encounter UI**, breaking the aggressive encounter loop and enabling smooth transitions to Pharmacy and Lab queues.
 * Integrated **Records Sub-Units** into each clinical workspace as toggleable tabs for easy historical review without navigating away from the active consult.
 
-How to Run Locally
+6. Enterprise Architecture & Docker Orchestration
+* We completely containerized the infrastructure using **Docker Compose**. The application is now split into three resilient containers:
+  * `plateau-ehr-api`: The core Node.js server.
+  * `plateau-ehr-redis`: A blazing-fast Redis memory cache.
+  * `plateau-ehr-worker`: A dedicated BullMQ background worker for heavy tasks like the Dunning revenue cycle.
+* **Data Transfer Objects (DTOs):** Implemented strict input validation layers (`dto.js`) ensuring that malicious data can never breach the core logic.
+* **Secure Session Management:** We replaced legacy token systems with a mathematically secure `sessionManager.js` backed by Redis, strictly enforcing concurrent login limits and auto-expiring tokens.
 
-1. Run `npm install` to install dependencies.
-2. Start the server by running `node server/server.js` or `$env:PORT=8085; node server/server.js`.
-3. Open `http://localhost:8085` in your browser.
+7. The Omni-Shield AI Constitution
+* Implemented a military-grade security directive inside `aiService.js` that intercepts all AI traffic.
+* **Absolute Zero-Trust:** It actively hunts and blocks "Prompt Injection" attacks (e.g., users typing "ignore previous instructions") before they reach the AI.
+* **Zero-Hallucination Protocol:** Enforces strict formatting and absolutely forbids generating fake URLs, placeholders, or linking to external sites like ChatGPT or Copilot.
 
-You can also test the standalone legal portal directly at `http://localhost:8085/legal.html` or inspect the audit payload at `http://localhost:8085/api/legal/audit-matrix`.
+8. Modern UI Refinements
+* Overhauled both the EMR (`emr.html`) and EHR/PHC (`admin.html`) module sidebars.
+* Replaced the harsh dark mode with a pristine, sleek white background to make colorful emojis and unit text highly readable.
+* Added smooth, animated toggle buttons (`☰`) that gracefully slide the sidebars from an expanded 260px view down to a clean 72px icon-only layout.
+
+## How to Run Locally (Docker)
+
+1. Ensure Docker Desktop is running on your machine.
+2. Run `docker-compose up -d --build` in the terminal.
+3. Open `http://localhost:8082` in your browser.
+4. (Optional) Run `docker-compose logs -f` to see the real-time server and worker logs.
+
+

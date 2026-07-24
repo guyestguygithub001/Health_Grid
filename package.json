@@ -17,10 +17,15 @@
   "author": "Daniel Kingsley Ene",
   "license": "MIT",
   "dependencies": {
+    "bullmq": "^5.81.1",
+    "connect-redis": "^9.0.0",
+    "express-session": "^1.19.0",
+    "ioredis": "^5.11.1",
     "pg": "^8.11.3",
     "sql.js": "^1.14.1",
     "sqlite": "^5.1.1",
-    "sqlite3": "^6.0.1"
+    "sqlite3": "^6.0.1",
+    "uuid": "^14.0.1"
   },
   "engines": {
     "node": ">=18.0.0"
