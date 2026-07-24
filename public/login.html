@@ -269,9 +269,10 @@
 
       <div class="form-group">
         <label>Password</label>
-        <div class="input-wrap">
+        <div class="input-wrap" style="position: relative;">
           <span class="input-icon">🔒</span>
           <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" />
+          <button type="button" onclick="const p = document.getElementById('password'); if(p.type === 'password'){ p.type = 'text'; this.innerText = '🙈'; } else { p.type = 'password'; this.innerText = '👁️'; }" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted-light); font-size: 16px; cursor: pointer; padding: 0; outline: none;">👁️</button>
         </div>
       </div>
 

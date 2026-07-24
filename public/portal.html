@@ -203,7 +203,10 @@
         </div>
         <div class="login-field">
           <label>Patient ID (Password)</label>
-          <input id="loginPatId" type="text" placeholder="e.g. PT-0001" autocomplete="off" required />
+          <div style="position: relative;">
+            <input id="loginPatId" type="password" placeholder="e.g. PT-0001" autocomplete="off" required style="width: 100%; box-sizing: border-box; padding-right: 40px;" />
+            <button type="button" onclick="const p = document.getElementById('loginPatId'); if(p.type === 'password'){ p.type = 'text'; this.innerText = '🙈'; } else { p.type = 'password'; this.innerText = '👁️'; }" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: rgba(255,255,255,0.6); font-size: 16px; cursor: pointer; padding: 0; outline: none;">👁️</button>
+          </div>
         </div>
 
         <div style="margin: 14px 0 18px; display: flex; align-items: center; justify-content: center; text-align: center; gap: 8px;">
