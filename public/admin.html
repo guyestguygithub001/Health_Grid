@@ -611,7 +611,7 @@
 
     
     // ── Live Backend Integration ─────────────────────────────────────
-    const API_URL = 'http://localhost:8085/api';
+    const API_URL = '/api';
 
     async function fetchLivePhcData() {
       try {
@@ -652,10 +652,10 @@
             });
           }
         }
-      } catch (err) {
-        console.error("Error fetching live data:", err);
-        document.getElementById('livePatientTableBody').innerHTML = `<tr><td colspan="5" style="padding: 20px; text-align: center; color: #ef4444;">Connection failed. Is server.js running on port 8085?</td></tr>`;
-      }
+      } catch (e) {
+          document.getElementById('livePatientTableBody').innerHTML = 
+            '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #ef4444;">Connection failed. Is the API server running?</td></tr>';
+        }
     }
 
     // Call it immediately on load if we are somehow bypassing landing screen, otherwise call it on switch
@@ -977,9 +977,54 @@
     // Initialize slide based on current real-world time
     if (document.getElementById('landingScreen')) {
       updateLandingSlideByTime();
-      // Update it every minute just in case the hour ticks over while they are on the screen
       setInterval(updateLandingSlideByTime, 60000); 
     }
+
+    // ── Authentication Gateway ──────────────────────────────────────────
+    document.addEventListener("DOMContentLoaded", () => {
+      const loginScreen = document.getElementById('loginScreen');
+      const token = localStorage.getItem('ehr_admin_token');
+      
+      // If no token is found, force the login screen to appear
+      if (!token) {
+        loginScreen.style.display = 'flex';
+      }
+
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('loginUser').value;
+        const pass = document.getElementById('loginPass').value;
+        const errorDiv = document.getElementById('loginError');
+        
+        try {
+          // Attempt to authenticate against the live API
+          const res = await fetch('/api/v1/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass })
+          });
+          
+          if (res.ok) {
+            const data = await res.json();
+            localStorage.setItem('ehr_admin_token', data.token);
+            loginScreen.style.display = 'none';
+          } else {
+            errorDiv.style.display = 'block';
+            errorDiv.innerText = 'Invalid username or password.';
+          }
+        } catch (err) {
+          // Fallback verification for static hosts (like Vercel) where the API might be unreachable
+          console.warn("API unreachable. Falling back to embedded static verification for Vercel.");
+          if (user === 'admin' && pass === 'secure_admin_password') {
+            localStorage.setItem('ehr_admin_token', 'static_vercel_token_fallback');
+            loginScreen.style.display = 'none';
+          } else {
+            errorDiv.style.display = 'block';
+            errorDiv.innerText = 'Invalid credentials (Static Fallback).';
+          }
+        }
+      });
+    });
 
   </script>
 </body>
