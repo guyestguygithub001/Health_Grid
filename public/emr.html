@@ -1347,7 +1347,25 @@
     }
 
 
-    function switchEmrView(viewId) {
+    // History API Listener for Back/Forward Navigation
+    window.onpopstate = function(event) {
+      if (event.state && event.state.viewId) {
+        switchEmrView(event.state.viewId, false);
+      } else {
+        const urlParams = new URLSearchParams(window.location.search);
+        const view = urlParams.get('view');
+        if (view) {
+          switchEmrView(view, false);
+        } else {
+          switchEmrView('omniBar', false);
+        }
+      }
+    };
+
+    function switchEmrView(viewId, pushState = true) {
+      if (pushState) {
+        history.pushState({ viewId: viewId }, "", "?view=" + viewId);
+      }
       document.querySelectorAll('.emr-view').forEach(el => {
         el.classList.add('hidden');
         el.classList.remove('active');
