@@ -58,22 +58,37 @@ async function getClinicalSuggestions(text) {
     // 2. Simulated LLM Processing (Adhering to Zero-Hallucination Protocol)
     // No external links, strictly defined chips only.
     const chips = [];
+    let suggestedIcd = null;
     if (input.includes("chest pain")) {
         chips.push("Order: Troponin-I", "Order: ECG", "Differential: ACS");
+        suggestedIcd = { code: "MC51", display: "Acute ischaemic heart disease" };
     }
-    if (input.includes("fever") || input.includes("malaria")) {
+    else if (input.includes("fever") || input.includes("malaria") || input.includes("chills")) {
         chips.push("Rx: Artemether-Lumefantrine", "Order: Malaria RDT");
+        suggestedIcd = { code: "1F4Z", display: "Malaria, unspecified" };
     }
-    if (input.includes("cough")) {
+    else if (input.includes("cough") || input.includes("breathing")) {
         chips.push("Order: Chest X-Ray", "Rx: Amoxicillin");
+        suggestedIcd = { code: "CA40", display: "Pneumonia, unspecified" };
     }
+    else if (input.includes("cholera") || input.includes("diarrhea") || input.includes("stool")) {
+        chips.push("Order: Stool Culture", "Rx: ORS & IV Fluids");
+        suggestedIcd = { code: "1A00", display: "Cholera" };
+    }
+    else if (input.includes("headache")) {
+        chips.push("Order: FBC", "Rx: Paracetamol");
+        suggestedIcd = { code: "MB41", display: "Headache" };
+    }
+
     if (chips.length === 0) {
         chips.push("Order: Full Blood Count", "Review Vitals");
+        suggestedIcd = { code: "MA01", display: "Fever of unknown origin" };
     }
 
     return {
         success: true,
         chips,
+        icd: suggestedIcd,
         _metadata: {
             policy: "OMNI_SHIELD_ACTIVE",
             transactionId: crypto.randomUUID()
