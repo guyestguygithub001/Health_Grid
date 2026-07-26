@@ -682,6 +682,28 @@
             <span>Warehouse B</span><span style="color:#166534; font-weight:bold;">ACT: 1200</span>
           </div>
         </div>
+
+        <div class="glass-card" style="margin-top: 24px; border-left: 4px solid #10b981;">
+          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Direct Dispense (Over-The-Counter)</h3>
+          <form onsubmit="submitWalkInPharmacy(event)">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Patient ID</label>
+                <input type="text" id="walkInPharmPatientId" required placeholder="PT1001" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
+              </div>
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Select Drug Catalog</label>
+                <select id="walkInPharmDrug" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+                  <option value="Artemether-Lumefantrine (ACT)|2500">Artemether-Lumefantrine (ACT) - ₦2,500</option>
+                  <option value="Paracetamol 500mg|500">Paracetamol 500mg - ₦500</option>
+                  <option value="Amoxicillin 500mg|1200">Amoxicillin 500mg - ₦1,200</option>
+                  <option value="Oral Rehydration Salts (ORS)|300">Oral Rehydration Salts (ORS) - ₦300</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" style="width: 100%; padding: 12px; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);">Dispense Drug & Generate Bill</button>
+          </form>
+        </div>
         
         <div class="glass-card" style="margin-top: 24px;">
           <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">
@@ -781,15 +803,41 @@
           </button>
         </div>
         
+        <div class="glass-card" style="margin-bottom: 24px; border-left: 4px solid #8b5cf6;">
+          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Direct Walk-In Orders</h3>
+          <form onsubmit="submitWalkInLab(event)">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Patient ID</label>
+                <input type="text" id="walkInLabPatientId" required placeholder="PT1001" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
+              </div>
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Select Test Catalog</label>
+                <select id="walkInLabTest" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+                  <option value="Full Blood Count (FBC)|3000|Laboratory">Full Blood Count (FBC) - ₦3,000</option>
+                  <option value="Malaria RDT|1500|Laboratory">Malaria RDT - ₦1,500</option>
+                  <option value="Chest X-Ray|10000|Radiology">Chest X-Ray - ₦10,000</option>
+                  <option value="Urinalysis|2000|Laboratory">Urinalysis - ₦2,000</option>
+                  <option value="Ultrasound Scan|8000|Radiology">Ultrasound Scan - ₦8,000</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" style="width: 100%; padding: 12px; border-radius: 8px; background: #8b5cf6; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.2);">Order Test & Generate Bill</button>
+          </form>
+        </div>
+        
         <div class="glass-card">
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">
+            <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Incoming Lab & Radiology Orders</h3>
+          </div>
           <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
               <thead>
                 <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280;">
-                  <th style="padding: 12px 8px;">Lab ID</th>
+                  <th style="padding: 12px 8px;">Order ID</th>
                   <th style="padding: 12px 8px;">Patient ID</th>
-                  <th style="padding: 12px 8px;">Date</th>
-                  <th style="padding: 12px 8px;">Critical Flag</th>
+                  <th style="padding: 12px 8px;">Test Detail</th>
+                  <th style="padding: 12px 8px;">Priority</th>
                 </tr>
               </thead>
               <tbody id="liveLabsTableBody">
@@ -1349,6 +1397,73 @@
         alert('Connection error. Ensure server.js is running.');
       }
     }
+
+    // ── EHR: Auto-Billing Functions
+    async function createAutoBill(patientId, service, description) {
+      try {
+        await fetch(`${API_URL}/billing`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ patientId, service, description })
+        });
+      } catch (err) {}
+    }
+
+    window.submitWalkInLab = async function(e) {
+      e.preventDefault();
+      const patientId = document.getElementById('walkInLabPatientId').value;
+      const selectVal = document.getElementById('walkInLabTest').value; 
+      const [item, priceStr, type] = selectVal.split('|');
+      
+      try {
+        await fetch(`${API_URL}/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ patientId, type, item: item + " (Walk-In)", priority: "Routine", orderedBy: "Walk-In Patient" })
+        });
+        
+        await fetch(`${API_URL}/billing`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ patientId, service: "Laboratory/Radiology", description: item + " (Walk-In Order)", amount: parseInt(priceStr) })
+        });
+        
+        alert(`Walk-In order for ${item} placed and billed securely!`);
+        e.target.reset();
+        fetchLiveLabs();
+        if(typeof fetchLiveBilling === 'function') fetchLiveBilling();
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    window.submitWalkInPharmacy = async function(e) {
+      e.preventDefault();
+      const patientId = document.getElementById('walkInPharmPatientId').value;
+      const selectVal = document.getElementById('walkInPharmDrug').value;
+      const [item, priceStr] = selectVal.split('|');
+      
+      try {
+        await fetch(`${API_URL}/orders`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ patientId, type: "Pharmacy", item: item + " (OTC Dispense)", priority: "Routine", orderedBy: "Walk-In Patient" })
+        });
+        
+        await fetch(`${API_URL}/billing`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ patientId, service: "Pharmacy", description: item + " (OTC Dispense)", amount: parseInt(priceStr) })
+        });
+        
+        alert(`OTC dispensation of ${item} recorded and billed securely!`);
+        e.target.reset();
+        fetchLivePharmacyOrders();
+        if(typeof fetchLiveBilling === 'function') fetchLiveBilling();
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
     // Override handleMpiSubmit to POST to local DB
     async function handleMpiSubmit(e) {
