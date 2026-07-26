@@ -1245,7 +1245,7 @@
           
           aiDebounceTimer = setTimeout(async () => {
             try {
-              const res = await fetch(`${API_URL}/emr/ai/suggest`, {
+              const res = await fetch(`/api/v1/emr/ai/suggest`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text })
