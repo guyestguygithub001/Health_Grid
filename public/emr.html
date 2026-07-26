@@ -383,15 +383,7 @@
               <h3 style="font-size: 14px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Live Incoming Orders</h3>
             </div>
             <div style="flex: 1; overflow-y: auto; padding: 16px;" id="pharmacyView-queue">
-              <!-- Mock Order Card -->
-              <div onclick="selectAncillaryOrder('pharmacyView', 'ORD-991', 'Daobo Miapmuk', '#10b981')" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 4px solid #10b981;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <span style="font-size: 12px; font-weight: 700; color: #64748b;">ORD-991</span>
-                  <span style="font-size: 11px; font-weight: 700; color: #10b981; background: #10b98115; padding: 2px 6px; border-radius: 4px;">Just Now</span>
-                </div>
-                <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Daobo Miapmuk</h4>
-                <p style="font-size: 13px; color: #64748b;">Dr. Ishola (GOPD)</p>
-              </div>
+              <!-- Dynamic Queue -->
             </div>
           </div>
 
@@ -472,15 +464,7 @@
               <h3 style="font-size: 14px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Live Incoming Orders</h3>
             </div>
             <div style="flex: 1; overflow-y: auto; padding: 16px;" id="labView-queue">
-              <!-- Mock Order Card -->
-              <div onclick="selectAncillaryOrder('labView', 'ORD-991', 'Daobo Miapmuk', '#8b5cf6')" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 4px solid #8b5cf6;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <span style="font-size: 12px; font-weight: 700; color: #64748b;">ORD-991</span>
-                  <span style="font-size: 11px; font-weight: 700; color: #8b5cf6; background: #8b5cf615; padding: 2px 6px; border-radius: 4px;">Just Now</span>
-                </div>
-                <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Daobo Miapmuk</h4>
-                <p style="font-size: 13px; color: #64748b;">Dr. Ishola (GOPD)</p>
-              </div>
+              <!-- Dynamic Queue -->
             </div>
           </div>
 
@@ -569,15 +553,7 @@
               <h3 style="font-size: 14px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Live Incoming Orders</h3>
             </div>
             <div style="flex: 1; overflow-y: auto; padding: 16px;" id="radView-queue">
-              <!-- Mock Order Card -->
-              <div onclick="selectAncillaryOrder('radView', 'ORD-991', 'Daobo Miapmuk', '#f59e0b')" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 4px solid #f59e0b;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <span style="font-size: 12px; font-weight: 700; color: #64748b;">ORD-991</span>
-                  <span style="font-size: 11px; font-weight: 700; color: #f59e0b; background: #f59e0b15; padding: 2px 6px; border-radius: 4px;">Just Now</span>
-                </div>
-                <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Daobo Miapmuk</h4>
-                <p style="font-size: 13px; color: #64748b;">Dr. Ishola (GOPD)</p>
-              </div>
+              <!-- Dynamic Queue -->
             </div>
           </div>
 
@@ -996,6 +972,69 @@
     function closeNursingPanel() {
         document.getElementById('nursingPanel').style.transform = 'translateX(120%)';
     }
+
+    
+    // --- LIVE ANCILLARY POLLING LOGIC ---
+    let ancillaryPollInterval = null;
+
+    function startAncillaryPolling() {
+        if (ancillaryPollInterval) clearInterval(ancillaryPollInterval);
+        
+        // Initial fetch
+        fetchLiveAncillaryOrders();
+        
+        // Poll every 5 seconds
+        ancillaryPollInterval = setInterval(fetchLiveAncillaryOrders, 5000);
+    }
+
+    async function fetchLiveAncillaryOrders() {
+        try {
+            const token = sessionStorage.getItem('ehr_admin_token') || localStorage.getItem('ehr_admin_token');
+            const res = await fetch('/api/orders', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!res.ok) return;
+            const orders = await res.json();
+            
+            // Filter and render for each department
+            renderAncillaryQueue('pharmacyView', orders.filter(o => o.type === 'Pharmacy'), '#10b981');
+            renderAncillaryQueue('labView', orders.filter(o => o.type === 'Laboratory'), '#8b5cf6');
+            renderAncillaryQueue('radView', orders.filter(o => o.type === 'Radiology'), '#f59e0b');
+            
+        } catch (error) {
+            console.error("Polling error:", error);
+        }
+    }
+
+    function renderAncillaryQueue(viewId, deptOrders, colorHex) {
+        const queueDiv = document.getElementById(viewId + '-queue');
+        if (!queueDiv) return;
+        
+        if (deptOrders.length === 0) {
+            queueDiv.innerHTML = `
+              <div style="padding: 40px; text-align: center;">
+                <p style="color: #94a3b8; font-size: 14px;">No pending orders in queue.</p>
+              </div>
+            `;
+            return;
+        }
+        
+        queueDiv.innerHTML = deptOrders.map(o => `
+          <div onclick="selectAncillaryOrder('${viewId}', '${o.id}', '${o.patientName || 'Unknown Patient'}', '${colorHex}')" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 4px solid ${colorHex};">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+              <span style="font-size: 12px; font-weight: 700; color: #64748b;">${o.id}</span>
+              <span style="font-size: 11px; font-weight: 700; color: ${colorHex}; background: ${colorHex}15; padding: 2px 6px; border-radius: 4px;">Live</span>
+            </div>
+            <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">${o.patientName || 'Unknown Patient'}</h4>
+            <p style="font-size: 13px; color: #64748b;">Ordered by: ${o.doctorName || 'Physician'}</p>
+          </div>
+        `).join('');
+    }
+
+    // Start polling when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        startAncillaryPolling();
+    });
 
     // --- UNIFIED CLINICAL WORKSPACE LOGIC ---
     async function loadUnifiedWaitingList(clinicName) {
