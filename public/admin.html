@@ -679,6 +679,30 @@
             <span>Warehouse B</span><span style="color:#166534; font-weight:bold;">ACT: 1200</span>
           </div>
         </div>
+        
+        <div class="glass-card" style="margin-top: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">
+            <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Incoming E-Prescriptions</h3>
+            <button onclick="if(typeof fetchLivePharmacyOrders==='function') fetchLivePharmacyOrders()" style="padding: 8px 16px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px;">
+              🔄 Refresh Orders
+            </button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+              <thead>
+                <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280;">
+                  <th style="padding: 12px 8px;">Order ID</th>
+                  <th style="padding: 12px 8px;">Patient ID</th>
+                  <th style="padding: 12px 8px;">Prescription Detail</th>
+                  <th style="padding: 12px 8px;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="livePharmacyTableBody">
+                <tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">Click refresh to fetch e-prescriptions...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- VIEW: LEGAL MATRIX -->
@@ -955,12 +979,39 @@
     // ── EHR: Inpatient Wards (GET /api/beds)
     async function fetchLiveWards() {
       try {
+        const resOrders = await fetch(`${API_URL}/orders`);
+        let admissions = [];
+        if (resOrders.ok) {
+           const allOrders = await resOrders.json();
+           admissions = allOrders.filter(o => o.type === 'Admission');
+        }
+
         const res = await fetch(`${API_URL}/beds`);
         if (res.ok) {
           const beds = await res.json();
           const tbody = document.getElementById('liveWardsTableBody');
           tbody.innerHTML = '';
-          if (beds.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">No beds registered in system.</td></tr>';
+          
+          if (admissions.length > 0) {
+            tbody.innerHTML += `<tr><td colspan="4" style="background:#f9fafb; font-weight:800; padding:8px 12px; color:#4b5563;">Pending Admissions (Incoming E-Notes)</td></tr>`;
+            admissions.forEach(a => {
+              tbody.innerHTML += `
+                <tr style="border-bottom: 1px solid #f3f4f6; background: #fffbeb;">
+                  <td style="padding: 12px 8px; font-family: monospace; color: #d97706; font-weight:bold;">${a.id}</td>
+                  <td style="padding: 12px 8px; font-weight: 500;">Unassigned (${a.item})</td>
+                  <td style="padding: 12px 8px;">
+                    <span style="background: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                      Pending Arrival
+                    </span>
+                  </td>
+                  <td style="padding: 12px 8px; font-family: monospace;">${a.patientId}</td>
+                </tr>
+              `;
+            });
+            tbody.innerHTML += `<tr><td colspan="4" style="background:#f9fafb; font-weight:800; padding:8px 12px; color:#4b5563;">Live Bed Status</td></tr>`;
+          }
+
+          if (beds.length === 0 && admissions.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">No beds registered in system.</td></tr>';
           else {
             beds.forEach(b => {
               tbody.innerHTML += `
@@ -981,25 +1032,56 @@
       } catch (err) {}
     }
 
-    // ── EHR: Labs & Diagnostics (GET /api/labresults)
+    // ── EHR: Labs & Diagnostics (GET /api/orders)
     async function fetchLiveLabs() {
       try {
-        const res = await fetch(`${API_URL}/labresults`);
+        const res = await fetch(`${API_URL}/orders`);
         if (res.ok) {
-          const labs = await res.json();
+          const allOrders = await res.json();
+          const labs = allOrders.filter(o => o.type === 'Laboratory' || o.type === 'Radiology');
           const tbody = document.getElementById('liveLabsTableBody');
           tbody.innerHTML = '';
-          if (labs.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">No lab results found.</td></tr>';
+          if (labs.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">No pending lab orders.</td></tr>';
           else {
             labs.slice(0, 15).forEach(l => {
               tbody.innerHTML += `
                 <tr style="border-bottom: 1px solid #f3f4f6;">
                   <td style="padding: 12px 8px; font-family: monospace; color: #8b5cf6; font-weight:bold;">${l.id}</td>
                   <td style="padding: 12px 8px; font-family: monospace;">${l.patientId}</td>
-                  <td style="padding: 12px 8px;">${l.date}</td>
+                  <td style="padding: 12px 8px; font-weight: 600;">${l.item} (${l.type})</td>
                   <td style="padding: 12px 8px;">
-                    <span style="background: ${l.criticalFlag ? '#fee2e2' : '#f3f4f6'}; color: ${l.criticalFlag ? '#b91c1c' : '#6b7280'}; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
-                      ${l.criticalFlag ? '🚨 CRITICAL' : 'Routine'}
+                    <span style="background: ${l.priority === 'Urgent' ? '#fee2e2' : '#f3f4f6'}; color: ${l.priority === 'Urgent' ? '#b91c1c' : '#6b7280'}; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                      ${l.priority}
+                    </span>
+                  </td>
+                </tr>
+              `;
+            });
+          }
+        }
+      } catch (err) {}
+    }
+
+    async function fetchLivePharmacyOrders() {
+      try {
+        const res = await fetch(`${API_URL}/orders`);
+        if (res.ok) {
+          const allOrders = await res.json();
+          const rx = allOrders.filter(o => o.type === 'Pharmacy');
+          const tbody = document.getElementById('livePharmacyTableBody');
+          if(!tbody) return;
+          tbody.innerHTML = '';
+          if (rx.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">No pending E-Prescriptions.</td></tr>';
+          else {
+            rx.forEach(o => {
+              tbody.innerHTML += `
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 8px; font-family: monospace; color: #8b5cf6; font-weight:bold;">${o.id}</td>
+                  <td style="padding: 12px 8px; font-family: monospace;">${o.patientId}</td>
+                  <td style="padding: 12px 8px; font-weight: 500;">${o.item}</td>
+                  <td style="padding: 12px 8px;">
+                    <span style="background: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                      ${o.status}
                     </span>
                   </td>
                 </tr>
@@ -1145,25 +1227,34 @@
     window.finalizeEncounter = async function(e) {
       e.preventDefault();
       const encId = document.getElementById('consultEncId').innerText;
+      const patientId = document.getElementById('consultPatId').innerText.replace('Patient ID: ', '');
+      const meds = document.getElementById('consultMeds').value;
       
-      const orderLab = document.getElementById('orderLab').checked;
-      const orderScan = document.getElementById('orderScan').checked;
-      const orderPharmacy = document.getElementById('orderPharmacy').checked;
-      const orderAdmit = document.getElementById('orderAdmit').checked;
-      const orderReferral = document.getElementById('orderReferral').checked;
-      const orderSurgery = document.getElementById('orderSurgery').checked;
-      const orderFollowUp = document.getElementById('orderFollowUp').checked;
+      const ordersToPost = [];
+      if (document.getElementById('orderLab').checked) ordersToPost.push({ type: "Laboratory", item: "Routine Labs", priority: "Routine" });
+      if (document.getElementById('orderScan').checked) ordersToPost.push({ type: "Radiology", item: "Routine Scan", priority: "Routine" });
+      if (document.getElementById('orderPharmacy').checked) ordersToPost.push({ type: "Pharmacy", item: meds || "General Prescription", priority: "Routine" });
+      if (document.getElementById('orderAdmit').checked) ordersToPost.push({ type: "Admission", item: "General Ward", priority: "Urgent" });
+      if (document.getElementById('orderReferral').checked) ordersToPost.push({ type: "Referral", item: "Specialist", priority: "Routine" });
+      if (document.getElementById('orderSurgery').checked) ordersToPost.push({ type: "Surgery", item: "Surgical Consult", priority: "Urgent" });
+      if (document.getElementById('orderFollowUp').checked) ordersToPost.push({ type: "FollowUp", item: "Follow-up Clinic", priority: "Routine" });
+
+      try {
+        for (const order of ordersToPost) {
+          await fetch('http://localhost:8082/api/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ patientId, type: order.type, item: order.item, priority: order.priority, orderedBy: "Physician" })
+          });
+        }
+      } catch (err) {
+        console.error("Order dispatch failed:", err);
+      }
       
       let msg = `Encounter ${encId} finalized securely!\nICD-11 diagnosis and notes logged.`;
-      if (orderLab || orderScan || orderPharmacy || orderAdmit || orderReferral || orderSurgery || orderFollowUp) {
+      if (ordersToPost.length > 0) {
         msg += `\n\nOrders Generated:`;
-        if (orderLab) msg += `\n- Lab Request Sent`;
-        if (orderScan) msg += `\n- Radiology Request Sent`;
-        if (orderPharmacy) msg += `\n- E-Prescription Sent to Pharmacy`;
-        if (orderAdmit) msg += `\n- Inpatient Admission Initiated`;
-        if (orderReferral) msg += `\n- Specialist Referral Created`;
-        if (orderSurgery) msg += `\n- Surgical Theater Request Sent`;
-        if (orderFollowUp) msg += `\n- Follow-up Appointment Scheduled`;
+        ordersToPost.forEach(o => msg += `\n- ${o.type} Request Sent`);
       }
       
       alert(msg);
@@ -1172,6 +1263,9 @@
       document.getElementById('consultationPanel').style.display = 'none';
       document.getElementById('consultationEmpty').style.display = 'flex';
       fetchLiveEncounters();
+      if(typeof fetchLiveLabs === 'function') fetchLiveLabs();
+      if(typeof fetchLiveWards === 'function') fetchLiveWards();
+      if(typeof fetchLivePharmacyOrders === 'function') fetchLivePharmacyOrders();
     };
 
     // Intercept switchEhrView to auto-load encounters
