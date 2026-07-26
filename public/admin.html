@@ -745,14 +745,29 @@
       switchEhrView('phcWorkflowView');
     }
 
-    function switchEhrView(viewId) {
+    function switchEhrView(viewId, isPopState = false) {
       document.querySelectorAll('.ehr-view').forEach(el => el.classList.add('hidden'));
       document.getElementById(viewId).classList.remove('hidden');
       
       document.querySelectorAll('#ehrAppShell .nav-btn').forEach(btn => btn.classList.remove('active'));
       const activeBtn = document.querySelector(`#ehrAppShell .nav-btn[onclick="switchEhrView('${viewId}')"]`);
       if (activeBtn) activeBtn.classList.add('active');
+      
+      if (!isPopState) {
+        history.pushState({ viewId }, "", "#" + viewId);
+      }
     }
+
+    window.addEventListener('popstate', (e) => {
+      if (e.state && e.state.viewId) {
+        document.getElementById('landingScreen').style.display = 'none';
+        document.getElementById('ehrAppShell').style.display = 'flex';
+        switchEhrView(e.state.viewId, true);
+      } else {
+        document.getElementById('landingScreen').style.display = 'flex';
+        document.getElementById('ehrAppShell').style.display = 'none';
+      }
+    });
 
     // Preserve original handleMpiSubmit for local endpoints
     function handleMpiSubmit(e) {
@@ -832,8 +847,9 @@
     // Call it immediately on load if we are somehow bypassing landing screen, otherwise call it on switch
     // Actually, let's just intercept switchEhrView
     const originalSwitch = switchEhrView;
-    switchEhrView = function(viewId) {
-      originalSwitch(viewId);
+    switchEhrView = function(...args) {
+      originalSwitch(...args);
+      const viewId = args[0];
       if (viewId === 'phcWorkflowView') {
         fetchLivePhcData();
       }
@@ -930,8 +946,9 @@
 
     // Intercept switchEhrView again to auto-load these views
     const tertiarySwitch = switchEhrView;
-    switchEhrView = function(viewId) {
-      tertiarySwitch(viewId);
+    switchEhrView = function(...args) {
+      tertiarySwitch(...args);
+      const viewId = args[0];
       if (viewId === 'wardsView') fetchLiveWards();
       if (viewId === 'labsView') fetchLiveLabs();
       if (viewId === 'billingView') fetchLiveBilling();
@@ -1010,8 +1027,9 @@
 
     // Intercept switchEhrView to auto-load encounters
     const secondarySwitch = switchEhrView;
-    switchEhrView = function(viewId) {
-      secondarySwitch(viewId);
+    switchEhrView = function(...args) {
+      secondarySwitch(...args);
+      const viewId = args[0];
       if (viewId === 'encountersView') fetchLiveEncounters();
     };
 
