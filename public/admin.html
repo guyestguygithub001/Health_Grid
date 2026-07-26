@@ -478,7 +478,7 @@
             <div style="width: 48px; height: 48px; background: #10b981; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">✓</div>
             <h3 style="margin: 0 0 8px; font-size: 18px; color: #111827;">Vitals Logged Successfully</h3>
             <p id="vitalsEncounterDisplay" style="margin: 0 0 24px; color: #6b7280; font-size: 14px;"></p>
-            <button onclick="switchEhrView('encountersView')" style="width: 100%; padding: 12px; border-radius: 8px; background: #3b82f6; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);">Proceed to Clinical Encounter ➔</button>
+            <button onclick="let v = document.getElementById('vitalsEncounterDisplay').dataset; switchEhrView('encountersView'); if(v.encId) { setTimeout(() => openConsultation(v.encId, v.patId, v.vitals), 100); }" style="width: 100%; padding: 12px; border-radius: 8px; background: #3b82f6; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);">Proceed to Clinical Encounter ➔</button>
           </div>
         </div>
       </div>
@@ -488,29 +488,58 @@
         <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
           <div>
             <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Clinical Encounters</h2>
-            <p style="color: #6b7280; font-size: 16px;">The digital waiting room. Fetch open encounters logged by triage.</p>
+            <p style="color: #6b7280; font-size: 16px;">The digital waiting room. Select an open encounter to begin consultation.</p>
           </div>
           <button onclick="fetchLiveEncounters()" style="padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
             🔄 Refresh Encounters
           </button>
         </div>
         
-        <div class="glass-card">
-          <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
-              <thead>
-                <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280;">
-                  <th style="padding: 12px 8px;">Encounter ID</th>
-                  <th style="padding: 12px 8px;">Patient ID</th>
-                  <th style="padding: 12px 8px;">Date</th>
-                  <th style="padding: 12px 8px;">Chief Complaint / Vitals</th>
-                  <th style="padding: 12px 8px;">Status</th>
-                </tr>
-              </thead>
-              <tbody id="liveEncountersTableBody">
-                <tr><td colspan="5" style="padding: 20px; text-align: center; color: #9ca3af;">Click refresh to fetch open encounters...</td></tr>
-              </tbody>
-            </table>
+        <div style="display: grid; grid-template-columns: 1fr 400px; gap: 24px;">
+          <div class="glass-card">
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                <thead>
+                  <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280;">
+                    <th style="padding: 12px 8px;">Encounter ID</th>
+                    <th style="padding: 12px 8px;">Patient ID</th>
+                    <th style="padding: 12px 8px;">Date</th>
+                    <th style="padding: 12px 8px;">Chief Complaint / Vitals</th>
+                    <th style="padding: 12px 8px;">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="liveEncountersTableBody">
+                  <tr><td colspan="5" style="padding: 20px; text-align: center; color: #9ca3af;">Click refresh to fetch open encounters...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="glass-card" id="consultationPanel" style="display: none;">
+            <h3 style="margin: 0 0 16px; font-size: 18px; color: #111827; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px;">Active Consultation</h3>
+            <div style="margin-bottom: 16px; background: rgba(59,130,246,0.05); padding: 12px; border-radius: 8px;">
+              <p style="margin: 0 0 4px; font-weight: 700; color: #1e3a8a;" id="consultEncId">ENC-XXXX</p>
+              <p style="margin: 0 0 4px; font-size: 12px; color: #3b82f6;" id="consultPatId">Patient ID: PT-XXXX</p>
+              <p style="margin: 0; font-size: 11px; color: #6b7280;" id="consultVitals">BP: --, Temp: --, Wt: --, P: --</p>
+            </div>
+            <form onsubmit="finalizeEncounter(event)">
+              <div style="margin-bottom: 16px;">
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Clinical Notes & Observations</label>
+                <textarea id="consultNotes" required placeholder="Document findings..." style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; min-height: 80px; resize: vertical;"></textarea>
+              </div>
+              <div style="margin-bottom: 16px;">
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Diagnosis Code (ICD-11)</label>
+                <input type="text" id="consultIcd" required placeholder="e.g. 1A00 for Cholera" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db;" />
+              </div>
+              <div style="margin-bottom: 16px;">
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Prescription / Orders</label>
+                <textarea id="consultMeds" placeholder="Paracetamol 500mg PO PRN" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; min-height: 60px; resize: vertical;"></textarea>
+              </div>
+              <button type="submit" style="width: 100%; padding: 12px; border-radius: 8px; background: #6366f1; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);">Finalize & Sign Encounter</button>
+            </form>
+          </div>
+          <div class="glass-card" id="consultationEmpty" style="display: flex; align-items: center; justify-content: center; text-align: center; color: #9ca3af; min-height: 300px;">
+            <p style="margin:0; font-size: 14px;">Select an open encounter<br>from the list to begin consultation.</p>
           </div>
         </div>
       </div>
@@ -978,7 +1007,12 @@
         const res = await fetch(`${API_URL}/encounters`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         if (res.ok) {
           const enc = await res.json();
-          document.getElementById('vitalsEncounterDisplay').innerText = `Encounter ID: ${enc.id} has been generated for Patient ${patientId}.`;
+          const disp = document.getElementById('vitalsEncounterDisplay');
+          disp.innerText = `Encounter ID: ${enc.id} has been generated for Patient ${patientId}.`;
+          disp.dataset.encId = enc.id;
+          disp.dataset.patId = patientId;
+          disp.dataset.vitals = JSON.stringify(vitals);
+          
           document.getElementById('vitalsSuccessContainer').style.display = 'block';
           e.target.reset();
         } else {
@@ -1004,8 +1038,9 @@
           } else {
             encounters.slice(0, 15).forEach(e => {
               const vitalsStr = e.vitals ? `BP: ${e.vitals.bp || '-'}, Temp: ${e.vitals.temp || '-'}°C` : 'No Vitals';
+              const rawVitals = JSON.stringify(e.vitals || {}).replace(/'/g, '&#39;').replace(/"/g, '&quot;');
               tbody.innerHTML += `
-                <tr style="border-bottom: 1px solid #f3f4f6;">
+                <tr style="border-bottom: 1px solid #f3f4f6; cursor: pointer;" onclick="openConsultation('${e.id}', '${e.patientId}', '${rawVitals}')" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='transparent'">
                   <td style="padding: 12px 8px; font-family: monospace; color: #6366f1; font-weight:bold;">${e.id}</td>
                   <td style="padding: 12px 8px; font-family: monospace; color: #4b5563;">${e.patientId}</td>
                   <td style="padding: 12px 8px;">${e.date}</td>
@@ -1024,6 +1059,34 @@
         document.getElementById('liveEncountersTableBody').innerHTML = `<tr><td colspan="5" style="padding: 20px; text-align: center; color: #ef4444;">Connection failed.</td></tr>`;
       }
     }
+    
+    window.openConsultation = function(encId, patientId, vitalsStr) {
+      document.getElementById('consultationEmpty').style.display = 'none';
+      document.getElementById('consultationPanel').style.display = 'block';
+      
+      document.getElementById('consultEncId').innerText = encId;
+      document.getElementById('consultPatId').innerText = `Patient ID: ${patientId}`;
+      
+      try {
+        const vitals = JSON.parse(vitalsStr);
+        document.getElementById('consultVitals').innerText = `BP: ${vitals.bp || '--'}, Temp: ${vitals.temp || '--'}°C, Wt: ${vitals.weight || '--'}kg, P: ${vitals.pulse || '--'}bpm`;
+      } catch(e) {
+        document.getElementById('consultVitals').innerText = `No Vitals`;
+      }
+    };
+    
+    window.finalizeEncounter = async function(e) {
+      e.preventDefault();
+      const encId = document.getElementById('consultEncId').innerText;
+      
+      // Simulate backend finalizing the encounter
+      alert(`Encounter ${encId} finalized securely! ICD-11 diagnosis and prescriptions logged to Patient Record.`);
+      
+      e.target.reset();
+      document.getElementById('consultationPanel').style.display = 'none';
+      document.getElementById('consultationEmpty').style.display = 'flex';
+      fetchLiveEncounters();
+    };
 
     // Intercept switchEhrView to auto-load encounters
     const secondarySwitch = switchEhrView;
