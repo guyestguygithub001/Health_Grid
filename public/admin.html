@@ -217,45 +217,56 @@
         #ehrAppShell .nav-icon { font-size: 22px; min-width: 28px; display: flex; justify-content: center; align-items: center; }
         #ehrAppShell .nav-text { margin-left: 12px; font-size: 15px; font-weight: 700; color: #374151; white-space: nowrap; opacity: 0; display: none; transition: opacity 0.2s; }
         #ehrAppShell .sidebar-expanded .nav-text { opacity: 1; display: flex; align-items: center; }
+        #ehrAppShell .sidebar-expanded #roleSwitcherContainer { display: block !important; }
       </style>
 
       <!-- Navigation Icons -->
       <nav style="display: flex; flex-direction: column; width: 100%; gap: 24px;">
         
+        <div class="nav-section-title">WORKSPACE</div>
+        <div style="padding: 0 12px; margin-bottom: 12px; display: none;" id="roleSwitcherContainer" class="nav-text">
+          <label style="font-size: 10px; font-weight: 800; color: #6b7280; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px;">Active Role</label>
+          <select id="roleSwitcher" onchange="switchAppRole(this.value)" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 13px; font-weight: 700; color: #111827; background: #f9fafb; cursor: pointer; outline: none;">
+            <option value="admin">Admin (All Access)</option>
+            <option value="physician">Physician / Doctor</option>
+            <option value="nurse">Nurse / Front Desk</option>
+          </select>
+        </div>
+
         <div class="nav-section-title">PHC SECTION</div>
-        <button class="nav-btn active" onclick="switchEhrView('phcWorkflowView')" title="Live PHC Workflow">
+        <button class="nav-btn active" data-roles="admin physician nurse" onclick="switchEhrView('phcWorkflowView')" title="Live PHC Workflow">
           <span class="nav-icon">🏥</span><span class="nav-text">Active PHC</span>
         </button>
-        <button class="nav-btn" onclick="switchEhrView('mpiView')" title="Patient Intake">
+        <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('mpiView')" title="Patient Intake">
           <span class="nav-icon">👥</span><span class="nav-text">Patient Intake</span>
         </button>
-        <button class="nav-btn" onclick="switchEhrView('vitalsView')" title="Vitals & Triage">
+        <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('vitalsView')" title="Vitals & Triage">
           <span class="nav-icon">🩺</span><span class="nav-text">Vitals & Triage</span>
         </button>
-        <button class="nav-btn" onclick="switchEhrView('encountersView')" title="Clinical Encounters">
+        <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('encountersView')" title="Clinical Encounters">
           <span class="nav-icon">📝</span><span class="nav-text">Clinical Encounters</span>
         </button>
-        <button class="nav-btn" onclick="switchEhrView('mchView')" title="Maternal & Child Health">
+        <button class="nav-btn" data-roles="admin nurse physician" onclick="switchEhrView('mchView')" title="Maternal & Child Health">
           <span class="nav-icon">👶</span><span class="nav-text">MCH (ANC)</span>
         </button>
 
         <div class="nav-section-title">EHR SECTION</div>
-        <button class="nav-btn" onclick="switchEhrView('epidemicView')" title="Epidemic Radar">
+        <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('epidemicView')" title="Epidemic Radar">
           <span class="nav-icon">🦠</span><span class="nav-text">Epidemic Radar</span>
         </button>
-        <button class="nav-btn" onclick="switchEhrView('pharmacyView')" title="Pharmacy Hub">
+        <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('pharmacyView')" title="Pharmacy Hub">
           <span class="nav-icon">💊</span><span class="nav-text">Pharmacy Hub</span>
         </button>
-        <button class="nav-btn" onclick="switchEhrView('legalView')" title="Legal Matrix">
+        <button class="nav-btn" data-roles="admin" onclick="switchEhrView('legalView')" title="Legal Matrix">
           <span class="nav-icon">⚖️</span><span class="nav-text">Legal Matrix</span>
         </button>
-        <button class="nav-btn" onclick="switchEhrView('wardsView')" title="Inpatient Wards">
+        <button class="nav-btn" data-roles="admin physician nurse" onclick="switchEhrView('wardsView')" title="Inpatient Wards">
           <span class="nav-icon">🛏️</span><span class="nav-text">Inpatient Wards</span>
         </button>
-        <button class="nav-btn" onclick="switchEhrView('labsView')" title="Lab & Diagnostics">
+        <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('labsView')" title="Lab & Diagnostics">
           <span class="nav-icon">🧪</span><span class="nav-text">Lab & Diagnostics</span>
         </button>
-        <button class="nav-btn" onclick="switchEhrView('billingView')" title="Billing & Claims">
+        <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('billingView')" title="Billing & Claims">
           <span class="nav-icon">💳</span><span class="nav-text">Billing & Claims</span>
         </button>
 
@@ -535,6 +546,23 @@
                 <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Prescription / Orders</label>
                 <textarea id="consultMeds" placeholder="Paracetamol 500mg PO PRN" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; min-height: 60px; resize: vertical;"></textarea>
               </div>
+              <div style="margin-bottom: 24px; padding: 12px; border-radius: 8px; border: 1px dashed #d1d5db; background: #f9fafb;">
+                <label style="display:block; font-size:12px; font-weight:800; color:#4b5563; margin-bottom:12px; text-transform:uppercase;">Clinical Orders (Optional)</label>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderLab" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    🧪 Order Lab & Diagnostics Test
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderScan" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    🩻 Order Radiology (Scan / X-Ray)
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderAdmit" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    🛏️ Admit to Inpatient Ward
+                  </label>
+                </div>
+              </div>
               <button type="submit" style="width: 100%; padding: 12px; border-radius: 8px; background: #6366f1; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);">Finalize & Sign Encounter</button>
             </form>
           </div>
@@ -766,12 +794,35 @@
   
   <script>
     function toggleSidebar() {
+      document.getElementById('ehrSidebar').classList.toggle('expanded');
       document.getElementById('ehrSidebar').classList.toggle('collapsed');
+      
+      const isExpanded = document.getElementById('ehrSidebar').classList.contains('expanded');
+      document.getElementById('roleSwitcherContainer').style.display = isExpanded ? 'block' : 'none';
     }
     function enterEhrModule() {
       document.getElementById('landingScreen').style.display = 'none';
       document.getElementById('ehrAppShell').style.display = 'flex';
+      switchAppRole('admin'); // default to admin
       switchEhrView('phcWorkflowView');
+    }
+
+    function switchAppRole(role) {
+      document.querySelectorAll('#ehrAppShell .nav-btn').forEach(btn => {
+        if (!btn.dataset.roles) return; // skip if no roles
+        const allowedRoles = btn.dataset.roles.split(' ');
+        if (allowedRoles.includes(role) || allowedRoles.includes('all')) {
+          btn.style.display = 'flex';
+        } else {
+          btn.style.display = 'none';
+        }
+      });
+      // Optionally route them to their default view if the current view isn't allowed
+      const currentActive = document.querySelector('#ehrAppShell .nav-btn.active');
+      if (currentActive && currentActive.style.display === 'none') {
+        if (role === 'physician') switchEhrView('encountersView');
+        if (role === 'nurse') switchEhrView('mpiView');
+      }
     }
 
     function switchEhrView(viewId, isPopState = false) {
@@ -1079,8 +1130,19 @@
       e.preventDefault();
       const encId = document.getElementById('consultEncId').innerText;
       
-      // Simulate backend finalizing the encounter
-      alert(`Encounter ${encId} finalized securely! ICD-11 diagnosis and prescriptions logged to Patient Record.`);
+      const orderLab = document.getElementById('orderLab').checked;
+      const orderScan = document.getElementById('orderScan').checked;
+      const orderAdmit = document.getElementById('orderAdmit').checked;
+      
+      let msg = `Encounter ${encId} finalized securely!\nICD-11 diagnosis and prescriptions logged.`;
+      if (orderLab || orderScan || orderAdmit) {
+        msg += `\n\nOrders Generated:`;
+        if (orderLab) msg += `\n- Lab Request Sent`;
+        if (orderScan) msg += `\n- Radiology Request Sent`;
+        if (orderAdmit) msg += `\n- Inpatient Admission Initiated`;
+      }
+      
+      alert(msg);
       
       e.target.reset();
       document.getElementById('consultationPanel').style.display = 'none';
