@@ -697,7 +697,8 @@
     // Global Fetch Interceptor to attach Authorization header automatically
     const originalFetch = window.fetch;
     window.fetch = async function() {
-      let [resource, config] = arguments;
+      let resource = arguments[0];
+      let config = arguments[1];
       if (typeof resource === 'string' && resource.startsWith('/api/') && !resource.startsWith('/api/v1/auth/') && !resource.startsWith('/api/v2/auth/')) {
         config = config || {};
         config.headers = config.headers || {};
@@ -706,7 +707,7 @@
           config.headers['Authorization'] = `Bearer ${token}`;
         }
       }
-      return originalFetch(resource, config);
+      return originalFetch.call(window, resource, config);
     };
 
     async function fetchLivePhcData() {
