@@ -558,8 +558,24 @@
                     🩻 Order Radiology (Scan / X-Ray)
                   </label>
                   <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderPharmacy" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    💊 Send E-Prescription to Pharmacy
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
                     <input type="checkbox" id="orderAdmit" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
                     🛏️ Admit to Inpatient Ward
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderReferral" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    🔄 Request Specialist Referral
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderSurgery" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    🔪 Request Surgical / Theater Booking
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderFollowUp" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    📅 Schedule Follow-up Appointment
                   </label>
                 </div>
               </div>
@@ -1132,14 +1148,22 @@
       
       const orderLab = document.getElementById('orderLab').checked;
       const orderScan = document.getElementById('orderScan').checked;
+      const orderPharmacy = document.getElementById('orderPharmacy').checked;
       const orderAdmit = document.getElementById('orderAdmit').checked;
+      const orderReferral = document.getElementById('orderReferral').checked;
+      const orderSurgery = document.getElementById('orderSurgery').checked;
+      const orderFollowUp = document.getElementById('orderFollowUp').checked;
       
-      let msg = `Encounter ${encId} finalized securely!\nICD-11 diagnosis and prescriptions logged.`;
-      if (orderLab || orderScan || orderAdmit) {
+      let msg = `Encounter ${encId} finalized securely!\nICD-11 diagnosis and notes logged.`;
+      if (orderLab || orderScan || orderPharmacy || orderAdmit || orderReferral || orderSurgery || orderFollowUp) {
         msg += `\n\nOrders Generated:`;
         if (orderLab) msg += `\n- Lab Request Sent`;
         if (orderScan) msg += `\n- Radiology Request Sent`;
+        if (orderPharmacy) msg += `\n- E-Prescription Sent to Pharmacy`;
         if (orderAdmit) msg += `\n- Inpatient Admission Initiated`;
+        if (orderReferral) msg += `\n- Specialist Referral Created`;
+        if (orderSurgery) msg += `\n- Surgical Theater Request Sent`;
+        if (orderFollowUp) msg += `\n- Follow-up Appointment Scheduled`;
       }
       
       alert(msg);
