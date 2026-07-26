@@ -360,19 +360,181 @@
         </div>
       </div>
 
-      <!-- VIEW 4: Pharmacy Shell -->
-      <div id="pharmacyView" class="emr-view hidden" style="padding: 40px; max-width: 1000px; margin: 0 auto;">
-        <h2 style="font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 24px;">Pharmacy Dispensing Queue</h2>
-        <div class="white-card" style="padding: 24px; min-height: 400px; display: flex; align-items: center; justify-content: center;">
-          <p style="color: #6b7280; text-align: center; font-size: 18px;">No pending prescriptions in queue.</p>
+      
+      <!-- VIEW: Pharmacy Command Center -->
+      <div id="pharmacyView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
+        <!-- Header -->
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
+          <div>
+            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Pharmacy Command Center</h2>
+            <p style="color: #64748b; font-size: 15px;">Live E-Notes Queue & Drugs Fulfillment</p>
+          </div>
+          <div style="background: #10b98115; padding: 8px 16px; border-radius: 8px; border: 1px solid #10b98140;">
+            <span style="color: #10b981; font-weight: 700; font-size: 14px;">💊 Systems Online</span>
+          </div>
+        </div>
+
+        <!-- Split Pane Layout -->
+        <div style="display: flex; gap: 24px; flex: 1; overflow: hidden; position: relative;">
+          
+          <!-- Left Pane: Live Queue -->
+          <div style="flex: 0 0 350px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; border-top: 4px solid #10b981; overflow: hidden;">
+            <div style="padding: 16px; border-bottom: 1px solid #f1f5f9; background: #f8fafc;">
+              <h3 style="font-size: 14px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Live Incoming Orders</h3>
+            </div>
+            <div style="flex: 1; overflow-y: auto; padding: 16px;" id="pharmacyView-queue">
+              <!-- Mock Order Card -->
+              <div onclick="selectAncillaryOrder('pharmacyView', 'ORD-991', 'Daobo Miapmuk', '#10b981')" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 4px solid #10b981;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <span style="font-size: 12px; font-weight: 700; color: #64748b;">ORD-991</span>
+                  <span style="font-size: 11px; font-weight: 700; color: #10b981; background: #10b98115; padding: 2px 6px; border-radius: 4px;">Just Now</span>
+                </div>
+                <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Daobo Miapmuk</h4>
+                <p style="font-size: 13px; color: #64748b;">Dr. Ishola (GOPD)</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Pane: Fulfillment Cart -->
+          <div id="pharmacyView-fulfillment" style="flex: 1; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; opacity: 0.5; pointer-events: none; transition: opacity 0.3s;">
+            <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 id="pharmacyView-patientName" style="font-size: 24px; font-weight: 800; color: #0f172a;">Select an Order</h3>
+                <p id="pharmacyView-orderId" style="font-size: 14px; color: #64748b;">Waiting for selection...</p>
+              </div>
+              <button onclick="fulfillAncillaryOrder('pharmacyView')" style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #10b98140; transition: all 0.2s;">✔️ Fulfill & Bill</button>
+            </div>
+            
+            <div style="display: flex; flex: 1; overflow: hidden;">
+              <!-- Catalog -->
+              <div style="flex: 1; padding: 24px; border-right: 1px solid #f1f5f9; overflow-y: auto;">
+                <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Available Drugs</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <button onclick="addToAncillaryCart('pharmacyView', 'Amoxicillin 500mg', 1500)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
+                    <div style="font-weight: 600; color: #1e293b;">Amoxicillin 500mg</div>
+                    <div style="font-size: 12px; color: #10b981; font-weight: 700; margin-top: 4px;">₦1,500</div>
+                  </button>
+                  <button onclick="addToAncillaryCart('pharmacyView', 'Paracetamol', 500)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
+                    <div style="font-weight: 600; color: #1e293b;">Paracetamol</div>
+                    <div style="font-size: 12px; color: #10b981; font-weight: 700; margin-top: 4px;">₦500</div>
+                  </button>
+                  <button onclick="addToAncillaryCart('pharmacyView', 'Full Blood Count (FBC)', 4000)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
+                    <div style="font-weight: 600; color: #1e293b;">Full Blood Count (FBC)</div>
+                    <div style="font-size: 12px; color: #10b981; font-weight: 700; margin-top: 4px;">₦4,000</div>
+                  </button>
+                  <button onclick="addToAncillaryCart('pharmacyView', 'Malaria Parasite (MP)', 2000)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
+                    <div style="font-weight: 600; color: #1e293b;">Malaria Parasite (MP)</div>
+                    <div style="font-size: 12px; color: #10b981; font-weight: 700; margin-top: 4px;">₦2,000</div>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Cart Invoice -->
+              <div style="flex: 0 0 300px; background: #f8fafc; padding: 24px; display: flex; flex-direction: column;">
+                <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Current Invoice Cart</h4>
+                <div id="pharmacyView-cart" style="flex: 1; overflow-y: auto;">
+                  <!-- Items go here -->
+                </div>
+                <div style="border-top: 2px dashed #cbd5e1; padding-top: 16px; margin-top: 16px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 14px; font-weight: 700; color: #64748b;">GRAND TOTAL</span>
+                    <span id="pharmacyView-total" style="font-size: 20px; font-weight: 800; color: #10b981;">₦0</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- VIEW 5: Lab Shell -->
-      <div id="labView" class="emr-view hidden" style="padding: 40px; max-width: 1000px; margin: 0 auto;">
-        <h2 style="font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 24px;">Laboratory Queue</h2>
-        <div class="white-card" style="padding: 24px; min-height: 400px; display: flex; align-items: center; justify-content: center;">
-          <p style="color: #6b7280; text-align: center; font-size: 18px;">No pending lab orders.</p>
+      
+      <!-- VIEW: Laboratory Command Center -->
+      <div id="labView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
+        <!-- Header -->
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
+          <div>
+            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Laboratory Command Center</h2>
+            <p style="color: #64748b; font-size: 15px;">Live E-Notes Queue & Tests Fulfillment</p>
+          </div>
+          <div style="background: #8b5cf615; padding: 8px 16px; border-radius: 8px; border: 1px solid #8b5cf640;">
+            <span style="color: #8b5cf6; font-weight: 700; font-size: 14px;">🧪 Systems Online</span>
+          </div>
+        </div>
+
+        <!-- Split Pane Layout -->
+        <div style="display: flex; gap: 24px; flex: 1; overflow: hidden; position: relative;">
+          
+          <!-- Left Pane: Live Queue -->
+          <div style="flex: 0 0 350px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; border-top: 4px solid #8b5cf6; overflow: hidden;">
+            <div style="padding: 16px; border-bottom: 1px solid #f1f5f9; background: #f8fafc;">
+              <h3 style="font-size: 14px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Live Incoming Orders</h3>
+            </div>
+            <div style="flex: 1; overflow-y: auto; padding: 16px;" id="labView-queue">
+              <!-- Mock Order Card -->
+              <div onclick="selectAncillaryOrder('labView', 'ORD-991', 'Daobo Miapmuk', '#8b5cf6')" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 4px solid #8b5cf6;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <span style="font-size: 12px; font-weight: 700; color: #64748b;">ORD-991</span>
+                  <span style="font-size: 11px; font-weight: 700; color: #8b5cf6; background: #8b5cf615; padding: 2px 6px; border-radius: 4px;">Just Now</span>
+                </div>
+                <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Daobo Miapmuk</h4>
+                <p style="font-size: 13px; color: #64748b;">Dr. Ishola (GOPD)</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Pane: Fulfillment Cart -->
+          <div id="labView-fulfillment" style="flex: 1; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; opacity: 0.5; pointer-events: none; transition: opacity 0.3s;">
+            <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 id="labView-patientName" style="font-size: 24px; font-weight: 800; color: #0f172a;">Select an Order</h3>
+                <p id="labView-orderId" style="font-size: 14px; color: #64748b;">Waiting for selection...</p>
+              </div>
+              <button onclick="fulfillAncillaryOrder('labView')" style="background: #8b5cf6; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #8b5cf640; transition: all 0.2s;">✔️ Fulfill & Bill</button>
+            </div>
+            
+            <div style="display: flex; flex: 1; overflow: hidden;">
+              <!-- Catalog -->
+              <div style="flex: 1; padding: 24px; border-right: 1px solid #f1f5f9; overflow-y: auto;">
+                <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Available Tests</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <button onclick="addToAncillaryCart('labView', 'Amoxicillin 500mg', 1500)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
+                    <div style="font-weight: 600; color: #1e293b;">Amoxicillin 500mg</div>
+                    <div style="font-size: 12px; color: #8b5cf6; font-weight: 700; margin-top: 4px;">₦1,500</div>
+                  </button>
+                  <button onclick="addToAncillaryCart('labView', 'Paracetamol', 500)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
+                    <div style="font-weight: 600; color: #1e293b;">Paracetamol</div>
+                    <div style="font-size: 12px; color: #8b5cf6; font-weight: 700; margin-top: 4px;">₦500</div>
+                  </button>
+                  <button onclick="addToAncillaryCart('labView', 'Full Blood Count (FBC)', 4000)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
+                    <div style="font-weight: 600; color: #1e293b;">Full Blood Count (FBC)</div>
+                    <div style="font-size: 12px; color: #8b5cf6; font-weight: 700; margin-top: 4px;">₦4,000</div>
+                  </button>
+                  <button onclick="addToAncillaryCart('labView', 'Malaria Parasite (MP)', 2000)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
+                    <div style="font-weight: 600; color: #1e293b;">Malaria Parasite (MP)</div>
+                    <div style="font-size: 12px; color: #8b5cf6; font-weight: 700; margin-top: 4px;">₦2,000</div>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Cart Invoice -->
+              <div style="flex: 0 0 300px; background: #f8fafc; padding: 24px; display: flex; flex-direction: column;">
+                <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Current Invoice Cart</h4>
+                <div id="labView-cart" style="flex: 1; overflow-y: auto;">
+                  <!-- Items go here -->
+                </div>
+                <div style="border-top: 2px dashed #cbd5e1; padding-top: 16px; margin-top: 16px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 14px; font-weight: 700; color: #64748b;">GRAND TOTAL</span>
+                    <span id="labView-total" style="font-size: 20px; font-weight: 800; color: #8b5cf6;">₦0</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -384,23 +546,193 @@
         </div>
       </div>
 
-      <!-- VIEW 7: Radiology Shell -->
-      <div id="radView" class="emr-view hidden" style="padding: 40px; max-width: 1000px; margin: 0 auto;">
-        <h2 style="font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 24px;">Radiology Queue</h2>
-        <div class="white-card" style="padding: 24px; min-height: 400px; display: flex; align-items: center; justify-content: center;">
-          <p style="color: #6b7280; text-align: center; font-size: 18px;">No pending imaging requests.</p>
+      
+      <!-- VIEW: Radiology Command Center -->
+      <div id="radView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
+        <!-- Header -->
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
+          <div>
+            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Radiology Command Center</h2>
+            <p style="color: #64748b; font-size: 15px;">Live E-Notes Queue & Scans Fulfillment</p>
+          </div>
+          <div style="background: #f59e0b15; padding: 8px 16px; border-radius: 8px; border: 1px solid #f59e0b40;">
+            <span style="color: #f59e0b; font-weight: 700; font-size: 14px;">☢️ Systems Online</span>
+          </div>
         </div>
-      </div>
 
-      <!-- VIEW 8: Wards Shell -->
-      <div id="wardsView" class="emr-view hidden" style="padding: 40px; max-width: 1000px; margin: 0 auto;">
-        <h2 style="font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 24px;">Inpatient Wards</h2>
-        <div class="white-card" style="padding: 24px; min-height: 400px; display: flex; align-items: center; justify-content: center;">
-          <p style="color: #6b7280; text-align: center; font-size: 18px;">No patients currently admitted.</p>
+        <!-- Split Pane Layout -->
+        <div style="display: flex; gap: 24px; flex: 1; overflow: hidden; position: relative;">
+          
+          <!-- Left Pane: Live Queue -->
+          <div style="flex: 0 0 350px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; border-top: 4px solid #f59e0b; overflow: hidden;">
+            <div style="padding: 16px; border-bottom: 1px solid #f1f5f9; background: #f8fafc;">
+              <h3 style="font-size: 14px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Live Incoming Orders</h3>
+            </div>
+            <div style="flex: 1; overflow-y: auto; padding: 16px;" id="radView-queue">
+              <!-- Mock Order Card -->
+              <div onclick="selectAncillaryOrder('radView', 'ORD-991', 'Daobo Miapmuk', '#f59e0b')" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 12px; border-left: 4px solid #f59e0b;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                  <span style="font-size: 12px; font-weight: 700; color: #64748b;">ORD-991</span>
+                  <span style="font-size: 11px; font-weight: 700; color: #f59e0b; background: #f59e0b15; padding: 2px 6px; border-radius: 4px;">Just Now</span>
+                </div>
+                <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 4px;">Daobo Miapmuk</h4>
+                <p style="font-size: 13px; color: #64748b;">Dr. Ishola (GOPD)</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Pane: Fulfillment Cart -->
+          <div id="radView-fulfillment" style="flex: 1; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; opacity: 0.5; pointer-events: none; transition: opacity 0.3s;">
+            <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <h3 id="radView-patientName" style="font-size: 24px; font-weight: 800; color: #0f172a;">Select an Order</h3>
+                <p id="radView-orderId" style="font-size: 14px; color: #64748b;">Waiting for selection...</p>
+              </div>
+              <button onclick="fulfillAncillaryOrder('radView')" style="background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #f59e0b40; transition: all 0.2s;">✔️ Fulfill & Bill</button>
+            </div>
+            
+            <div style="display: flex; flex: 1; overflow: hidden;">
+              <!-- Catalog -->
+              <div style="flex: 1; padding: 24px; border-right: 1px solid #f1f5f9; overflow-y: auto;">
+                <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Available Scans</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                  <button onclick="addToAncillaryCart('radView', 'Amoxicillin 500mg', 1500)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
+                    <div style="font-weight: 600; color: #1e293b;">Amoxicillin 500mg</div>
+                    <div style="font-size: 12px; color: #f59e0b; font-weight: 700; margin-top: 4px;">₦1,500</div>
+                  </button>
+                  <button onclick="addToAncillaryCart('radView', 'Paracetamol', 500)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
+                    <div style="font-weight: 600; color: #1e293b;">Paracetamol</div>
+                    <div style="font-size: 12px; color: #f59e0b; font-weight: 700; margin-top: 4px;">₦500</div>
+                  </button>
+                  <button onclick="addToAncillaryCart('radView', 'Full Blood Count (FBC)', 4000)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
+                    <div style="font-weight: 600; color: #1e293b;">Full Blood Count (FBC)</div>
+                    <div style="font-size: 12px; color: #f59e0b; font-weight: 700; margin-top: 4px;">₦4,000</div>
+                  </button>
+                  <button onclick="addToAncillaryCart('radView', 'Malaria Parasite (MP)', 2000)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
+                    <div style="font-weight: 600; color: #1e293b;">Malaria Parasite (MP)</div>
+                    <div style="font-size: 12px; color: #f59e0b; font-weight: 700; margin-top: 4px;">₦2,000</div>
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Cart Invoice -->
+              <div style="flex: 0 0 300px; background: #f8fafc; padding: 24px; display: flex; flex-direction: column;">
+                <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Current Invoice Cart</h4>
+                <div id="radView-cart" style="flex: 1; overflow-y: auto;">
+                  <!-- Items go here -->
+                </div>
+                <div style="border-top: 2px dashed #cbd5e1; padding-top: 16px; margin-top: 16px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 14px; font-weight: 700; color: #64748b;">GRAND TOTAL</span>
+                    <span id="radView-total" style="font-size: 20px; font-weight: 800; color: #f59e0b;">₦0</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
         </div>
       </div>
 
       
+      <!-- VIEW: Interactive Bed Board (Wards) -->
+      <div id="wardsView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
+        <!-- Header -->
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
+          <div>
+            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Interactive Bed Board</h2>
+            <p style="color: #64748b; font-size: 15px;">Inpatient Ward Management & Nursing E-Notes</p>
+          </div>
+          <div style="display: flex; gap: 12px;">
+             <span style="background: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #166534; border: 1px solid #bbf7d0;">🟢 12 Available</span>
+             <span style="background: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #991b1b; border: 1px solid #fecaca;">🔴 4 Occupied</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 24px; flex: 1; overflow: hidden; position: relative;">
+            
+            <!-- Grid -->
+            <div style="flex: 1; overflow-y: auto; padding-right: 12px;">
+                <h3 style="font-size: 16px; font-weight: 700; color: #475569; margin-bottom: 16px;">Male Medical Ward (A)</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px;">
+                    
+                    <!-- Occupied Bed -->
+                    <div onclick="openNursingPanel('Bed A1', 'Daobo Miapmuk', 'Malaria')" style="background: white; border: 1px solid #fecaca; border-top: 4px solid #ef4444; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span style="font-weight: 800; font-size: 18px; color: #0f172a;">A1</span>
+                            <span style="font-size: 10px; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 700;">OCCUPIED</span>
+                        </div>
+                        <p style="font-weight: 700; color: #1e293b; font-size: 14px;">Daobo Miapmuk</p>
+                        <p style="font-size: 12px; color: #64748b;">Severe Malaria</p>
+                    </div>
+
+                    <!-- Available Bed -->
+                    <div style="background: #f8fafc; border: 1px dashed #bbf7d0; border-top: 4px solid #22c55e; border-radius: 8px; padding: 16px; opacity: 0.7;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span style="font-weight: 800; font-size: 18px; color: #64748b;">A2</span>
+                            <span style="font-size: 10px; background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: 700;">AVAILABLE</span>
+                        </div>
+                        <p style="font-weight: 600; color: #94a3b8; font-size: 13px; text-align: center; margin-top: 8px;">Clean & Ready</p>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1px dashed #bbf7d0; border-top: 4px solid #22c55e; border-radius: 8px; padding: 16px; opacity: 0.7;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span style="font-weight: 800; font-size: 18px; color: #64748b;">A3</span>
+                            <span style="font-size: 10px; background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: 700;">AVAILABLE</span>
+                        </div>
+                        <p style="font-weight: 600; color: #94a3b8; font-size: 13px; text-align: center; margin-top: 8px;">Clean & Ready</p>
+                    </div>
+                </div>
+
+                <h3 style="font-size: 16px; font-weight: 700; color: #475569; margin-bottom: 16px;">Intensive Care Unit (ICU)</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;">
+                    <!-- Occupied ICU -->
+                    <div onclick="openNursingPanel('ICU-1', 'Aishatu Sule', 'Cardiac Arrest')" style="background: white; border: 1px solid #fecaca; border-top: 4px solid #ef4444; border-radius: 8px; padding: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                            <span style="font-weight: 800; font-size: 18px; color: #0f172a;">ICU-1</span>
+                            <span style="font-size: 10px; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 700;">CRITICAL</span>
+                        </div>
+                        <p style="font-weight: 700; color: #1e293b; font-size: 14px;">Aishatu Sule</p>
+                        <p style="font-size: 12px; color: #ef4444; font-weight: 600;">Cardiac Arrest</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Slide-Out Nursing Panel -->
+            <div id="nursingPanel" style="flex: 0 0 400px; background: white; border-radius: 12px; box-shadow: -4px 0 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
+                <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; position: relative; background: #0f172a; border-radius: 12px 12px 0 0;">
+                    <button onclick="closeNursingPanel()" style="position: absolute; right: 16px; top: 16px; background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer;">✕</button>
+                    <span id="np-bed" style="background: #334155; color: #cbd5e1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700;">Bed A1</span>
+                    <h3 id="np-name" style="font-size: 24px; font-weight: 800; color: white; margin-top: 8px;">Patient Name</h3>
+                    <p id="np-dx" style="color: #94a3b8; font-size: 14px;">Diagnosis</p>
+                </div>
+                <div style="flex: 1; padding: 24px; overflow-y: auto;">
+                    <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Live Vitals</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <p style="font-size: 11px; color: #64748b; font-weight: 700;">HEART RATE</p>
+                            <p style="font-size: 20px; font-weight: 800; color: #ef4444;">88 <span style="font-size: 12px; color: #94a3b8;">bpm</span></p>
+                        </div>
+                        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <p style="font-size: 11px; color: #64748b; font-weight: 700;">BP</p>
+                            <p style="font-size: 20px; font-weight: 800; color: #0f172a;">120/80</p>
+                        </div>
+                    </div>
+                    
+                    <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Physician E-Notes</h4>
+                    <div style="background: #fdfce8; border-left: 4px solid #facc15; padding: 12px; border-radius: 0 8px 8px 0; margin-bottom: 12px;">
+                        <p style="font-size: 13px; color: #422006; line-height: 1.5;"><strong>Dr. Ishola:</strong> Administer 500mg Paracetamol stat. Monitor temperature every 2 hours.</p>
+                        <p style="font-size: 11px; color: #a16207; margin-top: 8px; font-weight: 600;">2 hours ago</p>
+                    </div>
+                </div>
+                <div style="padding: 16px; border-top: 1px solid #f1f5f9;">
+                    <button style="width: 100%; padding: 12px; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2);">+ Add Nursing Note</button>
+                </div>
+            </div>
+        </div>
+      </div>
+
       <!-- VIEW 10: Records Unit (Premium Rebuild) -->
       <div id="recordsMainView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
@@ -581,6 +913,90 @@
 <script>
     
     
+    
+    // --- ANCILLARY CART & BED BOARD LOGIC ---
+    const ancillaryCarts = { pharmacyView: [], labView: [], radView: [] };
+
+    function selectAncillaryOrder(viewId, orderId, patientName, colorHex) {
+        // Activate Right Pane
+        const fulfillmentPane = document.getElementById(viewId + '-fulfillment');
+        fulfillmentPane.style.opacity = '1';
+        fulfillmentPane.style.pointerEvents = 'auto';
+        
+        document.getElementById(viewId + '-patientName').innerText = patientName;
+        document.getElementById(viewId + '-orderId').innerText = "Order: " + orderId;
+        
+        // Reset Cart
+        ancillaryCarts[viewId] = [];
+        renderAncillaryCart(viewId, colorHex);
+    }
+
+    function addToAncillaryCart(viewId, itemName, price) {
+        ancillaryCarts[viewId].push({ name: itemName, price: price });
+        // Find the color hex based on viewId for rendering
+        const color = viewId === 'pharmacyView' ? '#10b981' : (viewId === 'labView' ? '#8b5cf6' : '#f59e0b');
+        renderAncillaryCart(viewId, color);
+    }
+
+    function renderAncillaryCart(viewId, colorHex) {
+        const cartDiv = document.getElementById(viewId + '-cart');
+        const cart = ancillaryCarts[viewId];
+        let total = 0;
+        
+        if (cart.length === 0) {
+            cartDiv.innerHTML = '<p style="color: #94a3b8; font-size: 13px; font-style: italic;">Cart is empty. Select items to dispense.</p>';
+        } else {
+            cartDiv.innerHTML = cart.map((item, idx) => {
+                total += item.price;
+                return `
+                  <div style="display: flex; justify-content: space-between; margin-bottom: 8px; border-bottom: 1px dashed #e2e8f0; padding-bottom: 4px;">
+                    <span style="font-size: 13px; color: #334155; font-weight: 500;">${item.name}</span>
+                    <span style="font-size: 13px; color: #0f172a; font-weight: 700;">₦${item.price.toLocaleString()}</span>
+                  </div>
+                `;
+            }).join('');
+        }
+        document.getElementById(viewId + '-total').innerText = '₦' + total.toLocaleString();
+    }
+
+    function fulfillAncillaryOrder(viewId) {
+        const cart = ancillaryCarts[viewId];
+        if (cart.length === 0) {
+            alert("Cart is empty! Select items to fulfill this order.");
+            return;
+        }
+        
+        // Clear Queue mock
+        document.getElementById(viewId + '-queue').innerHTML = `
+          <div style="padding: 40px; text-align: center;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            <h4 style="font-size: 16px; font-weight: 600; color: #64748b;">Queue Cleared!</h4>
+            <p style="font-size: 13px; color: #94a3b8;">Excellent work. E-notes and Billing have been synced.</p>
+          </div>
+        `;
+        
+        // Disable Right Pane
+        const fulfillmentPane = document.getElementById(viewId + '-fulfillment');
+        fulfillmentPane.style.opacity = '0.5';
+        fulfillmentPane.style.pointerEvents = 'none';
+        
+        document.getElementById(viewId + '-patientName').innerText = "Select an Order";
+        document.getElementById(viewId + '-orderId').innerText = "Waiting for selection...";
+        ancillaryCarts[viewId] = [];
+        renderAncillaryCart(viewId, '#000');
+    }
+
+    function openNursingPanel(bed, name, dx) {
+        document.getElementById('np-bed').innerText = bed;
+        document.getElementById('np-name').innerText = name;
+        document.getElementById('np-dx').innerText = dx;
+        document.getElementById('nursingPanel').style.transform = 'translateX(0)';
+    }
+
+    function closeNursingPanel() {
+        document.getElementById('nursingPanel').style.transform = 'translateX(120%)';
+    }
+
     // --- UNIFIED CLINICAL WORKSPACE LOGIC ---
     async function loadUnifiedWaitingList(clinicName) {
       currentClinicContext = clinicName;
