@@ -76,6 +76,7 @@
         <button class="nav-btn" onclick="switchEmrView('labView')" title="Laboratory"><span>🧪</span><span class="nav-text">Laboratory</span></button>
         <button class="nav-btn" onclick="switchEmrView('radView')" title="Radiology"><span>☢️</span><span class="nav-text">Radiology</span></button>
         <button class="nav-btn" onclick="switchEmrView('billingView')" title="Billing"><span>💳</span><span class="nav-text">Billing</span></button>
+        <button class="nav-btn" onclick="switchEmrView('recordsMainView')" title="Records Unit" style="border-top: 1px solid #e5e7eb; border-radius: 0; margin-top: 8px; padding-top: 16px;"><span>📂</span><span class="nav-text" style="color: #4f46e5;">Records Unit</span></button>
       </div>
 
       <div style="margin-top: auto; border-top: 1px solid #e5e7eb; padding-top: 16px;">
@@ -93,8 +94,16 @@
           <p style="margin-bottom: 16px; color: #4b5563;">Select your facility to load your patient roster</p>
           <select id="facilitySelect" class="form-input">
             <option value="">-- Select --</option>
+            <option value="FAC-JUTH">Jos University Teaching Hospital (JUTH)</option>
             <option value="FAC-001">Plateau State Specialist Hospital</option>
             <option value="FAC-002">Barkin Ladi General Hospital</option>
+            <option value="FAC-003">Bingham University Teaching Hospital</option>
+            <option value="FAC-004">Our Lady of Apostles (OLA) Hospital</option>
+            <option value="FAC-005">Mangu General Hospital</option>
+            <option value="FAC-006">Pankshin General Hospital</option>
+            <option value="FAC-007">Shendam General Hospital</option>
+            <option value="FAC-008">Langtang General Hospital</option>
+            <option value="FAC-009">Bassa General Hospital</option>
           </select>
           <button class="btn btn-primary" onclick="setContext()" style="margin-top: 16px; width: 100%;">Enter EMR</button>
           <button class="btn" onclick="window.location.href='/admin.html'" style="margin-top: 8px; width: 100%; background: #f3f4f6; color: #374151; border: 1px solid #d1d5db;">Back to Main Dashboard</button>
@@ -128,44 +137,89 @@
       </div>
 
       
-      <!-- VIEW: Clinics Dashboard -->
-      <div id="clinicsDashboardView" class="emr-view hidden" style="padding: 60px 40px; max-width: 1000px; margin: 0 auto;">
-        <h2 style="font-size: 32px; font-weight: 800; color: #111827; margin-bottom: 32px; text-align: center; letter-spacing: -0.02em;">Outpatient Clinics</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px;">
+      
+      <!-- VIEW: Clinics Dashboard (Categorized Unified Workspace) -->
+      <div id="clinicsDashboardView" class="emr-view hidden" style="padding: 40px; max-width: 1200px; margin: 0 auto;">
+        <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.02em;">Unified Clinical Workspace</h2>
+        <p style="color: #64748b; margin-bottom: 40px; font-size: 16px;">Select a department to manage its waiting list and active encounters.</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 32px;">
           
-          <div onclick="enterClinic('GOPD')" class="white-card" style="cursor: pointer; text-align: center; transition: all 0.2s; border: 2px solid transparent;">
-            <div style="font-size: 40px; margin-bottom: 16px;">🩺</div>
-            <h3 style="font-size: 20px; font-weight: 700; color: #1f2937;">GOPD</h3>
-            <p style="color: #6b7280; font-size: 14px;">General Outpatient Dept</p>
+          <!-- Category: Primary & Emergency -->
+          <div>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Primary & Emergency</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <button onclick="loadUnifiedWaitingList('GOPD')" class="clinic-btn">🩺 General Outpatient (GOPD)</button>
+              <button onclick="loadUnifiedWaitingList('A & E')" class="clinic-btn" style="border-left-color: #ef4444;">🚨 Accident & Emergency</button>
+              <button onclick="loadUnifiedWaitingList('EPU')" class="clinic-btn">🚑 Emergency Pediatric Unit (EPU)</button>
+              <button onclick="loadUnifiedWaitingList('Amenity Clinic')" class="clinic-btn">⭐ Amenity Clinic</button>
+            </div>
           </div>
-          
-          <div onclick="enterClinic('SOPD')" class="white-card" style="cursor: pointer; text-align: center; transition: all 0.2s; border: 2px solid transparent;">
-            <div style="font-size: 40px; margin-bottom: 16px;">🔪</div>
-            <h3 style="font-size: 20px; font-weight: 700; color: #1f2937;">SOPD</h3>
-            <p style="color: #6b7280; font-size: 14px;">Surgical Outpatient Dept</p>
+
+          <!-- Category: Surgical & Theater -->
+          <div>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Surgical & Procedures</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <button onclick="loadUnifiedWaitingList('Theater')" class="clinic-btn" style="border-left-color: #ef4444;">🔪 Theater (Surgery)</button>
+              <button onclick="loadUnifiedWaitingList('Orthopaedics')" class="clinic-btn">🦴 Orthopaedics</button>
+              <button onclick="loadUnifiedWaitingList('Endoscopy')" class="clinic-btn">🔍 Endoscopy</button>
+              <button onclick="loadUnifiedWaitingList('Procedure')" class="clinic-btn">💉 General Procedures</button>
+            </div>
           </div>
-          
-          <div onclick="enterClinic('MOPD')" class="white-card" style="cursor: pointer; text-align: center; transition: all 0.2s; border: 2px solid transparent;">
-            <div style="font-size: 40px; margin-bottom: 16px;">💊</div>
-            <h3 style="font-size: 20px; font-weight: 700; color: #1f2937;">MOPD</h3>
-            <p style="color: #6b7280; font-size: 14px;">Medical Outpatient Dept</p>
+
+          <!-- Category: Specialist Care -->
+          <div>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Specialist Care</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <button onclick="loadUnifiedWaitingList('Cardiac Centre')" class="clinic-btn" style="border-left-color: #ec4899;">❤️ Cardiac Centre</button>
+              <button onclick="loadUnifiedWaitingList('Cardiology')" class="clinic-btn" style="border-left-color: #ec4899;">🫀 Cardiology</button>
+              <button onclick="loadUnifiedWaitingList('Urology')" class="clinic-btn">💧 Urology</button>
+              <button onclick="loadUnifiedWaitingList('Renal')" class="clinic-btn">🩸 Renal</button>
+              <button onclick="loadUnifiedWaitingList('Endocrinology')" class="clinic-btn">🧪 Endocrinology</button>
+              <button onclick="loadUnifiedWaitingList('Dermatology')" class="clinic-btn">✋ Dermatology</button>
+              <button onclick="loadUnifiedWaitingList('Oncology')" class="clinic-btn">🎗️ Oncology</button>
+            </div>
           </div>
-          
-          <div onclick="enterClinic('ENT')" class="white-card" style="cursor: pointer; text-align: center; transition: all 0.2s; border: 2px solid transparent;">
-            <div style="font-size: 40px; margin-bottom: 16px;">👂</div>
-            <h3 style="font-size: 20px; font-weight: 700; color: #1f2937;">ENT Clinic</h3>
-            <p style="color: #6b7280; font-size: 14px;">Ear, Nose & Throat</p>
+
+          <!-- Category: Women & Children -->
+          <div>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Women & Children</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <button onclick="loadUnifiedWaitingList('O & G')" class="clinic-btn" style="border-left-color: #a855f7;">🤰 Obstetrics & Gynaecology</button>
+              <button onclick="loadUnifiedWaitingList('Antenatal')" class="clinic-btn" style="border-left-color: #a855f7;">👶 Antenatal</button>
+              <button onclick="loadUnifiedWaitingList('Post Natal')" class="clinic-btn" style="border-left-color: #a855f7;">🍼 Post Natal</button>
+              <button onclick="loadUnifiedWaitingList('Pediatrics')" class="clinic-btn">🧸 Pediatrics</button>
+              <button onclick="loadUnifiedWaitingList('Family Planning')" class="clinic-btn">👨‍👩‍👧 Family Planning</button>
+            </div>
           </div>
-          
-          <div onclick="enterClinic('Eye Clinic')" class="white-card" style="cursor: pointer; text-align: center; transition: all 0.2s; border: 2px solid transparent;">
-            <div style="font-size: 40px; margin-bottom: 16px;">👁️</div>
-            <h3 style="font-size: 20px; font-weight: 700; color: #1f2937;">Eye Clinic</h3>
-            <p style="color: #6b7280; font-size: 14px;">Ophthalmology</p>
+
+          <!-- Category: Mental & Allied Health -->
+          <div>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Mental & Allied Health</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <button onclick="loadUnifiedWaitingList('Psychiatry')" class="clinic-btn">🧠 Psychiatry</button>
+              <button onclick="loadUnifiedWaitingList('Psychology')" class="clinic-btn">🛋️ Psychology</button>
+              <button onclick="loadUnifiedWaitingList('Physiotherapy')" class="clinic-btn">🏃 Physiotherapy</button>
+              <button onclick="loadUnifiedWaitingList('Nutrition & Dietetics')" class="clinic-btn">🥗 Nutrition & Dietetics</button>
+            </div>
           </div>
-          
+
+          <!-- Category: Dental & ENT -->
+          <div>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Dental & Head</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <button onclick="loadUnifiedWaitingList('Dentistry')" class="clinic-btn" style="border-left-color: #0ea5e9;">🦷 Dentistry</button>
+              <button onclick="loadUnifiedWaitingList('Maxillofacial')" class="clinic-btn" style="border-left-color: #0ea5e9;">💀 Maxillofacial</button>
+              <button onclick="loadUnifiedWaitingList('Dental Therapy')" class="clinic-btn" style="border-left-color: #0ea5e9;">🪥 Dental Therapy</button>
+              <button onclick="loadUnifiedWaitingList('E.N.T.')" class="clinic-btn">👂 E.N.T. Clinic</button>
+              <button onclick="loadUnifiedWaitingList('Eye Clinic')" class="clinic-btn">👁️ Eye Clinic</button>
+            </div>
+          </div>
+
         </div>
         <style>
-          #clinicsDashboardView .white-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); border-color: #0B5E7E; }
+          .clinic-btn { background: white; border: 1px solid #e2e8f0; border-left: 4px solid #0B5E7E; padding: 16px 20px; border-radius: 8px; font-size: 15px; font-weight: 600; color: #1e293b; text-align: left; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+          .clinic-btn:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: #cbd5e1; }
         </style>
       </div>
 
@@ -179,16 +233,64 @@
             <p style="color: #6b7280; font-size: 14px;">Select patient from Omni-Bar or review departmental records.</p>
           </div>
           <div style="display: flex; gap: 8px; background: #e5e7eb; padding: 4px; border-radius: 12px;">
-            <button id="tabConsult" onclick="switchClinicTab('consult')" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: white; color: #0B5E7E; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">Active Consult</button>
+            
+            <button id="tabWaiting" onclick="switchClinicTab('waiting')" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: white; color: #0B5E7E; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">Waiting List Queue</button>
+            <button id="tabConsult" onclick="switchClinicTab('consult')" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: transparent; color: #6b7280; display: none;">Active Consult</button>
             <button id="tabRecords" onclick="switchClinicTab('records')" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: transparent; color: #6b7280;">Records Sub-Unit</button>
+
           </div>
         </div>
 
         <!-- Main Workspace Area -->
         <div style="display: flex; gap: 24px; flex: 1; overflow: hidden; position: relative;">
           
+          
+          <!-- WAITING LIST TAB (SMART TABLE) -->
+          <div id="waitingListTabContent" style="display: flex; flex-direction: column; flex: 1; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; transition: opacity 0.2s;">
+            <!-- Metrics Ribbon -->
+            <div style="display: flex; gap: 24px; padding: 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
+              <div style="flex: 1; background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #3b82f6;">
+                <p style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Waiting</p>
+                <h4 id="wlStatTotal" style="font-size: 28px; font-weight: 800; color: #0f172a; margin-top: 4px;">0</h4>
+              </div>
+              <div style="flex: 1; background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #10b981;">
+                <p style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Assigned To Me</p>
+                <h4 id="wlStatAssigned" style="font-size: 28px; font-weight: 800; color: #0f172a; margin-top: 4px;">0</h4>
+              </div>
+              <div style="flex: 1; background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #64748b;">
+                <p style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Completed</p>
+                <h4 id="wlStatCompleted" style="font-size: 28px; font-weight: 800; color: #0f172a; margin-top: 4px;">0</h4>
+              </div>
+            </div>
+
+            <!-- Smart Table -->
+            <div style="flex: 1; overflow-y: auto;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead style="background: white; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 #e2e8f0;">
+                  <tr>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase;">Patient</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase;">Time In</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase;">Payment</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase;">Type</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase; text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="waitingListBody">
+                  <!-- Empty State SVG -->
+                  <tr>
+                    <td colspan="5" style="padding: 60px; text-align: center;">
+                      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                      <h4 style="font-size: 18px; font-weight: 600; color: #64748b;">No patients currently in queue.</h4>
+                      <p style="color: #94a3b8; font-size: 14px; margin-top: 8px;">Waiting list is clear for this department.</p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
           <!-- CONSULTATION TAB (The original right/left panels) -->
-          <div id="consultTabContent" style="display: flex; gap: 24px; flex: 1; width: 100%; transition: opacity 0.2s;">
+          <div id="consultTabContent" class="hidden" style="display: flex; gap: 24px; flex: 1; width: 100%; transition: opacity 0.2s;">
 
         <!-- Left Panel -->
         <div id="leftPanel" style="flex: 0 0 320px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
@@ -298,6 +400,159 @@
         </div>
       </div>
 
+      
+      <!-- VIEW 10: Records Unit (Premium Rebuild) -->
+      <div id="recordsMainView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
+          <div>
+            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Records Unit</h2>
+            <p style="color: #64748b; font-size: 15px;">Centralized Patient Registry & Registration</p>
+          </div>
+          <div style="display: flex; gap: 8px; background: #e2e8f0; padding: 6px; border-radius: 12px;">
+            <button id="recTab-patients" onclick="switchRecordsTab('patients')" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: white; color: #4f46e5; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">Patient Roster</button>
+            <button id="recTab-appointments" onclick="switchRecordsTab('appointments')" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: transparent; color: #64748b;">Appointments</button>
+            <button id="recTab-referrals" onclick="switchRecordsTab('referrals')" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: transparent; color: #64748b;">Referrals</button>
+            <button id="recTab-register" onclick="switchRecordsTab('register')" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: #4f46e5; color: white; box-shadow: 0 4px 12px rgba(79,70,229,0.3); margin-left: 12px;">+ Register Patient</button>
+          </div>
+        </div>
+
+        <div style="flex: 1; overflow-y: auto; padding: 0 16px;">
+          
+          <!-- RECORDS: PATIENT ROSTER -->
+          <div id="recContent-patients" class="rec-tab-content" style="animation: fadeIn 0.3s ease-out;">
+            <!-- Summary Cards -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+              <div class="white-card" style="padding: 24px; border-left: 4px solid #4f46e5;">
+                <p style="color: #64748b; font-size: 14px; font-weight: 600; text-transform: uppercase;">Total Patients</p>
+                <h3 id="recStat-total" style="font-size: 32px; font-weight: 800; color: #0f172a; margin-top: 8px;">0</h3>
+              </div>
+              <div class="white-card" style="padding: 24px; border-left: 4px solid #0ea5e9;">
+                <p style="color: #64748b; font-size: 14px; font-weight: 600; text-transform: uppercase;">Male Patients</p>
+                <h3 id="recStat-male" style="font-size: 32px; font-weight: 800; color: #0f172a; margin-top: 8px;">0</h3>
+              </div>
+              <div class="white-card" style="padding: 24px; border-left: 4px solid #ec4899;">
+                <p style="color: #64748b; font-size: 14px; font-weight: 600; text-transform: uppercase;">Female Patients</p>
+                <h3 id="recStat-female" style="font-size: 32px; font-weight: 800; color: #0f172a; margin-top: 8px;">0</h3>
+              </div>
+              <div class="white-card" style="padding: 24px; border-left: 4px solid #10b981;">
+                <p style="color: #64748b; font-size: 14px; font-weight: 600; text-transform: uppercase;">New Patients (Today)</p>
+                <h3 id="recStat-new" style="font-size: 32px; font-weight: 800; color: #0f172a; margin-top: 8px;">0</h3>
+              </div>
+            </div>
+            
+            <!-- Modern Table -->
+            <div class="white-card" style="padding: 0; overflow: hidden;">
+              <div style="padding: 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 18px; font-weight: 700; color: #0f172a;">Patient Database</h3>
+                <div class="search-input-wrapper" style="margin: 0; padding: 6px 12px; max-width: 300px;">
+                  <span class="icon-btn" style="font-size: 16px;">🔍</span>
+                  <input type="text" id="recSearchInput" placeholder="Search Hospital Number..." style="font-size: 14px; padding: 4px;" onkeyup="filterRecordsTable()" />
+                </div>
+              </div>
+              <table style="width: 100%; border-collapse: collapse; text-align: left;" id="recPatientsTable">
+                <thead style="background: #f8fafc;">
+                  <tr>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase;">Hospital No.</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase;">Patient Name</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase;">Sex</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase;">Phone</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase;">Status</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="recPatientsBody">
+                  <tr><td colspan="6" style="padding: 32px; text-align: center; color: #94a3b8;">Loading records...</td></tr>
+                </tbody>
+              </table>
+              <div style="padding: 16px 24px; border-top: 1px solid #e2e8f0; text-align: right; color: #64748b; font-size: 14px;">
+                Showing <span id="recShowingCount">0</span> records
+              </div>
+            </div>
+          </div>
+
+          <!-- RECORDS: REGISTER PATIENT WIZARD -->
+          <div id="recContent-register" class="rec-tab-content hidden" style="animation: fadeIn 0.3s ease-out; max-width: 800px; margin: 0 auto;">
+            <div class="white-card" style="padding: 40px;">
+              <h3 style="font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Register New Patient</h3>
+              <p style="color: #64748b; margin-bottom: 32px;">Complete the 3-step wizard to enroll a new patient into the registry.</p>
+              
+              <!-- Stepper -->
+              <div style="display: flex; justify-content: space-between; margin-bottom: 40px; position: relative;">
+                <div style="position: absolute; top: 16px; left: 0; right: 0; height: 2px; background: #e2e8f0; z-index: 1;"></div>
+                <div style="position: absolute; top: 16px; left: 0; height: 2px; background: #4f46e5; z-index: 2; transition: width 0.3s;" id="stepProgress"></div>
+                
+                <div class="step-indicator active" id="stepInd-1" style="z-index: 3; background: white; padding: 0 16px; text-align: center;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: #4f46e5; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto 8px;">1</div>
+                  <span style="font-size: 14px; font-weight: 600; color: #0f172a;">Bio Data</span>
+                </div>
+                <div class="step-indicator" id="stepInd-2" style="z-index: 3; background: white; padding: 0 16px; text-align: center;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto 8px; transition: all 0.3s;">2</div>
+                  <span style="font-size: 14px; font-weight: 600; color: #64748b;">Contact</span>
+                </div>
+                <div class="step-indicator" id="stepInd-3" style="z-index: 3; background: white; padding: 0 16px; text-align: center;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto 8px; transition: all 0.3s;">3</div>
+                  <span style="font-size: 14px; font-weight: 600; color: #64748b;">HMO</span>
+                </div>
+              </div>
+
+              <!-- Forms -->
+              <div id="stepForm-1" class="step-form">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">First Name *</label><input type="text" id="wizFirst" class="form-input" /></div>
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Last Name *</label><input type="text" id="wizLast" class="form-input" /></div>
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Date of Birth *</label><input type="date" id="wizDob" class="form-input" /></div>
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Sex *</label><select id="wizSex" class="form-input"><option>Male</option><option>Female</option></select></div>
+                </div>
+                <div style="text-align: right; margin-top: 24px;"><button onclick="nextStep(2)" class="btn" style="background: #0f172a; color: white; width: auto; padding: 12px 32px;">Next Step →</button></div>
+              </div>
+
+              <div id="stepForm-2" class="step-form hidden">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div style="grid-column: span 2;"><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Phone Number *</label><input type="tel" id="wizPhone" class="form-input" /></div>
+                  <div style="grid-column: span 2;"><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Next of Kin Name</label><input type="text" class="form-input" /></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+                  <button onclick="nextStep(1)" class="btn" style="background: #f1f5f9; color: #475569; width: auto; padding: 12px 32px;">← Back</button>
+                  <button onclick="nextStep(3)" class="btn" style="background: #0f172a; color: white; width: auto; padding: 12px 32px;">Next Step →</button>
+                </div>
+              </div>
+
+              <div id="stepForm-3" class="step-form hidden">
+                <div style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">HMO / Retainership Provider</label>
+                    <select class="form-input" id="wizHmo"><option value="">-- None (Out of Pocket) --</option><option>Police Health Maintainers</option><option>NHIS</option><option>Hygeia</option></select>
+                  </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+                  <button onclick="nextStep(2)" class="btn" style="background: #f1f5f9; color: #475569; width: auto; padding: 12px 32px;">← Back</button>
+                  <button onclick="submitWizard()" class="btn" style="background: #10b981; color: white; width: auto; padding: 12px 32px;">Submit & Register</button>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <!-- RECORDS: APPOINTMENTS SHELL -->
+          <div id="recContent-appointments" class="rec-tab-content hidden" style="animation: fadeIn 0.3s ease-out;">
+            <div class="white-card" style="padding: 40px; text-align: center; min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+              <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
+              <h3 style="font-size: 20px; font-weight: 700; color: #0f172a;">All Appointments</h3>
+              <p style="color: #64748b;">No appointments scheduled for today.</p>
+            </div>
+          </div>
+          
+          <!-- RECORDS: REFERRALS SHELL -->
+          <div id="recContent-referrals" class="rec-tab-content hidden" style="animation: fadeIn 0.3s ease-out;">
+            <div class="white-card" style="padding: 40px; text-align: center; min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+              <div style="font-size: 48px; margin-bottom: 16px;">🔄</div>
+              <h3 style="font-size: 20px; font-weight: 700; color: #0f172a;">Referrals Ledger</h3>
+              <p style="color: #64748b;">No active inbound or outbound referrals.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
       <!-- VIEW 9: Billing Shell -->
       <div id="billingView" class="emr-view hidden" style="padding: 40px; max-width: 1000px; margin: 0 auto;">
         <h2 style="font-size: 28px; font-weight: 800; color: #111827; margin-bottom: 24px;">Billing & Accounts</h2>
@@ -324,16 +579,297 @@
   <div id="toast">Success!</div>
 
 <script>
+    
+    
+    // --- UNIFIED CLINICAL WORKSPACE LOGIC ---
+    async function loadUnifiedWaitingList(clinicName) {
+      currentClinicContext = clinicName;
+      document.getElementById('clinicHeaderTitle').innerText = clinicName;
+      
+      switchEmrView('workspace');
+      switchClinicTab('waiting');
+      
+      const tbody = document.getElementById('waitingListBody');
+      tbody.innerHTML = '<tr><td colspan="5" style="padding: 40px; text-align: center; color: #64748b;">Loading queue...</td></tr>';
+      
+      try {
+        // Fetch all patients and mock a queue for this specific department
+        const res = await fetch('/api/patients');
+        if(!res.ok) throw new Error("API failed");
+        const allPatients = await res.json();
+        
+        // Mock filtering: just take a random subset for demo purposes to simulate departmental queues
+        const numWaiting = Math.floor(Math.random() * 8) + 2; // 2 to 10 patients
+        const queue = [...allPatients].sort(() => 0.5 - Math.random()).slice(0, numWaiting);
+        
+        document.getElementById('wlStatTotal').innerText = queue.length;
+        document.getElementById('wlStatAssigned').innerText = Math.floor(queue.length / 3);
+        document.getElementById('wlStatCompleted').innerText = Math.floor(Math.random() * 5);
+        
+        tbody.innerHTML = '';
+        if(queue.length === 0) {
+           tbody.innerHTML = `<tr><td colspan="5" style="padding: 60px; text-align: center;">
+             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+             <h4 style="font-size: 18px; font-weight: 600; color: #64748b;">No patients currently in queue.</h4>
+             <p style="color: #94a3b8; font-size: 14px; margin-top: 8px;">Waiting list is clear for this department.</p>
+           </td></tr>`;
+           return;
+        }
+        
+        queue.forEach((p, index) => {
+          // Dynamic Badges
+          const isPaid = Math.random() > 0.3;
+          const payBadge = isPaid ? `<span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">PAID</span>` 
+                                  : `<span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 700;">UNPAID</span>`;
+          const typeBadge = Math.random() > 0.5 ? `<span style="color: #475569; font-size: 12px; font-weight: 600; background: #f1f5f9; padding: 4px 8px; border-radius: 4px;">Follow-up</span>` 
+                                                : `<span style="color: #4f46e5; font-size: 12px; font-weight: 600; background: #e0e7ff; padding: 4px 8px; border-radius: 4px;">Initial</span>`;
+          
+          const timeIn = new Date(Date.now() - Math.random() * 10000000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+          
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid #f1f5f9';
+          tr.onmouseover = () => tr.style.background = '#f8fafc';
+          tr.onmouseout = () => tr.style.background = 'transparent';
+          
+          tr.innerHTML = `
+            <td style="padding: 16px 24px;">
+              <p style="font-weight: 700; color: #0f172a; margin-bottom: 2px;">${p.name}</p>
+              <p style="font-size: 12px; color: #64748b; font-family: monospace;">${p.id}</p>
+            </td>
+            <td style="padding: 16px 24px; color: #475569; font-size: 14px; font-weight: 500;">${timeIn}</td>
+            <td style="padding: 16px 24px;">${payBadge}</td>
+            <td style="padding: 16px 24px;">${typeBadge}</td>
+            <td style="padding: 16px 24px; text-align: right; position: relative;">
+              <button onclick="toggleKebabMenu('kebab-${p.id}')" style="background: transparent; border: none; font-size: 20px; color: #94a3b8; cursor: pointer; padding: 4px 8px; border-radius: 4px;">⋮</button>
+              
+              <!-- Clean Kebab Dropdown -->
+              <div id="kebab-${p.id}" class="kebab-menu hidden" style="position: absolute; right: 24px; top: 40px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 180px; z-index: 100; text-align: left; overflow: hidden;">
+                <button onclick="startUnifiedConsult('${p.id}', '${p.name}')" style="width: 100%; text-align: left; padding: 12px 16px; background: transparent; border: none; border-bottom: 1px solid #f1f5f9; cursor: pointer; color: #0f172a; font-size: 13px; font-weight: 600;">🩺 Start Encounter</button>
+                <button style="width: 100%; text-align: left; padding: 12px 16px; background: transparent; border: none; border-bottom: 1px solid #f1f5f9; cursor: pointer; color: #475569; font-size: 13px;">🔄 Route Patient</button>
+                <button style="width: 100%; text-align: left; padding: 12px 16px; background: transparent; border: none; cursor: pointer; color: #ef4444; font-size: 13px;">❌ Remove from Queue</button>
+              </div>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+        
+      } catch(e) {
+        console.error(e);
+        tbody.innerHTML = '<tr><td colspan="5" style="padding: 40px; text-align: center; color: #ef4444;">Connection failed.</td></tr>';
+      }
+    }
+
+    function toggleKebabMenu(menuId) {
+      document.querySelectorAll('.kebab-menu').forEach(m => {
+        if(m.id !== menuId) m.classList.add('hidden');
+      });
+      document.getElementById(menuId).classList.toggle('hidden');
+    }
+    
+    // Close dropdowns if clicked outside
+    document.addEventListener('click', (e) => {
+      if(!e.target.innerText || e.target.innerText !== '⋮') {
+        document.querySelectorAll('.kebab-menu').forEach(m => m.classList.add('hidden'));
+      }
+    });
+
+    function startUnifiedConsult(patientId, patientName) {
+      // Set the active consult tab
+      const consultBtn = document.getElementById('tabConsult');
+      consultBtn.style.display = 'block'; // Make it visible
+      switchClinicTab('consult');
+      
+      // Load patient details (reusing existing functions if available)
+      window.EMRContext.patient = { id: patientId, name: patientName };
+      document.getElementById('patName').innerText = patientName;
+      document.getElementById('patDetails').innerText = "ID: " + patientId;
+      document.getElementById('composer').innerHTML = '';
+      document.getElementById('timelineFeed').innerHTML = '<p style="color: #6b7280; font-size: 14px;">Fetching history...</p>';
+    }
+
+    // Overwrite switchClinicTab to handle the 3 workspace tabs
+    function old_switchClinicTab(tab) {
+      const btnWaiting = document.getElementById('tabWaiting');
+      const btnConsult = document.getElementById('tabConsult');
+      const btnRecords = document.getElementById('tabRecords');
+      
+      const contentWaiting = document.getElementById('waitingListTabContent');
+      const contentConsult = document.getElementById('consultTabContent');
+      const contentRecords = document.getElementById('recordsTabContent');
+      
+      // Reset
+      [btnWaiting, btnConsult, btnRecords].forEach(btn => {
+         if(btn) { btn.style.background = 'transparent'; btn.style.color = '#6b7280'; btn.style.boxShadow = 'none'; }
+      });
+      [contentWaiting, contentConsult, contentRecords].forEach(c => {
+         if(c) c.classList.add('hidden');
+      });
+      
+      // Activate
+      const activeBtn = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
+      const activeContent = document.getElementById(tab + 'TabContent');
+      
+      if(activeBtn) {
+        activeBtn.style.background = 'white';
+        activeBtn.style.color = '#0B5E7E';
+        activeBtn.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+      }
+      if(activeContent) activeContent.classList.remove('hidden');
+    }
+
+    // --- RECORDS UNIT LOGIC ---
+    function switchRecordsTab(tabName) {
+      // Reset buttons
+      document.querySelectorAll('[id^="recTab-"]').forEach(btn => {
+        if(btn.id !== 'recTab-register') {
+           btn.style.background = 'transparent'; btn.style.color = '#64748b'; btn.style.boxShadow = 'none';
+        }
+      });
+      // Set active button (except register which is styled differently)
+      if(tabName !== 'register') {
+        const activeBtn = document.getElementById('recTab-' + tabName);
+        activeBtn.style.background = 'white'; activeBtn.style.color = '#4f46e5'; activeBtn.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
+      }
+      
+      // Hide all contents
+      document.querySelectorAll('.rec-tab-content').forEach(c => c.classList.add('hidden'));
+      // Show active
+      document.getElementById('recContent-' + tabName).classList.remove('hidden');
+      
+      if(tabName === 'patients') {
+        loadRecordsData(); // Refresh data when opening tab
+      }
+    }
+
+    async function loadRecordsData() {
+      try {
+        const res = await fetch('/api/patients');
+        if(!res.ok) return;
+        const patients = await res.json();
+        
+        // 1. Update Summary Cards
+        document.getElementById('recStat-total').innerText = patients.length;
+        const males = patients.filter(p => p.gender && p.gender.toLowerCase() === 'male').length;
+        const females = patients.filter(p => p.gender && p.gender.toLowerCase() === 'female').length;
+        document.getElementById('recStat-male').innerText = males;
+        document.getElementById('recStat-female').innerText = females;
+        
+        // Mock new patients count
+        document.getElementById('recStat-new').innerText = Math.floor(patients.length / 4) || 1;
+        
+        // 2. Render Modern Table
+        const tbody = document.getElementById('recPatientsBody');
+        tbody.innerHTML = '';
+        document.getElementById('recShowingCount').innerText = patients.length;
+        
+        patients.forEach(p => {
+          const hospId = p.id;
+          const statusBadge = `<span style="background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; border: 1px solid #bbf7d0;">Active</span>`;
+          
+          const tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid #f1f5f9';
+          tr.style.transition = 'background 0.2s';
+          tr.onmouseover = () => tr.style.background = '#f8fafc';
+          tr.onmouseout = () => tr.style.background = 'transparent';
+          
+          tr.innerHTML = `
+            <td style="padding: 16px 24px; font-family: monospace; font-size: 14px; font-weight: 600; color: #475569;">${hospId}</td>
+            <td style="padding: 16px 24px; font-weight: 700; color: #0f172a;">${p.name}</td>
+            <td style="padding: 16px 24px; color: #64748b; font-size: 14px;">${p.gender || '-'}</td>
+            <td style="padding: 16px 24px; color: #64748b; font-size: 14px;">${p.phone || '-'}</td>
+            <td style="padding: 16px 24px;">${statusBadge}</td>
+            <td style="padding: 16px 24px;">
+              <button class="icon-btn" style="background: #f1f5f9; border-radius: 6px; padding: 6px 10px; color: #4f46e5; font-size: 14px; font-weight: 600;" onclick="switchEmrView('omniBar'); document.getElementById('mpiSearch').value='${hospId}'; debounceSearch();">View</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+        
+      } catch(e) {
+        console.error(e);
+      }
+    }
+
+    function filterRecordsTable() {
+      const q = document.getElementById('recSearchInput').value.toLowerCase();
+      const rows = document.getElementById('recPatientsBody').querySelectorAll('tr');
+      let visible = 0;
+      rows.forEach(row => {
+        if(row.innerText.toLowerCase().includes(q)) {
+          row.style.display = '';
+          visible++;
+        } else {
+          row.style.display = 'none';
+        }
+      });
+      document.getElementById('recShowingCount').innerText = visible;
+    }
+
+    function nextStep(step) {
+      // Hide all forms
+      document.querySelectorAll('.step-form').forEach(f => f.classList.add('hidden'));
+      document.getElementById('stepForm-' + step).classList.remove('hidden');
+      
+      // Update progress bar width
+      const prog = document.getElementById('stepProgress');
+      if(step === 1) prog.style.width = '0%';
+      if(step === 2) prog.style.width = '50%';
+      if(step === 3) prog.style.width = '100%';
+      
+      // Update indicators
+      for(let i=1; i<=3; i++) {
+        const ind = document.getElementById('stepInd-' + i);
+        const circle = ind.children[0];
+        const label = ind.children[1];
+        if(i <= step) {
+          circle.style.background = '#4f46e5';
+          circle.style.color = 'white';
+          label.style.color = '#0f172a';
+        } else {
+          circle.style.background = '#e2e8f0';
+          circle.style.color = '#64748b';
+          label.style.color = '#64748b';
+        }
+      }
+    }
+    
+    async function submitWizard() {
+      const name = document.getElementById('wizFirst').value + ' ' + document.getElementById('wizLast').value;
+      const dob = document.getElementById('wizDob').value;
+      const gender = document.getElementById('wizSex').value;
+      const phone = document.getElementById('wizPhone').value;
+      
+      if(!document.getElementById('wizFirst').value || !document.getElementById('wizLast').value) {
+        alert("Please enter First and Last Name.");
+        return;
+      }
+      
+      // Fake submit (just loading omnibar logic)
+      document.getElementById('regName').value = name;
+      document.getElementById('regDob').value = dob;
+      document.getElementById('regGender').value = gender;
+      document.getElementById('regPhone').value = phone;
+      
+      await submitQuickRegister(); // Reuse existing quick register API logic
+      
+      showToast("Patient Registered Successfully! ID created.");
+      
+      // Reset wizard & go back to list
+      document.querySelectorAll('.step-form input').forEach(i => i.value='');
+      nextStep(1);
+      switchRecordsTab('patients');
+    }
+
     let currentClinicContext = "GOPD";
     
-    function enterClinic(clinicName) {
+    function old_enterClinic(clinicName) {
       currentClinicContext = clinicName;
       document.getElementById('clinicHeaderTitle').innerText = clinicName + ' Workspace';
       switchEmrView('workspace');
       switchClinicTab('consult');
     }
 
-    function switchClinicTab(tab) {
+    function old_switchClinicTab(tab) {
       const btnConsult = document.getElementById('tabConsult');
       const btnRecords = document.getElementById('tabRecords');
       const contentConsult = document.getElementById('consultTabContent');
