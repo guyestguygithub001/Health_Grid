@@ -694,6 +694,21 @@
     // ── Live Backend Integration ─────────────────────────────────────
     const API_URL = '/api';
 
+    // Global Fetch Interceptor to attach Authorization header automatically
+    const originalFetch = window.fetch;
+    window.fetch = async function() {
+      let [resource, config] = arguments;
+      if (typeof resource === 'string' && resource.startsWith('/api/') && !resource.startsWith('/api/v1/auth/') && !resource.startsWith('/api/v2/auth/')) {
+        config = config || {};
+        config.headers = config.headers || {};
+        const token = localStorage.getItem('ehr_admin_token');
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
+      }
+      return originalFetch(resource, config);
+    };
+
     async function fetchLivePhcData() {
       try {
         // Fetch Summary Stats
