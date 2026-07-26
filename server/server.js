@@ -294,6 +294,8 @@ function validateIcd11Cluster(expression) {
   for (const extCode of extensionCodes) {
     const ext = ICD11_DB.extensions[extCode];
     if (!ext) return { isValid: false, error: `Invalid extension: ${extCode}` };
+    validatedExtensions.push(ext);
+  }
   return { isValid: true, stem: { code: stemCode, title: stem.title }, extensions: validatedExtensions, formattedDisplay: stem.title + (validatedExtensions.length ? ", " + validatedExtensions.map(e => e.title).join(", ") : "") };
 }
 
@@ -304,12 +306,6 @@ function queueDatabaseWrite(data) {
   writeBatchQueue.push(data);
   if (writeBatchQueue.length >= 5) { _writeFile(writeBatchQueue.shift()); }
 }
-
-async function _handleRequest(req, res, pathname, ip, url) {
-  // Acquire a DB connection from the simulated pool (Scaling branch 1: Connection vs Capacity)
-  await acquireConnection();
-  try {
-    // ── 1. Security & Pre-flight ─────────────────────────────────────────────────
 
 // ─── Billing ─────────────────────────────────────────────────
 const serviceCosts = { "Triage": 500, "Outpatient": 1000, "Emergency": 3000, "Wards": 5000, "Laboratory": 2000, "Pharmacy": 1200, "Radiology": 4500, "ANC and Maternity": 1000, "Immunization": 300, "Theatre": 15000, "Claims": 200, "Referrals": 800, "Consultation": 1500, "Appointment": 500 };
