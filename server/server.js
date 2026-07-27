@@ -701,7 +701,26 @@ async function handleApi(req, res, url) {
   if (!data.billing) data.billing = [];
   if (!data.appointments) data.appointments = [];
   if (!data.labResults) data.labResults = [];
-  if (!data.beds) data.beds = [];
+  if (!data.beds || data.beds.length === 0) {
+      data.beds = [
+          { id: "A1", ward: "Male Ward", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "A2", ward: "Male Ward", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "A3", ward: "Male Ward", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "A4", ward: "Male Ward", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "F1", ward: "Female Ward", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "F2", ward: "Female Ward", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "F3", ward: "Female Ward", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "F4", ward: "Female Ward", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "P1", ward: "Pediatric Ward", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "P2", ward: "Pediatric Ward", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "P3", ward: "Pediatric Ward", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "P4", ward: "Pediatric Ward", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "ICU-1", ward: "Intensive Care Unit (ICU)", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "ICU-2", ward: "Intensive Care Unit (ICU)", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "ICU-3", ward: "Intensive Care Unit (ICU)", status: "Available", patientId: null, admissionId: null, patientName: null },
+          { id: "ICU-4", ward: "Intensive Care Unit (ICU)", status: "Available", patientId: null, admissionId: null, patientName: null }
+      ];
+  }
   if (!data.pendingAdmissions) data.pendingAdmissions = [];
   if (!data.labCatalog) data.labCatalog = [
       { id: "LAB-01", category: "Hematology", name: "Full Blood Count (FBC)", price: 4000 },

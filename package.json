@@ -17,6 +17,7 @@
   "author": "Daniel Kingsley Ene",
   "license": "MIT",
   "dependencies": {
+    "acorn": "^8.17.0",
     "bullmq": "^5.81.1",
     "connect-redis": "^9.0.0",
     "express-session": "^1.19.0",

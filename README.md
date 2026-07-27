@@ -57,11 +57,15 @@ We conducted a comprehensive legal audit and built a dedicated Legal and Complia
 * Replaced the harsh dark mode with a pristine, sleek white background to make colorful emojis and unit text highly readable.
 * Added smooth, animated toggle buttons (`☰`) that gracefully slide the sidebars from an expanded 260px view down to a clean 72px icon-only layout.
 
+9. Inpatient Wards & Nursing Triage Upgrades (V2)
+* **Direct Admissions & Bed Board**: Migrated the legacy auto-admission system into a manual Nurse Handover process. The EMR now features a split-pane Bed Board and a "Direct Admission (Walk-In)" button for booking admissions directly to the ward.
+* **Triage Workstation Modal**: Built a highly interactive slide-out Triage panel triggered by clicking occupied beds, featuring live Vitals logging, a Universal Patient Timeline, and Official Discharge execution logic.
+* **Live Ancillary Carts**: Completely eliminated mockups in the Laboratory and Pharmacy, replacing them with dynamic catalogs fetched securely via `/api/v2/emr/lab-catalog`.
+* **EMR Access Controls**: Embedded a sleek Role-Based Access Control (RBAC) dropdown directly inside the EMR Sidebar to filter views between System Admin, Nurse Workstation, Physician, and ancillary staff.
+
 ## How to Run Locally (Docker)
 
 1. Ensure Docker Desktop is running on your machine.
 2. Run `docker-compose up -d --build` in the terminal.
 3. Open `http://localhost:8082` in your browser.
 4. (Optional) Run `docker-compose logs -f` to see the real-time server and worker logs.
-
-
