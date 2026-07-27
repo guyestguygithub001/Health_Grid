@@ -1122,7 +1122,7 @@
     };
 
 
-    // ── EHR: Inpatient Wards (GET /api/beds)
+    // ── EHR: Inpatient Wards (GET /api/v2/beds)
     async function fetchLiveWards() {
       try {
         const resOrders = await fetch(`${API_URL}/orders`);
@@ -1178,7 +1178,7 @@
       } catch (err) {}
     }
 
-    // ── EHR: Labs & Diagnostics (GET /api/orders)
+    // ── EHR: Labs & Diagnostics (GET /api/v2/orders)
     async function fetchLiveLabs() {
       try {
         const res = await fetch(`${API_URL}/orders`);
@@ -1238,7 +1238,7 @@
       } catch (err) {}
     }
 
-    // ── EHR: Billing (GET /api/billing)
+    // ── EHR: Billing (GET /api/v2/billing)
     async function fetchLiveBilling() {
       try {
         const res = await fetch(`${API_URL}/billing`);
@@ -1278,7 +1278,7 @@
       if (viewId === 'billingView') fetchLiveBilling();
     };
 
-    // ── Vitals & Triage (POST /api/encounters)
+    // ── Vitals & Triage (POST /api/v2/encounters)
     async function submitVitals(e) {
       e.preventDefault();
       const patientId = document.getElementById('triagePatientId').value;
@@ -1319,7 +1319,7 @@
       }
     }
 
-    // ── Clinical Encounters (GET /api/encounters)
+    // ── Clinical Encounters (GET /api/v2/encounters)
     async function fetchLiveEncounters() {
       try {
         const res = await fetch(`${API_URL}/encounters`);
@@ -1388,7 +1388,7 @@
           
           aiDebounceTimer = setTimeout(async () => {
             try {
-              const res = await fetch(`/api/v1/emr/ai/suggest`, {
+              const res = await fetch(`/api/v2/emr/ai/suggest`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ text })
@@ -1436,7 +1436,7 @@
 
       try {
         for (const order of ordersToPost) {
-          await fetch('http://localhost:8082/api/orders', {
+          await fetch('http://localhost:8082/api/v2/orders', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ patientId, type: order.type, item: order.item, priority: order.priority, orderedBy: "Physician" })
@@ -1471,7 +1471,7 @@
       if (viewId === 'encountersView') fetchLiveEncounters();
     };
 
-    // ── MCH (POST /api/appointments)
+    // ── MCH (POST /api/v2/appointments)
     async function submitMch(e) {
       e.preventDefault();
       const payload = {

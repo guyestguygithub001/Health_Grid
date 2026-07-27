@@ -525,7 +525,7 @@
     regBtn.textContent = "Creating Account…";
 
     try {
-      const res = await fetch("/api/patient/register", {
+      const res = await fetch("/api/v2/patient/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, phone, age, sex })
@@ -583,7 +583,7 @@
     loginBtn.textContent = "Signing in…";
 
     try {
-      const res = await fetch("/api/patient/login", {
+      const res = await fetch("/api/v2/patient/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, patientId })
@@ -649,7 +649,7 @@
     let data = payload;
     if (!data.consultations) {
       try {
-        const r = await fetch(`/api/patient/dashboard/${patient.id}?phone=${encodeURIComponent(patientSession.phone)}`);
+        const r = await fetch(`/api/v2/patient/dashboard/${patient.id}?phone=${encodeURIComponent(patientSession.phone)}`);
         data = await r.json();
       } catch (_) {}
     }
@@ -765,7 +765,7 @@
     if (session) {
       patientSession = session;
       try {
-        const res = await fetch(`/api/patient/dashboard/${session.patientId}?phone=${encodeURIComponent(session.phone)}`);
+        const res = await fetch(`/api/v2/patient/dashboard/${session.patientId}?phone=${encodeURIComponent(session.phone)}`);
         if (res.ok) {
           const data = await res.json();
           if (data.patient) { await loadDashboard(data.patient, data); return; }

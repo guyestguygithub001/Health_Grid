@@ -709,14 +709,14 @@ async function handleApi(req, res, url) {
   if (req.method === "OPTIONS") { sendJson(res, 200, { ok: true }); return; }
 
   // ── Summary
-  if (req.method === "GET" && url.pathname === "/api/summary") { sendJson(res, 200, buildSummary(data)); return; }
+  if (req.method === "GET" && url.pathname === "/api/v2/summary") { sendJson(res, 200, buildSummary(data)); return; }
   // ── Analytics
-  if (req.method === "GET" && url.pathname === "/api/analytics") { sendJson(res, 200, buildAnalytics(data)); return; }
+  if (req.method === "GET" && url.pathname === "/api/v2/analytics") { sendJson(res, 200, buildAnalytics(data)); return; }
   // ── Facilities
-  if (req.method === "GET" && url.pathname === "/api/facilities") { sendJson(res, 200, data.facilities); return; }
+  if (req.method === "GET" && url.pathname === "/api/v2/facilities") { sendJson(res, 200, data.facilities); return; }
   // ── Patients
-  if (req.method === "GET" && url.pathname === "/api/patients") { sendJson(res, 200, data.patients); return; }
-  if (req.method === "POST" && url.pathname === "/api/patients") {
+  if (req.method === "GET" && url.pathname === "/api/v2/patients") { sendJson(res, 200, data.patients); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/patients") {
     const body = await collectBody(req);
     const patient = { id: nextId("PT", data.patients), name: body.name || "Unnamed", sex: body.sex || "Unknown", age: Number(body.age || 0), dateOfBirth: body.dateOfBirth || "", bloodGroup: body.bloodGroup || "", phone: body.phone || "", address: body.address || "", occupation: body.occupation || "", lga: body.lga || "", community: body.community || "", facilityId: body.facilityId || "FAC-PLSH", insurance: body.insurance || "Private Pay", risk: body.risk || "Routine", allergies: String(body.allergies || "").split(",").map(s => s.trim()).filter(Boolean), nextOfKin: body.nextOfKin || "", nextOfKinPhone: body.nextOfKinPhone || "", lastVisit: new Date().toISOString().slice(0, 10) };
     data.patients.unshift(patient);
@@ -725,7 +725,7 @@ async function handleApi(req, res, url) {
     return;
   }
   // ── Patient Timeline
-  if (req.method === "GET" && url.pathname.startsWith("/api/patients/") && url.pathname.endsWith("/timeline")) {
+  if (req.method === "GET" && url.pathname.startsWith("/api/v2/patients/") && url.pathname.endsWith("/timeline")) {
     const patientId = url.pathname.split("/")[3];
     const patient = data.patients.find(p => p.id === patientId);
     if (!patient) { sendJson(res, 404, { error: "Patient not found" }); return; }
@@ -743,8 +743,8 @@ async function handleApi(req, res, url) {
     return;
   }
   // ── Encounters
-  if (req.method === "GET" && url.pathname === "/api/encounters") { sendJson(res, 200, data.encounters); return; }
-  if (req.method === "POST" && url.pathname === "/api/encounters") {
+  if (req.method === "GET" && url.pathname === "/api/v2/encounters") { sendJson(res, 200, data.encounters); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/encounters") {
     const body = await collectBody(req);
     const encounter = { id: nextId("ENC", data.encounters), patientId: body.patientId, facilityId: body.facilityId, unit: body.unit || "OPD", date: new Date().toISOString().slice(0, 10), doctorId: body.doctorId || "", duration: Number(body.duration || 0), chiefComplaint: body.chiefComplaint || "", vitals: body.vitals || {}, assessment: body.assessment || "", plan: body.plan || "", status: body.status || "Open", icd11Code: body.icd11Code || "", icd11Display: body.icd11Display || "", labResultIds: [], earlyWarningScore: body.earlyWarningScore || null, readmissionRisk: body.readmissionRisk || null, dischargeNote: "" };
     data.encounters.unshift(encounter);
@@ -755,8 +755,8 @@ async function handleApi(req, res, url) {
     return;
   }
   // ── Orders
-  if (req.method === "GET" && url.pathname === "/api/orders") { sendJson(res, 200, data.orders); return; }
-  if (req.method === "POST" && url.pathname === "/api/orders") {
+  if (req.method === "GET" && url.pathname === "/api/v2/orders") { sendJson(res, 200, data.orders); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/orders") {
     const body = await collectBody(req);
     const order = { id: nextId("ORD", data.orders), patientId: body.patientId, type: body.type || "Laboratory", item: body.item || "Unspecified", priority: body.priority || "Routine", status: "Pending", facilityId: body.facilityId || "FAC-PLSH", orderedBy: body.orderedBy || "", date: new Date().toISOString().slice(0, 10) };
     data.orders.unshift(order);
@@ -765,8 +765,8 @@ async function handleApi(req, res, url) {
     return;
   }
   // ── Appointments
-  if (req.method === "GET" && url.pathname === "/api/appointments") { sendJson(res, 200, data.appointments); return; }
-  if (req.method === "POST" && url.pathname === "/api/appointments") {
+  if (req.method === "GET" && url.pathname === "/api/v2/appointments") { sendJson(res, 200, data.appointments); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/appointments") {
     const body = await collectBody(req);
     const apt = { id: nextId("APT", data.appointments), patientId: body.patientId, facilityId: body.facilityId, department: body.department || "OPD", doctor: body.doctor || "", date: body.date, time: body.time || "08:00", reason: body.reason || "", status: "Scheduled", notes: body.notes || "" };
     data.appointments.unshift(apt);
@@ -775,7 +775,7 @@ async function handleApi(req, res, url) {
     sendJson(res, 201, apt);
     return;
   }
-  if (req.method === "POST" && url.pathname === "/api/appointments/status") {
+  if (req.method === "POST" && url.pathname === "/api/v2/appointments/status") {
     const body = await collectBody(req);
     const apt = data.appointments.find(a => a.id === body.id);
     if (apt) { apt.status = body.status; queueDatabaseWrite(data); sendJson(res, 200, apt); }
@@ -783,8 +783,8 @@ async function handleApi(req, res, url) {
     return;
   }
   // ── Lab Results
-  if (req.method === "GET" && url.pathname === "/api/labresults") { sendJson(res, 200, data.labResults); return; }
-  if (req.method === "POST" && url.pathname === "/api/labresults") {
+  if (req.method === "GET" && url.pathname === "/api/v2/labresults") { sendJson(res, 200, data.labResults); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/labresults") {
     const body = await collectBody(req);
     const hasCritical = (body.tests || []).some(t => t.interpretation === "Critical");
     const lr = { id: nextId("LAB", data.labResults), patientId: body.patientId, orderId: body.orderId || "", facilityId: body.facilityId, date: new Date().toISOString().slice(0, 10), tests: body.tests || [], technician: body.technician || "", notes: body.notes || "", criticalFlag: hasCritical };
@@ -795,8 +795,8 @@ async function handleApi(req, res, url) {
     return;
   }
   // ── Beds
-  if (req.method === "GET" && url.pathname === "/api/beds") { sendJson(res, 200, data.beds); return; }
-  if (req.method === "POST" && url.pathname === "/api/beds/admit") {
+  if (req.method === "GET" && url.pathname === "/api/v2/beds") { sendJson(res, 200, data.beds); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/beds/admit") {
     const body = await collectBody(req);
     const bed = data.beds.find(b => b.id === body.bedId);
     if (!bed) { sendJson(res, 404, { error: "Bed not found" }); return; }
@@ -809,7 +809,7 @@ async function handleApi(req, res, url) {
     sendJson(res, 201, { bed, admission });
     return;
   }
-  if (req.method === "POST" && url.pathname === "/api/beds/discharge") {
+  if (req.method === "POST" && url.pathname === "/api/v2/beds/discharge") {
     const body = await collectBody(req);
     const admission = data.admissions.find(a => a.id === body.admissionId);
     if (!admission) { sendJson(res, 404, { error: "Admission not found" }); return; }
@@ -821,16 +821,16 @@ async function handleApi(req, res, url) {
     return;
   }
   // ── Reports
-  if (req.method === "GET" && url.pathname === "/api/reports") { sendJson(res, 200, { summary: buildSummary(data), inventory: data.inventory, surveillance: data.surveillance, facilities: data.facilities.map(f => ({ id: f.id, name: f.name, lga: f.lga, openEncounters: data.encounters.filter(e => e.facilityId === f.id && e.status !== "Closed").length, orders: data.orders.filter(o => o.facilityId === f.id).length })) }); return; }
+  if (req.method === "GET" && url.pathname === "/api/v2/reports") { sendJson(res, 200, { summary: buildSummary(data), inventory: data.inventory, surveillance: data.surveillance, facilities: data.facilities.map(f => ({ id: f.id, name: f.name, lga: f.lga, openEncounters: data.encounters.filter(e => e.facilityId === f.id && e.status !== "Closed").length, orders: data.orders.filter(o => o.facilityId === f.id).length })) }); return; }
   // ── Billing
-  if (req.method === "GET" && url.pathname === "/api/billing") { sendJson(res, 200, data.billing); return; }
-  if (req.method === "POST" && url.pathname === "/api/billing") { const body = await collectBody(req); const bill = createAutoBill(data, body.patientId, body.service, body.description); queueDatabaseWrite(data); sendJson(res, 201, bill); return; }
-  if (req.method === "POST" && url.pathname === "/api/billing/status") { const body = await collectBody(req); const bill = data.billing.find(b => b.id === body.id); if (bill) { bill.status = body.status; queueDatabaseWrite(data); sendJson(res, 200, bill); } else sendJson(res, 404, { error: "Bill not found" }); return; }
+  if (req.method === "GET" && url.pathname === "/api/v2/billing") { sendJson(res, 200, data.billing); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/billing") { const body = await collectBody(req); const bill = createAutoBill(data, body.patientId, body.service, body.description); queueDatabaseWrite(data); sendJson(res, 201, bill); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/billing/status") { const body = await collectBody(req); const bill = data.billing.find(b => b.id === body.id); if (bill) { bill.status = body.status; queueDatabaseWrite(data); sendJson(res, 200, bill); } else sendJson(res, 404, { error: "Bill not found" }); return; }
   // ── Theatre
-  if (req.method === "GET" && url.pathname === "/api/theatre") { sendJson(res, 200, data.theatreBookings || []); return; }
+  if (req.method === "GET" && url.pathname === "/api/v2/theatre") { sendJson(res, 200, data.theatreBookings || []); return; }
   // ── Consultations
-  if (req.method === "GET" && url.pathname === "/api/consultations") { sendJson(res, 200, data.consultations); return; }
-  if (req.method === "POST" && url.pathname === "/api/consultations") {
+  if (req.method === "GET" && url.pathname === "/api/v2/consultations") { sendJson(res, 200, data.consultations); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/consultations") {
     const body = await collectBody(req);
     const cns = { id: nextId("CNS", data.consultations), patientId: body.patientId, facilityId: body.facilityId, doctorName: body.doctorName || "Dr. Staff", specialty: body.specialty || "General Medicine", chiefComplaint: body.chiefComplaint || "", historyOfPresentingComplaint: body.historyOfPresentingComplaint || "", pastMedicalHistory: body.pastMedicalHistory || "", allergies: body.allergies || "", examinationFindings: body.examinationFindings || "", vitals: body.vitals || {}, socialHistory: body.socialHistory || "", assessment: body.assessment || "", plan: body.plan || "", icd11Code: body.icd11Code || "", icd11Display: body.icd11Display || "", prescriptions: body.prescriptions || [], date: new Date().toISOString().slice(0, 10) };
     data.consultations.unshift(cns);
@@ -840,11 +840,11 @@ async function handleApi(req, res, url) {
     return;
   }
   // ── ICD-11
-  if (req.method === "GET" && url.pathname === "/api/icd11/search") { sendJson(res, 200, searchIcd11(url.searchParams.get("q") || "")); return; }
-  if (req.method === "POST" && url.pathname === "/api/icd11/validate") { const body = await collectBody(req); sendJson(res, 200, validateIcd11Cluster(body.expression)); return; }
-  if (req.method === "GET" && url.pathname === "/api/icd11/suggest") { sendJson(res, 200, { suggestion: suggestIcd11FromSymptoms(url.searchParams.get("symptoms") || "") }); return; }
+  if (req.method === "GET" && url.pathname === "/api/v2/icd11/search") { sendJson(res, 200, searchIcd11(url.searchParams.get("q") || "")); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/icd11/validate") { const body = await collectBody(req); sendJson(res, 200, validateIcd11Cluster(body.expression)); return; }
+  if (req.method === "GET" && url.pathname === "/api/v2/icd11/suggest") { sendJson(res, 200, { suggestion: suggestIcd11FromSymptoms(url.searchParams.get("symptoms") || "") }); return; }
   // ── FHIR
-  if (req.method === "GET" && url.pathname.startsWith("/api/fhir/Condition/")) {
+  if (req.method === "GET" && url.pathname.startsWith("/api/v2/fhir/Condition/")) {
     const id = url.pathname.split("/").pop();
     const enc = data.encounters.find(e => e.id === id);
     if (!enc) { sendJson(res, 404, { error: "Encounter not found" }); return; }
@@ -855,16 +855,16 @@ async function handleApi(req, res, url) {
     return;
   }
   // ── Clinical Endpoints
-  if (req.method === "POST" && url.pathname === "/api/support/scrub") { const body = await collectBody(req); sendJson(res, 200, scrubClinicalNote(body)); return; }
-  if (req.method === "POST" && url.pathname === "/api/support/inquiry") { const body = await collectBody(req); sendJson(res, 200, answerClinicalInquiry(body.question)); return; }
-  if (req.method === "POST" && url.pathname === "/api/support/autonote") { const body = await collectBody(req); sendJson(res, 200, generateAutoNote(body)); return; }
-  if (req.method === "POST" && url.pathname === "/api/support/triage") { const body = await collectBody(req); sendJson(res, 200, triageSymptoms(body)); return; }
-  if (req.method === "POST" && url.pathname === "/api/support/ews") { const body = await collectBody(req); sendJson(res, 200, calculateEWS(body.vitals || {}, body.gcs)); return; }
-  if (req.method === "POST" && url.pathname === "/api/support/readmission-risk") { const body = await collectBody(req); sendJson(res, 200, calculateReadmissionRisk(body)); return; }
-  if (req.method === "POST" && url.pathname === "/api/support/discharge-summary") { const body = await collectBody(req); const summary = generateDischargeSummary(body); data.dischargeSummaries.push({ ...summary, createdAt: new Date().toISOString() }); queueDatabaseWrite(data); sendJson(res, 200, summary); return; }
-  if (req.method === "POST" && url.pathname === "/api/alerts/drug-check") { const body = await collectBody(req); sendJson(res, 200, checkDrugInteractions(body.drugs || [], body.allergies || [])); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/support/scrub") { const body = await collectBody(req); sendJson(res, 200, scrubClinicalNote(body)); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/support/inquiry") { const body = await collectBody(req); sendJson(res, 200, answerClinicalInquiry(body.question)); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/support/autonote") { const body = await collectBody(req); sendJson(res, 200, generateAutoNote(body)); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/support/triage") { const body = await collectBody(req); sendJson(res, 200, triageSymptoms(body)); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/support/ews") { const body = await collectBody(req); sendJson(res, 200, calculateEWS(body.vitals || {}, body.gcs)); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/support/readmission-risk") { const body = await collectBody(req); sendJson(res, 200, calculateReadmissionRisk(body)); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/support/discharge-summary") { const body = await collectBody(req); const summary = generateDischargeSummary(body); data.dischargeSummaries.push({ ...summary, createdAt: new Date().toISOString() }); queueDatabaseWrite(data); sendJson(res, 200, summary); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/alerts/drug-check") { const body = await collectBody(req); sendJson(res, 200, checkDrugInteractions(body.drugs || [], body.allergies || [])); return; }
   // ── Generic Update Record Endpoint
-  if (req.method === "POST" && url.pathname === "/api/update-record") {
+  if (req.method === "POST" && url.pathname === "/api/v2/update-record") {
     const body = await collectBody(req);
     const { collection, id, fields } = body;
     if (!data[collection]) { sendJson(res, 400, { error: "Invalid collection" }); return; }
@@ -900,8 +900,8 @@ function serveStatic(req, res, url) {
 async function handlePatientApi(req, res, url) {
   const data = await readDataAsync();
 
-  // POST /api/patient/register  { name, phone, age, sex, lga, community }
-  if (req.method === "POST" && url.pathname === "/api/patient/register") {
+  // POST /api/v2/patient/register  { name, phone, age, sex, lga, community }
+  if (req.method === "POST" && url.pathname === "/api/v2/patient/register") {
     const body = await collectBody(req);
     const phone = (body.phone || "").trim();
     if (!phone) {
@@ -931,8 +931,8 @@ async function handlePatientApi(req, res, url) {
     return;
   }
 
-  // POST /api/patient/login  { phone, patientId }
-  if (req.method === "POST" && url.pathname === "/api/patient/login") {
+  // POST /api/v2/patient/login  { phone, patientId }
+  if (req.method === "POST" && url.pathname === "/api/v2/patient/login") {
     const body = await collectBody(req);
     const phone     = (body.phone || "").trim();
     const patientId = (body.patientId || "").trim().toUpperCase();
@@ -952,8 +952,8 @@ async function handlePatientApi(req, res, url) {
     return;
   }
 
-  // GET /api/patient/dashboard/:patientId?phone=xxx
-  if (req.method === "GET" && url.pathname.startsWith("/api/patient/dashboard/")) {
+  // GET /api/v2/patient/dashboard/:patientId?phone=xxx
+  if (req.method === "GET" && url.pathname.startsWith("/api/v2/patient/dashboard/")) {
     const patientId = url.pathname.split("/")[4] || "";
     const phone     = (url.searchParams.get("phone") || "").trim();
     const patient   = data.patients.find(p =>
@@ -978,9 +978,9 @@ async function handlePatientApi(req, res, url) {
 //   /index.html         → homepage
 //   /portal.html        → patient portal
 //   /portal.js          → patient portal script (if any)
-//   /api/patient/*      → patient auth endpoints
+//   /api/v2/patient/*      → patient auth endpoints
 const PUBLIC_PATHS = ["/", "/index.html", "/portal.html", "/legal.html"];
-const PUBLIC_API   = "/api/patient/";
+const PUBLIC_API   = "/api/v2/patient/";
 
 
 // ============================================================================
@@ -1192,11 +1192,11 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     // ── NEW: EMR & MPI Route Interception (White Coat EMR) ─────────
-    if (pathname.startsWith("/api/v1/mpi/") || pathname.startsWith("/api/v1/emr/")) {
+    if (pathname.startsWith("/api/v2/mpi/") || pathname.startsWith("/api/v2/emr/")) {
       const data = await readDataAsync();
       
       // Node H: Read-Only MPI Search
-      if (req.method === "GET" && pathname === "/api/v1/mpi/search") {
+      if (req.method === "GET" && pathname === "/api/v2/mpi/search") {
         const q = url.searchParams.get("q") || "";
         const patients = data.patients.filter(p => 
           (p.name && p.name.toLowerCase().includes(q.toLowerCase())) || 
@@ -1207,7 +1207,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       // Timeline Load
-      if (req.method === "GET" && pathname === "/api/v1/emr/encounters") {
+      if (req.method === "GET" && pathname === "/api/v2/emr/encounters") {
         const patientId = url.searchParams.get("patientId");
         const encounters = (data.emr_encounters || []).filter(e => e.patientId === patientId);
         // Attach clinical notes
@@ -1220,7 +1220,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       // Nodes I-J: Quick Register
-      if (req.method === "POST" && pathname === "/api/v1/mpi/register") {
+      if (req.method === "POST" && pathname === "/api/v2/mpi/register") {
         const body = await collectBody(req);
         const newPatient = {
           id: `PT-${Date.now()}`,
@@ -1237,7 +1237,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       // Nodes Q-R: AI Sidecar & Floating Chips (Protected by Omni-Shield)
-      if (req.method === "POST" && pathname === "/api/v1/emr/ai/suggest") {
+      if (req.method === "POST" && pathname === "/api/v2/emr/ai/suggest") {
         const body = await collectBody(req);
         const result = await aiService.getClinicalSuggestions(body.text || "");
         
@@ -1250,7 +1250,7 @@ const server = http.createServer(async (req, res) => {
       }
 
       // Node X: Isolated Inventory Check
-      if (req.method === "GET" && pathname === "/api/v1/emr/inventory/check") {
+      if (req.method === "GET" && pathname === "/api/v2/emr/inventory/check") {
         const drug = url.searchParams.get("drug") || "";
         // Mock checking facility pharmacy schema
         if (drug.toLowerCase().includes("amoxicillin") || drug.toLowerCase().includes("augmentin")) {
@@ -1263,7 +1263,40 @@ const server = http.createServer(async (req, res) => {
       }
 
       // Node W-AB: Sign & Close Encounter (Atomic Write)
-      if (req.method === "POST" && pathname === "/api/v1/emr/encounters/finalize") {
+            if (req.method === "POST" && pathname === "/api/v2/emr/nursing-notes") {
+        const body = await collectBody(req);
+        const newEncounter = {
+          id: `NN-${Date.now()}`,
+          patientId: body.patientId,
+          admissionId: body.admissionId,
+          date: new Date().toISOString(),
+          type: "Nursing Note",
+          icd11: "",
+          icd11Display: "",
+          vitals: body.vitals || null,
+          fluid: body.fluid || null,
+          text: body.notes || "Routine ward check.",
+          status: "Closed",
+          facilityId: "FAC-JUTH"
+        };
+        data.emr_encounters = data.emr_encounters || [];
+        data.emr_encounters.push(newEncounter);
+        
+        data.emr_clinical_notes = data.emr_clinical_notes || [];
+        data.emr_clinical_notes.push({
+          id: `NOTE-${Date.now()}`,
+          encounterId: newEncounter.id,
+          patientId: body.patientId,
+          text: newEncounter.text,
+          date: newEncounter.date
+        });
+
+        queueDatabaseWrite(data);
+        sendJson(res, 201, { success: true, encounter: newEncounter });
+        return;
+      }
+
+      if (req.method === "POST" && pathname === "/api/v2/emr/encounters/finalize") {
         const body = await collectBody(req);
         // Ensure emr schemas exist in data
         if (!data.emr_encounters) data.emr_encounters = [];

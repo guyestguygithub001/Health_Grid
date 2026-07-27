@@ -764,10 +764,11 @@
 
                         <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 12px;">Log New Vitals</h4>
                         <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                            <input type="text" placeholder="HR (bpm)" style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; outline: none;">
-                            <input type="text" placeholder="BP (mmHg)" style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; outline: none;">
+                            <input type="text" id="np-hr-input" placeholder="HR (bpm)" style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; outline: none;">
+                            <input type="text" id="np-bp-input" placeholder="120/80 (BP)" style="flex: 1; padding: 12px; border: 1px solid #e2e8f0; border-radius: 6px; outline: none;">
                         </div>
-                        <button onclick="alert('Vitals logged to patient timeline!')" style="width: 100%; padding: 12px; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2);">Save Vitals</button>
+                        <button onclick="saveNursingNote('vitals')" style="width: 100%; padding: 12px; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2);">Save Vitals</button>
+                        <button onclick="saveNursingNote('text')" style="width: 100%; margin-top: 12px; padding: 12px; background: #475569; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">+ Add Observation Note</button>
                     </div>
 
                     <!-- TAB 2: MEDS & FLUIDS -->
@@ -779,12 +780,12 @@
 
                         <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Log Fluid Administration</h4>
                         <div style="background: #f8fafc; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                            <select style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 12px; outline: none; font-size: 14px; color: #0f172a;">
+                            <select id="np-fluid-select" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 12px; outline: none; font-size: 14px; color: #0f172a;">
                                 <option>0.9% Normal Saline (500ml)</option>
                                 <option>5% Dextrose (500ml)</option>
                                 <option>Ringer's Lactate (500ml)</option>
                             </select>
-                            <button onclick="alert('Fluid administration logged!')" style="width: 100%; padding: 12px; background: #8b5cf6; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2);">Log Fluid Administration</button>
+                            <button onclick="saveNursingNote('fluids')" style="width: 100%; padding: 12px; background: #8b5cf6; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2);">Log Fluid Administration</button>
                         </div>
                     </div>
 
@@ -1119,7 +1120,7 @@
         // 1. Send to Backend
         try {
             const token = sessionStorage.getItem('ehr_admin_token') || localStorage.getItem('ehr_admin_token');
-            await fetch('/api/orders', {
+            await fetch('/api/v2/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
@@ -1174,7 +1175,7 @@
     async function fetchLiveWards() {
         if (!document.getElementById('wardsView') || document.getElementById('wardsView').classList.contains('hidden')) return;
         try {
-            const res = await fetch('/api/beds');
+            const res = await fetch('/api/v2/beds');
             const beds = await res.json();
             
             // Group beds by ward
@@ -1192,7 +1193,7 @@
                 wardBeds.forEach(bed => {
                     if (bed.status === 'Occupied') {
                         html += `
-                        <div onclick="openNursesWorkstation('${bed.id}', '${bed.patientId}', '${bed.admissionId}', '${bed.ward}')" style="background: white; border: 1px solid #fecaca; border-top: 4px solid #ef4444; border-radius: 8px; padding: 16px; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <div onclick="openNursesWorkstation('${bed.id}', '${bed.patientId}', '${bed.admissionId}', '${bed.ward}', '${bed.patientName}')" style="background: white; border: 1px solid #fecaca; border-top: 4px solid #ef4444; border-radius: 8px; padding: 16px; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                                 <span style="font-weight: 800; font-size: 18px; color: #0f172a;">${bed.id}</span>
                                 <span style="font-size: 10px; background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-weight: 800;">OCCUPIED</span>
@@ -1216,26 +1217,66 @@
         } catch (e) { console.error("Failed to fetch beds", e); }
     }
 
-    async function openNursesWorkstation(bedId, patientId, admissionId, ward) {
+    async function saveNursingNote(type) {
+        const patientId = document.getElementById('np-mpi').innerText;
+        const admissionId = document.getElementById('currentAdmissionId').value;
+        const token = sessionStorage.getItem('ehr_creds');
+        
+        let payload = { patientId, admissionId };
+        
+        if (type === 'vitals') {
+            payload.vitals = { 
+                heartRate: document.getElementById('np-hr-input').value,
+                bloodPressureSystolic: document.getElementById('np-bp-input').value.split('/')[0],
+                bloodPressureDiastolic: document.getElementById('np-bp-input').value.split('/')[1]
+            };
+            payload.notes = "Vitals updated.";
+        } else if (type === 'fluids') {
+            payload.fluid = document.getElementById('np-fluid-select').value;
+            payload.notes = "Fluid administered: " + payload.fluid;
+        } else if (type === 'text') {
+            payload.notes = prompt("Enter nursing observation note:");
+            if (!payload.notes) return;
+        }
+        
+        try {
+            const res = await fetch('/api/v2/emr/nursing-notes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                showToast("Nursing record pushed to Universal Timeline!");
+                // Refresh workstation
+                const bedId = document.getElementById('np-bed').innerText;
+                const pName = document.getElementById('np-name').innerText;
+                openNursesWorkstation(bedId, patientId, admissionId, null, pName);
+            }
+        } catch(e) { console.error(e); }
+    }
+
+    async function openNursesWorkstation(bedId, patientId, admissionId, ward, patientName) {
         document.getElementById('nursingPanel').style.opacity = '1'; document.getElementById('nursingPanel').style.pointerEvents = 'auto'; document.getElementById('nursingPanel').style.transform = 'translate(-50%, -50%) scale(1)'; document.getElementById('nursingBackdrop').style.opacity = '1'; document.getElementById('nursingBackdrop').style.pointerEvents = 'auto';
         document.getElementById('np-bed').innerText = bedId;
         document.getElementById('np-mpi').innerText = patientId;
         document.getElementById('currentAdmissionId').value = admissionId;
+        document.getElementById('np-name').innerText = patientName || `Patient ${patientId}`;
         
         switchWorkstationTab('vitals');
 
         try {
-            // Fetch Patient Dashboard to get real vitals and E-Notes
-            const res = await fetch(`/api/patient/dashboard/${patientId}`);
-            if (!res.ok) throw new Error("Dashboard fetch failed");
+            const token = sessionStorage.getItem('ehr_creds');
+            // Fetch EMR Encounters (secure EMR API)
+            const res = await fetch(`/api/v2/emr/encounters?patientId=${patientId}`, { headers: { "Authorization": `Bearer ${token}` }});
+            if (!res.ok) throw new Error("Encounters fetch failed");
             const db = await res.json();
             
-            document.getElementById('np-name').innerText = db.patient.name.given + " " + db.patient.name.family;
+            // Get latest DOCTOR encounter for E-Notes
+            const doctorEncounters = (db.encounters || []).filter(e => e.type !== "Nursing Note");
+            const lastEnc = doctorEncounters.length > 0 ? doctorEncounters[0] : null;
             
-            // Get latest encounter for E-Notes
-            const lastEnc = db.encounters && db.encounters.length > 0 ? db.encounters[0] : null;
-            document.getElementById('np-dx').innerText = lastEnc ? lastEnc.icd11Display || lastEnc.assessment : "No Diagnosis";
-            document.getElementById('np-enotes').innerText = lastEnc ? (lastEnc.plan || lastEnc.chiefComplaint) : "No clinical notes available.";
+            document.getElementById('np-dx').innerText = lastEnc ? lastEnc.icd11Display || "Observation" : "No Diagnosis";
+            document.getElementById('np-enotes').innerText = lastEnc ? (lastEnc.text) : "No clinical notes available.";
             
             if (lastEnc && lastEnc.vitals) {
                 document.getElementById('np-hr').innerText = lastEnc.vitals.heartRate || "--";
@@ -1275,7 +1316,7 @@
 
         try {
             const token = sessionStorage.getItem('ehr_admin_token') || localStorage.getItem('ehr_admin_token');
-            await fetch('/api/beds/discharge', {
+            await fetch('/api/v2/beds/discharge', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ admissionId: admissionId, dischargedBy: "Nurses Workstation" })
@@ -1294,7 +1335,7 @@
     async function fetchLiveInventory() {
         if (!document.getElementById('pharmacyView') || document.getElementById('pharmacyView').classList.contains('hidden')) return;
         try {
-            const res = await fetch('/api/reports');
+            const res = await fetch('/api/v2/reports');
             const db = await res.json();
             
             const tbody = document.getElementById('pharmacyInventoryBody');
@@ -1386,7 +1427,7 @@
     async function fetchLiveAncillaryOrders() {
         try {
             const token = sessionStorage.getItem('ehr_admin_token') || localStorage.getItem('ehr_admin_token');
-            const res = await fetch('/api/orders', {
+            const res = await fetch('/api/v2/orders', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (!res.ok) return;
@@ -1445,7 +1486,7 @@
       
       try {
         // Fetch all patients and mock a queue for this specific department
-        const res = await fetch('/api/patients');
+        const res = await fetch('/api/v2/patients');
         if(!res.ok) throw new Error("API failed");
         const allPatients = await res.json();
         
@@ -1594,7 +1635,7 @@
 
     async function loadRecordsData() {
       try {
-        const res = await fetch('/api/patients');
+        const res = await fetch('/api/v2/patients');
         if(!res.ok) return;
         const patients = await res.json();
         
@@ -1857,7 +1898,7 @@
       
       const token = sessionStorage.getItem("ehr_creds");
       try {
-        const res = await fetch(`/api/v1/mpi/search?q=${encodeURIComponent(q)}`, {
+        const res = await fetch(`/api/v2/mpi/search?q=${encodeURIComponent(q)}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         const data = await res.json();
@@ -1892,7 +1933,7 @@
       
       const token = sessionStorage.getItem("ehr_creds");
       try {
-        const res = await fetch(`/api/v1/mpi/register`, {
+        const res = await fetch(`/api/v2/mpi/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
           body: JSON.stringify({ name, dob, gender, phone })
@@ -1959,17 +2000,26 @@
     async function loadTimeline(patientId) {
       const token = sessionStorage.getItem("ehr_creds");
       try {
-        const res = await fetch(`/api/v1/emr/encounters?patientId=${patientId}`, {
+        const res = await fetch(`/api/v2/emr/encounters?patientId=${patientId}`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         const data = await res.json();
         const feed = document.getElementById("timelineFeed");
         if (data.encounters && data.encounters.length > 0) {
           feed.innerHTML = data.encounters.map(e => `
-            <div class="timeline-item">
+            <div class="timeline-item" style="${e.type === 'Nursing Note' ? 'border-left-color: #0ea5e9;' : ''}">
               <div class="timeline-date">${new Date(e.date).toLocaleDateString()} - ${e.id}</div>
-              <div class="timeline-dx">${e.icd11 ? `ICD-11: ${e.icd11}` : `ICD-10: ${e.icd10 || 'N/A'}`}</div>
-              <div style="font-size: 13px; color: #4b5563; margin-top:8px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${e.text}</div>
+              ${e.type === 'Nursing Note' 
+                ? `<div style="display: inline-block; background: #e0f2fe; color: #0284c7; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; margin-bottom: 8px; letter-spacing: 0.05em; border: 1px solid #bae6fd;">🩺 NURSING LOG</div>`
+                : `<div class="timeline-dx">${e.icd11 ? `ICD-11: ${e.icd11}` : `Observation: ${e.icd11Display || 'N/A'}`}</div>`
+              }
+              <div style="font-size: 13px; color: #4b5563; margin-top:8px; line-height: 1.5;">
+                ${e.type === 'Nursing Note' ? (
+                  (e.vitals ? `<span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:600; color:#334155; margin-right:8px; font-size: 12px;">❤️ HR: ${e.vitals.heartRate}</span><span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:600; color:#334155; font-size: 12px; margin-bottom: 8px; display:inline-block;">🩸 BP: ${e.vitals.bloodPressureSystolic}/${e.vitals.bloodPressureDiastolic}</span><br>` : '') +
+                  (e.fluid ? `<b>Fluid Administered:</b> ${e.fluid}<br>` : '') +
+                  (e.text || '')
+                ) : (e.text || 'No clinical notes recorded.')}
+              </div>
             </div>
           `).join('');
         } else {
@@ -2032,7 +2082,7 @@
       
       const token = sessionStorage.getItem("ehr_creds");
       try {
-        const res = await fetch(`/api/v1/emr/ai/suggest`, {
+        const res = await fetch(`/api/v2/emr/ai/suggest`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
           body: JSON.stringify({ text })
@@ -2093,7 +2143,7 @@
       if(prescriptions.length > 0) {
         try {
           // Check the first drug for mock purposes
-          const res = await fetch(`/api/v1/emr/inventory/check?drug=${encodeURIComponent(prescriptions[0])}`, {
+          const res = await fetch(`/api/v2/emr/inventory/check?drug=${encodeURIComponent(prescriptions[0])}`, {
             headers: { "Authorization": `Bearer ${token}` }
           });
           const data = await res.json();
@@ -2113,11 +2163,11 @@
       if (admitWard) {
           // Find a vacant bed in the selected ward
           try {
-              const bRes = await fetch('/api/beds');
+              const bRes = await fetch('/api/v2/beds');
               const beds = await bRes.json();
               const vacantBed = beds.find(b => b.ward === admitWard && b.status === 'Vacant');
               if (vacantBed) {
-                  await fetch('/api/beds/admit', {
+                  await fetch('/api/v2/beds/admit', {
                       method: 'POST',
                       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
                       body: JSON.stringify({ patientId: patientId, bedId: vacantBed.id, diagnosis: "Automated Admission from Consult" })
@@ -2153,7 +2203,7 @@
     async function commitEncounter(payload) {
       const token = sessionStorage.getItem("ehr_creds");
       try {
-        const res = await fetch(`/api/v1/emr/encounters/finalize`, {
+        const res = await fetch(`/api/v2/emr/encounters/finalize`, {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
           body: JSON.stringify(payload)
