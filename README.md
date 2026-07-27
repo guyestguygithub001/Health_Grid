@@ -69,3 +69,12 @@ We conducted a comprehensive legal audit and built a dedicated Legal and Complia
 2. Run `docker-compose up -d --build` in the terminal.
 3. Open `http://localhost:8082` in your browser.
 4. (Optional) Run `docker-compose logs -f` to see the real-time server and worker logs.
+
+### V2 Realtime Referrals Ledger
+- **Location:** Inside the Records Unit (`emr.html` and `admin.html`).
+- **Feature:** A massive, real-time fetching referral list mimicking legacy workflow scales.
+- **Components:**
+  - Colored KPI Cards (Overall Total, Total Accepted, Total Pending, Inbound, Outbound, Completed).
+  - High-density data tables displaying real-time inbound/outbound referral traffic.
+  - Automatic 5-second polling interval against `/api/v2/referrals` to keep data perfectly in sync across all clients and facilities without page refreshes.
+  - Quick action buttons (Accept, Reject, Complete) that fire `PUT /api/v2/referrals/:id/status` endpoints.
