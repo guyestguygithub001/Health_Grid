@@ -1020,7 +1020,7 @@
       </div>
   
   <!-- Out of Stock Modal -->
-  <div id="oosModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(2px);">
+  <div id="oosModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(2px);">
     <div class="white-card" style="width: 400px;">
       <h2 style="margin-bottom: 16px; color: #ef4444;">⚠️ Out of Stock</h2>
       <p id="oosMessage" style="margin-bottom: 24px; font-size: 15px; color: #4b5563;"></p>
@@ -2528,7 +2528,7 @@
             pendingEncounterPayload = { text, patientId, prescriptions };
             pendingSubstitute = { original: prescriptions[0], substitute: data.substitute };
             document.getElementById("oosMessage").innerText = `"${prescriptions[0]}" is out of stock. Suggested substitute: ${data.substitute}.`;
-            document.getElementById("oosModal").classList.remove("hidden");
+            document.getElementById("oosModal").style.display = "flex";
             return; // Halt flow
           }
         } catch(err) { console.error(err); }
@@ -2558,13 +2558,13 @@
     }
     
     function closeOosModal() {
-      document.getElementById("oosModal").classList.add("hidden");
+      document.getElementById("oosModal").style.display = "none";
       pendingEncounterPayload = null;
       pendingSubstitute = null;
     }
     
     async function acceptSubstitute() {
-      document.getElementById("oosModal").classList.add("hidden");
+      document.getElementById("oosModal").style.display = "none";
       if(pendingEncounterPayload && pendingSubstitute) {
         // Swap it in text
         let newText = pendingEncounterPayload.text.replace(new RegExp(`Rx:\\s*${pendingSubstitute.original}`, "g"), `Rx: ${pendingSubstitute.substitute}`);
