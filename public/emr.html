@@ -140,7 +140,7 @@
     <main id="mainContent" style="flex: 1; position: relative; overflow-y: auto;">
       
       <!-- Gatekeeper Context Modal (Overlays Everything) -->
-      <div id="contextModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);">
+      <div id="contextModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);" class="">
         <div id="facilityGate" class="white-card" style="width: 400px;">
           <h2 style="margin-bottom: 24px; color: #1f2937;">Select Facility Context</h2>
           <p style="margin-bottom: 16px; color: #4b5563;">Select your facility to load your patient roster</p>
@@ -342,7 +342,7 @@
           </div>
 
           <!-- CONSULTATION TAB (The original right/left panels) -->
-          <div id="consultTabContent" class="hidden" style="display: flex; gap: 24px; flex: 1; width: 100%; transition: opacity 0.2s;">
+          <div id="consultTabContent" class="hidden" style="display: none; gap: 24px; flex: 1; width: 100%; transition: opacity 0.2s;">
 
         <!-- Left Panel -->
         <div id="leftPanel" style="flex: 0 0 320px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
@@ -2179,11 +2179,22 @@
 
     function setContext() {
       const val = document.getElementById("facilitySelect").value;
-      if (!val) return;
+      if (!val) { alert('Please select a facility first.'); return; }
       sessionStorage.setItem("emr_facility_id", val);
-      document.getElementById("contextModal").classList.add("hidden");
+      const modal = document.getElementById("contextModal");
+      modal.style.display = 'none';
       showOmniBar();
     }
+
+    // Auto-restore context if already set
+    (function checkExistingContext() {
+      const existingFacility = sessionStorage.getItem("emr_facility_id");
+      if (existingFacility) {
+        const modal = document.getElementById("contextModal");
+        if (modal) modal.style.display = 'none';
+        showOmniBar();
+      }
+    })();
 
 
     // History API Listener for Back/Forward Navigation
@@ -2624,7 +2635,7 @@
   </script>
 
     <!-- UNIVERSAL WALK-IN MODAL -->
-    <div id="universalWalkInModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(2px);">
+    <div id="universalWalkInModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(2px);">
         <div style="background: white; border-radius: 16px; width: 500px; max-width: 90%; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
             <div id="walkInHeader" style="background: #10b981; padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
                 <h3 id="walkInTitle" style="margin: 0; font-size: 20px; font-weight: 800;">Pharmacy Walk-In Order</h3>
