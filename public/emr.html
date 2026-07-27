@@ -703,7 +703,8 @@
             </div>
 
             <!-- Slide-Out Nurses Workstation -->
-            <div id="nursingPanel" style="flex: 0 0 650px; background: white; border-radius: 12px; box-shadow: -4px 0 25px rgba(0,0,0,0.1); display: flex; flex-direction: column; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
+            <div id="nursingBackdrop" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s;"></div>
+            <div id="nursingPanel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); opacity: 0; pointer-events: none; z-index: 1000; width: 700px; max-height: 85vh; background: white; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
                 
                 <!-- Workstation Header -->
                 <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; position: relative; background: #0f172a;">
@@ -783,41 +784,7 @@
 
                 </div>
             </div>
-            <!-- Slide-Out Nursing Panel -->
-            <div id="nursingPanel" style="flex: 0 0 400px; background: white; border-radius: 12px; box-shadow: -4px 0 15px rgba(0,0,0,0.05); display: flex; flex-direction: column; transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);">
-                <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; position: relative; background: #0f172a; border-radius: 12px 12px 0 0;">
-                    <button onclick="closeNursingPanel()" style="position: absolute; right: 16px; top: 16px; background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer;">✕</button>
-                    <span id="np-bed" style="background: #334155; color: #cbd5e1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700;">Bed A1</span>
-                    <h3 id="np-name" style="font-size: 24px; font-weight: 800; color: white; margin-top: 8px;">Patient Name</h3>
-                    <p id="np-dx" style="color: #94a3b8; font-size: 14px;">Diagnosis</p>
-                </div>
-                <div style="flex: 1; padding: 24px; overflow-y: auto;">
-                    <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Live Vitals</h4>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
-                        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <p style="font-size: 11px; color: #64748b; font-weight: 700;">HEART RATE</p>
-                            <p style="font-size: 20px; font-weight: 800; color: #ef4444;">88 <span style="font-size: 12px; color: #94a3b8;">bpm</span></p>
-                        </div>
-                        <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <p style="font-size: 11px; color: #64748b; font-weight: 700;">BP</p>
-                            <p style="font-size: 20px; font-weight: 800; color: #0f172a;">120/80</p>
-                        </div>
-                    </div>
-                    
-                    <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Physician E-Notes</h4>
-                    <div style="background: #fdfce8; border-left: 4px solid #facc15; padding: 12px; border-radius: 0 8px 8px 0; margin-bottom: 12px;">
-                        <p style="font-size: 13px; color: #422006; line-height: 1.5;"><strong>Dr. Ishola:</strong> Administer 500mg Paracetamol stat. Monitor temperature every 2 hours.</p>
-                        <p style="font-size: 11px; color: #a16207; margin-top: 8px; font-weight: 600;">2 hours ago</p>
-                    </div>
-                </div>
-                <div style="padding: 16px; border-top: 1px solid #f1f5f9;">
-                    <button style="width: 100%; padding: 12px; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(14, 165, 233, 0.2);">+ Add Nursing Note</button>
-                </div>
-            </div>
-        </div>
-      </div>
-
-      <!-- VIEW 10: Records Unit (Premium Rebuild) -->
+            <!-- VIEW 10: Records Unit (Premium Rebuild) -->
       <div id="recordsMainView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
           <div>
@@ -1074,11 +1041,11 @@
         document.getElementById('np-bed').innerText = bed;
         document.getElementById('np-name').innerText = name;
         document.getElementById('np-dx').innerText = dx;
-        document.getElementById('nursingPanel').style.transform = 'translateX(0)';
+        document.getElementById('nursingPanel').style.opacity = '1'; document.getElementById('nursingPanel').style.pointerEvents = 'auto'; document.getElementById('nursingPanel').style.transform = 'translate(-50%, -50%) scale(1)'; document.getElementById('nursingBackdrop').style.opacity = '1'; document.getElementById('nursingBackdrop').style.pointerEvents = 'auto';
     }
 
     function closeNursingPanel() {
-        document.getElementById('nursingPanel').style.transform = 'translateX(120%)';
+        document.getElementById('nursingPanel').style.opacity = '0'; document.getElementById('nursingPanel').style.pointerEvents = 'none'; document.getElementById('nursingPanel').style.transform = 'translate(-50%, -50%) scale(0.95)'; document.getElementById('nursingBackdrop').style.opacity = '0'; document.getElementById('nursingBackdrop').style.pointerEvents = 'none';
     }
 
     
@@ -1234,7 +1201,7 @@
     }
 
     async function openNursesWorkstation(bedId, patientId, admissionId, ward) {
-        document.getElementById('nursingPanel').style.transform = 'translateX(0)';
+        document.getElementById('nursingPanel').style.opacity = '1'; document.getElementById('nursingPanel').style.pointerEvents = 'auto'; document.getElementById('nursingPanel').style.transform = 'translate(-50%, -50%) scale(1)'; document.getElementById('nursingBackdrop').style.opacity = '1'; document.getElementById('nursingBackdrop').style.pointerEvents = 'auto';
         document.getElementById('np-bed').innerText = bedId;
         document.getElementById('np-mpi').innerText = patientId;
         document.getElementById('currentAdmissionId').value = admissionId;
@@ -1282,7 +1249,7 @@
     }
 
     function closeNursingPanel() {
-        document.getElementById('nursingPanel').style.transform = 'translateX(120%)';
+        document.getElementById('nursingPanel').style.opacity = '0'; document.getElementById('nursingPanel').style.pointerEvents = 'none'; document.getElementById('nursingPanel').style.transform = 'translate(-50%, -50%) scale(0.95)'; document.getElementById('nursingBackdrop').style.opacity = '0'; document.getElementById('nursingBackdrop').style.pointerEvents = 'none';
     }
 
     async function dischargePatient() {
