@@ -233,7 +233,8 @@
 
   <script>
     const BASE = "";
-    const headers = { "Content-Type": "application/json", "Authorization": `Basic ${btoa("guyestguy:guyestguygithub001")}` };
+    const token = localStorage.getItem('ehr_admin_token') || sessionStorage.getItem('ehr_admin_token');
+    const headers = { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
 
     async function api(path) {
       try {

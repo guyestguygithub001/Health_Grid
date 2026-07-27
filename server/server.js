@@ -1024,7 +1024,15 @@ async function handleApi(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/v2/reports") { sendJson(res, 200, { summary: buildSummary(data), inventory: data.inventory, surveillance: data.surveillance, facilities: data.facilities.map(f => ({ id: f.id, name: f.name, lga: f.lga, openEncounters: data.encounters.filter(e => e.facilityId === f.id && e.status !== "Closed").length, orders: data.orders.filter(o => o.facilityId === f.id).length })) }); return; }
   // ── Billing
   if (req.method === "GET" && url.pathname === "/api/v2/billing") { sendJson(res, 200, data.billing); return; }
-  if (req.method === "POST" && url.pathname === "/api/v2/billing") { const body = await collectBody(req); const bill = createAutoBill(data, body.patientId, body.service, body.description); queueDatabaseWrite(data); sendJson(res, 201, bill); return; }
+  if (req.method === "POST" && url.pathname === "/api/v2/billing") { 
+    const body = await collectBody(req); 
+    // Business Logic Validation (Anti-Fraud)
+    if (body.amount !== undefined && (typeof body.amount !== 'number' || body.amount <= 0)) {
+      return sendJson(res, 400, { error: "Validation Error: Bill amount must be a positive number." });
+    }
+    const bill = createAutoBill(data, body.patientId, body.service, body.description); 
+    queueDatabaseWrite(data); sendJson(res, 201, bill); return; 
+  }
   if (req.method === "POST" && url.pathname === "/api/v2/billing/status") { const body = await collectBody(req); const bill = data.billing.find(b => b.id === body.id); if (bill) { bill.status = body.status; queueDatabaseWrite(data); sendJson(res, 200, bill); } else sendJson(res, 404, { error: "Bill not found" }); return; }
   // ── Theatre
   if (req.method === "GET" && url.pathname === "/api/v2/theatre") { sendJson(res, 200, data.theatreBookings || []); return; }
@@ -1325,14 +1333,17 @@ const server = http.createServer(async (req, res) => {
     // ── 3. Login endpoint (unauthenticated) ────────────────
     if (req.method === "POST" && pathname === "/api/v1/auth/login") {
       const body = await collectBody(req);
-      const validUser = process.env.APP_USER || "admin";
-      const validPass = process.env.APP_PASS || (() => { if(process.env.NODE_ENV === "production") { console.error("[SECURITY] APP_PASS env var not set! Server refusing to start."); process.exit(1); } return "dev_local_only_password"; })();
-      if (body.username === validUser && body.password === validPass) {
-        const token = Buffer.from(`${body.username}:${body.password}`).toString("base64");
-        sendJson(res, 200, { success: true, token, username: body.username, role: "system_admin", userId: "USR-0001" });
-      } else {
-        sendJson(res, 401, { success: false, error: "Invalid credentials" });
+      // Enterprise Auth with Password Hashing and JWT
+      const userRecord = USERS_DB[body.username];
+      if (userRecord) {
+        const attemptedHash = hashPassword(body.password, userRecord.salt);
+        if (attemptedHash === userRecord.hash) {
+          const token = signJWT({ username: body.username, role: userRecord.role });
+          sendJson(res, 200, { success: true, token, username: body.username, role: userRecord.role, userId: "USR-0001" });
+          return;
+        }
       }
+      sendJson(res, 401, { success: false, error: "Invalid credentials" });
       return;
     }
 

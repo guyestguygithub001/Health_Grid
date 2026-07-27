@@ -176,3 +176,31 @@ All V2 endpoints require `Authorization: Bearer <token>` header.
 3. Open `http://localhost:8082` in your browser.
 4. Login with credentials set in your `.env` file (`APP_USER` / `APP_PASS`).
 5. For Docker: `docker-compose up -d --build`
+
+---
+
+## 🛡️ Enterprise Cloud Posture & DevSecOps
+
+When transitioning this platform from Local Prototype to Cloud Production (e.g., AWS, Azure), the DevOps team must adhere to the following rigid security postures. The Node.js application is already hardened to support these environments natively.
+
+### 1. Secure Secrets Management
+- **Never Hardcode Secrets**: Do not commit `.env` files.
+- **Vaults**: Inject variables like `JWT_SECRET` and database credentials at runtime using AWS Secrets Manager or HashiCorp Vault.
+- **Key Rotation**: Set automated 90-day rotation policies on all cryptographic keys.
+
+### 2. Network Isolation & Cloud Posture
+- **VPC Boundaries**: The Node.js Server (`server.js`) must be deployed within a **Private Subnet** inside a Virtual Private Cloud (VPC). It should have NO public IP address.
+- **Load Balancer**: Expose the server to the internet strictly via an Application Load Balancer (ALB) acting as a reverse proxy, residing in a Public Subnet.
+- **WAF**: Attach a Web Application Firewall (WAF) to the ALB to block known malicious payloads before they reach the server.
+- **Bucket Policies**: If configuring S3 for external asset uploads in the future, explicitly set "Block Public Access" to True and use presigned URLs.
+
+### 3. CI/CD Pipeline Security
+- **SAST**: Integrate Static Application Security Testing (e.g., SonarQube) in GitHub Actions to block PRs containing vulnerable code patterns.
+- **Dependency Scanning**: Enforce `npm audit` or use Snyk to automatically scan and block deployments if CVEs are detected.
+
+### 4. Incident Response Playbook
+If a breach or zero-day exploit is suspected, activate the **Containment Strategy**:
+1. **Isolate**: Remove the compromised server from the Load Balancer target group to sever external access without destroying forensic evidence in RAM.
+2. **Review Logs**: Access the immutable `server/audit.log` via the Legal Matrix dashboard to trace the attacker's actions.
+3. **Revoke Keys**: Trigger an immediate key rotation in Secrets Manager and cycle all JWT signing keys, instantly logging out all current sessions across the hospital.
+4. **Restore**: Since `writeData` automatically writes to `data.backup.json` prior to any state mutation, spin up a clean server instance pointing to the most recent uncorrupted backup timestamp.
