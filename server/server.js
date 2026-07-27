@@ -702,6 +702,23 @@ async function handleApi(req, res, url) {
   if (!data.appointments) data.appointments = [];
   if (!data.labResults) data.labResults = [];
   if (!data.beds) data.beds = [];
+  if (!data.labCatalog) data.labCatalog = [
+      { id: "LAB-01", category: "Hematology", name: "Full Blood Count (FBC)", price: 4000 },
+      { id: "LAB-02", category: "Hematology", name: "Packed Cell Volume (PCV)", price: 1500 },
+      { id: "LAB-03", category: "Hematology", name: "Blood Grouping & Crossmatch", price: 2000 },
+      { id: "LAB-04", category: "Microbiology", name: "Malaria Parasite (MP)", price: 2000 },
+      { id: "LAB-05", category: "Microbiology", name: "Widal Test", price: 3000 },
+      { id: "LAB-06", category: "Microbiology", name: "Urinalysis", price: 1500 },
+      { id: "LAB-07", category: "Microbiology", name: "Stool Microscopy", price: 2000 },
+      { id: "LAB-08", category: "Chemistry", name: "Fasting Blood Sugar (FBS)", price: 1500 },
+      { id: "LAB-09", category: "Chemistry", name: "Lipid Profile", price: 8000 },
+      { id: "LAB-10", category: "Chemistry", name: "Liver Function Test (LFT)", price: 7000 },
+      { id: "LAB-11", category: "Chemistry", name: "Electrolytes, Urea & Creatinine", price: 6000 },
+      { id: "LAB-12", category: "Serology", name: "HIV Screening", price: 2000 },
+      { id: "LAB-13", category: "Serology", name: "Hepatitis B (HBsAg)", price: 2500 },
+      { id: "LAB-14", category: "Serology", name: "Hepatitis C (HCV)", price: 2500 },
+      { id: "LAB-15", category: "Serology", name: "Pregnancy Test (PT)", price: 1000 }
+  ];
   if (!data.admissions) data.admissions = [];
   if (!data.alertsLog) data.alertsLog = [];
   if (!data.dischargeSummaries) data.dischargeSummaries = [];
@@ -794,6 +811,8 @@ async function handleApi(req, res, url) {
     sendJson(res, 201, lr);
     return;
   }
+    // ── Lab Catalog
+  if (req.method === "GET" && url.pathname === "/api/v2/emr/lab-catalog") { sendJson(res, 200, data.labCatalog); return; }
   // ── Beds
   if (req.method === "GET" && url.pathname === "/api/v2/beds") { sendJson(res, 200, data.beds); return; }
   if (req.method === "POST" && url.pathname === "/api/v2/beds/admit") {

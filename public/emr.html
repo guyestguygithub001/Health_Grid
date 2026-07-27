@@ -567,23 +567,8 @@
               <!-- Catalog -->
               <div style="flex: 1; padding: 24px; border-right: 1px solid #f1f5f9; overflow-y: auto;">
                 <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Available Tests</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                  <button onclick="addToAncillaryCart('labView', 'Amoxicillin 500mg', 1500)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
-                    <div style="font-weight: 600; color: #1e293b;">Amoxicillin 500mg</div>
-                    <div style="font-size: 12px; color: #8b5cf6; font-weight: 700; margin-top: 4px;">₦1,500</div>
-                  </button>
-                  <button onclick="addToAncillaryCart('labView', 'Paracetamol', 500)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
-                    <div style="font-weight: 600; color: #1e293b;">Paracetamol</div>
-                    <div style="font-size: 12px; color: #8b5cf6; font-weight: 700; margin-top: 4px;">₦500</div>
-                  </button>
-                  <button onclick="addToAncillaryCart('labView', 'Full Blood Count (FBC)', 4000)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
-                    <div style="font-weight: 600; color: #1e293b;">Full Blood Count (FBC)</div>
-                    <div style="font-size: 12px; color: #8b5cf6; font-weight: 700; margin-top: 4px;">₦4,000</div>
-                  </button>
-                  <button onclick="addToAncillaryCart('labView', 'Malaria Parasite (MP)', 2000)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
-                    <div style="font-weight: 600; color: #1e293b;">Malaria Parasite (MP)</div>
-                    <div style="font-size: 12px; color: #8b5cf6; font-weight: 700; margin-top: 4px;">₦2,000</div>
-                  </button>
+                <div id="labView-catalog" style="display: flex; flex-direction: column; gap: 16px;">
+                    <!-- Javascript will render Lab Catalog here -->
                 </div>
               </div>
               
@@ -717,50 +702,6 @@
             <div style="flex: 1; overflow-y: auto; padding-right: 12px;" id="liveBedsGrid">
                 <!-- Javascript will render dynamic live beds here! -->
             </div>
-
-            <!-- Slide-Out Nurses Workstation -->
-            <div id="nursingBackdrop" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s;"></div>
-            <div id="nursingPanel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); opacity: 0; pointer-events: none; z-index: 1000; width: 700px; max-height: 85vh; background: white; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
-                
-                <!-- Workstation Header -->
-                <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; position: relative; background: #0f172a;">
-                    <button onclick="closeNursingPanel()" style="position: absolute; right: 16px; top: 16px; background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; transition: color 0.2s;">✕</button>
-                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-                        <span id="np-bed" style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 800; letter-spacing: 0.05em;">BED --</span>
-                        <span id="np-mpi" style="background: #334155; color: #cbd5e1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700;">ID: --</span>
-                    </div>
-                    <h3 id="np-name" style="font-size: 24px; font-weight: 800; color: white; margin: 0 0 4px 0;">--</h3>
-                    <p id="np-dx" style="color: #94a3b8; font-size: 14px; margin: 0; font-weight: 500;">--</p>
-                </div>
-
-                <!-- Workstation Tabs -->
-                <div style="display: flex; background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 0 12px;">
-                    <button onclick="switchWorkstationTab('vitals')" id="tab-vitals" class="ws-tab active" style="padding: 16px 12px; border: none; background: transparent; font-weight: 700; font-size: 13px; color: #3b82f6; border-bottom: 3px solid #3b82f6; cursor: pointer;">Overview & Vitals</button>
-                    <button onclick="switchWorkstationTab('fluids')" id="tab-fluids" class="ws-tab" style="padding: 16px 12px; border: none; background: transparent; font-weight: 600; font-size: 13px; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">Meds & Fluids</button>
-                    <button onclick="switchWorkstationTab('discharge')" id="tab-discharge" class="ws-tab" style="padding: 16px 12px; border: none; background: transparent; font-weight: 600; font-size: 13px; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">Discharge</button>
-                </div>
-
-                <div style="flex: 1; overflow-y: auto; background: white; position: relative;">
-                    
-                    <!-- TAB 1: VITALS -->
-                    <div id="content-vitals" class="ws-content" style="padding: 24px; display: block;">
-                        
-                        <div style="background: #fdfce8; border-left: 4px solid #facc15; padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 24px;">
-                            <h4 style="font-size: 11px; font-weight: 800; color: #a16207; text-transform: uppercase; margin-bottom: 8px;">Admitting Physician E-Notes</h4>
-                            <p id="np-enotes" style="font-size: 14px; color: #422006; line-height: 1.5; margin: 0;">--</p>
-                        </div>
-
-                        <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Live Vitals</h4>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
-                            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 11px; color: #64748b; font-weight: 700;">HR</span>
-                                <span id="np-hr" style="font-size: 24px; font-weight: 800; color: #ef4444;">--</span>
-                            </div>
-                            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
-                                <span style="font-size: 11px; color: #64748b; font-weight: 700;">BP</span>
-                                <span id="np-bp" style="font-size: 24px; font-weight: 800; color: #0f172a;">--</span>
-                            </div>
-                        </div>
 
                         <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 12px;">Log New Vitals</h4>
                         <div style="display: flex; gap: 8px; margin-bottom: 16px;">
@@ -1382,6 +1323,43 @@
     };
 
     
+        // --- LAB CATALOG LOGIC ---
+    async function fetchLabCatalog() {
+        try {
+            const res = await fetch('/api/v2/emr/lab-catalog');
+            const catalog = await res.json();
+            const grid = document.getElementById('labView-catalog');
+            if(!grid) return;
+            
+            // Group by category
+            const categories = {};
+            catalog.forEach(item => {
+                if(!categories[item.category]) categories[item.category] = [];
+                categories[item.category].push(item);
+            });
+
+            let html = '';
+            for (const [category, items] of Object.entries(categories)) {
+                html += `<h5 style="font-size: 13px; font-weight: 800; color: #8b5cf6; margin-bottom: 8px; text-transform: uppercase;">${category}</h5>`;
+                html += `<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">`;
+                items.forEach(test => {
+                    html += `
+                    <button onclick="addToAncillaryCart('labView', '${test.name}', ${test.price})" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s;" onmouseover="this.style.borderColor='#8b5cf6'; this.style.boxShadow='0 2px 4px rgba(139, 92, 246, 0.1)';" onmouseout="this.style.borderColor='#e2e8f0'; this.style.boxShadow='none';">
+                        <div style="font-weight: 600; color: #1e293b; font-size: 13px;">${test.name}</div>
+                        <div style="font-size: 12px; color: #8b5cf6; font-weight: 700; margin-top: 4px;">₦${test.price.toLocaleString()}</div>
+                    </button>`;
+                });
+                html += `</div>`;
+            }
+            grid.innerHTML = html;
+        } catch(e) { console.error("Failed to load lab catalog", e); }
+    }
+    
+    // Call on load
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchLabCatalog();
+    });
+
     // --- ROLE BASED ACCESS CONTROL (RBAC) ---
     function setEmrRole(role) {
         const accessMap = {
@@ -1851,11 +1829,8 @@
       if(target) {
         target.classList.remove('hidden');
         target.classList.add('active');
-        if(viewId === 'workspace') {
-          target.style.display = 'flex';
-        } else {
-          target.style.display = 'block';
-        }
+        // Let CSS handle display mode automatically to prevent layout collapse
+        target.style.display = '';
       }
       
       // Update sidebar active states
@@ -2272,6 +2247,51 @@
         </div>
     </div>
 
+
+
+            <!-- Slide-Out Nurses Workstation -->
+            <div id="nursingBackdrop" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s;"></div>
+            <div id="nursingPanel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); opacity: 0; pointer-events: none; z-index: 1000; width: 700px; max-height: 85vh; background: white; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
+                
+                <!-- Workstation Header -->
+                <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; position: relative; background: #0f172a;">
+                    <button onclick="closeNursingPanel()" style="position: absolute; right: 16px; top: 16px; background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; transition: color 0.2s;">✕</button>
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <span id="np-bed" style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 800; letter-spacing: 0.05em;">BED --</span>
+                        <span id="np-mpi" style="background: #334155; color: #cbd5e1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700;">ID: --</span>
+                    </div>
+                    <h3 id="np-name" style="font-size: 24px; font-weight: 800; color: white; margin: 0 0 4px 0;">--</h3>
+                    <p id="np-dx" style="color: #94a3b8; font-size: 14px; margin: 0; font-weight: 500;">--</p>
+                </div>
+
+                <!-- Workstation Tabs -->
+                <div style="display: flex; background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 0 12px;">
+                    <button onclick="switchWorkstationTab('vitals')" id="tab-vitals" class="ws-tab active" style="padding: 16px 12px; border: none; background: transparent; font-weight: 700; font-size: 13px; color: #3b82f6; border-bottom: 3px solid #3b82f6; cursor: pointer;">Overview & Vitals</button>
+                    <button onclick="switchWorkstationTab('fluids')" id="tab-fluids" class="ws-tab" style="padding: 16px 12px; border: none; background: transparent; font-weight: 600; font-size: 13px; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">Meds & Fluids</button>
+                    <button onclick="switchWorkstationTab('discharge')" id="tab-discharge" class="ws-tab" style="padding: 16px 12px; border: none; background: transparent; font-weight: 600; font-size: 13px; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">Discharge</button>
+                </div>
+
+                <div style="flex: 1; overflow-y: auto; background: white; position: relative;">
+                    
+                    <!-- TAB 1: VITALS -->
+                    <div id="content-vitals" class="ws-content" style="padding: 24px; display: block;">
+                        
+                        <div style="background: #fdfce8; border-left: 4px solid #facc15; padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 24px;">
+                            <h4 style="font-size: 11px; font-weight: 800; color: #a16207; text-transform: uppercase; margin-bottom: 8px;">Admitting Physician E-Notes</h4>
+                            <p id="np-enotes" style="font-size: 14px; color: #422006; line-height: 1.5; margin: 0;">--</p>
+                        </div>
+
+                        <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Live Vitals</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 11px; color: #64748b; font-weight: 700;">HR</span>
+                                <span id="np-hr" style="font-size: 24px; font-weight: 800; color: #ef4444;">--</span>
+                            </div>
+                            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 11px; color: #64748b; font-weight: 700;">BP</span>
+                                <span id="np-bp" style="font-size: 24px; font-weight: 800; color: #0f172a;">--</span>
+                            </div>
+                        </div>
 </body>
 </html>
 
@@ -2300,5 +2320,50 @@
         </div>
     </div>
 
+
+
+            <!-- Slide-Out Nurses Workstation -->
+            <div id="nursingBackdrop" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s;"></div>
+            <div id="nursingPanel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); opacity: 0; pointer-events: none; z-index: 1000; width: 700px; max-height: 85vh; background: white; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
+                
+                <!-- Workstation Header -->
+                <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; position: relative; background: #0f172a;">
+                    <button onclick="closeNursingPanel()" style="position: absolute; right: 16px; top: 16px; background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; transition: color 0.2s;">✕</button>
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <span id="np-bed" style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 800; letter-spacing: 0.05em;">BED --</span>
+                        <span id="np-mpi" style="background: #334155; color: #cbd5e1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700;">ID: --</span>
+                    </div>
+                    <h3 id="np-name" style="font-size: 24px; font-weight: 800; color: white; margin: 0 0 4px 0;">--</h3>
+                    <p id="np-dx" style="color: #94a3b8; font-size: 14px; margin: 0; font-weight: 500;">--</p>
+                </div>
+
+                <!-- Workstation Tabs -->
+                <div style="display: flex; background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 0 12px;">
+                    <button onclick="switchWorkstationTab('vitals')" id="tab-vitals" class="ws-tab active" style="padding: 16px 12px; border: none; background: transparent; font-weight: 700; font-size: 13px; color: #3b82f6; border-bottom: 3px solid #3b82f6; cursor: pointer;">Overview & Vitals</button>
+                    <button onclick="switchWorkstationTab('fluids')" id="tab-fluids" class="ws-tab" style="padding: 16px 12px; border: none; background: transparent; font-weight: 600; font-size: 13px; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">Meds & Fluids</button>
+                    <button onclick="switchWorkstationTab('discharge')" id="tab-discharge" class="ws-tab" style="padding: 16px 12px; border: none; background: transparent; font-weight: 600; font-size: 13px; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">Discharge</button>
+                </div>
+
+                <div style="flex: 1; overflow-y: auto; background: white; position: relative;">
+                    
+                    <!-- TAB 1: VITALS -->
+                    <div id="content-vitals" class="ws-content" style="padding: 24px; display: block;">
+                        
+                        <div style="background: #fdfce8; border-left: 4px solid #facc15; padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 24px;">
+                            <h4 style="font-size: 11px; font-weight: 800; color: #a16207; text-transform: uppercase; margin-bottom: 8px;">Admitting Physician E-Notes</h4>
+                            <p id="np-enotes" style="font-size: 14px; color: #422006; line-height: 1.5; margin: 0;">--</p>
+                        </div>
+
+                        <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Live Vitals</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px;">
+                            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 11px; color: #64748b; font-weight: 700;">HR</span>
+                                <span id="np-hr" style="font-size: 24px; font-weight: 800; color: #ef4444;">--</span>
+                            </div>
+                            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                                <span style="font-size: 11px; color: #64748b; font-weight: 700;">BP</span>
+                                <span id="np-bp" style="font-size: 24px; font-weight: 800; color: #0f172a;">--</span>
+                            </div>
+                        </div>
 </body>
 </html>
