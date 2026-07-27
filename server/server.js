@@ -885,7 +885,51 @@ async function handleApi(req, res, url) {
     return;
   }
   // ── Orders
-  if (req.method === "GET" && url.pathname === "/api/v2/orders") { sendJson(res, 200, data.orders); return; }
+
+  // ── Audit Trail (Admin Only) ─────────────────────────────────
+  if (req.method === "GET" && url.pathname === "/api/v2/audit") {
+    try {
+      const logPath = path.join(__dirname, 'audit.log');
+      if (!fs.existsSync(logPath)) {
+        sendJson(res, 200, { logs: [] });
+        return;
+      }
+      const rawLogs = fs.readFileSync(logPath, 'utf8').trim().split('\n');
+      const parsedLogs = rawLogs.slice(-100).map(line => {
+        try { return JSON.parse(line); } catch(e) { return null; }
+      }).filter(Boolean).reverse();
+      
+      sendJson(res, 200, { logs: parsedLogs });
+    } catch (e) {
+      throw new AppError("Failed to read audit logs", 500);
+    }
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/v2/orders")
+  if (req.method === "POST" && url.pathname === "/api/v2/orders/status") {
+    const body = await collectBody(req);
+    let found = false;
+    data.encounters.forEach(enc => {
+      if (enc.orders) {
+        enc.orders.forEach(o => {
+          if (o.id === body.id) {
+            o.status = body.status;
+            if (body.result) o.result = body.result;
+            found = true;
+          }
+        });
+      }
+    });
+    if (found) {
+      queueDatabaseWrite(data);
+      sendJson(res, 200, { success: true });
+    } else {
+      sendJson(res, 404, { error: "Order not found" });
+    }
+    return;
+  }
+ { sendJson(res, 200, data.orders); return; }
   if (req.method === "POST" && url.pathname === "/api/v2/orders") {
     const body = await collectBody(req);
     const order = { id: nextId("ORD", data.orders), patientId: body.patientId, type: body.type || "Laboratory", item: body.item || "Unspecified", priority: body.priority || "Routine", status: "Pending", facilityId: body.facilityId || "FAC-PLSH", orderedBy: body.orderedBy || "", date: new Date().toISOString().slice(0, 10) };

@@ -1098,6 +1098,17 @@
           <h4 style="color:#fff; font-size:16px; margin:24px 0 8px;">2. Privacy Policy & Data Sovereignty</h4>
           <p style="color:#94a3b8; font-size: 14px; line-height: 1.6;">Personal health information (PHI) is processed under lawful bases established by the Nigeria Data Protection Act (NDPA 2023). Biometric data is stored in locally encrypted SQLite caches and never transmitted raw.</p>
 
+          <div style="margin-top: 32px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <h4 style="color:#fff; font-size:16px; margin: 0; display: flex; align-items: center; gap: 8px;"><span style="color: #10b981;">●</span> Live System Audit Trail</h4>
+              <button onclick="fetchAuditLogs()" style="padding: 6px 12px; background: #334155; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;">Refresh Stream</button>
+            </div>
+            
+            <div id="auditTerminal" class="terminal-scroll" style="background: #020617; border: 1px solid #1e293b; border-radius: 8px; padding: 16px; height: 350px; overflow-y: auto; font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #a5b4fc; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">
+              <div id="auditLogOutput">Initializing secure audit stream...</div>
+            </div>
+          </div>
+
           <h4 style="color:#fff; font-size:16px; margin:24px 0 8px;">3. Clinical Decision Support & Medical Disclaimer</h4>
           <p style="background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); padding:16px; border-radius:8px; color:#fecaca; font-size: 14px; line-height: 1.6;">
             <strong>🚨 EMERGENCY & CLINICAL NOTICE:</strong> The GHG provides clinical decision support for informational purposes only. It does not replace independent physician judgment. <strong>In an emergency, call 112 immediately.</strong>
@@ -1294,6 +1305,83 @@
       </div>
 
     </main>
+
+  <!-- Sleek Modals for Workflows -->
+  
+  <!-- Discharge Modal -->
+  <div id="dischargeModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 16px; padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); animation: slideUp 0.3s forwards;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="width: 64px; height: 64px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px;">🛏️</div>
+        <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Discharge Patient</h3>
+        <p style="color: #64748b; font-size: 14px; margin-top: 8px;">Are you sure you want to discharge this patient and mark the bed as Vacant?</p>
+      </div>
+      <input type="hidden" id="dischargeBedId">
+      <input type="hidden" id="dischargePatientId">
+      <div style="display: flex; gap: 12px;">
+        <button onclick="document.getElementById('dischargeModal').style.display='none'" style="flex: 1; padding: 12px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">Cancel</button>
+        <button onclick="confirmDischarge()" style="flex: 1; padding: 12px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2); transition: background 0.2s;">Confirm Discharge</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lab Results Modal -->
+  <div id="labResultModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 16px; padding: 32px; width: 100%; max-width: 450px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); animation: slideUp 0.3s forwards;">
+      <div style="margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+          <div style="width: 40px; height: 40px; background: #f3e8ff; color: #9333ea; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">🧪</div>
+          <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Enter Lab Results</h3>
+        </div>
+        <p style="color: #64748b; font-size: 14px; margin: 0;">Record diagnostic values for this order.</p>
+      </div>
+      <input type="hidden" id="labOrderId">
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px;">Clinical Findings / Values</label>
+        <textarea id="labResultText" rows="4" placeholder="e.g. Hemoglobin 12.5 g/dL, WBC 5.4..." style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s;"></textarea>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button onclick="document.getElementById('labResultModal').style.display='none'" style="flex: 1; padding: 12px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
+        <button onclick="confirmLabComplete()" style="flex: 2; padding: 12px; background: #9333ea; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(147, 51, 234, 0.2);">Mark as Completed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Receipt Modal -->
+  <div id="paymentModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 16px; padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); animation: slideUp 0.3s forwards;">
+      <div style="text-align: center; margin-bottom: 24px; border-bottom: 2px dashed #e2e8f0; padding-bottom: 24px;">
+        <div style="width: 64px; height: 64px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px;">💳</div>
+        <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Payment Processing</h3>
+        <p style="color: #64748b; font-size: 14px; margin-top: 8px;">Receive funds and generate digital receipt.</p>
+      </div>
+      <input type="hidden" id="paymentBillId">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px;">
+        <span style="color: #64748b;">Amount Due:</span>
+        <strong style="color: #0f172a; font-size: 20px;">₦<span id="paymentAmountDisplay"></span></strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 24px; font-size: 15px;">
+        <span style="color: #64748b;">Payment Method:</span>
+        <select style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 8px; font-size: 14px; outline: none;">
+          <option>Cash / POS</option>
+          <option>Bank Transfer</option>
+          <option>NHIS / HMO Claim</option>
+        </select>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button onclick="document.getElementById('paymentModal').style.display='none'" style="flex: 1; padding: 12px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
+        <button onclick="confirmPayment()" style="flex: 2; padding: 12px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2);">Confirm Payment</button>
+      </div>
+    </div>
+  </div>
+  <style>
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .terminal-scroll::-webkit-scrollbar { width: 8px; }
+    .terminal-scroll::-webkit-scrollbar-track { background: #0f172a; }
+    .terminal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  </style>
+
   </div>
   
   <script>
@@ -1597,6 +1685,7 @@
       if (viewId === 'wardsView') fetchLiveWards();
       if (viewId === 'labsView') fetchLiveLabs();
       if (viewId === 'billingView') fetchLiveBilling();
+      if (viewId === 'legalView') fetchAuditLogs();
     };
 
     // ── Vitals & Triage (POST /api/v2/encounters)
