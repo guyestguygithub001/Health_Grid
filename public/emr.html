@@ -1909,7 +1909,9 @@
         body: JSON.stringify({ id, status: newStatus })
       });
       loadBilling();
-    }\n\n    // --- REFERRALS POLLING LOGIC ---
+    }
+
+    // --- REFERRALS POLLING LOGIC ---
     let referralsInterval = null;
 
     async function loadReferrals() {
@@ -1972,7 +1974,9 @@
         body: JSON.stringify({ status: newStatus })
       });
       loadReferrals();
-    }\n\n    function switchRecordsTab(tabName) {
+    }
+
+    function switchRecordsTab(tabName) {
       // Reset buttons
       document.querySelectorAll('[id^="recTab-"]').forEach(btn => {
         if(btn.id !== 'recTab-register') {
@@ -1990,7 +1994,8 @@
       // Show active
       document.getElementById('recContent-' + tabName).classList.remove('hidden');
       
-      if(tabName === 'referrals') { loadReferrals(); if(!referralsInterval) referralsInterval = setInterval(loadReferrals, 5000); } else { clearInterval(referralsInterval); referralsInterval = null; }\n      if(tabName === 'patients') {
+      if(tabName === 'referrals') { loadReferrals(); if(!referralsInterval) referralsInterval = setInterval(loadReferrals, 5000); } else { clearInterval(referralsInterval); referralsInterval = null; }
+      if(tabName === 'patients') {
         loadRecordsData(); // Refresh data when opening tab
       }
     }
@@ -2494,9 +2499,13 @@
       const comp = document.getElementById("composer");
       let text = comp.innerText;
       if(text.includes("Plan:")) {
-        comp.innerText = text.replace("Plan:", `Plan:\n- ${chipText}`);
+        comp.innerText = text.replace("Plan:", `Plan:
+- ${chipText}`);
       } else {
-        comp.innerText = text + `\n\nPlan:\n- ${chipText}`;
+        comp.innerText = text + `
+
+Plan:
+- ${chipText}`;
       }
       triggerNLPEngine(); // refresh chips
     }

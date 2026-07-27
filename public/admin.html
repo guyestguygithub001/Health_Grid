@@ -1767,10 +1767,14 @@
         console.error("Order dispatch failed:", err);
       }
       
-      let msg = `Encounter ${encId} finalized securely!\nICD-11 diagnosis and notes logged.`;
+      let msg = `Encounter ${encId} finalized securely!
+ICD-11 diagnosis and notes logged.`;
       if (ordersToPost.length > 0) {
-        msg += `\n\nOrders Generated:`;
-        ordersToPost.forEach(o => msg += `\n- ${o.type} Request Sent`);
+        msg += `
+
+Orders Generated:`;
+        ordersToPost.forEach(o => msg += `
+- ${o.type} Request Sent`);
       }
       
       alert(msg);
