@@ -1189,7 +1189,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "POST" && pathname === "/api/v1/auth/login") {
       const body = await collectBody(req);
       const validUser = process.env.APP_USER || "admin";
-      const validPass = process.env.APP_PASS || "secure_admin_password";
+      const validPass = process.env.APP_PASS || (() => { if(process.env.NODE_ENV === "production") { console.error("[SECURITY] APP_PASS env var not set! Server refusing to start."); process.exit(1); } return "dev_local_only_password"; })();
       if (body.username === validUser && body.password === validPass) {
         const token = Buffer.from(`${body.username}:${body.password}`).toString("base64");
         sendJson(res, 200, { success: true, token, username: body.username, role: "system_admin", userId: "USR-0001" });
@@ -1235,7 +1235,7 @@ const server = http.createServer(async (req, res) => {
     const colonIdx = decoded.indexOf(":");
     const login    = decoded.slice(0, colonIdx);
     const password = decoded.slice(colonIdx + 1);
-    if (login !== (process.env.APP_USER || "admin") || password !== (process.env.APP_PASS || "secure_admin_password")) {
+    if (login !== (process.env.APP_USER || "admin") || password !== (process.env.APP_PASS || (() => { if(process.env.NODE_ENV === "production") { console.error("[SECURITY] APP_PASS env var not set! Server refusing to start."); process.exit(1); } return "dev_local_only_password"; })())) {
       // Return JSON 401 WITHOUT WWW-Authenticate — prevents browser Basic Auth popup
       res.writeHead(401, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
       res.end(JSON.stringify({ success: false, error: "Unauthorized", code: "SEC-001" }));

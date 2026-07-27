@@ -1507,23 +1507,7 @@
     }
 
 
-    // --- HOOK INTO switchEmrView ---
-    // We need to override or attach to switchEmrView to start/stop intervals
-    const originalSwitch = window.switchEmrView;
-    window.switchEmrView = function(viewId) {
-        if(originalSwitch) originalSwitch(viewId);
-        
-        clearInterval(bedsInterval);
-        clearInterval(invInterval);
-        
-        if (viewId === 'wardsView') {
-            fetchLiveWards();
-            bedsInterval = setInterval(fetchLiveWards, 5000);
-        } else if (viewId === 'pharmacyView') {
-            fetchLiveInventory();
-            invInterval = setInterval(fetchLiveInventory, 10000); // 10s for inventory
-        }
-    };
+    // --- switchEmrView polling hooks moved into the real function below ---
 
     
         // --- LAB CATALOG LOGIC ---
@@ -2244,6 +2228,22 @@
           const s = document.getElementById("mpiSearch");
           if(s) s.focus();
         }, 100);
+      }
+      
+      // --- Realtime polling hooks ---
+      clearInterval(bedsInterval);
+      clearInterval(invInterval);
+      clearInterval(billingInterval);
+      clearInterval(referralsInterval);
+      
+      if (viewId === 'wardsView') {
+        if(typeof fetchLiveWards === 'function') { fetchLiveWards(); bedsInterval = setInterval(fetchLiveWards, 5000); }
+      } else if (viewId === 'pharmacyView') {
+        if(typeof fetchLiveInventory === 'function') { fetchLiveInventory(); invInterval = setInterval(fetchLiveInventory, 10000); }
+      } else if (viewId === 'billingView') {
+        if(typeof loadBilling === 'function') { loadBilling(); billingInterval = setInterval(loadBilling, 8000); }
+      } else if (viewId === 'recordsMainView') {
+        if(typeof loadRecordsData === 'function') { loadRecordsData(); }
       }
     }
 

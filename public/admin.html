@@ -1063,7 +1063,7 @@
       </div>
   
   <!-- Out of Stock Modal -->
-  <div id="oosModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(2px);">
+  <div id="oosModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(2px);">
     <div class="white-card" style="width: 400px;">
       <h2 style="margin-bottom: 16px; color: #ef4444;">⚠️ Out of Stock</h2>
       <p id="oosMessage" style="margin-bottom: 24px; font-size: 15px; color: #4b5563;"></p>
@@ -2218,13 +2218,9 @@
         } catch (err) {
           // Fallback verification for static hosts (like Vercel) where the API might be unreachable
           console.warn("API unreachable. Falling back to embedded static verification for Vercel.");
-          if (user === 'admin' && pass === 'secure_admin_password') {
-            localStorage.setItem('ehr_admin_token', 'static_vercel_token_fallback');
-            loginScreen.style.display = 'none';
-          } else {
-            errorDiv.style.display = 'block';
-            errorDiv.innerText = 'Invalid credentials (Static Fallback).';
-          }
+          // Static fallback removed for security — API must be reachable
+          errorDiv.style.display = 'block';
+          errorDiv.innerText = 'Server unreachable. Please contact your system administrator.';
         }
       });
     });
