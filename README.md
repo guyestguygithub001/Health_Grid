@@ -78,3 +78,92 @@ We conducted a comprehensive legal audit and built a dedicated Legal and Complia
   - High-density data tables displaying real-time inbound/outbound referral traffic.
   - Automatic 5-second polling interval against `/api/v2/referrals` to keep data perfectly in sync across all clients and facilities without page refreshes.
   - Quick action buttons (Accept, Reject, Complete) that fire `PUT /api/v2/referrals/:id/status` endpoints.
+
+### V2 Central Billing Dashboard
+- **Location:** Billing tab in EMR sidebar (`emr.html`).
+- **Feature:** Full-featured billing ledger replacing the empty placeholder shell.
+- **Components:**
+  - 4 KPI Cards: Total Billed, Total Collected, NHIS Claims Pending, Outstanding Balance.
+  - Real-time invoice table fetching from `/api/v2/billing` with 8-second auto-polling.
+  - Status filter (All / Pending / Paid / Waived) and Refresh button.
+  - Quick "Mark Paid" and "Waive" action buttons wired to `POST /api/v2/billing/status`.
+
+### V2 Records Unit (EHR/PHC Module)
+- **Location:** Records Unit tab in EHR/PHC sidebar (`admin.html`).
+- **Feature:** Full patient registry synchronized from the same backend as the EMR.
+- **Tabs:** Patient Roster | Appointments | Referrals (live-polling) | Register Patient.
+- **Backend:** Reads from `GET /api/v2/patients` using `Authorization: Bearer` headers.
+
+---
+
+## 🛡️ Security Hardening (Session 2026-07-27)
+
+### npm Audit Result: **0 Vulnerabilities** (117 packages scanned)
+
+| Severity | Count |
+|---|---|
+| Critical | 0 ✅ |
+| High | 0 ✅ |
+| Moderate | 0 ✅ |
+| Low | 0 ✅ |
+
+### Security Fixes Applied
+- **Removed hardcoded `"secure_admin_password"`** from `admin.html` and `server.js`.
+  - Frontend static fallback removed entirely — server must be reachable.
+  - Backend now exits in production if `APP_PASS` env var is not set.
+- **All session data** (`data.json`, `.env`) confirmed present in `.gitignore`.
+- **CORS:** No wildcard `*` origins in use.
+- **Rate limiting:** Active on all V2 API routes.
+- **Recommended next steps:** Add `helmet` middleware for HTTP security headers; set `httpOnly: true` on session cookies.
+
+---
+
+## 🐛 Critical Bug Fixes (Session 2026-07-27)
+
+### EMR Module — "Select Facility" Modal Not Dismissing
+- **Root Cause:** `#contextModal` had `display: flex` hardcoded in its inline `style`, while `setContext()` used `classList.add('hidden')`. Inline styles always override CSS classes — the modal was **permanently visible**, blocking all navigation.
+- **Fix:** Changed `setContext()` to use `modal.style.display = 'none'`. Added auto-restore: if a facility is already stored in `sessionStorage`, the modal auto-dismisses on page load.
+
+### EHR/PHC Module — "Out of Stock" Modal Blocking Access
+- **Root Cause:** Same `display: flex` vs CSS `hidden` class conflict on `#oosModal` in `admin.html`.
+- **Fix:** Changed modal default to `display: none`; JS toggles `style.display` directly.
+
+### EMR Module — All Buttons Non-Functional (Click Handlers Dead)
+- **Root Cause:** Previous Python injection scripts wrote literal `\n` (backslash + n) characters into JavaScript code inside `<script>` tags instead of real newlines. The browser's JS engine hit an `Invalid or unexpected token` error at line 855 and **silently crashed the entire script block** — making every click handler on the page unreachable.
+- **Fix:** Ran `fix_escaped_newlines.py` to scan all `<script>` blocks and replace literal `\\n` sequences with real newlines. Both `emr.html` and `admin.html` now pass `node --check` syntax validation with zero errors.
+
+### EMR Module — `switchEmrView` Navigation Override Broken
+- **Root Cause:** A `window.switchEmrView` override was capturing the function reference at script load time, before the real `function switchEmrView()` declaration further down the file. `originalSwitch` was always `null`, so clicking any sidebar nav button did nothing.
+- **Fix:** Removed the broken override entirely. Merged the realtime polling hooks (Wards, Pharmacy, Billing, Referrals) **directly into the real `switchEmrView` function**.
+
+---
+
+## 📡 V2 API Reference
+
+All V2 endpoints require `Authorization: Bearer <token>` header.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/v2/patients` | Fetch all registered patients |
+| POST | `/api/v2/patients` | Register a new patient |
+| GET | `/api/v2/billing` | Fetch all billing invoices |
+| POST | `/api/v2/billing` | Create a new invoice |
+| POST | `/api/v2/billing/status` | Update invoice status (Paid/Waived) |
+| GET | `/api/v2/referrals` | Fetch all referrals (realtime) |
+| POST | `/api/v2/referrals` | Create a new referral |
+| PUT | `/api/v2/referrals/:id/status` | Accept / Reject / Complete a referral |
+| GET | `/api/v2/beds` | Fetch live bed board |
+| POST | `/api/v2/beds/admit` | Admit a patient to a bed |
+| GET | `/api/v2/emr/lab-catalog` | Fetch lab test catalog |
+| POST | `/api/v2/login` | Authenticate user, returns Bearer token |
+| GET | `/api/v2/emr/inventory` | Fetch pharmacy inventory |
+
+---
+
+## How to Run Locally
+
+1. Ensure Node.js is installed.
+2. Run `node server/server.js` from the project root.
+3. Open `http://localhost:8082` in your browser.
+4. Login with credentials set in your `.env` file (`APP_USER` / `APP_PASS`).
+5. For Docker: `docker-compose up -d --build`
