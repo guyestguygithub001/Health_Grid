@@ -204,3 +204,14 @@ If a breach or zero-day exploit is suspected, activate the **Containment Strateg
 2. **Review Logs**: Access the immutable `server/audit.log` via the Legal Matrix dashboard to trace the attacker's actions.
 3. **Revoke Keys**: Trigger an immediate key rotation in Secrets Manager and cycle all JWT signing keys, instantly logging out all current sessions across the hospital.
 4. **Restore**: Since `writeData` automatically writes to `data.backup.json` prior to any state mutation, spin up a clean server instance pointing to the most recent uncorrupted backup timestamp.
+
+### 5. Advanced Data Protection & Privacy
+- **Data Masking**: All sensitive tokens and passwords are automatically masked before writing to the Audit Log.
+- **Secure Caching**: All API endpoints enforce `Cache-Control: no-store` to guarantee PHI is never cached by proxy servers or local browsers.
+- **Data Minimization**: The platform strictly requests only required fields for clinical operations.
+
+### 6. Client-Side & Code-Level Defenses
+- **Browser Security**: The Node.js engine strictly enforces CSP, HSTS, and X-Content-Type-Options headers across all routes.
+- **XSS & Output Encoding**: All incoming JSON payloads undergo recursive HTML tag escaping before execution to neutralize XSS vectors while preserving clinical notes.
+- **Zero-Dependency Supply Chain**: The core engine operates entirely on native Node.js libraries, neutralizing NPM supply-chain attacks and rendering SBOM tracking trivial.
+- **Safe Deserialization**: The system strictly parses standard JSON natively, avoiding dangerous deserialization vectors like XML or YAML code execution.
