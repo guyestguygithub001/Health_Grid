@@ -114,7 +114,16 @@ We conducted a comprehensive legal audit and built a dedicated Legal and Complia
 - **All session data** (`data.json`, `.env`) confirmed present in `.gitignore`.
 - **CORS:** No wildcard `*` origins in use.
 - **Rate limiting:** Active on all V2 API routes.
-- **Recommended next steps:** Add `helmet` middleware for HTTP security headers; set `httpOnly: true` on session cookies.
+
+### Architectural Security Improvements (Session 2026-07-27 Phase 2)
+- **Universal Error Handler & Environment Separation:** Added `UniversalErrorHandler` and `AppError` to capture all unhandled exceptions. In `NODE_ENV=production`, stack traces are completely stripped from API responses, returning generic 500s. In `development`, full stack traces are sent to the client to assist debugging.
+- **XSS Payload Escaping:** The core `collectBody` JSON parser now recursively escapes `<` and `>` into safe HTML entities (`&lt;` and `&gt;`). This neutralizes Cross-Site Scripting (XSS) attacks in `.innerHTML` renders without stripping the clinician's raw text.
+- **HTTP Security Headers:** Natively injected missing headers into all HTTP responses, acting as a lightweight Helmet replacement:
+  - `X-Frame-Options: DENY` (Clickjacking protection)
+  - `X-Content-Type-Options: nosniff` (MIME sniffing protection)
+  - `Content-Security-Policy: default-src 'self'`
+  - `Strict-Transport-Security: max-age=31536000; includeSubDomains` (HSTS)
+- **Sensitive Action Audit Trail:** The new `AuditLogger` intercepts all mutating methods (`POST`, `PUT`, `DELETE`, `PATCH`). It captures IP, URL, Method, User ID, Timestamp, and the request payload. Passwords and secret tokens are dynamically `***MASKED***`, while patient identifiers (names, phones) are retained for NDPA/HIPAA traceability. Logs are permanently appended to `server/audit.log`.
 
 ---
 

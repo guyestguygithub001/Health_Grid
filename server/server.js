@@ -3,6 +3,66 @@ const fs   = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 
+// ── Security & Architecture Modules ────────────────────────────
+class AppError extends Error {
+  constructor(message, statusCode, isOperational = true) {
+    super(message);
+    this.statusCode = statusCode;
+    this.isOperational = isOperational;
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+class UniversalErrorHandler {
+  static handle(err, res) {
+    const isDev = process.env.NODE_ENV !== 'production';
+    const statusCode = err.statusCode || 500;
+    
+    if (isDev) {
+      console.error('🔥 [DEV ERROR]:', err);
+    } else if (!err.isOperational) {
+      console.error('💥 [PROD CRITICAL ERROR]:', err.name, err.message);
+    }
+
+    // Mask details in production for 500s
+    if (!isDev && statusCode === 500) {
+      sendJson(res, 500, { error: 'Internal Server Error' });
+      return;
+    }
+
+    sendJson(res, statusCode, {
+      error: err.message || 'Error occurred',
+      ...(isDev && { stack: err.stack })
+    });
+  }
+}
+
+class AuditLogger {
+  static logAction(req, payload) {
+    const method = req.method;
+    if (!['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) return;
+    
+    // Mask sensitive secrets (passwords, tokens), but KEEP names/phones for NDPA traceability
+    const maskedPayload = JSON.parse(JSON.stringify(payload || {}));
+    if (maskedPayload.password) maskedPayload.password = '***MASKED***';
+    if (maskedPayload.token) maskedPayload.token = '***MASKED***';
+
+    const entry = {
+      timestamp: new Date().toISOString(),
+      method: method,
+      url: req.url,
+      ip: req.socket.remoteAddress || 'unknown',
+      user: req.headers['x-user-id'] || 'anonymous',
+      payload: maskedPayload
+    };
+
+    const logLine = JSON.stringify(entry) + "\n";
+    fs.appendFile(path.join(__dirname, 'audit.log'), logLine, (err) => {
+      if (err) console.error('Failed to write audit log:', err);
+    });
+  }
+}
+
 // ── SmartClinic Enterprise Modules ────────────────────────────
 const enterprise = require("./enterprise");
 const sessionManager = require("./sessionManager");
@@ -138,7 +198,11 @@ function sendJson(res, status, body) {
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET,POST,PUT,DELETE,OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type"
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, x-user-id",
+    "X-Frame-Options": "DENY",
+    "X-Content-Type-Options": "nosniff",
+    "Content-Security-Policy": "default-src 'self'",
+    "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
   };
 
   const acceptEncoding = (res.req && res.req.headers['accept-encoding']) || "";
@@ -159,11 +223,40 @@ function sendJson(res, status, body) {
   }
 }
 
+function escapeXSS(obj) {
+  if (typeof obj === 'string') {
+    return obj.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(escapeXSS);
+  }
+  if (obj !== null && typeof obj === 'object') {
+    for (let key in obj) {
+      obj[key] = escapeXSS(obj[key]);
+    }
+  }
+  return obj;
+}
+
 function collectBody(req) {
   return new Promise((resolve, reject) => {
     let raw = "";
-    req.on("data", chunk => { raw += chunk; if (raw.length > 2_000_000) reject(new Error("Body too large")); });
-    req.on("end", () => { if (!raw) { resolve({}); return; } try { resolve(JSON.parse(raw)); } catch (e) { reject(e); } });
+    req.on("data", chunk => { raw += chunk; if (raw.length > 2_000_000) reject(new AppError("Payload Too Large", 413)); });
+    req.on("end", () => { 
+      if (!raw) { 
+        AuditLogger.logAction(req, {});
+        resolve({}); 
+        return; 
+      } 
+      try { 
+        const parsed = JSON.parse(raw);
+        const safeData = escapeXSS(parsed);
+        AuditLogger.logAction(req, safeData); // Audit trail intercept
+        resolve(safeData);
+      } catch (e) { 
+        reject(new AppError("Invalid JSON", 400)); 
+      } 
+    });
   });
 }
 
@@ -1410,7 +1503,7 @@ const server = http.createServer(async (req, res) => {
     if (pathname.startsWith("/api/")) { await handleApi(req, res, url); return; }
     serveStatic(req, res, url);
 
-  } catch (err) { sendJson(res, 500, { error: err.message }); }
+  } catch (err) { UniversalErrorHandler.handle(err, res); }
 });
 
 if (require.main === module) {
