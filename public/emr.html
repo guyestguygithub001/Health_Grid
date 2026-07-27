@@ -1095,6 +1095,41 @@
 
     
     // --- NURSES WORKSTATION & LIVE BEDS LOGIC ---
+    let selectedPendingPatient = null;
+
+    function selectPendingPatient(patientId, reqId) {
+        selectedPendingPatient = { patientId, reqId };
+        document.querySelectorAll('.pending-req-card').forEach(c => {
+            c.style.borderColor = '#e2e8f0';
+            c.style.background = 'white';
+        });
+        const card = document.getElementById('pending-req-' + reqId);
+        if(card) {
+            card.style.borderColor = '#ef4444';
+            card.style.background = '#fef2f2';
+        }
+        showToast("Select a vacant bed on the board to assign this patient.");
+    }
+
+    async function assignBed(bedId, wardName) {
+        if (!selectedPendingPatient) {
+            alert("Please select a patient from the Pending Admissions queue first!");
+            return;
+        }
+        if (!confirm(`Assign Patient ${selectedPendingPatient.patientId} to ${bedId} (${wardName})?`)) return;
+        
+        try {
+            await fetch('/api/v2/beds/admit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ patientId: selectedPendingPatient.patientId, bedId: bedId, diagnosis: "Assigned by Nurse" })
+            });
+            selectedPendingPatient = null;
+            fetchLiveWards();
+            showToast(`Patient successfully admitted to ${bedId}!`);
+        } catch(e) { console.error("Bed assignment failed", e); }
+    }
+
     let bedsInterval = null;
 
     function switchWorkstationTab(tab) {
@@ -1116,6 +1151,21 @@
     async function fetchLiveWards() {
         if (!document.getElementById('wardsView') || document.getElementById('wardsView').classList.contains('hidden')) return;
         try {
+            // Fetch Pending Queue
+            const qRes = await fetch('/api/v2/emr/admissions/pending');
+            const queue = await qRes.json();
+            const qContainer = document.getElementById('wards-queue');
+            if(queue.length > 0) {
+                qContainer.innerHTML = queue.map(q => `
+                    <div id="pending-req-${q.id}" class="pending-req-card" onclick="selectPendingPatient('${q.patientId}', '${q.id}')" style="background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 12px; cursor: pointer; transition: all 0.2s;">
+                        <div style="font-weight: 800; color: #0f172a; font-size: 15px; margin-bottom: 4px;">${q.patientName}</div>
+                        <div style="font-size: 12px; color: #64748b; font-weight: 700;">ID: ${q.patientId}</div>
+                    </div>
+                `).join('');
+            } else {
+                qContainer.innerHTML = `<p style="font-size: 13px; color: #94a3b8; text-align: center;">Queue is empty.</p>`;
+            }
+
             const res = await fetch('/api/v2/beds');
             const beds = await res.json();
             
@@ -1143,12 +1193,12 @@
                         </div>`;
                     } else {
                         html += `
-                        <div style="background: #f8fafc; border: 1px dashed #bbf7d0; border-top: 4px solid #22c55e; border-radius: 8px; padding: 16px; opacity: 0.8;">
+                        <div onclick="assignBed('${bed.id}', '${wardName}')" style="background: #f8fafc; border: 1px dashed #bbf7d0; border-top: 4px solid #22c55e; border-radius: 8px; padding: 16px; opacity: 0.8; cursor: pointer; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
                                 <span style="font-weight: 800; font-size: 18px; color: #64748b;">${bed.id}</span>
                                 <span style="font-size: 10px; background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 4px; font-weight: 800;">AVAILABLE</span>
                             </div>
-                            <p style="font-weight: 600; color: #94a3b8; font-size: 13px; text-align: center; margin-top: 8px;">Clean & Ready</p>
+                            <p style="font-weight: 600; color: #22c55e; font-size: 12px; text-align: center; margin-top: 8px;">Click to Assign</p>
                         </div>`;
                     }
                 });
@@ -1166,10 +1216,13 @@
         let payload = { patientId, admissionId };
         
         if (type === 'vitals') {
+            const bp = document.getElementById('np-bp-input').value || '0/0';
             payload.vitals = { 
-                heartRate: document.getElementById('np-hr-input').value,
-                bloodPressureSystolic: document.getElementById('np-bp-input').value.split('/')[0],
-                bloodPressureDiastolic: document.getElementById('np-bp-input').value.split('/')[1]
+                heartRate: document.getElementById('np-hr-input').value || '--',
+                bloodPressureSystolic: bp.split('/')[0] || '--',
+                bloodPressureDiastolic: bp.split('/')[1] || '--',
+                temperature: document.getElementById('np-temp-input').value || '--',
+                weight: document.getElementById('np-weight-input').value || '--'
             };
             payload.notes = "Vitals updated.";
         } else if (type === 'fluids') {
@@ -1219,13 +1272,25 @@
             document.getElementById('np-dx').innerText = lastEnc ? lastEnc.icd11Display || "Observation" : "No Diagnosis";
             document.getElementById('np-enotes').innerText = lastEnc ? (lastEnc.text) : "No clinical notes available.";
             
-            if (lastEnc && lastEnc.vitals) {
-                document.getElementById('np-hr').innerText = lastEnc.vitals.heartRate || "--";
-                document.getElementById('np-bp').innerText = (lastEnc.vitals.bloodPressureSystolic && lastEnc.vitals.bloodPressureDiastolic) ? 
-                    `${lastEnc.vitals.bloodPressureSystolic}/${lastEnc.vitals.bloodPressureDiastolic}` : "--";
+            // Render the timeline inside the Workstation!
+            const tContainer = document.getElementById('np-timeline');
+            if(db.encounters && db.encounters.length > 0) {
+                tContainer.innerHTML = db.encounters.map(e => `
+                    <div style="position: relative; margin-bottom: 24px;">
+                        <div style="position: absolute; left: -25px; top: 0; width: 10px; height: 10px; background: ${e.type === 'Nursing Note' ? '#0ea5e9' : '#8b5cf6'}; border-radius: 50%; border: 2px solid white;"></div>
+                        <div style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 4px;">${new Date(e.date).toLocaleDateString()} - ${e.id}</div>
+                        ${e.type === 'Nursing Note' 
+                            ? `<span style="background: #e0f2fe; color: #0284c7; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 800;">🩺 NURSING LOG</span>`
+                            : `<span style="font-weight: 700; color: #475569; font-size: 12px;">${e.icd11Display || 'Encounter'}</span>`
+                        }
+                        <p style="font-size: 13px; color: #334155; margin-top: 6px; line-height: 1.5;">
+                            ${e.type === 'Nursing Note' && e.vitals ? `<b>HR:</b> ${e.vitals.heartRate} | <b>BP:</b> ${e.vitals.bloodPressureSystolic}/${e.vitals.bloodPressureDiastolic} <br>` : ''}
+                            ${e.text || ''}
+                        </p>
+                    </div>
+                `).join('');
             } else {
-                document.getElementById('np-hr').innerText = "--";
-                document.getElementById('np-bp').innerText = "--";
+                tContainer.innerHTML = '<p style="color: #94a3b8; font-size: 13px;">No history.</p>';
             }
 
             // Populate Meds Tab
@@ -2251,7 +2316,7 @@
 
             <!-- Slide-Out Nurses Workstation -->
             <div id="nursingBackdrop" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s;"></div>
-            <div id="nursingPanel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); opacity: 0; pointer-events: none; z-index: 1000; width: 700px; max-height: 85vh; background: white; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
+            <div id="nursingPanel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); opacity: 0; pointer-events: none; z-index: 1000; width: 1000px; max-width: 95vw; height: 85vh; background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
                 
                 <!-- Workstation Header -->
                 <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; position: relative; background: #0f172a;">
@@ -2324,7 +2389,7 @@
 
             <!-- Slide-Out Nurses Workstation -->
             <div id="nursingBackdrop" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s;"></div>
-            <div id="nursingPanel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); opacity: 0; pointer-events: none; z-index: 1000; width: 700px; max-height: 85vh; background: white; border-radius: 12px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
+            <div id="nursingPanel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); opacity: 0; pointer-events: none; z-index: 1000; width: 1000px; max-width: 95vw; height: 85vh; background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
                 
                 <!-- Workstation Header -->
                 <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; position: relative; background: #0f172a;">

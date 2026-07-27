@@ -702,6 +702,7 @@ async function handleApi(req, res, url) {
   if (!data.appointments) data.appointments = [];
   if (!data.labResults) data.labResults = [];
   if (!data.beds) data.beds = [];
+  if (!data.pendingAdmissions) data.pendingAdmissions = [];
   if (!data.labCatalog) data.labCatalog = [
       { id: "LAB-01", category: "Hematology", name: "Full Blood Count (FBC)", price: 4000 },
       { id: "LAB-02", category: "Hematology", name: "Packed Cell Volume (PCV)", price: 1500 },
@@ -813,6 +814,28 @@ async function handleApi(req, res, url) {
   }
     // ── Lab Catalog
   if (req.method === "GET" && url.pathname === "/api/v2/emr/lab-catalog") { sendJson(res, 200, data.labCatalog); return; }
+    // ── Pending Admissions Queue
+  if (req.method === "GET" && url.pathname === "/api/v2/emr/admissions/pending") {
+      sendJson(res, 200, data.pendingAdmissions);
+      return;
+  }
+  
+  if (req.method === "POST" && url.pathname === "/api/v2/emr/admissions/request") {
+      const body = await collectBody(req);
+      const reqId = nextId("REQ", data.pendingAdmissions);
+      const newReq = {
+          id: reqId,
+          patientId: body.patientId,
+          patientName: body.patientName || "Unknown",
+          diagnosis: body.diagnosis || "Unspecified",
+          date: new Date().toISOString(),
+          requestedBy: "Physician"
+      };
+      data.pendingAdmissions.unshift(newReq);
+      queueDatabaseWrite(data);
+      sendJson(res, 201, { success: true, request: newReq });
+      return;
+  }
   // ── Beds
   if (req.method === "GET" && url.pathname === "/api/v2/beds") { sendJson(res, 200, data.beds); return; }
   if (req.method === "POST" && url.pathname === "/api/v2/beds/admit") {
@@ -823,6 +846,8 @@ async function handleApi(req, res, url) {
     const admission = { id: nextId("ADM", data.admissions), patientId: body.patientId, facilityId: bed.facilityId, bedId: bed.id, ward: bed.ward, admissionDate: new Date().toISOString().slice(0, 10), dischargeDate: null, admissionDiagnosis: body.diagnosis || "Unspecified", status: "Active", readmissionRisk: null, dischargedBy: null };
     bed.status = "Occupied"; bed.patientId = body.patientId; bed.admissionId = admission.id;
     data.admissions.unshift(admission);
+    // NEW: Remove from pending queue
+    data.pendingAdmissions = data.pendingAdmissions.filter(p => p.patientId !== body.patientId);
     createAutoBill(data, body.patientId, "Wards", `Ward admission: ${bed.ward}`);
     queueDatabaseWrite(data);
     sendJson(res, 201, { bed, admission });
