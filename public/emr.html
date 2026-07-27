@@ -105,17 +105,33 @@
       
       <div style="display: flex; flex-direction: column; width: 100%;">
         <button class="nav-btn active" onclick="switchEmrView('omniBar')" title="Search / Home"><span>🔍</span><span class="nav-text">Omni-Bar / Search</span></button>
-        <button class="nav-btn" onclick="switchEmrView('triageView')" title="Triage & Vitals"><span>🩺</span><span class="nav-text">Triage & Vitals</span></button>
-        <button class="nav-btn" onclick="switchEmrView('clinicsDashboardView')" title="Outpatient Clinics"><span>🏥</span><span class="nav-text">Outpatient Clinics</span></button>
-        <button class="nav-btn" onclick="switchEmrView('wardsView')" title="Inpatient Wards"><span>🛏️</span><span class="nav-text">Inpatient Wards</span></button>
-        <button class="nav-btn" onclick="switchEmrView('pharmacyView')" title="Pharmacy"><span>💊</span><span class="nav-text">Pharmacy</span></button>
-        <button class="nav-btn" onclick="switchEmrView('labView')" title="Laboratory"><span>🧪</span><span class="nav-text">Laboratory</span></button>
-        <button class="nav-btn" onclick="switchEmrView('radView')" title="Radiology"><span>☢️</span><span class="nav-text">Radiology</span></button>
-        <button class="nav-btn" onclick="switchEmrView('billingView')" title="Billing"><span>💳</span><span class="nav-text">Billing</span></button>
-        <button class="nav-btn" onclick="switchEmrView('recordsMainView')" title="Records Unit" style="border-top: 1px solid #e5e7eb; border-radius: 0; margin-top: 8px; padding-top: 16px;"><span>📂</span><span class="nav-text" style="color: #4f46e5;">Records Unit</span></button>
+        <button class="nav-btn" onclick="switchEmrView('triageView')" data-target-view="triageView" title="Triage & Vitals"><span>🩺</span><span class="nav-text">Triage & Vitals</span></button>
+        <button class="nav-btn" onclick="switchEmrView('clinicsDashboardView')" data-target-view="clinicsDashboardView" title="Outpatient Clinics"><span>🏥</span><span class="nav-text">Outpatient Clinics</span></button>
+        <button class="nav-btn" onclick="switchEmrView('wardsView')" data-target-view="wardsView" title="Inpatient Wards"><span>🛏️</span><span class="nav-text">Inpatient Wards</span></button>
+        <button class="nav-btn" onclick="switchEmrView('pharmacyView')" data-target-view="pharmacyView" title="Pharmacy"><span>💊</span><span class="nav-text">Pharmacy</span></button>
+        <button class="nav-btn" onclick="switchEmrView('labView')" data-target-view="labView" title="Laboratory"><span>🧪</span><span class="nav-text">Laboratory</span></button>
+        <button class="nav-btn" onclick="switchEmrView('radView')" data-target-view="radView" title="Radiology"><span>☢️</span><span class="nav-text">Radiology</span></button>
+        <button class="nav-btn" onclick="switchEmrView('billingView')" data-target-view="billingView" title="Billing"><span>💳</span><span class="nav-text">Billing</span></button>
+        <button class="nav-btn" onclick="switchEmrView('recordsMainView')" data-target-view="recordsMainView" title="Records Unit" style="border-top: 1px solid #e5e7eb; border-radius: 0; margin-top: 8px; padding-top: 16px;"><span>📂</span><span class="nav-text" style="color: #4f46e5;">Records Unit</span></button>
       </div>
 
       <div style="margin-top: auto; border-top: 1px solid #e5e7eb; padding-top: 16px;">
+        
+        <!-- Role Selector -->
+        <div class="nav-text" style="padding: 0 12px; margin-bottom: 16px; width: 100%;">
+            <p style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Active Context</p>
+            <select id="roleSelector" onchange="setEmrRole(this.value)" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #0f172a; font-weight: 700; font-size: 13px; outline: none; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+                <option value="admin">System Admin (Full Access)</option>
+                <option value="doctor">Physician</option>
+                <option value="nurse">Nursing & Wards</option>
+                <option value="pharmacy">Pharmacist</option>
+                <option value="lab">Laboratory Tech</option>
+                <option value="rad">Radiologist</option>
+                <option value="billing">Billing Cashier</option>
+                <option value="records">Records Officer</option>
+            </select>
+        </div>
+
         <button class="nav-btn" onclick="window.location.href='/admin.html'" title="Exit to EHR Dashboard"><span>🚪</span><span class="nav-text">Exit to Admin</span></button>
       </div>
     </nav>
@@ -396,8 +412,8 @@
           
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <button onclick="printSummary()" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #1f2937; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">🖨️ Print Patient Summary</button>
-            <button onclick="switchEmrView('pharmacyView')" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #10b981; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">💊 Proceed to Pharmacy</button>
-            <button onclick="switchEmrView('labView')" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #8b5cf6; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">🧪 Proceed to Laboratory</button>
+            <button onclick="switchEmrView('pharmacyView')" data-target-view="pharmacyView" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #10b981; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">💊 Proceed to Pharmacy</button>
+            <button onclick="switchEmrView('labView')" data-target-view="labView" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #8b5cf6; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">🧪 Proceed to Laboratory</button>
             <button onclick="switchEmrView('omniBar')" style="padding: 16px; background: #0B5E7E; border: none; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: white; transition: all 0.2s; box-shadow: 0 4px 6px rgba(11,94,126,0.2);">🔍 Return to Omni-Bar</button>
           </div>
         </div>
@@ -1323,6 +1339,36 @@
             invInterval = setInterval(fetchLiveInventory, 10000); // 10s for inventory
         }
     };
+
+    
+    // --- ROLE BASED ACCESS CONTROL (RBAC) ---
+    function setEmrRole(role) {
+        const accessMap = {
+            'admin': ['triageView', 'clinicsDashboardView', 'wardsView', 'pharmacyView', 'labView', 'radView', 'billingView', 'recordsMainView'],
+            'doctor': ['clinicsDashboardView', 'wardsView'],
+            'nurse': ['triageView', 'wardsView'],
+            'pharmacy': ['pharmacyView'],
+            'lab': ['labView'],
+            'rad': ['radView'],
+            'billing': ['billingView'],
+            'records': ['recordsMainView']
+        };
+
+        const allowedViews = accessMap[role] || [];
+        
+        document.querySelectorAll('.nav-btn[data-target-view]').forEach(btn => {
+            const target = btn.getAttribute('data-target-view');
+            if (role === 'admin' || allowedViews.includes(target)) {
+                btn.style.display = 'flex';
+            } else {
+                btn.style.display = 'none';
+            }
+        });
+        
+        // Force navigate to Omni-Bar to reset context and prevent access to hidden views
+        switchEmrView('omniBar');
+        showToast("Role context switched to " + role.toUpperCase());
+    }
 
     // --- LIVE ANCILLARY POLLING LOGIC ---
     let ancillaryPollInterval = null;
