@@ -2561,8 +2561,8 @@
       if(target) {
         target.classList.remove('hidden');
         target.classList.add('active');
-        // Let CSS handle display mode automatically to prevent layout collapse
-        target.style.display = '';
+        // Restore flex display to maintain internal grid/flex layouts
+        target.style.display = 'flex';
       }
       
       // Update sidebar active states
