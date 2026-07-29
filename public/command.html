@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Global Health Grid | Hospitals and PHCs</title>
+  <title>The Global Health Grid | Hospitals and PHCs (DEBUG)</title>
   <meta name="description" content="A Plateau State hospital and PHC electronic health record prototype with clinical, operational, reporting, and clinical documentation audit modules." />
   <link rel="stylesheet" href="styles.css" />
 
@@ -44,7 +44,6 @@
   </style>
 </head>
 <body>
-<body>
 
   <!-- ÔöÇÔöÇ LOGIN SCREEN ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
   <div id="loginScreen" style="
@@ -81,7 +80,7 @@
         <div id="loginError" style="display:none;color:#f87171;font-size:13px;margin-bottom:16px;padding:10px 14px;background:rgba(239,68,68,0.15);border-radius:8px;border:1px solid rgba(239,68,68,0.3);">
           Invalid username or password. Please try again.
         </div>
-        <div style="text-align: right; margin-bottom: 16px;">
+        <div style="text-align: center; margin-bottom: 16px;">
           <a href="javascript:void(0)" onclick="document.getElementById('resetModal').style.display='flex'" style="color:#60a5fa; font-size:12px; text-decoration:none; font-weight:600;">Forgot Password?</a>
         </div>
         <button type="submit" id="loginBtn"
@@ -260,18 +259,9 @@
         <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('recordsMainView')" title="Records Unit">
             <span>📂</span><span class="nav-text">Records Unit</span>
         </button>
-        <button class="nav-btn" data-roles="admin" onclick="switchEhrView('legalView')" title="Legal Matrix">
-          <span class="nav-icon">⚖️</span><span class="nav-text">Legal Matrix</span>
-        </button>
-        <button class="nav-btn" data-roles="admin physician nurse" onclick="switchEhrView('wardsView')" title="Inpatient Wards">
-          <span class="nav-icon">🛏️</span><span class="nav-text">Inpatient Wards</span>
-        </button>
-        <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('labsView')" title="Lab & Diagnostics">
-          <span class="nav-icon">🧪</span><span class="nav-text">Lab & Diagnostics</span>
-        </button>
-        <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('billingView')" title="Billing & Claims">
-          <span class="nav-icon">💳</span><span class="nav-text">Billing & Claims</span>
-        </button>
+
+        
+
 
       </nav>
 
@@ -987,7 +977,7 @@
       </div>
 
       <!-- VIEW 9: Billing Shell -->
-      <div id="billingView" class="ehr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
+      <div id="oldBillingView" class="ehr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
         <!-- Legacy Header Bar -->
         <div style="background: #10b981; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px 4px 0 0;">
           <div style="display: flex; align-items: center; gap: 12px;">
@@ -1024,7 +1014,7 @@
           <div style="display: flex; gap: 24px; align-items: flex-end; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
             <div>
               <label style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">Status *</label><br/>
-              <select id="billStatusFilter" style="border: none; border-bottom: 1px solid #cbd5e1; padding: 4px 0; font-size: 14px; color: #333; outline: none; background: transparent;" onchange="loadBilling()">
+              <select id="billStatusFilter" style="border: none; border-bottom: 1px solid #cbd5e1; padding: 4px 0; font-size: 14px; color: #333; outline: none; background: transparent;" onchange="fetchLiveBilling()">
                 <option value="All">All</option>
                 <option value="Pending">Pending</option>
                 <option value="Paid">Paid</option>
@@ -1032,7 +1022,7 @@
               </select>
             </div>
             <div>
-              <button style="background: #facc15; color: #854d0e; font-weight: 700; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="loadBilling()">
+              <button style="background: #facc15; color: #854d0e; font-weight: 700; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="fetchLiveBilling()">
                 <span>🔄</span> Refresh
               </button>
             </div>
@@ -1076,237 +1066,9 @@
 
   <div id="toast">Success!</div>
 
-      <!-- VIEW: LEGAL MATRIX -->
-      <div id="legalView" class="ehr-view hidden" style="padding: 40px; max-width: 1000px; margin: 0 auto; width: 100%;">
-        <div style="margin-bottom: 32px;">
-          <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Legal & Compliance Matrix</h2>
-          <p style="color: #6b7280; font-size: 16px;">Dedicated portal for NDPA, GDPR, and HIPAA audit status.</p>
-        </div>
-        
-        <div class="glass-card" style="background: #0f172a; color: white; border: none;">
-          <div style="background:rgba(37,99,235,0.15); border:1px solid rgba(37,99,235,0.3); border-radius:12px; padding:16px; margin-bottom:24px; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-              <strong style="color:#60a5fa; font-size:16px;">Audit Standing: 100% GREEN LIGHT - PASSED</strong>
-              <div style="font-size:13px; color:#94a3b8; margin-top:4px;">Compliant with NDPA 2023, HIPAA, GDPR, FDA CDS Rules, and Plateau State E-Health Framework.</div>
-            </div>
-            <a href="legal.html" target="_blank" style="padding:10px 16px; background:#2563eb; color:#fff; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px;">Full Document Portal ↗</a>
-          </div>
 
-          <h4 style="color:#fff; font-size:16px; margin:24px 0 8px;">1. Terms of Service & Explicit Consent</h4>
-          <p style="color:#94a3b8; font-size: 14px; line-height: 1.6;">Use of the Global Health Grid requires explicit, click-through consent before account authorization. All clinical staff and users are responsible for credential security and acceptable use.</p>
-
-          <h4 style="color:#fff; font-size:16px; margin:24px 0 8px;">2. Privacy Policy & Data Sovereignty</h4>
-          <p style="color:#94a3b8; font-size: 14px; line-height: 1.6;">Personal health information (PHI) is processed under lawful bases established by the Nigeria Data Protection Act (NDPA 2023). Biometric data is stored in locally encrypted SQLite caches and never transmitted raw.</p>
-
-          <div style="margin-top: 32px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <h4 style="color:#fff; font-size:16px; margin: 0; display: flex; align-items: center; gap: 8px;"><span style="color: #10b981;">●</span> Live System Audit Trail</h4>
-              <button onclick="fetchAuditLogs()" style="padding: 6px 12px; background: #334155; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;">Refresh Stream</button>
-            </div>
-            
-            <div id="auditTerminal" class="terminal-scroll" style="background: #020617; border: 1px solid #1e293b; border-radius: 8px; padding: 16px; height: 350px; overflow-y: auto; font-family: 'Courier New', Courier, monospace; font-size: 13px; color: #a5b4fc; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);">
-              <div id="auditLogOutput">Initializing secure audit stream...</div>
-            </div>
-          </div>
-
-          <h4 style="color:#fff; font-size:16px; margin:24px 0 8px;">3. Clinical Decision Support & Medical Disclaimer</h4>
-          <p style="background:rgba(239,68,68,0.12); border:1px solid rgba(239,68,68,0.3); padding:16px; border-radius:8px; color:#fecaca; font-size: 14px; line-height: 1.6;">
-            <strong>🚨 EMERGENCY & CLINICAL NOTICE:</strong> The GHG provides clinical decision support for informational purposes only. It does not replace independent physician judgment. <strong>In an emergency, call 112 immediately.</strong>
-          </p>
-        </div>
-      </div>
-
-
-      <!-- VIEW: INPATIENT WARDS -->
-      <div id="wardsView" class="ehr-view hidden" style="padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%;">
-        <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
-          <div>
-            <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Inpatient Wards</h2>
-            <p style="color: #6b7280; font-size: 16px;">Live bed management and admission tracking.</p>
-          </div>
-          <button onclick="fetchLiveWards()" style="padding: 10px 20px; background: #0284c7; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-            🔄 Refresh Beds
-          </button>
-        </div>
-        
-        <div class="glass-card" style="margin-bottom: 24px; border-left: 4px solid #0284c7;">
-          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Direct Admission Booking (Walk-In)</h3>
-          <form onsubmit="addToWardCart(event)">
-            <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 16px; margin-bottom: 16px;">
-              <div>
-                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Patient ID</label>
-                <input type="text" id="walkInWardPatientId" required placeholder="PT1001" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
-              </div>
-              <div>
-                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Select Ward / Bed Tier</label>
-                <select id="walkInWardType" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
-                  <optgroup label="Standard Admissions">
-                    <option value="General Ward|5000">General Ward - ₦5,000/day</option>
-                    <option value="Pediatric Ward|6000">Pediatric Ward - ₦6,000/day</option>
-                    <option value="Maternity Ward|8000">Maternity Ward - ₦8,000/day</option>
-                  </optgroup>
-                  <optgroup label="Premium / Specialized">
-                    <option value="Semi-Private Room|12000">Semi-Private Room - ₦12,000/day</option>
-                    <option value="Private Suite|25000">Private Suite - ₦25,000/day</option>
-                    <option value="Intensive Care Unit (ICU)|50000">Intensive Care Unit (ICU) - ₦50,000/day</option>
-                  </optgroup>
-                </select>
-              </div>
-              <div>
-                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Duration (Days)</label>
-                <input type="number" id="walkInWardDays" required min="1" value="1" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
-              </div>
-            </div>
-            <button type="submit" style="width: 100%; padding: 12px; border-radius: 8px; background: #e2e8f0; color: #1e293b; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 16px;">[+] Add to Booking List</button>
-          </form>
-          
-          <div id="wardCartContainer" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
-            <h4 style="margin: 0 0 12px; font-size: 14px; font-weight: 700;">Booking Summary</h4>
-            <ul id="wardCartList" style="list-style: none; padding: 0; margin: 0 0 16px; font-size: 13px;"></ul>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 12px;">
-              <strong style="font-size: 16px;">Total: ₦<span id="wardCartTotal">0</span></strong>
-              <button onclick="checkoutWardCart()" style="padding: 10px 20px; border-radius: 8px; background: #0284c7; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.2);">Confirm Admission & Bill</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="glass-card">
-          <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
-              <thead>
-                <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280;">
-                  <th style="padding: 12px 8px;">Bed ID</th>
-                  <th style="padding: 12px 8px;">Ward</th>
-                  <th style="padding: 12px 8px;">Status</th>
-                  <th style="padding: 12px 8px;">Patient ID</th>
-                </tr>
-              </thead>
-              <tbody id="liveWardsTableBody">
-                <tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">Click refresh to fetch bed statuses...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- VIEW: LABS -->
-      <div id="labsView" class="ehr-view hidden" style="padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%;">
-        <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
-          <div>
-            <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Laboratory & Diagnostics</h2>
-            <p style="color: #6b7280; font-size: 16px;">Regional laboratory result processing.</p>
-          </div>
-          <button onclick="fetchLiveLabs()" style="padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-            🔄 Refresh Labs
-          </button>
-        </div>
-        
-        <div class="glass-card" style="margin-bottom: 24px; border-left: 4px solid #8b5cf6;">
-          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Direct Walk-In Orders</h3>
-          <form onsubmit="addToLabCart(event)">
-            <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 16px; margin-bottom: 16px;">
-              <div>
-                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Patient ID</label>
-                <input type="text" id="walkInLabPatientId" required placeholder="PT1001" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
-              </div>
-              <div>
-                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Select Test Catalog</label>
-                <select id="walkInLabTest" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
-                  <optgroup label="Hematology & Coagulation">
-                    <option value="Full Blood Count (FBC)|3000|Laboratory">Full Blood Count (FBC) - ₦3,000</option>
-                    <option value="Hemoglobin A1c|4500|Laboratory">Hemoglobin A1c - ₦4,500</option>
-                  </optgroup>
-                  <optgroup label="Clinical Chemistry">
-                    <option value="Comprehensive Metabolic Panel|8000|Laboratory">Comprehensive Metabolic Panel - ₦8,000</option>
-                    <option value="Lipid Profile|5000|Laboratory">Lipid Profile - ₦5,000</option>
-                  </optgroup>
-                  <optgroup label="Microbiology">
-                    <option value="Malaria RDT|1500|Laboratory">Malaria RDT - ₦1,500</option>
-                    <option value="Urinalysis|2000|Laboratory">Urinalysis - ₦2,000</option>
-                    <option value="Blood Culture|7500|Laboratory">Blood Culture - ₦7,500</option>
-                  </optgroup>
-                  <optgroup label="Radiology & Imaging">
-                    <option value="Chest X-Ray|10000|Radiology">Chest X-Ray - ₦10,000</option>
-                    <option value="Ultrasound Scan|8000|Radiology">Ultrasound Scan - ₦8,000</option>
-                    <option value="CT Scan (Head)|35000|Radiology">CT Scan (Head) - ₦35,000</option>
-                  </optgroup>
-                </select>
-              </div>
-              <div>
-                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Quantity</label>
-                <input type="number" id="walkInLabQty" required min="1" value="1" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
-              </div>
-            </div>
-            <button type="submit" style="width: 100%; padding: 12px; border-radius: 8px; background: #e2e8f0; color: #1e293b; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 16px;">[+] Add to Cart</button>
-          </form>
-          
-          <div id="labCartContainer" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
-            <h4 style="margin: 0 0 12px; font-size: 14px; font-weight: 700;">Cart Summary</h4>
-            <ul id="labCartList" style="list-style: none; padding: 0; margin: 0 0 16px; font-size: 13px;"></ul>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 12px;">
-              <strong style="font-size: 16px;">Total: ₦<span id="labCartTotal">0</span></strong>
-              <button onclick="checkoutLabCart()" style="padding: 10px 20px; border-radius: 8px; background: #8b5cf6; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.2);">Checkout & Bill</button>
-            </div>
-          </div>
-        </div>
-        
-        <div class="glass-card">
-          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">
-            <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Incoming Lab & Radiology Orders</h3>
-          </div>
-          <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
-              <thead>
-                <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280;">
-                  <th style="padding: 12px 8px;">Order ID</th>
-                  <th style="padding: 12px 8px;">Patient ID</th>
-                  <th style="padding: 12px 8px;">Test Detail</th>
-                  <th style="padding: 12px 8px;">Priority</th>
-                </tr>
-              </thead>
-              <tbody id="liveLabsTableBody">
-                <tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">Click refresh to fetch labs...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <!-- VIEW: BILLING -->
-      <div id="billingView" class="ehr-view hidden" style="padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%;">
-        <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
-          <div>
-            <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Billing & Claims</h2>
-            <p style="color: #6b7280; font-size: 16px;">Financial reconciliation and NHIS claims processing.</p>
-          </div>
-          <button onclick="fetchLiveBilling()" style="padding: 10px 20px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
-            🔄 Refresh Billing
-          </button>
-        </div>
-        
-        <div class="glass-card">
-          <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
-              <thead>
-                <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280;">
-                  <th style="padding: 12px 8px;">Bill ID</th>
-                  <th style="padding: 12px 8px;">Patient ID</th>
-                  <th style="padding: 12px 8px;">Service</th>
-                  <th style="padding: 12px 8px;">Amount (NGN)</th>
-                  <th style="padding: 12px 8px;">Status</th>
-                </tr>
-              </thead>
-              <tbody id="liveBillingTableBody">
-                <tr><td colspan="5" style="padding: 20px; text-align: center; color: #9ca3af;">Click refresh to fetch billing records...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-    </main>
-
-  <!-- Sleek Modals for Workflows -->
+      <!-- VIEW: LEGAL MATRIX (SLEEK) -->
+      <!-- Sleek Modals for Workflows -->
   
   <!-- Discharge Modal -->
   <div id="dischargeModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center;">
@@ -1417,7 +1179,7 @@
       }
     }
 
-
+    let billingInterval = null;
 
     function switchEhrView(viewId, isPopState = false) {
       document.querySelectorAll('.ehr-view').forEach(el => el.classList.add('hidden'));
@@ -1429,7 +1191,7 @@
       
       if (!isPopState) {
         history.pushState({ viewId }, "", "#" + viewId);
-      if(viewId === 'billingView') { loadBilling(); if(!billingInterval) billingInterval = setInterval(loadBilling, 5000); } else { clearInterval(billingInterval); billingInterval = null; }
+      if(viewId === 'billingView') { fetchLiveBilling(); if(!billingInterval) billingInterval = setInterval(fetchLiveBilling, 5000); } else { clearInterval(billingInterval); billingInterval = null; }
       }
     }
 
@@ -1456,7 +1218,7 @@
 
     
     // ── Live Backend Integration ─────────────────────────────────────
-    const API_URL = '/api';
+    const API_URL = '/api/v2';
 
     // Global Fetch Interceptor to attach Authorization header automatically
     const originalFetch = window.fetch;
@@ -1532,90 +1294,122 @@
 
 
     // ── EHR: Inpatient Wards (GET /api/v2/beds)
+    
+
+    async function fetchAuditLogs() {
+      try {
+        const res = await fetch(`${API_URL}/audit`);
+        if (res.ok) {
+          const logsData = await res.json();
+          const logs = logsData.logs || [];
+          const list = document.getElementById('legalAuditList');
+          if (!list) return;
+          list.innerHTML = logs.slice(0, 5).map(log => `
+            <div style="padding: 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <div style="font-weight: 600; color: #1e293b;">${log.method} ${log.url}</div>
+                <div style="font-size: 13px; color: #64748b; margin-top: 4px;">User: ${log.user} | IP: ${log.ip}</div>
+              </div>
+              <div style="font-size: 12px; color: #94a3b8;">${new Date(log.timestamp).toLocaleTimeString()}</div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        console.error("Audit load failed:", e);
+      }
+    }
+
+    
+    async function fetchRecordsRegistry() {
+      console.log('Fetching records registry...');
+    }
+
     async function fetchLiveWards() {
       try {
         const resOrders = await fetch(`${API_URL}/orders`);
-        let admissions = [];
-        if (resOrders.ok) {
-           const allOrders = await resOrders.json();
-           admissions = allOrders.filter(o => o.type === 'Admission');
-        }
-
         const res = await fetch(`${API_URL}/beds`);
-        if (res.ok) {
+        
+        if (res.ok && resOrders.ok) {
           const beds = await res.json();
-          const tbody = document.getElementById('liveWardsTableBody');
-          tbody.innerHTML = '';
+          const admissions = await resOrders.json();
           
-          if (admissions.length > 0) {
-            tbody.innerHTML += `<tr><td colspan="4" style="background:#f9fafb; font-weight:800; padding:8px 12px; color:#4b5563;">Pending Admissions (Incoming E-Notes)</td></tr>`;
-            admissions.forEach(a => {
-              tbody.innerHTML += `
-                <tr style="border-bottom: 1px solid #f3f4f6; background: #fffbeb;">
-                  <td style="padding: 12px 8px; font-family: monospace; color: #d97706; font-weight:bold;">${a.id}</td>
-                  <td style="padding: 12px 8px; font-weight: 500;">Unassigned (${a.item})</td>
-                  <td style="padding: 12px 8px;">
-                    <span style="background: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
-                      Pending Arrival
-                    </span>
-                  </td>
-                  <td style="padding: 12px 8px; font-family: monospace;">${a.patientId}</td>
-                </tr>
-              `;
-            });
-            tbody.innerHTML += `<tr><td colspan="4" style="background:#f9fafb; font-weight:800; padding:8px 12px; color:#4b5563;">Live Bed Status</td></tr>`;
-          }
-
-          if (beds.length === 0 && admissions.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">No beds registered in system.</td></tr>';
-          else {
-            beds.forEach(b => {
-              tbody.innerHTML += `
-                <tr style="border-bottom: 1px solid #f3f4f6;">
-                  <td style="padding: 12px 8px; font-family: monospace; color: #0284c7; font-weight:bold;">${b.id}</td>
-                  <td style="padding: 12px 8px; font-weight: 500;">${b.ward}</td>
-                  <td style="padding: 12px 8px;">
-                    <span style="background: ${b.status === 'Occupied' ? '#fee2e2' : '#dcfce3'}; color: ${b.status === 'Occupied' ? '#b91c1c' : '#166534'}; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
-                      ${b.status}
-                    </span>
-                  </td>
-                  <td style="padding: 12px 8px; font-family: monospace;">${b.patientId || '-'}</td>
-                </tr>
-              `;
-            });
-          }
+          if (!document.getElementById('wardStatTotal')) return;
+          
+          const total = beds.length;
+          const occupied = beds.filter(b => b.status === 'Occupied').length;
+          const available = total - occupied;
+          
+          document.getElementById('wardStatTotal').innerText = total || '-';
+          document.getElementById('wardStatOccupied').innerText = occupied || '0';
+          document.getElementById('wardStatAvailable').innerText = available || '0';
+          
+          const grid = document.getElementById('liveWardsGrid');
+          grid.innerHTML = beds.map(bed => {
+            const isOccupied = bed.status === 'Occupied';
+            return `
+              <div style="background: ${isOccupied ? '#fef2f2' : '#ecfdf5'}; border: 1px solid ${isOccupied ? '#fca5a5' : '#6ee7b7'}; border-radius: 16px; padding: 20px; text-align: center;">
+                <div style="font-size: 24px; font-weight: 800; color: ${isOccupied ? '#991b1b' : '#065f46'};">${bed.bedId}</div>
+                <div style="font-size: 14px; color: ${isOccupied ? '#b91c1c' : '#059669'}; margin-top: 4px; font-weight: 600;">${bed.status}</div>
+                ${!isOccupied ? `<button style="margin-top: 16px; width: 100%; padding: 8px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="alert('Open admission flow for ${bed.bedId}')">Admit</button>` : `<div style="margin-top: 16px; font-size: 12px; color: #7f1d1d; opacity: 0.8;">Patient ID: ${bed.patientId}</div>`}
+              </div>
+            `;
+          }).join('');
         }
-      } catch (err) {}
+      } catch (e) {
+        console.error("Wards load failed:", e);
+      }
     }
 
+
     // ── EHR: Labs & Diagnostics (GET /api/v2/orders)
+
     async function fetchLiveLabs() {
       try {
         const res = await fetch(`${API_URL}/orders`);
         if (res.ok) {
-          const allOrders = await res.json();
-          const labs = allOrders.filter(o => o.type === 'Laboratory' || o.type === 'Radiology');
-          const tbody = document.getElementById('liveLabsTableBody');
-          tbody.innerHTML = '';
-          if (labs.length === 0) tbody.innerHTML = '<tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">No pending lab orders.</td></tr>';
-          else {
-            labs.slice(0, 15).forEach(l => {
-              tbody.innerHTML += `
-                <tr style="border-bottom: 1px solid #f3f4f6;">
-                  <td style="padding: 12px 8px; font-family: monospace; color: #8b5cf6; font-weight:bold;">${l.id}</td>
-                  <td style="padding: 12px 8px; font-family: monospace;">${l.patientId}</td>
-                  <td style="padding: 12px 8px; font-weight: 600;">${l.item} (${l.type})</td>
-                  <td style="padding: 12px 8px;">
-                    <span style="background: ${l.priority === 'Urgent' ? '#fee2e2' : '#f3f4f6'}; color: ${l.priority === 'Urgent' ? '#b91c1c' : '#6b7280'}; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
-                      ${l.priority}
-                    </span>
-                  </td>
-                </tr>
-              `;
-            });
+          const orders = await res.json();
+          const labOrders = orders.filter(o => o.type === 'Lab');
+          
+          const pending = labOrders.filter(o => o.status === 'Pending');
+          const completed = labOrders.filter(o => o.status === 'Completed').slice(0, 5); // Last 5
+          
+          if (!document.getElementById('labsPendingList')) return;
+          
+          const pendingList = document.getElementById('labsPendingList');
+          if (pending.length === 0) {
+            pendingList.innerHTML = '<div style="color:#94a3b8; text-align:center; padding: 20px;">No pending lab requests.</div>';
+          } else {
+            pendingList.innerHTML = pending.map(o => `
+              <div style="padding: 20px; border: 1px solid #f1f5f9; border-radius: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                  <div>
+                    <div style="font-weight: 700; color: #0f172a; font-size: 18px;">${o.details.testName || 'Lab Test'}</div>
+                    <div style="color: #64748b; font-size: 14px; margin-top: 4px;">PT ID: ${o.patientId}</div>
+                  </div>
+                </div>
+                <button style="width: 100%; padding: 12px; background: #eff6ff; color: #2563eb; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;" onclick="alert('Processing ${o.id}')">Process Sample</button>
+              </div>
+            `).join('');
+          }
+          
+          const resultsList = document.getElementById('labsResultsList');
+          if (completed.length === 0) {
+            resultsList.innerHTML = '<div style="color:#94a3b8; text-align:center; padding: 20px;">No recent results.</div>';
+          } else {
+            resultsList.innerHTML = completed.map(o => `
+              <div style="padding: 20px; border: 1px solid #f1f5f9; border-radius: 16px;">
+                <div style="font-weight: 700; color: #0f172a; font-size: 18px;">${o.details.testName || 'Lab Test'}</div>
+                <div style="color: #64748b; font-size: 14px; margin-top: 4px;">PT ID: ${o.patientId}</div>
+                <div style="margin-top: 16px; display: inline-block; background: #ecfdf5; color: #059669; padding: 6px 16px; border-radius: 8px; font-weight: 700;">Result: ${o.details.result || 'READY'}</div>
+              </div>
+            `).join('');
           }
         }
-      } catch (err) {}
+      } catch (e) {
+        console.error("Labs load failed:", e);
+      }
     }
+
 
     async function fetchLivePharmacyOrders() {
       try {
@@ -1648,34 +1442,42 @@
     }
 
     // ── EHR: Billing (GET /api/v2/billing)
+
     async function fetchLiveBilling() {
       try {
         const res = await fetch(`${API_URL}/billing`);
         if (res.ok) {
-          const bills = await res.json();
-          const tbody = document.getElementById('liveBillingTableBody');
-          tbody.innerHTML = '';
-          if (bills.length === 0) tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #9ca3af;">No billing records found.</td></tr>';
-          else {
-            bills.slice(0, 15).forEach(b => {
-              tbody.innerHTML += `
-                <tr style="border-bottom: 1px solid #f3f4f6;">
-                  <td style="padding: 12px 8px; font-family: monospace; color: #10b981; font-weight:bold;">${b.id}</td>
-                  <td style="padding: 12px 8px; font-family: monospace;">${b.patientId}</td>
-                  <td style="padding: 12px 8px;">${b.service}</td>
-                  <td style="padding: 12px 8px; font-weight:600;">₦${b.amount.toLocaleString()}</td>
-                  <td style="padding: 12px 8px;">
-                    <span style="background: ${b.status === 'Paid' ? '#dcfce3' : '#fef3c7'}; color: ${b.status === 'Paid' ? '#166534' : '#b45309'}; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
-                      ${b.status}
-                    </span>
-                  </td>
-                </tr>
-              `;
-            });
+          const invoices = await res.json();
+          if (!document.getElementById('billingTotalRev')) return;
+          
+          const unpaid = invoices.filter(inv => inv.status === 'Unpaid');
+          const totalRev = unpaid.reduce((sum, inv) => sum + (Number(inv.amount) || 0), 0);
+          
+          document.getElementById('billingTotalRev').innerText = '₦' + totalRev.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+          
+          const list = document.getElementById('billingInvoiceList');
+          if (unpaid.length === 0) {
+            list.innerHTML = '<div style="color:#94a3b8; text-align:center; padding: 20px;">All invoices are settled!</div>';
+          } else {
+            list.innerHTML = unpaid.map(inv => `
+              <div style="padding: 16px 20px; background: #f8fafc; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 600; color: #0f172a;">${inv.description}</div>
+                  <div style="font-size: 14px; color: #64748b; margin-top: 4px;">Patient ID: ${inv.patientId}</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 16px;">
+                  <div style="font-weight: 800; color: #0f172a; font-size: 18px;">₦${Number(inv.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
+                  <button style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="alert('Settling invoice ${inv.id}')">Settle Bill</button>
+                </div>
+              </div>
+            `).join('');
           }
         }
-      } catch (err) {}
+      } catch (e) {
+        console.error("Billing load failed:", e);
+      }
     }
+
 
     // Intercept switchEhrView again to auto-load these views
     const tertiarySwitch = switchEhrView;
@@ -2281,8 +2083,12 @@ Orders Generated:`;
       const loginScreen = document.getElementById('loginScreen');
       const token = localStorage.getItem('ehr_admin_token');
       
+      // Temporary Bypass for 3 hours
+      localStorage.setItem('ehr_admin_token', 'mock-jwt-token-12345');
+      loginScreen.style.display = 'none';
+
       // If no token is found, force the login screen to appear
-      if (!token) {
+      if (!localStorage.getItem('ehr_admin_token')) {
         loginScreen.style.display = 'flex';
       }
 

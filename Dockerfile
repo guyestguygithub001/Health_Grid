@@ -2,20 +2,15 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package configuration
+# Copy the server and public directories
 COPY package*.json ./
+RUN npm install --production
+COPY server ./server
+COPY public ./public
+# If no package.json exists, this will just fail gracefully or we can just ignore it.
+# Actually, since it's just server.js, we don't strictly need npm install if there are no external dependencies.
+# The previous code showed no external requires other than built-in 'http', 'fs', 'path', 'zlib'.
 
-# Install production dependencies
-RUN npm install
-
-# Copy application source code
-COPY . .
-
-# Ensure server/data.json exists so the server doesn't crash on boot if omitted from build
-RUN mkdir -p server && touch server/data.json
-
-# Expose the API port
 EXPOSE 8082
 
-# Start the application
-CMD ["npm", "start"]
+CMD ["node", "server/server.js"]

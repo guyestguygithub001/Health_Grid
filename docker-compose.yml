@@ -1,42 +1,12 @@
 version: '3.8'
 
 services:
-  api:
+  plateau-ehr:
     build: .
-    container_name: plateau-ehr-api
+    container_name: plateau-ehr-app
     ports:
       - "8082:8082"
     environment:
       - NODE_ENV=production
       - PORT=8082
-      - REDIS_URL=redis://redis:6379
-    depends_on:
-      - redis
-    volumes:
-      - ./server/data.json:/app/server/data.json
     restart: unless-stopped
-
-  worker:
-    build: .
-    container_name: plateau-ehr-worker
-    command: node server/worker.js
-    environment:
-      - NODE_ENV=production
-      - REDIS_URL=redis://redis:6379
-    depends_on:
-      - redis
-    volumes:
-      - ./server/data.json:/app/server/data.json
-    restart: unless-stopped
-
-  redis:
-    image: redis:7-alpine
-    container_name: plateau-ehr-redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-
-volumes:
-  redis_data:
