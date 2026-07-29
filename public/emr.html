@@ -43,7 +43,7 @@
     .emr-sidebar { width: 72px; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: #ffffff; display: flex; flex-direction: column; padding: 24px 12px; z-index: 100; box-shadow: 4px 0 12px rgba(0,0,0,0.05); overflow-x: hidden; }
     .emr-sidebar.sidebar-expanded { width: 260px; }
     
-    .emr-view { display: none; animation: fadeIn 0.3s ease-out forwards; }
+    .emr-view { display: none; animation: fadeIn 0.3s ease-out forwards; width: 100%; }
     .emr-view.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     
@@ -165,7 +165,7 @@
     </nav>
 
     <!-- Main Content Area -->
-    <main id="mainContent" style="flex: 1; position: relative; overflow-y: auto;">
+    <main id="mainContent" style="flex: 1; position: relative; overflow-y: auto; display: flex; flex-direction: column; align-items: center;">
       
       <!-- Gatekeeper Context Modal (Overlays Everything) -->
       <div id="contextModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);" class="">
@@ -2562,7 +2562,7 @@
         target.classList.remove('hidden');
         target.classList.add('active');
         // Let CSS handle display mode automatically to prevent layout collapse
-        target.style.display = 'flex';
+        target.style.display = '';
       }
       
       // Update sidebar active states
