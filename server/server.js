@@ -86,7 +86,7 @@ function _loadSeed() {
     const sf = path.join(ROOT, "server", "seed_data.json");
     return JSON.parse(fs.readFileSync(sf, "utf8"));
   } catch (_) {}
-  return { patients:[], encounters:[], admissions:[], billing:[], facilities:[],
+  return { staff:[], patients:[], encounters:[], admissions:[], billing:[], facilities:[],
            orders:[], appointments:[], labResults:[], beds:[], consultations:[] };
 }
 
@@ -94,6 +94,7 @@ function _readFile() {
   if (memoryDb) return memoryDb;
   try {
     const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
+    if (!data.staff) { data.staff = []; fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf8"); }
     return data;
   } catch (_) {
     const seed = _loadSeed();
@@ -876,7 +877,25 @@ async function handleApi(req, res, url) {
   if (req.method === "GET" && url.pathname === "/api/v2/encounters") { sendJson(res, 200, data.encounters); return; }
   if (req.method === "POST" && url.pathname === "/api/v2/encounters") {
     const body = await collectBody(req);
-    const encounter = { id: nextId("ENC", data.encounters), patientId: body.patientId, facilityId: body.facilityId, unit: body.unit || "OPD", date: new Date().toISOString().slice(0, 10), doctorId: body.doctorId || "", duration: Number(body.duration || 0), chiefComplaint: body.chiefComplaint || "", vitals: body.vitals || {}, assessment: body.assessment || "", plan: body.plan || "", status: body.status || "Open", icd11Code: body.icd11Code || "", icd11Display: body.icd11Display || "", labResultIds: [], earlyWarningScore: body.earlyWarningScore || null, readmissionRisk: body.readmissionRisk || null, dischargeNote: "" };
+    const encounter = { id: nextId("ENC", data.encounters), patientId: body.patientId, facilityId: body.facilityId, unit: body.unit || "OPD", date: new Date().toISOString().slice(0, 10), doctorId: body.doctorId || "", duration: Number(body.duration || 0), chiefComplaint: body.chiefComplaint || "", vitals: body.vitals || {}, assessment: body.assessment || "", plan: body.plan || "", status: body.status || "Closed", icd11Code: body.icd11Code || "", icd11Display: body.icd11Display || "", earlyWarningScore: body.earlyWarningScore || null, readmissionRisk: body.readmissionRisk || null, dischargeNote: "" };
+    
+    // Module Integrations:
+    if (body.labOrders && Array.isArray(body.labOrders)) {
+      body.labOrders.forEach(labTest => {
+        const order = { id: nextId("ORD", data.orders), patientId: body.patientId, type: "Laboratory", item: labTest, priority: "Routine", status: "Pending", facilityId: body.facilityId || "FAC-PLSH", orderedBy: encounter.doctorId, date: encounter.date };
+        data.orders.unshift(order);
+        createAutoBill(data, body.patientId, "Laboratory", `Lab Test: ${labTest}`);
+      });
+    }
+
+    if (body.prescriptions && Array.isArray(body.prescriptions)) {
+      body.prescriptions.forEach(drug => {
+        const rx = { id: nextId("ORD", data.orders), patientId: body.patientId, type: "Pharmacy", item: drug, priority: "Routine", status: "Pending", facilityId: body.facilityId || "FAC-PLSH", orderedBy: encounter.doctorId, date: encounter.date };
+        data.orders.unshift(rx);
+        createAutoBill(data, body.patientId, "Pharmacy", `Prescription: ${drug}`);
+      });
+    }
+
     data.encounters.unshift(encounter);
     const serviceType = unitToServiceMap[encounter.unit] || "Outpatient";
     createAutoBill(data, encounter.patientId, serviceType, `${encounter.unit} encounter: ${encounter.chiefComplaint || "Clinical services"}`);
@@ -1151,7 +1170,70 @@ async function handlePatientApi(req, res, url) {
   }
 
   // POST /api/v2/patient/login  { phone, patientId }
-  if (req.method === "POST" && url.pathname === "/api/v2/patient/login") {
+  
+  // STAFF AUTHENTICATION GATEWAY
+  if (req.method === "POST" && url.pathname === "/api/v2/auth/register") {
+    let body = "";
+    req.on("data", chunk => body += chunk);
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+        if (!payload.username || !payload.password || !payload.role) {
+          sendJson(res, 400, { error: "Missing required fields" });
+          return;
+        }
+        const db = _readFile();
+        const existing = db.staff.find(s => s.username === payload.username);
+        if (existing) {
+          sendJson(res, 400, { error: "Username already exists" });
+          return;
+        }
+        const newStaff = {
+          id: "STF-" + Math.floor(Math.random() * 900000 + 100000),
+          username: payload.username,
+          password: payload.password, // Plaintext for mock demo
+          name: payload.name || payload.username,
+          role: payload.role
+        };
+        db.staff.push(newStaff);
+        _writeFile(db);
+        sendJson(res, 201, { message: "Staff registered successfully", staff: { id: newStaff.id, name: newStaff.name, role: newStaff.role } });
+      } catch (e) {
+        sendJson(res, 500, { error: "Internal server error" });
+      }
+    });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/v2/auth/login") {
+    let body = "";
+    req.on("data", chunk => body += chunk);
+    req.on("end", () => {
+      try {
+        const payload = JSON.parse(body);
+        const db = _readFile();
+        const staff = db.staff.find(s => s.username === payload.username && s.password === payload.password);
+        if (!staff) {
+          sendJson(res, 401, { error: "Invalid credentials" });
+          return;
+        }
+        // Generate mock token
+        const token = "stf_" + Date.now().toString(36) + "_" + Math.random().toString(36).substr(2);
+        sendJson(res, 200, {
+          token: token,
+          user: {
+            id: staff.id,
+            name: staff.name,
+            role: staff.role
+          }
+        });
+      } catch (e) {
+        sendJson(res, 500, { error: "Internal server error" });
+      }
+    });
+    return;
+  }
+if (req.method === "POST" && url.pathname === "/api/v2/patient/login") {
     const body = await collectBody(req);
     const phone     = (body.phone || "").trim();
     const patientId = (body.patientId || "").trim().toUpperCase();

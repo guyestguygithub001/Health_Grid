@@ -83,54 +83,10 @@
         <div style="text-align: center; margin-bottom: 16px;">
           <a href="javascript:void(0)" onclick="document.getElementById('resetModal').style.display='flex'" style="color:#60a5fa; font-size:12px; text-decoration:none; font-weight:600;">Forgot Password?</a>
         </div>
-
         <button type="submit" id="loginBtn"
-          style="width:100%;padding:13px;border:none;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.02em;transition:opacity 0.2s; margin-bottom:12px;">
+          style="width:100%;padding:13px;border:none;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.02em;transition:opacity 0.2s;">
           Sign In
         </button>
-        <button type="button" id="signupModalBtn" onclick="document.getElementById('signupModal').style.display='flex'; document.getElementById('loginScreen').style.display='none';"
-          style="width:100%;padding:13px;border:1px solid rgba(255,255,255,0.2);border-radius:8px;background:transparent;color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.02em;transition:background 0.2s;">
-          Sign Up as Clinical Staff
-        </button>
-
-      </form>
-    </div>
-  </div>
-
-  
-  <!-- SIGN UP MODAL -->
-  <div id="signupModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:10000; align-items:center; justify-content:center;">
-    <div style="width:100%; max-width:450px; background:#1e293b; padding:40px; border-radius:16px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); max-height:90vh; overflow-y:auto;">
-      <h2 style="color:#fff; font-size:24px; font-weight:700; margin-top:0; margin-bottom:8px;">Staff Registration</h2>
-      <p style="color:rgba(255,255,255,0.7); font-size:13px; margin-bottom:24px; line-height:1.5;">Create a new clinical or administrative account.</p>
-      
-      <form id="signupForm">
-        <div style="margin-bottom:16px;">
-          <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;margin-bottom:6px;">Full Name</label>
-          <input id="signupName" type="text" required style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;outline:none;" />
-        </div>
-        <div style="margin-bottom:16px;">
-          <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;margin-bottom:6px;">Username</label>
-          <input id="signupUser" type="text" required style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;outline:none;" />
-        </div>
-        <div style="margin-bottom:16px;">
-          <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;margin-bottom:6px;">Password</label>
-          <input id="signupPass" type="password" required style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;outline:none;" />
-        </div>
-        <div style="margin-bottom:20px;">
-          <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;margin-bottom:6px;">Role</label>
-          <select id="signupRole" required style="width:100%;box-sizing:border-box;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.05);color:#fff;font-size:14px;outline:none;">
-            <option value="physician">Doctor / Physician</option>
-            <option value="nurse">Nurse</option>
-            <option value="pharmacist">Pharmacist</option>
-            <option value="admin">Administrator</option>
-          </select>
-        </div>
-        <div id="signupError" style="display:none;color:#f87171;font-size:13px;margin-bottom:16px;"></div>
-        <div style="display:flex; gap:12px;">
-          <button type="button" onclick="document.getElementById('signupModal').style.display='none'; document.getElementById('loginScreen').style.display='flex';" style="flex:1; padding:12px; border:1px solid rgba(255,255,255,0.2); border-radius:8px; background:transparent; color:#fff; cursor:pointer; font-weight:600;">Cancel</button>
-          <button type="submit" style="flex:1; padding:12px; border:none; border-radius:8px; background:#10b981; color:#fff; cursor:pointer; font-weight:700;">Register</button>
-        </div>
       </form>
     </div>
   </div>
@@ -1679,59 +1635,40 @@
       e.preventDefault();
       const encId = document.getElementById('consultEncId').innerText;
       const patientId = document.getElementById('consultPatId').innerText.replace('Patient ID: ', '');
-      const notes = document.getElementById('consultNotes').value;
-      const icd = document.getElementById('consultIcd').value;
       const meds = document.getElementById('consultMeds').value;
       
-      const labOrders = [];
-      if (document.getElementById('orderLab').checked) labOrders.push("Routine Labs");
-      if (document.getElementById('orderScan').checked) labOrders.push("Radiology Scan");
-      
-      const prescriptions = [];
-      if (document.getElementById('orderPharmacy').checked || meds.trim() !== '') {
-          prescriptions.push(meds.trim() || "General Prescription");
-      }
+      const ordersToPost = [];
+      if (document.getElementById('orderLab').checked) ordersToPost.push({ type: "Laboratory", item: "Routine Labs", priority: "Routine" });
+      if (document.getElementById('orderScan').checked) ordersToPost.push({ type: "Radiology", item: "Routine Scan", priority: "Routine" });
+      if (document.getElementById('orderPharmacy').checked) ordersToPost.push({ type: "Pharmacy", item: meds || "General Prescription", priority: "Routine" });
+      if (document.getElementById('orderAdmit').checked) ordersToPost.push({ type: "Admission", item: "General Ward", priority: "Urgent" });
+      if (document.getElementById('orderReferral').checked) ordersToPost.push({ type: "Referral", item: "Specialist", priority: "Routine" });
+      if (document.getElementById('orderSurgery').checked) ordersToPost.push({ type: "Surgery", item: "Surgical Consult", priority: "Urgent" });
+      if (document.getElementById('orderFollowUp').checked) ordersToPost.push({ type: "FollowUp", item: "Follow-up Clinic", priority: "Routine" });
 
-      // Close the encounter and dispatch all module integration data centrally
       try {
-        const payload = {
-            patientId: patientId,
-            facilityId: window.currentFacilityId || "FAC-PLSH",
-            unit: "OPD",
-            chiefComplaint: "General Consultation", // Typically passed from triage
-            vitals: {}, // From triage
-            assessment: notes,
-            icd11Code: icd,
-            status: "Closed",
-            labOrders: labOrders,
-            prescriptions: prescriptions
-        };
-        const token = localStorage.getItem('ehr_admin_token') || sessionStorage.getItem('ehr_admin_token');
-        const res = await fetch('/api/v2/encounters', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify(payload)
-        });
-        
-        if(res.ok) {
-            let msg = `Encounter ${encId} finalized securely!
-ICD-11 diagnosis and notes logged.`;
-            if (labOrders.length > 0 || prescriptions.length > 0) {
-              msg += `
-
-Orders Generated:`;
-              labOrders.forEach(o => msg += `
-- Lab Request Sent: ${o}`);
-              prescriptions.forEach(o => msg += `
-- E-Prescription Sent: ${o}`);
-            }
-            alert(msg);
-        } else {
-            alert('Failed to finalize encounter on server.');
+        for (const order of ordersToPost) {
+          await fetch('http://localhost:8082/api/v2/orders', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ patientId, type: order.type, item: order.item, priority: order.priority, orderedBy: "Physician" })
+          });
         }
       } catch (err) {
-        console.error("Encounter finalization failed:", err);
+        console.error("Order dispatch failed:", err);
       }
+      
+      let msg = `Encounter ${encId} finalized securely!
+ICD-11 diagnosis and notes logged.`;
+      if (ordersToPost.length > 0) {
+        msg += `
+
+Orders Generated:`;
+        ordersToPost.forEach(o => msg += `
+- ${o.type} Request Sent`);
+      }
+      
+      alert(msg);
       
       e.target.reset();
       document.getElementById('consultationPanel').style.display = 'none';
@@ -1739,6 +1676,7 @@ Orders Generated:`;
       fetchLiveEncounters();
       if(typeof fetchLiveLabs === 'function') fetchLiveLabs();
       if(typeof fetchLiveWards === 'function') fetchLiveWards();
+      if(typeof fetchLivePharmacyOrders === 'function') fetchLivePharmacyOrders();
     };
 
     // Intercept switchEhrView to auto-load encounters
@@ -2144,12 +2082,10 @@ Orders Generated:`;
     document.addEventListener("DOMContentLoaded", () => {
       const loginScreen = document.getElementById('loginScreen');
       const token = localStorage.getItem('ehr_admin_token');
-
+      
       // If no token is found, force the login screen to appear
       if (!token) {
         loginScreen.style.display = 'flex';
-      } else {
-        loginScreen.style.display = 'none';
       }
 
       document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -2182,117 +2118,8 @@ Orders Generated:`;
           errorDiv.innerText = 'Server unreachable. Please contact your system administrator.';
         }
       });
-
-      document.getElementById('signupForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const user = document.getElementById('signupUser').value;
-        const pass = document.getElementById('signupPass').value;
-        const name = document.getElementById('signupName').value;
-        const role = document.getElementById('signupRole').value;
-        const errorDiv = document.getElementById('signupError');
-        errorDiv.style.display = 'none';
-        
-        try {
-          const res = await fetch('/api/v2/auth/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: user, password: pass, name: name, role: role })
-          });
-          
-          if (res.ok) {
-            const data = await res.json();
-            localStorage.setItem('ehr_admin_token', data.token);
-            localStorage.setItem('ehr_user_role', data.role);
-            document.getElementById('signupModal').style.display = 'none';
-            // Trigger UI reset
-            window.location.reload();
-          } else {
-            const data = await res.json();
-            errorDiv.style.display = 'block';
-            errorDiv.innerText = data.error || 'Registration failed.';
-          }
-        } catch (err) {
-          errorDiv.style.display = 'block';
-          errorDiv.innerText = 'Server unreachable.';
-        }
-      });
     });
 
   </script>
-
-  <!-- Global Error Handler -->
-  <style>
-    #global-error-toast {
-      position: fixed;
-      bottom: -100px;
-      right: 20px;
-      background: #ef4444;
-      color: white;
-      padding: 16px 24px;
-      border-radius: 8px;
-      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-family: system-ui, sans-serif;
-      font-size: 14px;
-      z-index: 999999;
-      transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      max-width: 400px;
-    }
-    #global-error-toast.show {
-      bottom: 20px;
-    }
-    #global-error-toast .close-btn {
-      margin-left: auto;
-      cursor: pointer;
-      font-weight: bold;
-      opacity: 0.8;
-    }
-    #global-error-toast .close-btn:hover {
-      opacity: 1;
-    }
-  </style>
-  <div id="global-error-toast">
-    <span>⚠️</span>
-    <span id="global-error-msg">An unexpected error occurred.</span>
-    <span class="close-btn" onclick="document.getElementById('global-error-toast').classList.remove('show')">✕</span>
-  </div>
-  <script>
-    window.showGlobalError = function(msg) {
-      const toast = document.getElementById('global-error-toast');
-      const msgEl = document.getElementById('global-error-msg');
-      if(toast && msgEl) {
-        msgEl.innerText = msg;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 5000);
-      } else {
-        console.error("Global error:", msg);
-      }
-    };
-    window.addEventListener('error', function(event) {
-      window.showGlobalError(event.message || 'A script error occurred.');
-    });
-    window.addEventListener('unhandledrejection', function(event) {
-      window.showGlobalError(event.reason ? (event.reason.message || event.reason) : 'An asynchronous error occurred.');
-    });
-    
-    // Intercept fetch to catch network errors globally
-    const originalFetch = window.fetch;
-    window.fetch = async function(...args) {
-      try {
-        const response = await originalFetch.apply(this, args);
-        if(!response.ok && response.status >= 500) {
-           window.showGlobalError(`Server Error: ${response.status} ${response.statusText}`);
-        }
-        return response;
-      } catch (err) {
-        window.showGlobalError('Network Error: Unable to reach the server.');
-        throw err;
-      }
-    };
-  </script>
-  <!-- End Global Error Handler -->
-
 </body>
 </html>

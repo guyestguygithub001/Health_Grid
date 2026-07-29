@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+<!DOCTYPE html><html lang="en"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>EMR Unit | Global Health Grid</title>
@@ -59,6 +57,40 @@
 </head>
 <body>
 
+<div id="emrAuthGateway" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #f1f5f9; z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: system-ui, sans-serif;">
+  <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 400px; max-width: 90%;">
+    <h2 style="margin: 0 0 8px; font-size: 24px; font-weight: 800; color: #0f172a; text-align: center;">Clinical Staff Gateway</h2>
+    <p style="margin: 0 0 24px; color: #64748b; font-size: 14px; text-align: center;">Authenticate to access the EMR module.</p>
+    
+    <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 24px;">
+      <p style="margin: 0 0 8px; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Active Context</p>
+      <div id="gatewayRoleDisplay" style="width: 100%; font-weight: 700; font-size: 14px; color: #0f172a;">
+        Not Authenticated
+      </div>
+    </div>
+
+    <form id="staffLoginForm">
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase;">Username</label>
+        <input type="text" id="loginUser" required style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 15px; outline: none;">
+      </div>
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase;">Password</label>
+        <input type="password" id="loginPass" required style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 15px; outline: none;">
+      </div>
+      <div id="loginError" style="display: none; margin-bottom: 16px; padding: 10px; background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; border-radius: 8px; font-size: 13px; font-weight: 500;"></div>
+      <button type="submit" style="width: 100%; padding: 12px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(37,99,235,0.2); margin-bottom: 16px;">Secure Login</button>
+    </form>
+    
+    <div style="border-top: 1px solid #e5e7eb; padding-top: 16px; text-align: center;">
+      <button onclick="document.getElementById('emrSignupModal').style.display='flex'" style="background: transparent; border: none; color: #10b981; font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: underline;">Register New Staff</button>
+    </div>
+  </div>
+</div>
+
+<div id="emrMainApp" style="display: none; height: 100vh; flex-direction: row; width: 100vw;">
+
+
     <!-- PRINT REQUISITION SLIP (HIDDEN UNLESS PRINTING) -->
     <style>
         @media print {
@@ -103,9 +135,17 @@
         <div class="nav-text" style="color: #0284c7; font-weight: 800; font-size: 24px; letter-spacing: -1px; margin-left: 0;">EMR Unit</div>
       </div>
       
-      <div style="display: flex; flex-direction: column; width: 100%;">
+      <div class="nav-text" style="width: 100%; margin-top: 16px; margin-bottom: 24px; border-bottom: 1px solid rgb(229, 231, 235); padding: 0px 12px 16px;">
+            <p style="margin: 0 0 8px; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Active Context</p>
+            <div id="activeRoleDisplay" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #0f172a; font-weight: 700; font-size: 13px; margin-bottom: 8px;">
+                Role Loading...
+            </div>
+            <button id="emrSignupBtn" onclick="document.getElementById('emrSignupModal').style.display='flex'" style="width: 100%; padding: 8px 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">
+                Register Staff
+            </button>
+        </div><div style="display: flex; flex-direction: column; width: 100%;">
         <button class="nav-btn active" onclick="switchEmrView('omniBar')" title="Search / Home"><span>🔍</span><span class="nav-text">Omni-Bar / Search</span></button>
-        <button class="nav-btn" onclick="switchEmrView('triageView')" data-target-view="triageView" title="Triage & Vitals"><span>🩺</span><span class="nav-text">Triage & Vitals</span></button>
+        <button class="nav-btn" onclick="switchEmrView('triageView')" data-target-view="triageView" title="Triage &amp; Vitals"><span>🩺</span><span class="nav-text">Triage &amp; Vitals</span></button>
         <button class="nav-btn" onclick="switchEmrView('clinicsDashboardView')" data-target-view="clinicsDashboardView" title="Outpatient Clinics"><span>🏥</span><span class="nav-text">Outpatient Clinics</span></button>
         <button class="nav-btn" onclick="switchEmrView('wardsView')" data-target-view="wardsView" title="Inpatient Wards"><span>🛏️</span><span class="nav-text">Inpatient Wards</span></button>
         <button class="nav-btn" onclick="switchEmrView('pharmacyView')" data-target-view="pharmacyView" title="Pharmacy"><span>💊</span><span class="nav-text">Pharmacy</span></button>
@@ -118,21 +158,9 @@
       <div style="margin-top: auto; border-top: 1px solid #e5e7eb; padding-top: 16px;">
         
         <!-- Role Selector -->
-        <div class="nav-text" style="padding: 0 12px; margin-bottom: 16px; width: 100%;">
-            <p style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Active Context</p>
-            <select id="roleSelector" onchange="setEmrRole(this.value)" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #0f172a; font-weight: 700; font-size: 13px; outline: none; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-                <option value="admin">System Admin (Full Access)</option>
-                <option value="doctor">Physician</option>
-                <option value="nurse">Nursing & Wards</option>
-                <option value="pharmacy">Pharmacist</option>
-                <option value="lab">Laboratory Tech</option>
-                <option value="rad">Radiologist</option>
-                <option value="billing">Billing Cashier</option>
-                <option value="records">Records Officer</option>
-            </select>
-        </div>
+        
 
-        <button class="nav-btn" onclick="window.location.href='/command.html'" title="Exit to EHR Dashboard"><span>🚪</span><span class="nav-text">Exit to Admin</span></button>
+        <button class="nav-btn" onclick="staffLogout()" title="Logout"><span>🚪</span><span class="nav-text">Logout</span></button>
       </div>
     </nav>
 
@@ -163,12 +191,12 @@
       </div>
 
       <!-- VIEW 1: Omni-Bar -->
-      <div id="omniBar" class="emr-view hidden" style="padding: 60px 40px; max-width: 800px; margin: 0 auto;">
-        <div class="search-card">
+      <div id="omniBar" class="emr-view hidden" style="padding: 60px 40px; width: 100%; display: flex; flex-direction: column; align-items: center; margin: 0 auto;">
+        <div class="search-card" style="width: 100%; max-width: 1200px; margin: 0 auto;">
           <h1 style="text-align: center; margin-bottom: 32px; font-size: 32px; font-weight: 800; letter-spacing: -0.02em;">Omni-Bar</h1>
           <div class="search-input-wrapper">
             <span class="icon-btn">🔍</span>
-            <input type="text" id="mpiSearch" placeholder="Search patient by name or ID..." oninput="debounceSearch()" />
+            <input type="text" id="mpiSearch" placeholder="Search patient by name or ID..." oninput="debounceSearch()">
             <button class="icon-btn mic-btn" title="Voice Search">🎤</button>
             <button class="icon-btn" title="Scan QR">📷</button>
           </div>
@@ -179,11 +207,11 @@
           <div id="searchResults" style="margin-top: 16px;"></div>
           
           <div id="quickRegisterForm" class="hidden" style="margin-top: 24px; text-align: left; border-top: 1px solid #e5e7eb; padding-top: 24px;">
-            <input type="text" id="regName" class="form-input" placeholder="Full Name" />
-            <input type="date" id="regDob" class="form-input" />
+            <input type="text" id="regName" class="form-input" placeholder="Full Name">
+            <input type="date" id="regDob" class="form-input">
             <select id="regGender" class="form-input"><option value="Male">Male</option><option value="Female">Female</option></select>
-            <input type="tel" id="regPhone" class="form-input" placeholder="Phone Number" />
-            <button onclick="submitQuickRegister()" class="btn btn-primary">Register & Load</button>
+            <input type="tel" id="regPhone" class="form-input" placeholder="Phone Number">
+            <button onclick="submitQuickRegister()" class="btn btn-primary">Register &amp; Load</button>
           </div>
         </div>
       </div>
@@ -199,10 +227,10 @@
           
           <!-- Category: Primary & Emergency -->
           <div>
-            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Primary & Emergency</h3>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Primary &amp; Emergency</h3>
             <div style="display: flex; flex-direction: column; gap: 12px;">
               <button onclick="loadUnifiedWaitingList('GOPD')" class="clinic-btn">🩺 General Outpatient (GOPD)</button>
-              <button onclick="loadUnifiedWaitingList('A & E')" class="clinic-btn" style="border-left-color: #ef4444;">🚨 Accident & Emergency</button>
+              <button onclick="loadUnifiedWaitingList('A &amp; E')" class="clinic-btn" style="border-left-color: #ef4444;">🚨 Accident &amp; Emergency</button>
               <button onclick="loadUnifiedWaitingList('EPU')" class="clinic-btn">🚑 Emergency Pediatric Unit (EPU)</button>
               <button onclick="loadUnifiedWaitingList('Amenity Clinic')" class="clinic-btn">⭐ Amenity Clinic</button>
             </div>
@@ -210,7 +238,7 @@
 
           <!-- Category: Surgical & Theater -->
           <div>
-            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Surgical & Procedures</h3>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Surgical &amp; Procedures</h3>
             <div style="display: flex; flex-direction: column; gap: 12px;">
               <button onclick="loadUnifiedWaitingList('Theater')" class="clinic-btn" style="border-left-color: #ef4444;">🔪 Theater (Surgery)</button>
               <button onclick="loadUnifiedWaitingList('Orthopaedics')" class="clinic-btn">🦴 Orthopaedics</button>
@@ -235,9 +263,9 @@
 
           <!-- Category: Women & Children -->
           <div>
-            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Women & Children</h3>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Women &amp; Children</h3>
             <div style="display: flex; flex-direction: column; gap: 12px;">
-              <button onclick="loadUnifiedWaitingList('O & G')" class="clinic-btn" style="border-left-color: #a855f7;">🤰 Obstetrics & Gynaecology</button>
+              <button onclick="loadUnifiedWaitingList('O &amp; G')" class="clinic-btn" style="border-left-color: #a855f7;">🤰 Obstetrics &amp; Gynaecology</button>
               <button onclick="loadUnifiedWaitingList('Antenatal')" class="clinic-btn" style="border-left-color: #a855f7;">👶 Antenatal</button>
               <button onclick="loadUnifiedWaitingList('Post Natal')" class="clinic-btn" style="border-left-color: #a855f7;">🍼 Post Natal</button>
               <button onclick="loadUnifiedWaitingList('Pediatrics')" class="clinic-btn">🧸 Pediatrics</button>
@@ -247,18 +275,18 @@
 
           <!-- Category: Mental & Allied Health -->
           <div>
-            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Mental & Allied Health</h3>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Mental &amp; Allied Health</h3>
             <div style="display: flex; flex-direction: column; gap: 12px;">
               <button onclick="loadUnifiedWaitingList('Psychiatry')" class="clinic-btn">🧠 Psychiatry</button>
               <button onclick="loadUnifiedWaitingList('Psychology')" class="clinic-btn">🛋️ Psychology</button>
               <button onclick="loadUnifiedWaitingList('Physiotherapy')" class="clinic-btn">🏃 Physiotherapy</button>
-              <button onclick="loadUnifiedWaitingList('Nutrition & Dietetics')" class="clinic-btn">🥗 Nutrition & Dietetics</button>
+              <button onclick="loadUnifiedWaitingList('Nutrition &amp; Dietetics')" class="clinic-btn">🥗 Nutrition &amp; Dietetics</button>
             </div>
           </div>
 
           <!-- Category: Dental & ENT -->
           <div>
-            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Dental & Head</h3>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Dental &amp; Head</h3>
             <div style="display: flex; flex-direction: column; gap: 12px;">
               <button onclick="loadUnifiedWaitingList('Dentistry')" class="clinic-btn" style="border-left-color: #0ea5e9;">🦷 Dentistry</button>
               <button onclick="loadUnifiedWaitingList('Maxillofacial')" class="clinic-btn" style="border-left-color: #0ea5e9;">💀 Maxillofacial</button>
@@ -369,7 +397,7 @@
                     <option value="Male Medical Ward (A)">Admit to Male Medical Ward (A)</option>
                     <option value="Intensive Care Unit (ICU)">Admit to ICU</option>
                 </select>
-                <button class="btn btn-primary" style="width: auto;" onclick="signAndClose()">Sign & Close Encounter</button>
+                <button class="btn btn-primary" style="width: auto;" onclick="signAndClose()">Sign &amp; Close Encounter</button>
             </div>
           </div>
         </div>
@@ -380,7 +408,7 @@
             <h3 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 24px;">Departmental Records Log</h3>
             <div class="search-input-wrapper" style="max-width: 400px; margin-bottom: 24px;">
               <span class="icon-btn">🔍</span>
-              <input type="text" placeholder="Search historical records..." style="font-size: 16px;" />
+              <input type="text" placeholder="Search historical records..." style="font-size: 16px;">
             </div>
             
             <table style="width: 100%; border-collapse: collapse; text-align: left;">
@@ -404,7 +432,7 @@
       </div>
 
       <!-- VIEW 3: Post-Encounter UI (Node AD) -->
-      <div id="postEncounterView" class="emr-view hidden" style="padding: 60px 40px; max-width: 800px; margin: 0 auto; text-align: center;">
+      <div id="postEncounterView" class="emr-view hidden" style="padding: 60px 40px; max-width: 95%; width: 100%; margin: 0 auto; text-align: center;">
         <div class="white-card" style="padding: 48px;">
           <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
           <h2 style="font-size: 28px; color: #111827; margin-bottom: 8px;">Encounter Closed Successfully</h2>
@@ -426,7 +454,7 @@
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
           <div>
             <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Pharmacy Command Center</h2>
-            <p style="color: #64748b; font-size: 15px;">Live E-Notes Queue & Drugs Fulfillment</p>
+            <p style="color: #64748b; font-size: 15px;">Live E-Notes Queue &amp; Drugs Fulfillment</p>
           </div>
           <div style="background: #10b98115; padding: 8px 16px; border-radius: 8px; border: 1px solid #10b98140;">
             <button onclick="openWalkInModal('Pharmacy')" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">+ Walk-In Order</button>
@@ -453,7 +481,7 @@
                 <h3 id="pharmacyView-patientName" style="font-size: 24px; font-weight: 800; color: #0f172a;">Select an Order</h3>
                 <p id="pharmacyView-orderId" style="font-size: 14px; color: #64748b;">Waiting for selection...</p>
               </div>
-              <button onclick="fulfillAncillaryOrder('pharmacyView')" style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #10b98140; transition: all 0.2s;">✔️ Fulfill & Bill</button>
+              <button onclick="fulfillAncillaryOrder('pharmacyView')" style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #10b98140; transition: all 0.2s;">✔️ Fulfill &amp; Bill</button>
             </div>
             
             <div style="display: flex; flex: 1; overflow: hidden;">
@@ -533,7 +561,7 @@
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
           <div>
             <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Laboratory Command Center</h2>
-            <p style="color: #64748b; font-size: 15px;">Live E-Notes Queue & Tests Fulfillment</p>
+            <p style="color: #64748b; font-size: 15px;">Live E-Notes Queue &amp; Tests Fulfillment</p>
           </div>
           <div style="background: #8b5cf615; padding: 8px 16px; border-radius: 8px; border: 1px solid #8b5cf640;">
             <button onclick="openWalkInModal('Laboratory')" style="background: #8b5cf6; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2);">+ Walk-In Order</button>
@@ -560,7 +588,7 @@
                 <h3 id="labView-patientName" style="font-size: 24px; font-weight: 800; color: #0f172a;">Select an Order</h3>
                 <p id="labView-orderId" style="font-size: 14px; color: #64748b;">Waiting for selection...</p>
               </div>
-              <button onclick="fulfillAncillaryOrder('labView')" style="background: #8b5cf6; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #8b5cf640; transition: all 0.2s;">✔️ Fulfill & Bill</button>
+              <button onclick="fulfillAncillaryOrder('labView')" style="background: #8b5cf6; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #8b5cf640; transition: all 0.2s;">✔️ Fulfill &amp; Bill</button>
             </div>
             
             <div style="display: flex; flex: 1; overflow: hidden;">
@@ -596,7 +624,7 @@
             <div id="triageView" class="emr-view hidden" style="padding: 32px; max-width: 1200px; margin: 0 auto; width: 100%;">
         <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
           <div>
-            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Triage & Vitals</h2>
+            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Triage &amp; Vitals</h2>
             <p style="color: #64748b; font-size: 16px; margin-top: 4px;">Assess arriving patients, record vitals, and assign priority.</p>
           </div>
           <button style="padding: 10px 20px; background: #0f172a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; gap: 8px; align-items: center; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2);" onclick="document.getElementById('addTriagePatientModal').style.display='flex'">
@@ -687,27 +715,27 @@
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px;">
                     <div>
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Blood Pressure (mmHg)</label>
-                      <input type="text" placeholder="120/80" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s;" />
+                      <input type="text" placeholder="120/80" required="" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s;">
                     </div>
                     <div>
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Heart Rate (bpm)</label>
-                      <input type="number" placeholder="72" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;" />
+                      <input type="number" placeholder="72" required="" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
                     </div>
                     <div>
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Temperature (°C)</label>
-                      <input type="number" step="0.1" placeholder="36.5" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;" />
+                      <input type="number" step="0.1" placeholder="36.5" required="" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
                     </div>
                     <div>
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">SpO2 (%)</label>
-                      <input type="number" placeholder="98" required style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;" />
+                      <input type="number" placeholder="98" required="" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
                     </div>
                     <div>
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Weight (kg)</label>
-                      <input type="number" step="0.1" placeholder="75" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;" />
+                      <input type="number" step="0.1" placeholder="75" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
                     </div>
                     <div>
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Height (cm)</label>
-                      <input type="number" placeholder="175" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;" />
+                      <input type="number" placeholder="175" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
                     </div>
                   </div>
 
@@ -717,7 +745,7 @@
                   
                   <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 32px;">
                     <label class="priority-radio" style="cursor: pointer;">
-                      <input type="radio" name="priority" value="routine" style="display: none;" checked>
+                      <input type="radio" name="priority" value="routine" style="display: none;" checked="">
                       <div class="p-card" style="padding: 16px; border: 2px solid #3b82f6; border-radius: 12px; text-align: center; background: #eff6ff; color: #1e3a8a;">
                         <div style="font-weight: 800; font-size: 15px; margin-bottom: 4px;">Routine</div>
                         <div style="font-size: 12px; opacity: 0.8;">Normal Queue</div>
@@ -746,7 +774,7 @@
 
                   <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 24px;">
                     <button type="button" onclick="cancelTriage()" style="padding: 12px 24px; background: white; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; cursor: pointer;">Cancel</button>
-                    <button type="submit" style="padding: 12px 32px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">Save Vitals & Dispatch</button>
+                    <button type="submit" style="padding: 12px 32px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">Save Vitals &amp; Dispatch</button>
                   </div>
                 </form>
               </div>
@@ -808,7 +836,7 @@
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
           <div>
             <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Radiology Command Center</h2>
-            <p style="color: #64748b; font-size: 15px;">Live E-Notes Queue & Scans Fulfillment</p>
+            <p style="color: #64748b; font-size: 15px;">Live E-Notes Queue &amp; Scans Fulfillment</p>
           </div>
           <div style="background: #f59e0b15; padding: 8px 16px; border-radius: 8px; border: 1px solid #f59e0b40;">
             <button onclick="openWalkInModal('Radiology')" style="background: #f59e0b; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);">+ Walk-In Order</button>
@@ -835,7 +863,7 @@
                 <h3 id="radView-patientName" style="font-size: 24px; font-weight: 800; color: #0f172a;">Select an Order</h3>
                 <p id="radView-orderId" style="font-size: 14px; color: #64748b;">Waiting for selection...</p>
               </div>
-              <button onclick="fulfillAncillaryOrder('radView')" style="background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #f59e0b40; transition: all 0.2s;">✔️ Fulfill & Bill</button>
+              <button onclick="fulfillAncillaryOrder('radView')" style="background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #f59e0b40; transition: all 0.2s;">✔️ Fulfill &amp; Bill</button>
             </div>
             
             <div style="display: flex; flex: 1; overflow: hidden;">
@@ -889,7 +917,7 @@
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
           <div>
             <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Interactive Bed Board</h2>
-            <p style="color: #64748b; font-size: 15px;">Inpatient Ward Management & Nursing E-Notes</p>
+            <p style="color: #64748b; font-size: 15px;">Inpatient Ward Management &amp; Nursing E-Notes</p>
           </div>
           <div style="display: flex; gap: 12px; align-items: center;">
              <button onclick="openWalkInAdmissionModal()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2); transition: background 0.2s;">+ Direct Admission (Walk-In)</button>
@@ -917,13 +945,84 @@
         </div>
 
                 </div>
+            <div id="billingView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
+        <!-- Legacy Header Bar -->
+        <div style="background: #10b981; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px 4px 0 0;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 24px; background: white; color: #10b981; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold;">₦</span>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 600; text-transform: uppercase;">Central Billing &amp; Accounts</h3>
+          </div>
+          <div>
+            <button style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 16px; border-radius: 4px; font-size: 12px; cursor: pointer;">Generate Invoice</button>
+          </div>
+        </div>
+
+        <div style="padding: 24px; background: white; border: 1px solid #e2e8f0; border-top: none; flex: 1; overflow-y: auto;">
+          <!-- KPI Cards -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+            <div style="background: #3b82f6; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <div style="font-size: 12px; font-weight: 600;">Total Billed</div>
+              <div id="bill-kpi-total" style="font-size: 24px; font-weight: bold; margin-top: 8px;">₦0</div>
             </div>
-            <!-- VIEW 10: Records Unit (Premium Rebuild) -->
-      <div id="recordsMainView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
+            <div style="background: #10b981; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <div style="font-size: 12px; font-weight: 600;">Total Collected (Patient)</div>
+              <div id="bill-kpi-collected" style="font-size: 24px; font-weight: bold; margin-top: 8px;">₦0</div>
+            </div>
+            <div style="background: #f59e0b; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <div style="font-size: 12px; font-weight: 600;">NHIS Claims Pending</div>
+              <div id="bill-kpi-claims" style="font-size: 24px; font-weight: bold; margin-top: 8px;">₦0</div>
+            </div>
+            <div style="background: #ef4444; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <div style="font-size: 12px; font-weight: 600;">Outstanding Balance</div>
+              <div id="bill-kpi-outstanding" style="font-size: 24px; font-weight: bold; margin-top: 8px;">₦0</div>
+            </div>
+          </div>
+
+          <!-- Filter Bar -->
+          <div style="display: flex; gap: 24px; align-items: flex-end; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
+            <div>
+              <label style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">Status *</label><br>
+              <select id="billStatusFilter" style="border: none; border-bottom: 1px solid #cbd5e1; padding: 4px 0; font-size: 14px; color: #333; outline: none; background: transparent;" onchange="loadBilling()">
+                <option value="All">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+                <option value="Waived">Waived</option>
+              </select>
+            </div>
+            <div>
+              <button style="background: #facc15; color: #854d0e; font-weight: 700; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="loadBilling()">
+                <span>🔄</span> Refresh
+              </button>
+            </div>
+          </div>
+
+          <!-- Data Table -->
+          <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 4px;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 12px;">
+              <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                <tr>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Invoice ID</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Date</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Patient ID</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Service / Description</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Total Amount</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">NHIS Claim</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Patient Payable</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Status</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="billingTableBody">
+                <tr><td colspan="9" style="text-align:center; padding:40px; color:#94a3b8;"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1' width='64' height='64'%3E%3Cpath d='M13 10V3L4 14h7v7l9-11h-7z'/%3E%3C/svg%3E" alt="No data"><br>Loading Invoices...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div><div id="recordsMainView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
           <div>
             <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Records Unit</h2>
-            <p style="color: #64748b; font-size: 15px;">Centralized Patient Registry & Registration</p>
+            <p style="color: #64748b; font-size: 15px;">Centralized Patient Registry &amp; Registration</p>
           </div>
           <div style="display: flex; gap: 8px; background: #e2e8f0; padding: 6px; border-radius: 12px;">
             <button id="recTab-patients" onclick="switchRecordsTab('patients')" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: white; color: #4f46e5; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">Patient Roster</button>
@@ -963,7 +1062,7 @@
                 <h3 style="font-size: 18px; font-weight: 700; color: #0f172a;">Patient Database</h3>
                 <div class="search-input-wrapper" style="margin: 0; padding: 6px 12px; max-width: 300px;">
                   <span class="icon-btn" style="font-size: 16px;">🔍</span>
-                  <input type="text" id="recSearchInput" placeholder="Search Hospital Number..." style="font-size: 14px; padding: 4px;" onkeyup="filterRecordsTable()" />
+                  <input type="text" id="recSearchInput" placeholder="Search Hospital Number..." style="font-size: 14px; padding: 4px;" onkeyup="filterRecordsTable()">
                 </div>
               </div>
               <table style="width: 100%; border-collapse: collapse; text-align: left;" id="recPatientsTable">
@@ -988,7 +1087,7 @@
           </div>
 
           <!-- RECORDS: REGISTER PATIENT WIZARD -->
-          <div id="recContent-register" class="rec-tab-content hidden" style="animation: fadeIn 0.3s ease-out; max-width: 800px; margin: 0 auto;">
+          <div id="recContent-register" class="rec-tab-content hidden" style="animation: fadeIn 0.3s ease-out; max-width: 95%; width: 100%; margin: 0 auto;">
             <div class="white-card" style="padding: 40px;">
               <h3 style="font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Register New Patient</h3>
               <p style="color: #64748b; margin-bottom: 32px;">Complete the 3-step wizard to enroll a new patient into the registry.</p>
@@ -1015,9 +1114,9 @@
               <!-- Forms -->
               <div id="stepForm-1" class="step-form">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">First Name *</label><input type="text" id="wizFirst" class="form-input" /></div>
-                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Last Name *</label><input type="text" id="wizLast" class="form-input" /></div>
-                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Date of Birth *</label><input type="date" id="wizDob" class="form-input" /></div>
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">First Name *</label><input type="text" id="wizFirst" class="form-input"></div>
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Last Name *</label><input type="text" id="wizLast" class="form-input"></div>
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Date of Birth *</label><input type="date" id="wizDob" class="form-input"></div>
                   <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Sex *</label><select id="wizSex" class="form-input"><option>Male</option><option>Female</option></select></div>
                 </div>
                 <div style="text-align: right; margin-top: 24px;"><button onclick="nextStep(2)" class="btn" style="background: #0f172a; color: white; width: auto; padding: 12px 32px;">Next Step →</button></div>
@@ -1025,8 +1124,8 @@
 
               <div id="stepForm-2" class="step-form hidden">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                  <div style="grid-column: span 2;"><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Phone Number *</label><input type="tel" id="wizPhone" class="form-input" /></div>
-                  <div style="grid-column: span 2;"><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Next of Kin Name</label><input type="text" class="form-input" /></div>
+                  <div style="grid-column: span 2;"><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Phone Number *</label><input type="tel" id="wizPhone" class="form-input"></div>
+                  <div style="grid-column: span 2;"><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Next of Kin Name</label><input type="text" class="form-input"></div>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-top: 24px;">
                   <button onclick="nextStep(1)" class="btn" style="background: #f1f5f9; color: #475569; width: auto; padding: 12px 32px;">← Back</button>
@@ -1042,7 +1141,7 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-top: 24px;">
                   <button onclick="nextStep(2)" class="btn" style="background: #f1f5f9; color: #475569; width: auto; padding: 12px 32px;">← Back</button>
-                  <button onclick="submitWizard()" class="btn" style="background: #10b981; color: white; width: auto; padding: 12px 32px;">Submit & Register</button>
+                  <button onclick="submitWizard()" class="btn" style="background: #10b981; color: white; width: auto; padding: 12px 32px;">Submit &amp; Register</button>
                 </div>
               </div>
               
@@ -1103,12 +1202,12 @@
               <!-- Filter Bar -->
               <div style="display: flex; gap: 24px; align-items: flex-end; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
                 <div>
-                  <label style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">From *</label><br/>
-                  <input type="date" style="border: none; border-bottom: 1px solid #cbd5e1; padding: 4px 0; font-size: 14px; color: #333; outline: none; background: transparent;" />
+                  <label style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">From *</label><br>
+                  <input type="date" style="border: none; border-bottom: 1px solid #cbd5e1; padding: 4px 0; font-size: 14px; color: #333; outline: none; background: transparent;">
                 </div>
                 <div>
-                  <label style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">To *</label><br/>
-                  <input type="date" style="border: none; border-bottom: 1px solid #cbd5e1; padding: 4px 0; font-size: 14px; color: #333; outline: none; background: transparent;" />
+                  <label style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">To *</label><br>
+                  <input type="date" style="border: none; border-bottom: 1px solid #cbd5e1; padding: 4px 0; font-size: 14px; color: #333; outline: none; background: transparent;">
                 </div>
                 <div>
                   <button style="background: #facc15; color: #854d0e; font-weight: 700; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="loadReferrals()">
@@ -1128,13 +1227,13 @@
                       <th style="padding: 12px 16px; color: #475569; font-weight: 600;">From Unit</th>
                       <th style="padding: 12px 16px; color: #475569; font-weight: 600;">To Unit</th>
                       <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Diagnosis</th>
-                      <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Date & Time</th>
+                      <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Date &amp; Time</th>
                       <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Status</th>
                       <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Action</th>
                     </tr>
                   </thead>
                   <tbody id="referralsTableBody">
-                    <tr><td colspan="9" style="text-align:center; padding:40px; color:#94a3b8;"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1' width='64' height='64'%3E%3Cpath d='M13 10V3L4 14h7v7l9-11h-7z'/%3E%3C/svg%3E" alt="No data"/><br/>No Records Found!</td></tr>
+                    <tr><td colspan="9" style="text-align:center; padding:40px; color:#94a3b8;"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1' width='64' height='64'%3E%3Cpath d='M13 10V3L4 14h7v7l9-11h-7z'/%3E%3C/svg%3E" alt="No data"><br>No Records Found!</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -1142,83 +1241,12 @@
           </div>
 
         </div>
-      </div>
+      </div></main></div>
+            <!-- VIEW 10: Records Unit (Premium Rebuild) -->
+      
 
       <!-- VIEW 9: Billing Shell -->
-      <div id="billingView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
-        <!-- Legacy Header Bar -->
-        <div style="background: #10b981; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px 4px 0 0;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-size: 24px; background: white; color: #10b981; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold;">₦</span>
-            <h3 style="margin: 0; font-size: 16px; font-weight: 600; text-transform: uppercase;">Central Billing & Accounts</h3>
-          </div>
-          <div>
-            <button style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 16px; border-radius: 4px; font-size: 12px; cursor: pointer;">Generate Invoice</button>
-          </div>
-        </div>
-
-        <div style="padding: 24px; background: white; border: 1px solid #e2e8f0; border-top: none; flex: 1; overflow-y: auto;">
-          <!-- KPI Cards -->
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
-            <div style="background: #3b82f6; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-              <div style="font-size: 12px; font-weight: 600;">Total Billed</div>
-              <div id="bill-kpi-total" style="font-size: 24px; font-weight: bold; margin-top: 8px;">₦0</div>
-            </div>
-            <div style="background: #10b981; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-              <div style="font-size: 12px; font-weight: 600;">Total Collected (Patient)</div>
-              <div id="bill-kpi-collected" style="font-size: 24px; font-weight: bold; margin-top: 8px;">₦0</div>
-            </div>
-            <div style="background: #f59e0b; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-              <div style="font-size: 12px; font-weight: 600;">NHIS Claims Pending</div>
-              <div id="bill-kpi-claims" style="font-size: 24px; font-weight: bold; margin-top: 8px;">₦0</div>
-            </div>
-            <div style="background: #ef4444; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-              <div style="font-size: 12px; font-weight: 600;">Outstanding Balance</div>
-              <div id="bill-kpi-outstanding" style="font-size: 24px; font-weight: bold; margin-top: 8px;">₦0</div>
-            </div>
-          </div>
-
-          <!-- Filter Bar -->
-          <div style="display: flex; gap: 24px; align-items: flex-end; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
-            <div>
-              <label style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">Status *</label><br/>
-              <select id="billStatusFilter" style="border: none; border-bottom: 1px solid #cbd5e1; padding: 4px 0; font-size: 14px; color: #333; outline: none; background: transparent;" onchange="loadBilling()">
-                <option value="All">All</option>
-                <option value="Pending">Pending</option>
-                <option value="Paid">Paid</option>
-                <option value="Waived">Waived</option>
-              </select>
-            </div>
-            <div>
-              <button style="background: #facc15; color: #854d0e; font-weight: 700; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="loadBilling()">
-                <span>🔄</span> Refresh
-              </button>
-            </div>
-          </div>
-
-          <!-- Data Table -->
-          <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 4px;">
-            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 12px;">
-              <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
-                <tr>
-                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Invoice ID</th>
-                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Date</th>
-                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Patient ID</th>
-                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Service / Description</th>
-                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Total Amount</th>
-                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">NHIS Claim</th>
-                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Patient Payable</th>
-                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Status</th>
-                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Action</th>
-                </tr>
-              </thead>
-              <tbody id="billingTableBody">
-                <tr><td colspan="9" style="text-align:center; padding:40px; color:#94a3b8;"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1' width='64' height='64'%3E%3Cpath d='M13 10V3L4 14h7v7l9-11h-7z'/%3E%3C/svg%3E" alt="No data"/><br/>Loading Invoices...</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      
   
   <!-- Out of Stock Modal -->
   <div id="oosModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(2px);">
@@ -1242,7 +1270,7 @@
         <h3 style="font-size: 20px; font-weight: 800; color: #0f172a;">Direct Admission (Walk-In)</h3>
         <p style="color: #64748b; font-size: 13px; margin-top: 4px;">Book an admission bypassing the Doctor's Consultation queue.</p>
       </div>
-      <button onclick="closeWalkInAdmissionModal()" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer;">&times;</button>
+      <button onclick="closeWalkInAdmissionModal()" style="background: none; border: none; font-size: 24px; color: #94a3b8; cursor: pointer;">×</button>
     </div>
     
     <div style="display: flex; flex-direction: column; gap: 16px;">
@@ -1752,13 +1780,28 @@
     function setEmrRole(role) {
         const accessMap = {
             'admin': ['triageView', 'clinicsDashboardView', 'wardsView', 'pharmacyView', 'labView', 'radView', 'billingView', 'recordsMainView'],
-            'doctor': ['clinicsDashboardView', 'wardsView'],
+            'physician': ['clinicsDashboardView', 'wardsView'],
+            'doctor': ['clinicsDashboardView', 'wardsView'], // legacy support
             'nurse': ['triageView', 'wardsView'],
+            'pharmacist': ['pharmacyView'],
             'pharmacy': ['pharmacyView'],
             'lab': ['labView'],
             'rad': ['radView'],
             'billing': ['billingView'],
             'records': ['recordsMainView']
+        };
+
+        const displayNames = {
+            'admin': 'System Admin (Full Access)',
+            'physician': 'Physician',
+            'doctor': 'Physician',
+            'nurse': 'Nursing & Wards',
+            'pharmacist': 'Pharmacist',
+            'pharmacy': 'Pharmacist',
+            'lab': 'Laboratory Tech',
+            'rad': 'Radiologist',
+            'billing': 'Billing Cashier',
+            'records': 'Records Officer'
         };
 
         const allowedViews = accessMap[role] || [];
@@ -1772,9 +1815,19 @@
             }
         });
         
+        const displayEl = document.getElementById('activeRoleDisplay');
+        if (displayEl) {
+            displayEl.innerText = displayNames[role] || role.toUpperCase();
+        }
+
+        const signupBtn = document.getElementById('emrSignupBtn');
+        if (signupBtn) {
+            signupBtn.style.display = role === 'admin' ? 'block' : 'none';
+        }
+        
         // Force navigate to Omni-Bar to reset context and prevent access to hidden views
         switchEmrView('omniBar');
-        showToast("Role context switched to " + role.toUpperCase());
+        showToast("Logged in as " + (displayNames[role] || role.toUpperCase()));
     }
 
     // --- WALK-IN ADMISSIONS ---
@@ -2098,7 +2151,8 @@
           tbody.appendChild(tr);
         });
       } catch(e) {
-        console.error("Billing sync error", e);
+        window.showGlobalError("Failed to load billing data.");
+        console.error("Billing error", e);
       }
     }
 
@@ -2247,7 +2301,8 @@
         });
         
       } catch(e) {
-        console.error(e);
+        window.showGlobalError("Failed to load records data.");
+        console.error("Records error", e);
       }
     }
 
@@ -2369,12 +2424,14 @@
     let autoSaveTimer = null;
     
     document.addEventListener("DOMContentLoaded", () => {
-      // Auto-provision a mock token for prototype testing if none exists
-      let token = sessionStorage.getItem("ehr_creds");
+      let token = sessionStorage.getItem("ehr_creds") || localStorage.getItem("ehr_admin_token");
       if (!token) {
-        token = "mock-token-123";
-        sessionStorage.setItem("ehr_creds", token);
+        window.location.href = "command.html";
+        return;
       }
+      let userRole = localStorage.getItem('ehr_user_role') || 'admin';
+      setTimeout(() => setEmrRole(userRole), 100);
+
       // Check Context
       const facility = sessionStorage.getItem("emr_facility_id");
       if (facility) {
@@ -2432,7 +2489,7 @@
         target.classList.remove('hidden');
         target.classList.add('active');
         // Let CSS handle display mode automatically to prevent layout collapse
-        target.style.display = '';
+        target.style.display = 'flex';
       }
       
       // Update sidebar active states
@@ -2849,7 +2906,7 @@ Plan:
         <div style="background: white; border-radius: 16px; width: 500px; max-width: 90%; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
             <div id="walkInHeader" style="background: #10b981; padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
                 <h3 id="walkInTitle" style="margin: 0; font-size: 20px; font-weight: 800;">Pharmacy Walk-In Order</h3>
-                <button onclick="closeWalkInModal()" style="background: transparent; border: none; color: white; font-size: 24px; cursor: pointer;">&times;</button>
+                <button onclick="closeWalkInModal()" style="background: transparent; border: none; color: white; font-size: 24px; cursor: pointer;">×</button>
             </div>
             <div style="padding: 24px;">
                 <div style="margin-bottom: 20px;">
@@ -2864,7 +2921,7 @@ Plan:
                     </div>
                 </div>
 
-                <button onclick="dispatchWalkInOrder()" id="dispatchBtn" style="width: 100%; padding: 16px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">Generate Slip & Dispatch</button>
+                <button onclick="dispatchWalkInOrder()" id="dispatchBtn" style="width: 100%; padding: 16px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">Generate Slip &amp; Dispatch</button>
             </div>
         </div>
     </div>
@@ -2888,8 +2945,8 @@ Plan:
 
                 <!-- Workstation Tabs -->
                 <div style="display: flex; background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 0 12px;">
-                    <button onclick="switchWorkstationTab('vitals')" id="tab-vitals" class="ws-tab active" style="padding: 16px 12px; border: none; background: transparent; font-weight: 700; font-size: 13px; color: #3b82f6; border-bottom: 3px solid #3b82f6; cursor: pointer;">Overview & Vitals</button>
-                    <button onclick="switchWorkstationTab('fluids')" id="tab-fluids" class="ws-tab" style="padding: 16px 12px; border: none; background: transparent; font-weight: 600; font-size: 13px; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">Meds & Fluids</button>
+                    <button onclick="switchWorkstationTab('vitals')" id="tab-vitals" class="ws-tab active" style="padding: 16px 12px; border: none; background: transparent; font-weight: 700; font-size: 13px; color: #3b82f6; border-bottom: 3px solid #3b82f6; cursor: pointer;">Overview &amp; Vitals</button>
+                    <button onclick="switchWorkstationTab('fluids')" id="tab-fluids" class="ws-tab" style="padding: 16px 12px; border: none; background: transparent; font-weight: 600; font-size: 13px; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">Meds &amp; Fluids</button>
                     <button onclick="switchWorkstationTab('discharge')" id="tab-discharge" class="ws-tab" style="padding: 16px 12px; border: none; background: transparent; font-weight: 600; font-size: 13px; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">Discharge</button>
                 </div>
 
@@ -2975,5 +3032,259 @@ Plan:
 
                 </div>
             </div>
+
+  <!-- Global Error Handler -->
+  <style>
+    #global-error-toast {
+      position: fixed;
+      bottom: -100px;
+      right: 20px;
+      background: #ef4444;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: system-ui, sans-serif;
+      font-size: 14px;
+      z-index: 999999;
+      transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      max-width: 400px;
+    }
+    #global-error-toast.show {
+      bottom: 20px;
+    }
+    #global-error-toast .close-btn {
+      margin-left: auto;
+      cursor: pointer;
+      font-weight: bold;
+      opacity: 0.8;
+    }
+    #global-error-toast .close-btn:hover {
+      opacity: 1;
+    }
+  </style>
+  <div id="global-error-toast">
+    <span>⚠️</span>
+    <span id="global-error-msg">An unexpected error occurred.</span>
+    <span class="close-btn" onclick="document.getElementById('global-error-toast').classList.remove('show')">✕</span>
+  </div>
+  <script>
+    window.showGlobalError = function(msg) {
+      const toast = document.getElementById('global-error-toast');
+      const msgEl = document.getElementById('global-error-msg');
+      if(toast && msgEl) {
+        msgEl.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 5000);
+      } else {
+        console.error("Global error:", msg);
+      }
+    };
+    window.addEventListener('error', function(event) {
+      window.showGlobalError(event.message || 'A script error occurred.');
+    });
+    window.addEventListener('unhandledrejection', function(event) {
+      window.showGlobalError(event.reason ? (event.reason.message || event.reason) : 'An asynchronous error occurred.');
+    });
+    
+    // Intercept fetch to catch network errors globally
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+      try {
+        const response = await originalFetch.apply(this, args);
+        if(!response.ok && response.status >= 500) {
+           window.showGlobalError(`Server Error: ${response.status} ${response.statusText}`);
+        }
+        return response;
+      } catch (err) {
+        window.showGlobalError('Network Error: Unable to reach the server.');
+        throw err;
+      }
+    };
+  </script>
+  <!-- End Global Error Handler -->
+
+
+  <!-- Clinical Staff Registration Modal (EMR) -->
+  <div id="emrSignupModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,0.8); z-index:99999; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
+    <div style="background:white; padding:32px; border-radius:16px; width:400px; max-width:90%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); position:relative;">
+      <span onclick="document.getElementById('emrSignupModal').style.display='none'" style="position:absolute; top:16px; right:16px; font-size:24px; color:#94a3b8; cursor:pointer; font-weight:bold;">×</span>
+      <h3 style="margin:0 0 8px; font-size:24px; font-weight:800; color:#1e293b; letter-spacing:-0.02em;">Register Clinical Staff</h3>
+      <p style="margin:0 0 24px; color:#64748b; font-size:14px;">Create a new staff identity and assign clinical access levels.</p>
+      
+      <form id="emrSignupForm">
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Full Name</label>
+          <input type="text" id="emrSignupName" required="" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; font-size:15px; outline:none;" placeholder="Dr. John Doe">
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Username</label>
+          <input type="text" id="emrSignupUser" required="" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; font-size:15px; outline:none;" placeholder="johndoe">
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Password</label>
+          <input type="password" id="emrSignupPass" required="" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; font-size:15px; outline:none;" placeholder="••••••••">
+        </div>
+        <div style="margin-bottom:24px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Clinical Role</label>
+          <select id="emrSignupRole" required="" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; font-size:15px; outline:none; background:white;">
+            <option value="physician">Physician (Clerking / Rx)</option>
+            <option value="nurse">Nurse (Triage / Wards)</option>
+            <option value="pharmacist">Pharmacist</option>
+            <option value="admin">System Admin</option>
+          </select>
+        </div>
+        <div id="emrSignupError" style="display:none; margin-bottom:16px; padding:10px; background:#fef2f2; border:1px solid #fecaca; color:#ef4444; border-radius:8px; font-size:13px; font-weight:500;"></div>
+        <button type="submit" style="width:100%; padding:12px; background:#2563eb; color:white; border:none; border-radius:8px; font-weight:700; font-size:15px; cursor:pointer; box-shadow:0 4px 6px -1px rgba(37,99,235,0.2);">Register Staff Member</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById('emrSignupForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('emrSignupUser').value;
+        const pass = document.getElementById('emrSignupPass').value;
+        const name = document.getElementById('emrSignupName').value;
+        const role = document.getElementById('emrSignupRole').value;
+        const errorDiv = document.getElementById('emrSignupError');
+        errorDiv.style.display = 'none';
+        
+        try {
+          const res = await fetch('/api/v2/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass, name: name, role: role })
+          });
+          
+          if (res.ok) {
+            alert('Staff registered successfully!');
+            document.getElementById('emrSignupModal').style.display = 'none';
+            document.getElementById('emrSignupForm').reset();
+          } else {
+            const data = await res.json();
+            errorDiv.style.display = 'block';
+            errorDiv.innerText = data.error || 'Registration failed.';
+          }
+        } catch (err) {
+          errorDiv.style.display = 'block';
+          errorDiv.innerText = 'Server unreachable.';
+        }
+      });
+    });
+  </script>
+
+
+
+</div>
+
+<script>
+  // Auth and RBAC Logic
+  const roleMappings = {
+    'admin': ['omniBar', 'triageView', 'clinicsDashboardView', 'wardsView', 'pharmacyView', 'labView', 'radView', 'billingView', 'recordsMainView', 'postEncounterView', 'workspace'],
+    'physician': ['omniBar', 'triageView', 'clinicsDashboardView', 'pharmacyView', 'labView', 'radView', 'recordsMainView', 'postEncounterView', 'workspace'],
+    'nurse': ['omniBar', 'triageView', 'wardsView', 'pharmacyView', 'workspace'],
+    'pharmacist': ['omniBar', 'pharmacyView', 'workspace']
+  };
+
+  function applyRbac(role) {
+    const allowedViews = roleMappings[role] || [];
+    
+    // Hide all sidebar buttons first
+    document.querySelectorAll('#emrSidebar .nav-btn').forEach(btn => {
+      // Find what view this button switches to by looking at its onclick or data-target-view
+      const onclickAttr = btn.getAttribute('onclick') || '';
+      let targetViewMatch = onclickAttr.match(/switchEmrView\('([^']+)'\)/);
+      if (targetViewMatch) {
+        const viewId = targetViewMatch[1];
+        if (!allowedViews.includes(viewId)) {
+          btn.style.display = 'none';
+        } else {
+          btn.style.display = 'flex';
+        }
+      } else {
+         // Things like "Exit to Admin" or others - keep them visible
+         // Ensure they are visible if they were accidentally hidden
+      }
+    });
+
+    // Auto-navigate to the first allowed view (usually omniBar)
+    if (allowedViews.length > 0) {
+      switchEmrView(allowedViews[0]);
+    }
+  }
+
+  function checkSession() {
+    const token = sessionStorage.getItem('staff_token');
+    const role = sessionStorage.getItem('staff_role');
+    const name = sessionStorage.getItem('staff_name');
+    
+    if (token && role) {
+      document.getElementById('emrAuthGateway').style.display = 'none';
+      document.getElementById('emrMainApp').style.display = 'flex';
+      
+      const roleNames = {
+        'admin': 'System Admin (Full Access)',
+        'physician': 'Physician (Clerking / Rx)',
+        'nurse': 'Nurse (Triage / Wards)',
+        'pharmacist': 'Pharmacist'
+      };
+      
+      const roleText = (name ? name + " - " : "") + (roleNames[role] || role);
+      document.getElementById('activeRoleDisplay').innerText = roleText;
+      
+      applyRbac(role);
+    } else {
+      document.getElementById('emrAuthGateway').style.display = 'flex';
+      document.getElementById('emrMainApp').style.display = 'none';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    checkSession();
+    
+    const loginForm = document.getElementById('staffLoginForm');
+    if (loginForm) {
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const u = document.getElementById('loginUser').value;
+        const p = document.getElementById('loginPass').value;
+        const errDiv = document.getElementById('loginError');
+        errDiv.style.display = 'none';
+        
+        try {
+          const res = await fetch('/api/v2/auth/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: u, password: p})
+          });
+          const data = await res.json();
+          if (res.ok) {
+            sessionStorage.setItem('staff_token', data.token);
+            sessionStorage.setItem('staff_role', data.user.role);
+            sessionStorage.setItem('staff_name', data.user.name);
+            checkSession();
+          } else {
+            errDiv.style.display = 'block';
+            errDiv.innerText = data.error || 'Login failed.';
+          }
+        } catch (err) {
+          errDiv.style.display = 'block';
+          errDiv.innerText = 'Network error.';
+        }
+      });
+    }
+  });
+
+  function staffLogout() {
+    sessionStorage.removeItem('staff_token');
+    sessionStorage.removeItem('staff_role');
+    sessionStorage.removeItem('staff_name');
+    checkSession();
+  }
+</script>
+
 </body>
-</html>
