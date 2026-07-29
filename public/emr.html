@@ -44,7 +44,7 @@
     .emr-sidebar.sidebar-expanded { width: 260px; }
     
     .emr-view { display: none; animation: fadeIn 0.3s ease-out forwards; width: 100%; }
-    .emr-view.active { display: block; }
+    .emr-view.active { display: flex !important; flex-direction: column; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     
     /* Toast */
@@ -192,7 +192,7 @@
 
       <!-- VIEW 1: Omni-Bar -->
       <div id="omniBar" class="emr-view hidden" style="width: 100%; max-width: 1600px; margin: 0 auto; padding: 32px 48px; display: flex; flex-direction: column; flex: 1; background: transparent; justify-content: center; align-items: center;">
-        <div class="search-card" style="width: 100%; max-width: 1200px; margin: 0 auto;">
+        <div class="search-card" style="width: 100%; max-width: 800px; margin: 0 auto;">
           <h1 style="text-align: center; margin-bottom: 32px; font-size: 32px; font-weight: 800; letter-spacing: -0.02em;">Omni-Bar</h1>
           <div class="search-input-wrapper">
             <span class="icon-btn">🔍</span>
