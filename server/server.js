@@ -1402,8 +1402,8 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // ── 2. Patient API (no admin auth needed) ─────────────
-    if (pathname.startsWith(PUBLIC_API)) {
+    // ── 2. Patient & Staff Auth API (no admin auth needed) ─────────────
+    if (pathname.startsWith(PUBLIC_API) || pathname.startsWith("/api/v2/auth/")) {
       await handlePatientApi(req, res, url);
       return;
     }
