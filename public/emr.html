@@ -57,7 +57,7 @@
 </head>
 <body>
 
-<div id="emrAuthGateway" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #f1f5f9; z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: system-ui, sans-serif;">
+<div id="emrAuthGateway" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #f1f5f9; z-index: 999999; display: flex; flex-direction: column; align-items: stretch; justify-content: center; font-family: system-ui, sans-serif;">
   <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 400px; max-width: 90%;">
     <h2 style="margin: 0 0 8px; font-size: 24px; font-weight: 800; color: #0f172a; text-align: center;">Clinical Staff Gateway</h2>
     <p style="margin: 0 0 24px; color: #64748b; font-size: 14px; text-align: center;">Authenticate to access the EMR module.</p>
@@ -165,7 +165,7 @@
     </nav>
 
     <!-- Main Content Area -->
-    <main id="mainContent" style="flex: 1; position: relative; overflow-y: auto; display: flex; flex-direction: column; align-items: center;">
+    <main id="mainContent" style="flex: 1; position: relative; overflow-y: auto; display: flex; flex-direction: column; align-items: stretch;">
       
       <!-- Gatekeeper Context Modal (Overlays Everything) -->
       <div id="contextModal" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px);" class="">
@@ -191,7 +191,7 @@
       </div>
 
       <!-- VIEW 1: Omni-Bar -->
-      <div id="omniBar" class="emr-view hidden" style="padding: 60px 40px; width: 100%; display: flex; flex-direction: column; align-items: center;  max-width: 1200px; margin: 0 auto; width: 100%;">
+      <div id="omniBar" class="emr-view hidden" style="padding: 60px 40px; width: 100%; display: flex; flex-direction: column; align-items: stretch;  max-width: 1200px; margin: 0 auto; width: 100%;">
         <div class="search-card" style="width: 100%; max-width: 1200px; margin: 0 auto;">
           <h1 style="text-align: center; margin-bottom: 32px; font-size: 32px; font-weight: 800; letter-spacing: -0.02em;">Omni-Bar</h1>
           <div class="search-input-wrapper">
@@ -377,7 +377,7 @@
         </script>
       </div>
 <!-- VIEW 2: Clinical Workspace -->
-      <div id="workspace" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; max-width: 1200px; margin: 0 auto; width: 100%;">
+      <div id="workspace" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column;   width: 100%; width: 100%; flex: 1;">
         
         <!-- Clinic Context Header & Tab Bar -->
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; padding: 0 16px;">
@@ -522,7 +522,7 @@
 
       
       <!-- VIEW: Pharmacy Command Center -->
-      <div id="pharmacyView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc; max-width: 1200px; margin: 0 auto; width: 100%;">
+      <div id="pharmacyView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;   width: 100%; width: 100%; flex: 1;">
         <!-- Header -->
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
           <div>
@@ -629,7 +629,7 @@
 
       
       <!-- VIEW: Laboratory Command Center -->
-      <div id="labView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc; max-width: 1200px; margin: 0 auto; width: 100%;">
+      <div id="labView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;   width: 100%; width: 100%; flex: 1;">
         <!-- Header -->
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
           <div>
@@ -761,7 +761,7 @@
 
           <!-- Assessment Pane -->
           <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-            <div id="triageEmptyState" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center;">
+            <div id="triageEmptyState" style="flex: 1; display: flex; flex-direction: column; align-items: stretch; justify-content: center; padding: 40px; text-align: center;">
               <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">🩺</div>
               <h3 style="font-size: 20px; font-weight: 700; color: #334155; margin-bottom: 8px;">Select a Patient</h3>
               <p style="color: #64748b; font-size: 15px; max-width: 300px;">Choose a patient from the queue to record their vitals and assign clinical priority.</p>
@@ -904,7 +904,7 @@
 
       
       <!-- VIEW: Radiology Command Center -->
-      <div id="radView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc; max-width: 1200px; margin: 0 auto; width: 100%;">
+      <div id="radView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;   width: 100%; width: 100%; flex: 1;">
         <!-- Header -->
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
           <div>
@@ -985,7 +985,7 @@
 
       
       <!-- VIEW: Interactive Bed Board (Wards) -->
-      <div id="wardsView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc; max-width: 1200px; margin: 0 auto; width: 100%;">
+      <div id="wardsView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;   width: 100%; width: 100%; flex: 1;">
         <!-- Header -->
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
           <div>
@@ -1018,7 +1018,7 @@
         </div>
 
                 </div>
-            <div id="billingView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc; max-width: 1200px; margin: 0 auto; width: 100%;">
+            <div id="billingView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;   width: 100%; width: 100%; flex: 1;">
         <!-- Legacy Header Bar -->
         <div style="background: #10b981; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px 4px 0 0;">
           <div style="display: flex; align-items: center; gap: 12px;">
@@ -1091,7 +1091,7 @@
             </table>
           </div>
         </div>
-      </div><div id="recordsMainView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc; max-width: 1200px; margin: 0 auto; width: 100%;">
+      </div><div id="recordsMainView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;   width: 100%; width: 100%; flex: 1;">
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
           <div>
             <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Records Unit</h2>
@@ -1223,7 +1223,7 @@
           
           <!-- RECORDS: APPOINTMENTS SHELL -->
           <div id="recContent-appointments" class="rec-tab-content hidden" style="animation: fadeIn 0.3s ease-out;">
-            <div class="white-card" style="padding: 40px; text-align: center; min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div class="white-card" style="padding: 40px; text-align: center; min-height: 300px; display: flex; flex-direction: column; align-items: stretch; justify-content: center;">
               <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
               <h3 style="font-size: 20px; font-weight: 700; color: #0f172a;">All Appointments</h3>
               <p style="color: #64748b;">No appointments scheduled for today.</p>
