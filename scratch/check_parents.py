@@ -1,0 +1,7 @@
+html = open('public/emr.html', encoding='utf-8').read()
+b = html.find('id="billingView"')
+r = html.find('id="recordsMainView"')
+print("Billing Parent:")
+print(html[max(0, b - 200):b])
+print("Records Parent:")
+print(html[max(0, r - 200):r])

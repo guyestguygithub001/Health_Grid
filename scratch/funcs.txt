@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Global Health Grid | Hospitals and PHCs (DEBUG)</title>
+  <meta name="description" content="A Plateau State hospital and PHC electronic health record prototype with clinical, operational, reporting, and clinical documentation audit modules." />
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ef4444; transition: .4s; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+    input:checked + .slider { background-color: #10b981; }
+    input:checked + .slider:before { transform: translateX(20px); }
+    .slider.round { border-radius: 20px; }
+    .slider.round:before { border-radius: 50%; }
+    
+    .ehr-workflow { border-radius: 4px; border: 1px solid rgba(0,0,0,0.1); background: #fafafa; }
+    .ehr-step { border-radius: 4px; border: 1px solid transparent; }
+    .ehr-step.active { background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.05); }
+    .ehr-icon { border-radius: 8px; font-size: 28px; background: transparent; border: none; box-shadow: none; }
+    .ehr-step.active .ehr-icon { background: rgba(59,130,246,0.1); color: #3b82f6; transform: none; box-shadow: none; }
+    
+    /* Branding Update */
+    .brand-text h1 { font-family: monospace; letter-spacing: -0.5px; }
+    .logo { border-radius: 50% !important; background: #0f172a !important; border: 2px solid #3b82f6; }
+    #dashGreetingIcon { font-size: 72px; }
+    #dashboardBackground { background-image: url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=2000') !important; opacity: 0.2 !important; mix-blend-mode: overlay; filter: grayscale(1); }
+    
+    /* Fluid button hover animation */
+    .module-btn {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .module-btn:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 12px 24px rgba(0,0,0,0.3) !important;
+    }
+    
+    /* EMR Sidebar Toggle Pattern */
+    .ehr-sidebar { width: 72px; transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); background: #ffffff; display: flex; flex-direction: column; padding: 24px 12px; z-index: 100; box-shadow: 4px 0 12px rgba(0,0,0,0.05); overflow-x: hidden; border-right: 1px solid #e5e7eb; }
+    .ehr-sidebar.sidebar-expanded { width: 260px; }
+  </style>
+</head>
+<body>
+
+  <!-- ÔöÇÔöÇ LOGIN SCREEN ÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇÔöÇ -->
+  <div id="loginScreen" style="
+    display:none; position:fixed; inset:0; z-index:9999;
+    background:linear-gradient(135deg,#0a1628 0%,#0f2347 60%,#1a3a5c 100%);
+    align-items:center; justify-content:center; flex-direction:column;
+  ">
+    <div style="background:rgba(255,255,255,0.05);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.12);border-radius:16px;padding:48px 44px;max-width:420px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,0.4);">
+      <div style="text-align:center;margin-bottom:28px;">
+        <h2 style="color:#fff;font-size:22px;font-weight:700;margin:0;">Health Grid</h2>
+      </div>
+      <form id="loginForm" autocomplete="on">
+        <div style="margin-bottom:16px;">
+          <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Username</label>
+          <input id="loginUser" name="username" type="text" autocomplete="username" required
+            style="width:100%;box-sizing:border-box;padding:12px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;outline:none;"
+            placeholder="Enter username" />
+        </div>
+        <div style="margin-bottom:20px;">
+          <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Password</label>
+          <div style="position: relative;">
+            <input id="loginPass" name="password" type="password" autocomplete="current-password" required
+              style="width:100%;box-sizing:border-box;padding:12px 40px 12px 14px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;outline:none;"
+              placeholder="Enter password" />
+            <button type="button" onclick="const p = document.getElementById('loginPass'); if(p.type === 'password'){ p.type = 'text'; this.innerText = '🙈'; } else { p.type = 'password'; this.innerText = '👁️'; }" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: rgba(255,255,255,0.6); font-size: 16px; cursor: pointer; padding: 0;">👁️</button>
+          </div>
+        </div>
+        <div style="margin: 16px auto 20px; text-align: center; display: flex; align-items: center; justify-content: center; width: 100%;">
+          <label for="loginLegalConsent" style="color: rgba(255,255,255,0.75); font-size: 11px; cursor: pointer; font-weight: 400; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto; text-align: center;">
+            <input id="loginLegalConsent" name="consent" type="checkbox" required style="margin: 0; cursor: pointer; flex-shrink: 0;" />
+            <span>I agree to <a href="legal.html" target="_blank" style="color:#60a5fa; text-decoration:none; font-weight:600;">Terms</a> · <a href="legal.html#privacy" target="_blank" style="color:#60a5fa; text-decoration:none; font-weight:600;">Privacy</a> · <a href="legal.html#disclaimer" target="_blank" style="color:#60a5fa; text-decoration:none; font-weight:600;">Disclaimer</a> <span style="opacity:0.65;">(18+)</span></span>
+          </label>
+        </div>
+        <div id="loginError" style="display:none;color:#f87171;font-size:13px;margin-bottom:16px;padding:10px 14px;background:rgba(239,68,68,0.15);border-radius:8px;border:1px solid rgba(239,68,68,0.3);">
+          Invalid username or password. Please try again.
+        </div>
+        <div style="text-align: center; margin-bottom: 16px;">
+          <a href="javascript:void(0)" onclick="document.getElementById('resetModal').style.display='flex'" style="color:#60a5fa; font-size:12px; text-decoration:none; font-weight:600;">Forgot Password?</a>
+        </div>
+        <button type="submit" id="loginBtn"
+          style="width:100%;padding:13px;border:none;border-radius:8px;background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;font-size:15px;font-weight:700;cursor:pointer;letter-spacing:0.02em;transition:opacity 0.2s;">
+          Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- PASSWORD RESET MODAL -->
+  <div id="resetModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:9999; align-items:center; justify-content:center;">
+    <div style="width:100%; max-width:400px; background:#1e293b; padding:40px; border-radius:16px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 25px 50px -12px rgba(0,0,0,0.5);">
+      <h2 style="color:#fff; font-size:24px; font-weight:700; margin-top:0; margin-bottom:8px;">Reset Password</h2>
+      <p style="color:rgba(255,255,255,0.7); font-size:13px; margin-bottom:24px; line-height:1.5;">Enter your username. We will send a secure OTP to your registered email or phone number.</p>
+      
+      <form id="resetForm">
+        <div style="margin-bottom:16px;">
+          <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:6px;">Username</label>
+          <input id="resetUser" type="text" required style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;" placeholder="admin" />
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:6px;">OTP (Check Email/SMS - Use 123456 for demo)</label>
+          <input id="resetOtp" type="text" required style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;letter-spacing:2px;text-align:center;" placeholder="------" />
+        </div>
+        <div style="margin-bottom:24px;">
+          <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:6px;">New Password</label>
+          <input id="resetNewPass" type="password" required style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;" placeholder="Enter new password" />
+        </div>
+        <div id="resetFeedback" style="display:none;font-size:13px;margin-bottom:16px;padding:10px;border-radius:8px;"></div>
+        
+        <div style="display:flex; gap:12px;">
+          <button type="button" onclick="document.getElementById('resetModal').style.display='none'" style="flex:1; padding:12px; border:1px solid rgba(255,255,255,0.2); border-radius:8px; background:transparent; color:#fff; cursor:pointer; font-weight:600;">Cancel</button>
+          <button type="submit" style="flex:1; padding:12px; border:none; border-radius:8px; background:#10b981; color:#fff; cursor:pointer; font-weight:700;">Reset Password</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <script>
+    document.getElementById('resetForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const user = document.getElementById('resetUser').value;
+      const otp = document.getElementById('resetOtp').value;
+      const newPass = document.getElementById('resetNewPass').value;
+      const fb = document.getElementById('resetFeedback');
+      
+      try {
+        const res = await fetch('/api/v2/auth/reset', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ username: user, otp, newPassword: newPass })
+        });
+        const data = await res.json();
+        
+        fb.style.display = 'block';
+        if (data.success) {
+          fb.style.background = 'rgba(16,185,129,0.15)';
+          fb.style.border = '1px solid rgba(16,185,129,0.3)';
+          fb.style.color = '#34d399';
+          fb.innerText = 'Password reset successfully! You can now log in.';
+          setTimeout(() => { document.getElementById('resetModal').style.display = 'none'; }, 2000);
+        } else {
+          fb.style.background = 'rgba(239,68,68,0.15)';
+          fb.style.border = '1px solid rgba(239,68,68,0.3)';
+          fb.style.color = '#f87171';
+          fb.innerText = data.error || 'Failed to reset password.';
+        }
+      } catch (err) {
+        // Vercel static fallback
+        if (user === 'admin' && otp === '123456') {
+          fb.style.display = 'block';
+          fb.style.background = 'rgba(16,185,129,0.15)';
+          fb.style.border = '1px solid rgba(16,185,129,0.3)';
+          fb.style.color = '#34d399';
+          fb.innerText = '[Vercel Fallback] Password reset successfully!';
+          setTimeout(() => { document.getElementById('resetModal').style.display = 'none'; }, 2000);
+        } else {
+          fb.style.display = 'block';
+          fb.style.background = 'rgba(239,68,68,0.15)';
+          fb.style.border = '1px solid rgba(239,68,68,0.3)';
+          fb.style.color = '#f87171';
+          fb.innerText = 'Invalid OTP or user.';
+        }
+      }
+    });
+  </script>
+  <!-- STANDALONE LANDING SCREEN -->
+  <div id="landingScreen" style="display:flex; height:100vh; overflow:hidden; flex-direction:column; justify-content:center; align-items:center; position:relative; z-index:40;">
+    
+    <!-- Dynamic Backgrounds Container -->
+    <div id="dynamicBgLayer" style="position:absolute; inset:0; z-index:-2; transition: opacity 2s ease-in-out; background-size: cover; background-position: center; filter: brightness(0.6);"></div>
+    <div id="dynamicBgOverlay" style="position:absolute; inset:0; z-index:-1; background: linear-gradient(135deg, rgba(30,58,138,0.7) 0%, rgba(79,70,229,0.7) 60%, rgba(124,58,237,0.7) 100%);"></div>
+    
+    <!-- Content -->
+    <div style="position:relative; z-index:1; text-align:center; max-width: 640px; transition: opacity 0.5s ease-in-out;" id="landingContentArea">
+      <div id="landingGreetingIcon" style="font-size:56px; margin-bottom:12px; line-height:1; transition: transform 0.5s;">☀️</div>
+      <h1 id="landingGreeting" style="color:#fff; margin:0 0 10px; font-size:52px; font-weight:800; line-height:1.1; letter-spacing:-0.02em;">Good Morning.</h1>
+      <p id="landingSubGreeting" style="color:rgba(255,255,255,0.8); font-size:16px; margin:0 auto 50px; font-weight:500; line-height:1.6;">How would you like to proceed today?</p>
+
+      <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
+        <button onclick="enterEhrModule()" class="module-btn" style="background:#fff; color:#1e3a8a; border:none; padding:16px 36px; font-weight:700; border-radius:50px; cursor:pointer; font-size:16px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);">EHR / PHC Module</button>
+        <button onclick="window.location.href='/emr.html'" class="module-btn" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.4); color:#fff; padding:16px 36px; font-weight:600; border-radius:50px; cursor:pointer; font-size:16px; backdrop-filter: blur(8px);">🖥️ EMR Module</button>
+      </div>
+    </div>
+  </div>
+  <!-- APP SHELL FOR EHR/PHC MODULE -->
+  <div id="ehrAppShell" style="display:none; height:100vh; overflow:hidden; background:#f3f4f6; font-family: 'Inter', system-ui, sans-serif;">
+    
+    <!-- ULTRA-CLEAN LIGHT SIDEBAR -->
+    <aside id="ehrSidebar" class="ehr-sidebar sidebar-expanded">
+      <!-- Logo and Toggle -->
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px; padding: 0 4px;">
+        <button onclick="document.getElementById('ehrSidebar').classList.toggle('sidebar-expanded')" style="background:transparent; border:none; font-size:24px; cursor:pointer; color: #374151;" title="Toggle Sidebar">☰</button>
+        <div class="nav-text" style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6, #6366f1); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 800; font-size: 14px; box-shadow: 0 4px 12px rgba(59,130,246,0.4);">HG</div>
+          <div style="color: #1f2937; font-weight: 800; font-size: 18px; letter-spacing: -0.5px; white-space: nowrap;">EHR System</div>
+        </div>
+      </div>
+
+      <style>
+        #ehrAppShell .nav-section-title { font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; letter-spacing: 0.12em; padding: 0 12px; margin: 24px 0 8px 0; opacity: 0; display: none; transition: opacity 0.2s; }
+        #ehrAppShell .sidebar-expanded .nav-section-title { opacity: 1; display: block; }
+        
+        #ehrAppShell .nav-btn { 
+          width: 100%; height: 44px; border-radius: 12px; border: none; background: transparent; color: #4b5563;
+          font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: flex-start; padding: 0 12px; transition: all 0.2s; margin-bottom: 6px;
+        }
+        #ehrAppShell .nav-btn:hover { background: #f3f4f6; color: #111827; }
+        #ehrAppShell .nav-btn.active { background: #e0f2fe; color: #0284c7; box-shadow: inset 4px 0 0 #0284c7; }
+        #ehrAppShell .nav-btn.active .nav-text { color: #0284c7; }
+        
+        #ehrAppShell .nav-icon { font-size: 22px; min-width: 28px; display: flex; justify-content: center; align-items: center; }
+        #ehrAppShell .nav-text { margin-left: 12px; font-size: 15px; font-weight: 700; color: #374151; white-space: nowrap; opacity: 0; display: none; transition: opacity 0.2s; }
+        #ehrAppShell .sidebar-expanded .nav-text { opacity: 1; display: flex; align-items: center; }
+        #ehrAppShell .sidebar-expanded #roleSwitcherContainer { display: block !important; }
+      </style>
+
+      <!-- Navigation Icons -->
+      <nav style="display: flex; flex-direction: column; width: 100%; gap: 24px;">
+        
+        <div class="nav-section-title">WORKSPACE</div>
+        <div style="padding: 0 12px; margin-bottom: 12px; display: none;" id="roleSwitcherContainer" class="nav-text">
+          <label style="font-size: 10px; font-weight: 800; color: #6b7280; text-transform: uppercase; letter-spacing: 0.1em; display: block; margin-bottom: 4px;">Active Role</label>
+          <select id="roleSwitcher" onchange="switchAppRole(this.value)" style="width: 100%; padding: 8px; border-radius: 8px; border: 1px solid #d1d5db; font-size: 13px; font-weight: 700; color: #111827; background: #f9fafb; cursor: pointer; outline: none;">
+            <option value="admin">Admin (All Access)</option>
+            <option value="physician">Physician / Doctor</option>
+            <option value="nurse">Nurse / Front Desk</option>
+          </select>
+        </div>
+
+        <div class="nav-section-title">PHC SECTION</div>
+        <button class="nav-btn active" data-roles="admin physician nurse" onclick="switchEhrView('phcWorkflowView')" title="Live PHC Workflow">
+          <span class="nav-icon">🏥</span><span class="nav-text">Active PHC</span>
+        </button>
+        <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('mpiView')" title="Patient Intake">
+          <span class="nav-icon">👥</span><span class="nav-text">Patient Intake</span>
+        </button>
+        <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('vitalsView')" title="Vitals & Triage">
+          <span class="nav-icon">🩺</span><span class="nav-text">Vitals & Triage</span>
+        </button>
+        <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('encountersView')" title="Clinical Encounters">
+          <span class="nav-icon">📝</span><span class="nav-text">Clinical Encounters</span>
+        </button>
+        <button class="nav-btn" data-roles="admin nurse physician" onclick="switchEhrView('mchView')" title="Maternal & Child Health">
+          <span class="nav-icon">👶</span><span class="nav-text">MCH (ANC)</span>
+        </button>
+
+        <div class="nav-section-title">EHR SECTION</div>
+        <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('epidemicView')" title="Epidemic Radar">
+          <span class="nav-icon">🦠</span><span class="nav-text">Epidemic Radar</span>
+        </button>
+        <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('pharmacyView')" title="Pharmacy Hub">
+          <span class="nav-icon">💊</span><span class="nav-text">Pharmacy Hub</span>
+        </button>
+        <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('recordsMainView')" title="Records Unit">
+            <span>📂</span><span class="nav-text">Records Unit</span>
+        </button>
+
+        <button class="nav-btn" data-roles="admin" onclick="switchEhrView('legalView')" title="Legal Matrix">
+          <span class="nav-icon">⚖️</span><span class="nav-text">Legal Matrix</span>
+        </button>
+        <button class="nav-btn" data-roles="admin physician nurse" onclick="switchEhrView('wardsView')" title="Inpatient Wards">
+          <span class="nav-icon">🛏️</span><span class="nav-text">Inpatient Wards</span>
+        </button>
+        <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('labsView')" title="Lab & Diagnostics">
+          <span class="nav-icon">🧪</span><span class="nav-text">Lab & Diagnostics</span>
+        </button>
+        <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('billingView')" title="Billing & Claims">
+          <span class="nav-icon">💳</span><span class="nav-text">Billing & Claims</span>
+        </button>
+
+
+      </nav>
+
+      <!-- Bottom Actions -->
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 16px; align-items: center;">
+        <button class="nav-btn" onclick="window.location.href='emr.html'" title="Switch to EMR" style="background: rgba(16,185,129,0.1); color: #10b981;">🏥</button>
+      </div>
+    </aside>
+
+    <style>
+      .ehr-view { opacity: 1; transition: opacity 0.3s ease-in-out; display: flex; flex-direction: column; height: 100%; }
+      .ehr-view.hidden { display: none; opacity: 0; }
+      
+      /* Glassmorphism Cards */
+      .glass-card { background: #ffffff; border-radius: 16px; padding: 24px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+    </style>
+
+    <!-- MAIN CONTENT AREA -->
+    <main style="flex: 1; overflow-y: auto; overflow-x: hidden; position: relative;">
+
+      
+      <!-- VIEW: PHC WORKFLOW -->
+      <div id="phcWorkflowView" class="ehr-view">
+        <div style="padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%;">
+          <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+              <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Live PHC Operations</h2>
+              <p style="color: #6b7280; font-size: 16px;">Real-time primary health care data securely fetched from localhost.</p>
+            </div>
+            <button onclick="fetchLivePhcData()" style="padding: 10px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+              🔄 Refresh Live Data
+            </button>
+          </div>
+          
+          <!-- Live Metrics -->
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; margin-bottom: 32px;">
+            <div class="glass-card" style="border-top: 4px solid #3b82f6;">
+              <h3 style="color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase;">Registered Patients</h3>
+              <p id="liveTotalPatients" style="font-size: 36px; font-weight: 800; color: #111827; margin: 8px 0;">--</p>
+            </div>
+            <div class="glass-card" style="border-top: 4px solid #f59e0b;">
+              <h3 style="color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase;">Open Encounters</h3>
+              <p id="liveOpenEncounters" style="font-size: 36px; font-weight: 800; color: #111827; margin: 8px 0;">--</p>
+            </div>
+            <div class="glass-card" style="border-top: 4px solid #10b981;">
+              <h3 style="color: #6b7280; font-size: 14px; font-weight: 600; text-transform: uppercase;">Active Facilities (PHC)</h3>
+              <p id="livePhcCount" style="font-size: 36px; font-weight: 800; color: #111827; margin: 8px 0;">--</p>
+            </div>
+          </div>
+
+          <!-- Live Patient Queue -->
+          <div class="glass-card">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Recent Patient Intake Queue</h3>
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                <thead>
+                  <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280;">
+                    <th style="padding: 12px 8px;">Patient ID</th>
+                    <th style="padding: 12px 8px;">Name</th>
+                    <th style="padding: 12px 8px;">Age/Sex</th>
+                    <th style="padding: 12px 8px;">LGA</th>
+                    <th style="padding: 12px 8px;">Insurance</th>
+                  </tr>
+                </thead>
+                <tbody id="livePatientTableBody">
+                  <tr><td colspan="5" style="padding: 20px; text-align: center; color: #9ca3af;">Fetching live data from the local server...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: PATIENT INDEX (MPI) -->
+      <div id="mpiView" class="ehr-view hidden" style="padding: 40px; max-width: 1000px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 32px;">
+          <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Master Patient Index (MPI)</h2>
+          <p style="color: #6b7280; font-size: 16px;">Offline biometrics cache, SDOH capture, and Global UUID v7 creation.</p>
+        </div>
+        <div class="glass-card">
+          <form id="mpiForm" class="stack-form" onsubmit="handleMpiSubmit(event)">
+            <h4 style="margin:0 0 12px; font-size:16px; font-weight: 700;">Patient Demographics</h4>
+            <div style="display: flex; gap: 16px; margin-bottom: 16px;">
+              <input type="text" id="mpiNin" placeholder="Scan National ID or QR" style="flex:1; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
+              <button type="button" onclick="queryNationalId()" style="padding: 12px 24px; border-radius: 8px; background: #374151; color: white; border: none; font-weight: 600;">Query ID</button>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <input id="mpiName" required placeholder="Full Name" style="padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; grid-column: span 2;" />
+              <input type="number" id="mpiAge" required placeholder="Age" style="padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
+              <select id="mpiSex" style="padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+                <option>Female</option><option>Male</option>
+              </select>
+            </div>
+
+            <div style="background: rgba(59,130,246,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(59,130,246,0.1); margin-bottom: 24px;">
+              <h4 style="margin:0 0 12px; font-size:14px; color: #1d4ed8; font-weight: 700;">Social Determinants of Health (SDOH)</h4>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <select id="mpiFood" style="padding: 10px; border-radius: 8px; border: 1px solid #bfdbfe;"><option value="yes">Food Secure</option><option value="no">Food Insecure</option></select>
+                <select id="mpiWater" style="padding: 10px; border-radius: 8px; border: 1px solid #bfdbfe;"><option value="yes">Clean Water Access</option><option value="no">No Clean Water</option></select>
+              </div>
+            </div>
+            
+            <button type="submit" style="width: 100%; padding: 14px; border-radius: 8px; background: #3b82f6; color: white; border: none; font-weight: 700; font-size: 16px; cursor: pointer;">Generate UUID v7 & Create MPI</button>
+          </form>
+          
+          <div id="qrWalletContainer" style="margin-top:24px; text-align:center; display:none;">
+            <h4 style="margin:0 0 10px; font-size:14px;">Digital Wallet QR</h4>
+            <img id="patientQr" src="" style="border-radius:12px; border:4px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.1);" />
+            <p id="patientUuidDisplay" style="margin-top:8px; font-size:11px; color:#6b7280; font-family:monospace;"></p>
+            <button onclick="switchEhrView('patientRecordView')" style="margin-top:16px; width: 100%; padding: 12px; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);">Proceed to Records Unit ➔</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: PATIENT RECORDS UNIT -->
+      <div id="patientRecordView" class="ehr-view hidden" style="padding: 40px; max-width: 1000px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Patient Records Unit</h2>
+            <p style="color: #6b7280; font-size: 16px;">View detailed profile, active encounters, and personnel logs.</p>
+          </div>
+          <div>
+            <button onclick="switchEhrView('vitalsView')" style="padding: 12px 24px; border-radius: 8px; background: #3b82f6; color: white; border: none; font-weight: 700; cursor: pointer;">Start New Encounter</button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 300px; gap: 24px;">
+          <!-- Left Col: Patient Profile -->
+          <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e5e7eb;">
+            <div style="display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 24px; margin-bottom: 24px;">
+              <img id="prAvatar" src="doctor_portrait_3_1784893353199.jpg" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; filter: grayscale(50%);">
+              <div>
+                <h3 id="prName" style="margin: 0 0 4px; font-size: 24px; color: #111827;">Loading...</h3>
+                <p id="prDetails" style="margin: 0; color: #6b7280; font-size: 14px;">PID: Loading...</p>
+              </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div>
+                <p style="margin: 0 0 4px; font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase;">SDOH Status</p>
+                <p id="prSdoh" style="margin: 0; font-size: 14px; font-weight: 500;">...</p>
+              </div>
+              <div>
+                <p style="margin: 0 0 4px; font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase;">Registration Officer</p>
+                <p style="margin: 0; font-size: 14px; font-weight: 500; color: #10b981;">Dr. Admin (Auto-logged)</p>
+              </div>
+              <div>
+                <p style="margin: 0 0 4px; font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase;">LGA</p>
+                <p id="prLga" style="margin: 0; font-size: 14px; font-weight: 500;">Jos North</p>
+              </div>
+              <div>
+                <p style="margin: 0 0 4px; font-size: 12px; font-weight: 600; color: #9ca3af; text-transform: uppercase;">Primary Insurance</p>
+                <p id="prInsurance" style="margin: 0; font-size: 14px; font-weight: 500;">Private Pay</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right Col: Booking/Appointments -->
+          <div style="background: rgba(59,130,246,0.05); border-radius: 16px; padding: 24px; border: 1px solid rgba(59,130,246,0.1);">
+            <h3 style="margin: 0 0 16px; font-size: 18px; color: #1d4ed8;">Book Appointment</h3>
+            <form onsubmit="event.preventDefault(); alert('Appointment booked successfully!'); switchEhrView('encountersView');">
+              <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">Clinic / Unit</label>
+                <select style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #bfdbfe;">
+                  <option>General OPD</option>
+                  <option>Antenatal Care (ANC)</option>
+                  <option>Immunization</option>
+                  <option>Family Planning</option>
+                </select>
+              </div>
+              <div style="margin-bottom: 24px;">
+                <label style="display: block; font-size: 14px; font-weight: 600; margin-bottom: 6px;">Date</label>
+                <input type="date" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #bfdbfe;" required>
+              </div>
+              <button type="submit" style="width: 100%; padding: 12px; border-radius: 8px; background: #3b82f6; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(59,130,246, 0.2);">Confirm Booking</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: VITALS & TRIAGE -->
+      <div id="vitalsView" class="ehr-view hidden" style="padding: 40px; max-width: 1000px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 32px;">
+          <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Vitals & Triage</h2>
+          <p style="color: #6b7280; font-size: 16px;">Log patient vitals and automatically generate a triage encounter.</p>
+        </div>
+        <div class="glass-card">
+          <form id="vitalsForm" onsubmit="submitVitals(event)">
+            <div style="margin-bottom: 16px;">
+              <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px; text-transform:uppercase;">Patient ID (e.g. PT1001)</label>
+              <input type="text" id="triagePatientId" required placeholder="Enter Patient ID" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; background: rgba(16,185,129,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.1);">
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#065f46; margin-bottom:6px;">Blood Pressure (mmHg)</label>
+                <input type="text" id="triageBp" required placeholder="120/80" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #a7f3d0;" />
+              </div>
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#065f46; margin-bottom:6px;">Temperature (°C)</label>
+                <input type="number" step="0.1" id="triageTemp" required placeholder="36.5" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #a7f3d0;" />
+              </div>
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#065f46; margin-bottom:6px;">Weight (kg)</label>
+                <input type="number" step="0.1" id="triageWeight" required placeholder="70" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #a7f3d0;" />
+              </div>
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#065f46; margin-bottom:6px;">Pulse (bpm)</label>
+                <input type="number" id="triagePulse" required placeholder="72" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #a7f3d0;" />
+              </div>
+            </div>
+            
+            <button type="submit" style="width: 100%; padding: 14px; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(16,185,129,0.2);">Log Vitals & Generate Encounter</button>
+          </form>
+
+          <div id="vitalsSuccessContainer" style="margin-top:24px; text-align:center; display:none; background: rgba(59,130,246,0.05); padding: 24px; border-radius: 12px; border: 1px solid rgba(59,130,246,0.1);">
+            <div style="width: 48px; height: 48px; background: #10b981; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 16px;">✓</div>
+            <h3 style="margin: 0 0 8px; font-size: 18px; color: #111827;">Vitals Logged Successfully</h3>
+            <p id="vitalsEncounterDisplay" style="margin: 0 0 24px; color: #6b7280; font-size: 14px;"></p>
+            <button onclick="let v = document.getElementById('vitalsEncounterDisplay').dataset; switchEhrView('encountersView'); if(v.encId) { setTimeout(() => openConsultation(v.encId, v.patId, v.vitals), 100); }" style="width: 100%; padding: 12px; border-radius: 8px; background: #3b82f6; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);">Proceed to Clinical Encounter ➔</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: CLINICAL ENCOUNTERS -->
+      <div id="encountersView" class="ehr-view hidden" style="padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Clinical Encounters</h2>
+            <p style="color: #6b7280; font-size: 16px;">The digital waiting room. Select an open encounter to begin consultation.</p>
+          </div>
+          <button onclick="fetchLiveEncounters()" style="padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+            🔄 Refresh Encounters
+          </button>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 24px;">
+          <div class="glass-card">
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                <thead>
+                  <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280;">
+                    <th style="padding: 12px 8px;">Encounter ID</th>
+                    <th style="padding: 12px 8px;">Patient ID</th>
+                    <th style="padding: 12px 8px;">Date</th>
+                    <th style="padding: 12px 8px;">Chief Complaint / Vitals</th>
+                    <th style="padding: 12px 8px;">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="liveEncountersTableBody">
+                  <tr><td colspan="5" style="padding: 20px; text-align: center; color: #9ca3af;">Click refresh to fetch open encounters...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <div class="glass-card" id="consultationPanel" style="display: none;">
+            <h3 style="margin: 0 0 16px; font-size: 18px; color: #111827; border-bottom: 1px solid #e5e7eb; padding-bottom: 12px;">Active Consultation</h3>
+            <div style="margin-bottom: 16px; background: rgba(59,130,246,0.05); padding: 12px; border-radius: 8px;">
+              <p style="margin: 0 0 4px; font-weight: 700; color: #1e3a8a;" id="consultEncId">ENC-XXXX</p>
+              <p style="margin: 0 0 4px; font-size: 12px; color: #3b82f6;" id="consultPatId">Patient ID: PT-XXXX</p>
+              <p style="margin: 0; font-size: 11px; color: #6b7280;" id="consultVitals">BP: --, Temp: --, Wt: --, P: --</p>
+            </div>
+            <form onsubmit="finalizeEncounter(event)">
+              <div style="margin-bottom: 16px;">
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Clinical Notes & Observations</label>
+                <textarea id="consultNotes" required placeholder="Document findings..." style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; min-height: 80px; resize: vertical;"></textarea>
+              </div>
+              <div style="margin-bottom: 16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                  <label style="font-size:12px; font-weight:700; color:#4b5563;">Diagnosis Code (ICD-11)</label>
+                  <span id="icdAiSuggest" style="font-size:11px; font-weight:700; color:#8b5cf6; display:none;">✨ AI Auto-Suggesting...</span>
+                </div>
+                <input type="text" id="consultIcd" required placeholder="e.g. 1A00 for Cholera" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; transition: all 0.3s;" />
+              </div>
+              <div style="margin-bottom: 16px;">
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Prescription / Orders</label>
+                <textarea id="consultMeds" placeholder="Paracetamol 500mg PO PRN" style="width:100%; padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; min-height: 60px; resize: vertical;"></textarea>
+              </div>
+              <div style="margin-bottom: 24px; padding: 12px; border-radius: 8px; border: 1px dashed #d1d5db; background: #f9fafb;">
+                <label style="display:block; font-size:12px; font-weight:800; color:#4b5563; margin-bottom:12px; text-transform:uppercase;">Clinical Orders (Optional)</label>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderLab" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    🧪 Order Lab & Diagnostics Test
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderScan" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    🩻 Order Radiology (Scan / X-Ray)
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderPharmacy" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    💊 Send E-Prescription to Pharmacy
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderAdmit" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    🛏️ Admit to Inpatient Ward
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderReferral" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    🔄 Request Specialist Referral
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderSurgery" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    🔪 Request Surgical / Theater Booking
+                  </label>
+                  <label style="display: flex; align-items: center; font-size: 13px; color: #374151; cursor: pointer;">
+                    <input type="checkbox" id="orderFollowUp" style="margin-right: 8px; cursor: pointer; width: 16px; height: 16px;" />
+                    📅 Schedule Follow-up Appointment
+                  </label>
+                </div>
+              </div>
+              <button type="submit" style="width: 100%; padding: 12px; border-radius: 8px; background: #6366f1; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);">Finalize & Sign Encounter</button>
+            </form>
+          </div>
+          <div class="glass-card" id="consultationEmpty" style="display: flex; align-items: center; justify-content: center; text-align: center; color: #9ca3af; min-height: 300px;">
+            <p style="margin:0; font-size: 14px;">Select an open encounter<br>from the list to begin consultation.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: MATERNAL & CHILD HEALTH (MCH) -->
+      <div id="mchView" class="ehr-view hidden" style="padding: 40px; max-width: 1000px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 32px;">
+          <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Maternal & Child Health (MCH)</h2>
+          <p style="color: #6b7280; font-size: 16px;">Schedule Antenatal Care (ANC) and Immunization visits.</p>
+        </div>
+        <div class="glass-card" style="border-left: 4px solid #f472b6;">
+          <form id="mchForm" onsubmit="submitMch(event)">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Patient ID</label>
+                <input type="text" id="mchPatientId" required placeholder="PT1001" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
+              </div>
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Visit Type</label>
+                <select id="mchType" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+                  <option value="ANC">Antenatal Care (ANC)</option>
+                  <option value="Immunization">Immunization (Routine)</option>
+                  <option value="Postnatal">Postnatal Care</option>
+                </select>
+              </div>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+              <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Scheduled Date</label>
+              <input type="date" id="mchDate" required style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
+            </div>
+            
+            <button type="submit" style="width: 100%; padding: 14px; border-radius: 8px; background: #ec4899; color: white; border: none; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(236,72,153,0.2);">Schedule MCH Appointment</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- VIEW: EPIDEMIC RADAR -->
+      <div id="epidemicView" class="ehr-view hidden" style="padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 32px;">
+          <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Epidemic Radar (GOARN)</h2>
+          <p style="color: #6b7280; font-size: 16px;">Real-time anomaly detection logs and infectious disease surveillance.</p>
+        </div>
+        
+        <div class="glass-card" style="background: #1e293b; color: white; border: none; position: relative; overflow: hidden;">
+          <div style="position:absolute; top:16px; right:16px; background:#ef4444; color:#fff; padding:4px 8px; font-size:10px; font-weight:bold; border-radius:4px; animation:pulse 2s infinite;">LIVE KAFKA ETL</div>
+          <h3 style="margin:0 0 16px; font-size:18px; font-weight: 700;">Event Stream Processor</h3>
+          
+          <div id="kafkaConsole" style="background:#000; padding:16px; border-radius:8px; font-family:monospace; font-size:13px; color:#10b981; height:200px; overflow-y:auto; line-height:1.6;">
+            [Kafka] Connecting to local stream...
+          </div>
+          
+          <div style="margin-top:24px; display:flex; gap:16px; align-items:center;">
+            <button onclick="triggerOutbreakSimulation()" style="padding: 12px 24px; border-radius: 8px; background: #ef4444; color: white; border: none; font-weight: 600; cursor: pointer;">Simulate Cholera Cluster</button>
+            <div id="goarnAlertStatus" style="font-size:14px; color:#fbbf24; font-weight:bold; display:none;">⚠️ OUTBREAK SIGNAL GENERATED</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: PHARMACY HUB -->
+      <div id="pharmacyView" class="ehr-view hidden" style="padding: 40px; max-width: 1000px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 32px;">
+          <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Circular Pharmacy Hub</h2>
+          <p style="color: #6b7280; font-size: 16px;">Zero-stock AI substitution, inventory routing, and digital SMS pickup codes.</p>
+        </div>
+        
+        <div class="glass-card">
+          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Live Inventory Matrix</h3>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center;">
+              <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; font-weight: 600;">Amoxicillin</div>
+              <div style="font-size: 24px; font-weight: 800; color: #10b981;">142</div>
+            </div>
+            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center;">
+              <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; font-weight: 600;">Artemether (ACT)</div>
+              <div id="stockACT" style="font-size: 24px; font-weight: 800; color: #ef4444;">0</div>
+            </div>
+            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center;">
+              <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; font-weight: 600;">Paracetamol</div>
+              <div style="font-size: 24px; font-weight: 800; color: #111827;">5,020</div>
+            </div>
+            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; border: 1px solid #e5e7eb; text-align: center;">
+              <div style="font-size: 12px; color: #6b7280; text-transform: uppercase; font-weight: 600;">ORS</div>
+              <div style="font-size: 24px; font-weight: 800; color: #111827;">84</div>
+            </div>
+          </div>
+
+          <h4 style="margin:0 0 12px; font-size:14px; font-weight: 600;">National Warehouse (Within 10km)</h4>
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;">
+            <span>Central Hub A</span><span style="color:#166534; font-weight:bold;">ACT: 400</span>
+          </div>
+          <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px; display: flex; justify-content: space-between; font-size: 14px;">
+            <span>Warehouse B</span><span style="color:#166534; font-weight:bold;">ACT: 1200</span>
+          </div>
+        </div>
+
+        <div class="glass-card" style="margin-top: 24px; border-left: 4px solid #10b981;">
+          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Direct Dispense (Over-The-Counter)</h3>
+          <form onsubmit="addToPharmacyCart(event)">
+            <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Patient ID</label>
+                <input type="text" id="walkInPharmPatientId" required placeholder="PT1001" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
+              </div>
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Select Drug Catalog</label>
+                <select id="walkInPharmDrug" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+                  <optgroup label="Antimalarials">
+                    <option value="Artemether-Lumefantrine (ACT)|2500">Artemether-Lumefantrine (ACT) - ₦2,500</option>
+                    <option value="Artesunate Injection|4000">Artesunate Injection - ₦4,000</option>
+                  </optgroup>
+                  <optgroup label="Analgesics & Antipyretics">
+                    <option value="Paracetamol 500mg|500">Paracetamol 500mg - ₦500</option>
+                    <option value="Ibuprofen 400mg|800">Ibuprofen 400mg - ₦800</option>
+                    <option value="Diclofenac 50mg|1000">Diclofenac 50mg - ₦1,000</option>
+                  </optgroup>
+                  <optgroup label="Antibiotics">
+                    <option value="Amoxicillin 500mg|1200">Amoxicillin 500mg - ₦1,200</option>
+                    <option value="Ciprofloxacin 500mg|1500">Ciprofloxacin 500mg - ₦1,500</option>
+                    <option value="Metronidazole 400mg|900">Metronidazole 400mg - ₦900</option>
+                  </optgroup>
+                  <optgroup label="Fluids & Supplements">
+                    <option value="Oral Rehydration Salts (ORS)|300">Oral Rehydration Salts (ORS) - ₦300</option>
+                    <option value="Vitamin C 1000mg|600">Vitamin C 1000mg - ₦600</option>
+                    <option value="Zinc Tablets 20mg|500">Zinc Tablets 20mg - ₦500</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Quantity</label>
+                <input type="number" id="walkInPharmQty" required min="1" value="1" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
+              </div>
+            </div>
+            <button type="submit" style="width: 100%; padding: 12px; border-radius: 8px; background: #e2e8f0; color: #1e293b; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 16px;">[+] Add to Cart</button>
+          </form>
+          
+          <div id="pharmacyCartContainer" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+            <h4 style="margin: 0 0 12px; font-size: 14px; font-weight: 700;">Cart Summary</h4>
+            <ul id="pharmacyCartList" style="list-style: none; padding: 0; margin: 0 0 16px; font-size: 13px;"></ul>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 12px;">
+              <strong style="font-size: 16px;">Total: ₦<span id="pharmacyCartTotal">0</span></strong>
+              <button onclick="checkoutPharmacyCart()" style="padding: 10px 20px; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);">Checkout & Bill</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="glass-card" style="margin-top: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px;">
+            <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Incoming E-Prescriptions</h3>
+            <button onclick="if(typeof fetchLivePharmacyOrders==='function') fetchLivePharmacyOrders()" style="padding: 8px 16px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px;">
+              🔄 Refresh Orders
+            </button>
+          </div>
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+              <thead>
+                <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280;">
+                  <th style="padding: 12px 8px;">Order ID</th>
+                  <th style="padding: 12px 8px;">Patient ID</th>
+                  <th style="padding: 12px 8px;">Prescription Detail</th>
+                  <th style="padding: 12px 8px;">Status</th>
+                </tr>
+              </thead>
+              <tbody id="livePharmacyTableBody">
+                <tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">Click refresh to fetch e-prescriptions...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: Records Unit -->
+      <div id="recordsMainView" class="ehr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
+          <div>
+            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Records Unit</h2>
+            <p style="color: #64748b; font-size: 15px;">Centralized Patient Registry & Registration</p>
+          </div>
+          <div style="display: flex; gap: 8px; background: #e2e8f0; padding: 6px; border-radius: 12px;">
+            <button id="recTab-patients" onclick="switchRecordsTab('patients')" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: white; color: #4f46e5; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">Patient Roster</button>
+            <button id="recTab-appointments" onclick="switchRecordsTab('appointments')" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: transparent; color: #64748b;">Appointments</button>
+            <button id="recTab-referrals" onclick="switchRecordsTab('referrals')" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: transparent; color: #64748b;">Referrals</button>
+          </div>
+        </div>
+
+        <div style="flex: 1; overflow-y: auto; padding: 0 16px;">
+          
+          <!-- RECORDS: PATIENT ROSTER -->
+          <div id="recContent-patients" class="rec-tab-content" style="animation: fadeIn 0.3s ease-out;">
+            <!-- Summary Cards -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+              <div class="white-card" style="padding: 24px; border-left: 4px solid #4f46e5;">
+                <p style="color: #64748b; font-size: 14px; font-weight: 600; text-transform: uppercase;">Total Patients</p>
+                <h3 id="recStat-total" style="font-size: 32px; font-weight: 800; color: #0f172a; margin-top: 8px;">0</h3>
+              </div>
+              <div class="white-card" style="padding: 24px; border-left: 4px solid #0ea5e9;">
+                <p style="color: #64748b; font-size: 14px; font-weight: 600; text-transform: uppercase;">Male Patients</p>
+                <h3 id="recStat-male" style="font-size: 32px; font-weight: 800; color: #0f172a; margin-top: 8px;">0</h3>
+              </div>
+              <div class="white-card" style="padding: 24px; border-left: 4px solid #ec4899;">
+                <p style="color: #64748b; font-size: 14px; font-weight: 600; text-transform: uppercase;">Female Patients</p>
+                <h3 id="recStat-female" style="font-size: 32px; font-weight: 800; color: #0f172a; margin-top: 8px;">0</h3>
+              </div>
+              <div class="white-card" style="padding: 24px; border-left: 4px solid #10b981;">
+                <p style="color: #64748b; font-size: 14px; font-weight: 600; text-transform: uppercase;">New Patients (Today)</p>
+                <h3 id="recStat-new" style="font-size: 32px; font-weight: 800; color: #0f172a; margin-top: 8px;">0</h3>
+              </div>
+            </div>
+            
+            <!-- Modern Table -->
+            <div class="white-card" style="padding: 0; overflow: hidden;">
+              <div style="padding: 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 18px; font-weight: 700; color: #0f172a;">Patient Database</h3>
+                <div class="search-input-wrapper" style="margin: 0; padding: 6px 12px; max-width: 300px;">
+                  <span class="icon-btn" style="font-size: 16px;">🔍</span>
+                  <input type="text" id="recSearchInput" placeholder="Search Hospital Number..." style="font-size: 14px; padding: 4px;" onkeyup="filterRecordsTable()" />
+                </div>
+              </div>
+              <table style="width: 100%; border-collapse: collapse; text-align: left;" id="recPatientsTable">
+                <thead style="background: #f8fafc;">
+                  <tr>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase;">Hospital No.</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase;">Patient Name</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase;">Sex</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase;">Phone</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase;">Status</th>
+                    <th style="padding: 16px 24px; color: #64748b; font-size: 13px; font-weight: 600; text-transform: uppercase;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="recPatientsBody">
+                  <tr><td colspan="6" style="padding: 32px; text-align: center; color: #94a3b8;">Loading records...</td></tr>
+                </tbody>
+              </table>
+              <div style="padding: 16px 24px; border-top: 1px solid #e2e8f0; text-align: right; color: #64748b; font-size: 14px;">
+                Showing <span id="recShowingCount">0</span> records
+              </div>
+            </div>
+          </div>
+
+          <!-- RECORDS: REGISTER PATIENT WIZARD -->
+          <div id="recContent-register" class="rec-tab-content hidden" style="animation: fadeIn 0.3s ease-out; max-width: 800px; margin: 0 auto;">
+            <div class="white-card" style="padding: 40px;">
+              <h3 style="font-size: 24px; font-weight: 700; color: #0f172a; margin-bottom: 8px;">Register New Patient</h3>
+              <p style="color: #64748b; margin-bottom: 32px;">Complete the 3-step wizard to enroll a new patient into the registry.</p>
+              
+              <!-- Stepper -->
+              <div style="display: flex; justify-content: space-between; margin-bottom: 40px; position: relative;">
+                <div style="position: absolute; top: 16px; left: 0; right: 0; height: 2px; background: #e2e8f0; z-index: 1;"></div>
+                <div style="position: absolute; top: 16px; left: 0; height: 2px; background: #4f46e5; z-index: 2; transition: width 0.3s;" id="stepProgress"></div>
+                
+                <div class="step-indicator active" id="stepInd-1" style="z-index: 3; background: white; padding: 0 16px; text-align: center;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: #4f46e5; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto 8px;">1</div>
+                  <span style="font-size: 14px; font-weight: 600; color: #0f172a;">Bio Data</span>
+                </div>
+                <div class="step-indicator" id="stepInd-2" style="z-index: 3; background: white; padding: 0 16px; text-align: center;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto 8px; transition: all 0.3s;">2</div>
+                  <span style="font-size: 14px; font-weight: 600; color: #64748b;">Contact</span>
+                </div>
+                <div class="step-indicator" id="stepInd-3" style="z-index: 3; background: white; padding: 0 16px; text-align: center;">
+                  <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-weight: bold; margin: 0 auto 8px; transition: all 0.3s;">3</div>
+                  <span style="font-size: 14px; font-weight: 600; color: #64748b;">HMO</span>
+                </div>
+              </div>
+
+              <!-- Forms -->
+              <div id="stepForm-1" class="step-form">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">First Name *</label><input type="text" id="wizFirst" class="form-input" /></div>
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Last Name *</label><input type="text" id="wizLast" class="form-input" /></div>
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Date of Birth *</label><input type="date" id="wizDob" class="form-input" /></div>
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Sex *</label><select id="wizSex" class="form-input"><option>Male</option><option>Female</option></select></div>
+                </div>
+                <div style="text-align: right; margin-top: 24px;"><button onclick="nextStep(2)" class="btn" style="background: #0f172a; color: white; width: auto; padding: 12px 32px;">Next Step →</button></div>
+              </div>
+
+              <div id="stepForm-2" class="step-form hidden">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                  <div style="grid-column: span 2;"><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Phone Number *</label><input type="tel" id="wizPhone" class="form-input" /></div>
+                  <div style="grid-column: span 2;"><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">Next of Kin Name</label><input type="text" class="form-input" /></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+                  <button onclick="nextStep(1)" class="btn" style="background: #f1f5f9; color: #475569; width: auto; padding: 12px 32px;">← Back</button>
+                  <button onclick="nextStep(3)" class="btn" style="background: #0f172a; color: white; width: auto; padding: 12px 32px;">Next Step →</button>
+                </div>
+              </div>
+
+              <div id="stepForm-3" class="step-form hidden">
+                <div style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+                  <div><label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block;">HMO / Retainership Provider</label>
+                    <select class="form-input" id="wizHmo"><option value="">-- None (Out of Pocket) --</option><option>Police Health Maintainers</option><option>NHIS</option><option>Hygeia</option></select>
+                  </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+                  <button onclick="nextStep(2)" class="btn" style="background: #f1f5f9; color: #475569; width: auto; padding: 12px 32px;">← Back</button>
+                  <button onclick="submitWizard()" class="btn" style="background: #10b981; color: white; width: auto; padding: 12px 32px;">Submit & Register</button>
+                </div>
+              </div>
+              
+            </div>
+          </div>
+          
+          <!-- RECORDS: APPOINTMENTS SHELL -->
+          <div id="recContent-appointments" class="rec-tab-content hidden" style="animation: fadeIn 0.3s ease-out;">
+            <div class="white-card" style="padding: 40px; text-align: center; min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+              <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
+              <h3 style="font-size: 20px; font-weight: 700; color: #0f172a;">All Appointments</h3>
+              <p style="color: #64748b;">No appointments scheduled for today.</p>
+            </div>
+          </div>
+          
+          <!-- RECORDS: REFERRALS SHELL -->
+          <div id="recContent-referrals" class="rec-tab-content hidden" style="animation: fadeIn 0.3s ease-out; background: white; padding: 0;">
+            <!-- Legacy Header Bar -->
+            <div style="background: #8b5cf6; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <span style="font-size: 24px; background: white; color: #8b5cf6; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold;">S</span>
+                <h3 style="margin: 0; font-size: 16px; font-weight: 600; text-transform: uppercase;">Records Unit | Referrals Ledger</h3>
+              </div>
+              <div>
+                <button style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 16px; border-radius: 4px; font-size: 12px; cursor: pointer;">Search for Patient</button>
+              </div>
+            </div>
+
+            <!-- KPI Cards (6 Boxes) -->
+            <div style="padding: 24px;">
+              <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; margin-bottom: 24px;">
+                <div style="background: #000080; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                  <div style="font-size: 12px; font-weight: 600;">Overall Total</div>
+                  <div id="ref-kpi-total" style="font-size: 24px; font-weight: bold; margin-top: 8px;">0</div>
+                </div>
+                <div style="background: #008000; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                  <div style="font-size: 12px; font-weight: 600;">Total Accepted</div>
+                  <div id="ref-kpi-accepted" style="font-size: 24px; font-weight: bold; margin-top: 8px;">0</div>
+                </div>
+                <div style="background: #cc0000; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                  <div style="font-size: 12px; font-weight: 600;">Total Pending</div>
+                  <div id="ref-kpi-pending" style="font-size: 24px; font-weight: bold; margin-top: 8px;">0</div>
+                </div>
+                <div style="background: #3b82f6; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                  <div style="font-size: 12px; font-weight: 600;">Inbound to Us</div>
+                  <div id="ref-kpi-inbound" style="font-size: 24px; font-weight: bold; margin-top: 8px;">0</div>
+                </div>
+                <div style="background: #b45309; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                  <div style="font-size: 12px; font-weight: 600;">Outbound from Us</div>
+                  <div id="ref-kpi-outbound" style="font-size: 24px; font-weight: bold; margin-top: 8px;">0</div>
+                </div>
+                <div style="background: #0f766e; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                  <div style="font-size: 12px; font-weight: 600;">Completed</div>
+                  <div id="ref-kpi-completed" style="font-size: 24px; font-weight: bold; margin-top: 8px;">0</div>
+                </div>
+              </div>
+
+              <!-- Filter Bar -->
+              <div style="display: flex; gap: 24px; align-items: flex-end; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
+                <div>
+                  <label style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">From *</label><br/>
+                  <input type="date" style="border: none; border-bottom: 1px solid #cbd5e1; padding: 4px 0; font-size: 14px; color: #333; outline: none; background: transparent;" />
+                </div>
+                <div>
+                  <label style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">To *</label><br/>
+                  <input type="date" style="border: none; border-bottom: 1px solid #cbd5e1; padding: 4px 0; font-size: 14px; color: #333; outline: none; background: transparent;" />
+                </div>
+                <div>
+                  <button style="background: #facc15; color: #854d0e; font-weight: 700; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="loadReferrals()">
+                    <span>🔄</span> Refresh
+                  </button>
+                </div>
+              </div>
+
+              <!-- Data Table -->
+              <div style="overflow-x: auto; background: white; border: 1px solid #e2e8f0; border-radius: 4px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 12px;">
+                  <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                    <tr>
+                      <th style="padding: 12px 16px; color: #475569; font-weight: 600;">S/N</th>
+                      <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Patient Name</th>
+                      <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Hospital Number</th>
+                      <th style="padding: 12px 16px; color: #475569; font-weight: 600;">From Unit</th>
+                      <th style="padding: 12px 16px; color: #475569; font-weight: 600;">To Unit</th>
+                      <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Diagnosis</th>
+                      <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Date & Time</th>
+                      <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Status</th>
+                      <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="referralsTableBody">
+                    <tr><td colspan="9" style="text-align:center; padding:40px; color:#94a3b8;"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1' width='64' height='64'%3E%3Cpath d='M13 10V3L4 14h7v7l9-11h-7z'/%3E%3C/svg%3E" alt="No data"/><br/>No Records Found!</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- VIEW 9: Billing Shell -->
+      <div id="oldBillingView" class="ehr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
+        <!-- Legacy Header Bar -->
+        <div style="background: #10b981; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px 4px 0 0;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 24px; background: white; color: #10b981; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold;">₦</span>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 600; text-transform: uppercase;">Central Billing & Accounts</h3>
+          </div>
+          <div>
+            <button style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4); color: white; padding: 6px 16px; border-radius: 4px; font-size: 12px; cursor: pointer;">Generate Invoice</button>
+          </div>
+        </div>
+
+        <div style="padding: 24px; background: white; border: 1px solid #e2e8f0; border-top: none; flex: 1; overflow-y: auto;">
+          <!-- KPI Cards -->
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+            <div style="background: #3b82f6; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <div style="font-size: 12px; font-weight: 600;">Total Billed</div>
+              <div id="bill-kpi-total" style="font-size: 24px; font-weight: bold; margin-top: 8px;">₦0</div>
+            </div>
+            <div style="background: #10b981; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <div style="font-size: 12px; font-weight: 600;">Total Collected (Patient)</div>
+              <div id="bill-kpi-collected" style="font-size: 24px; font-weight: bold; margin-top: 8px;">₦0</div>
+            </div>
+            <div style="background: #f59e0b; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <div style="font-size: 12px; font-weight: 600;">NHIS Claims Pending</div>
+              <div id="bill-kpi-claims" style="font-size: 24px; font-weight: bold; margin-top: 8px;">₦0</div>
+            </div>
+            <div style="background: #ef4444; color: white; padding: 16px; border-radius: 4px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+              <div style="font-size: 12px; font-weight: 600;">Outstanding Balance</div>
+              <div id="bill-kpi-outstanding" style="font-size: 24px; font-weight: bold; margin-top: 8px;">₦0</div>
+            </div>
+          </div>
+
+          <!-- Filter Bar -->
+          <div style="display: flex; gap: 24px; align-items: flex-end; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px;">
+            <div>
+              <label style="font-size: 10px; color: #64748b; font-weight: bold; text-transform: uppercase;">Status *</label><br/>
+              <select id="billStatusFilter" style="border: none; border-bottom: 1px solid #cbd5e1; padding: 4px 0; font-size: 14px; color: #333; outline: none; background: transparent;" onchange="fetchLiveBilling()">
+                <option value="All">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Paid">Paid</option>
+                <option value="Waived">Waived</option>
+              </select>
+            </div>
+            <div>
+              <button style="background: #facc15; color: #854d0e; font-weight: 700; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="fetchLiveBilling()">
+                <span>🔄</span> Refresh
+              </button>
+            </div>
+          </div>
+
+          <!-- Data Table -->
+          <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 4px;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 12px;">
+              <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                <tr>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Invoice ID</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Date</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Patient ID</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Service / Description</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Total Amount</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">NHIS Claim</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Patient Payable</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Status</th>
+                  <th style="padding: 12px 16px; color: #475569; font-weight: 600;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="billingTableBody">
+                <tr><td colspan="9" style="text-align:center; padding:40px; color:#94a3b8;"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1' width='64' height='64'%3E%3Cpath d='M13 10V3L4 14h7v7l9-11h-7z'/%3E%3C/svg%3E" alt="No data"/><br/>Loading Invoices...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+  
+  <!-- Out of Stock Modal -->
+  <div id="oosModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(2px);">
+    <div class="white-card" style="width: 400px;">
+      <h2 style="margin-bottom: 16px; color: #ef4444;">⚠️ Out of Stock</h2>
+      <p id="oosMessage" style="margin-bottom: 24px; font-size: 15px; color: #4b5563;"></p>
+      <div style="display: flex; gap: 12px;">
+        <button onclick="closeOosModal()" class="btn" style="background: #e5e7eb; color: #374151;">Cancel</button>
+        <button onclick="acceptSubstitute()" class="btn" style="background: #10b981; color: white;">Accept Substitute</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">Success!</div>
+
+
+      <!-- VIEW: LEGAL MATRIX (SLEEK) -->
+      <div id="legalView" class="ehr-view hidden" style="padding: 48px; max-width: 1000px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 40px; display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h2 style="font-size: 36px; font-weight: 800; color: #0f172a; letter-spacing: -0.03em;">Legal & Compliance</h2>
+            <p style="color: #64748b; font-size: 18px; margin-top: 8px;">Active consent forms and audit logs</p>
+          </div>
+          <button style="padding: 12px 24px; background: #0f172a; color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);">+ New Consent</button>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+          <!-- Consent Forms -->
+          <div style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 20px; padding: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+            <h3 style="font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 24px;">Active Consents</h3>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <div style="padding: 16px; background: #f8fafc; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 600; color: #0f172a;">Surgery Consent (PT-889)</div>
+                  <div style="font-size: 14px; color: #64748b; margin-top: 4px;">Signed by Patient ┬À 2h ago</div>
+                </div>
+                <span style="background: #dcfce7; color: #166534; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">Valid</span>
+              </div>
+              <div style="padding: 16px; background: #f8fafc; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <div style="font-weight: 600; color: #0f172a;">Data Sharing Auth (PT-102)</div>
+                  <div style="font-size: 14px; color: #64748b; margin-top: 4px;">Pending Guardian Signature</div>
+                </div>
+                <span style="background: #fef9c3; color: #854d0e; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">Pending</span>
+              </div>
+            </div>
+          </div>
+          <!-- Audit Log -->
+          <div style="background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(226, 232, 240, 0.8); border-radius: 20px; padding: 32px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+            <h3 style="font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 24px;">Security Audit Log</h3>
+            <div id="legalAuditList" style="display: flex; flex-direction: column; gap: 16px;">
+              <!-- Dynamically populated -->
+              <div style="text-align: center; color: #94a3b8; padding: 20px;">Fetching secure logs...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: INPATIENT WARDS (SLEEK) -->
+      <div id="wardsView" class="ehr-view hidden" style="padding: 48px; max-width: 1200px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 40px;">
+          <h2 style="font-size: 36px; font-weight: 800; color: #0f172a; letter-spacing: -0.03em;">Inpatient Wards</h2>
+          <p style="color: #64748b; font-size: 18px; margin-top: 8px;">Live bed management and allocations</p>
+        </div>
+        
+        <!-- Stats Row -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px;">
+          <div style="background: white; border-radius: 24px; padding: 32px; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+            <div style="color: #64748b; font-weight: 600; margin-bottom: 8px;">Total Beds</div>
+            <div id="wardStatTotal" style="font-size: 48px; font-weight: 800; color: #0f172a; letter-spacing: -0.04em;">-</div>
+          </div>
+          <div style="background: white; border-radius: 24px; padding: 32px; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+            <div style="color: #64748b; font-weight: 600; margin-bottom: 8px;">Occupied</div>
+            <div id="wardStatOccupied" style="font-size: 48px; font-weight: 800; color: #e11d48; letter-spacing: -0.04em;">-</div>
+          </div>
+          <div style="background: white; border-radius: 24px; padding: 32px; border: 1px solid #f1f5f9; box-shadow: 0 4px 20px rgba(0,0,0,0.02);">
+            <div style="color: #64748b; font-weight: 600; margin-bottom: 8px;">Available</div>
+            <div id="wardStatAvailable" style="font-size: 48px; font-weight: 800; color: #10b981; letter-spacing: -0.04em;">-</div>
+          </div>
+        </div>
+
+        <!-- Bed Grid -->
+        <div id="liveWardsGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+          <div style="grid-column: span 4; text-align: center; color: #94a3b8; padding: 40px;">Syncing live bed states...</div>
+        </div>
+      </div>
+
+      <!-- VIEW: LABS (SLEEK) -->
+      <div id="labsView" class="ehr-view hidden" style="padding: 48px; max-width: 1200px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 40px;">
+          <h2 style="font-size: 36px; font-weight: 800; color: #0f172a; letter-spacing: -0.03em;">Lab & Diagnostics</h2>
+          <p style="color: #64748b; font-size: 18px; margin-top: 8px;">Pending orders and recent results</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px;">
+          <!-- Pending Requests -->
+          <div style="background: white; border-radius: 24px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.04);">
+            <h3 style="font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 24px; display: flex; justify-content: space-between;">
+              Pending Requests <span style="background: #fee2e2; color: #b91c1c; padding: 2px 10px; border-radius: 12px; font-size: 14px;">3</span>
+            </h3>
+            <div id="labsPendingList" style="display: flex; flex-direction: column; gap: 16px;">
+              <div style="padding: 20px; border: 1px solid #f1f5f9; border-radius: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+                  <div>
+                    <div style="font-weight: 700; color: #0f172a; font-size: 18px;">Full Blood Count (FBC)</div>
+                    <div style="color: #64748b; font-size: 14px; margin-top: 4px;">PT-901 ┬À Stat Priority</div>
+                  </div>
+                </div>
+                <button style="width: 100%; padding: 12px; background: #eff6ff; color: #2563eb; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;">Process Sample</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Recent Results -->
+          <div style="background: white; border-radius: 24px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.04);">
+            <h3 style="font-size: 20px; font-weight: 700; color: #1e293b; margin-bottom: 24px;">Recent Results</h3>
+            <div id="labsResultsList" style="display: flex; flex-direction: column; gap: 16px;">
+              <div style="padding: 20px; border: 1px solid #f1f5f9; border-radius: 16px;">
+                <div style="font-weight: 700; color: #0f172a; font-size: 18px;">Malaria RDT</div>
+                <div style="color: #64748b; font-size: 14px; margin-top: 4px;">PT-404 ┬À Completed 1h ago</div>
+                <div style="margin-top: 16px; display: inline-block; background: #fef2f2; color: #dc2626; padding: 6px 16px; border-radius: 8px; font-weight: 700;">Result: POSITIVE +</div>
+              </div>
+              <div style="padding: 20px; border: 1px solid #f1f5f9; border-radius: 16px;">
+                <div style="font-weight: 700; color: #0f172a; font-size: 18px;">Lipid Panel</div>
+                <div style="color: #64748b; font-size: 14px; margin-top: 4px;">PT-112 ┬À Completed 3h ago</div>
+                <div style="margin-top: 16px; display: inline-block; background: #ecfdf5; color: #059669; padding: 6px 16px; border-radius: 8px; font-weight: 700;">Result: NORMAL</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: BILLING (SLEEK) -->
+      <div id="billingView" class="ehr-view hidden" style="padding: 48px; max-width: 1000px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 40px; text-align: center;">
+          <h2 style="font-size: 20px; font-weight: 700; color: #64748b; letter-spacing: 0.05em; text-transform: uppercase;">Outstanding Revenue</h2>
+          <div id="billingTotalRev" style="font-size: 64px; font-weight: 800; color: #0f172a; letter-spacing: -0.04em; margin-top: 8px;">₦0.00</div>
+        </div>
+
+        <div style="background: white; border-radius: 24px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.04);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3 style="font-size: 20px; font-weight: 700; color: #1e293b;">Unpaid Invoices</h3>
+            <button style="padding: 8px 16px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Export CSV</button>
+          </div>
+          <div id="billingInvoiceList" style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="text-align: center; color: #94a3b8; padding: 20px;">Fetching financial data...</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+  <!-- Sleek Modals for Workflows -->
+  
+  <!-- Discharge Modal -->
+  <div id="dischargeModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 16px; padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); transform: translateY(20px); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); animation: slideUp 0.3s forwards;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <div style="width: 64px; height: 64px; background: #fee2e2; color: #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px;">🛏️</div>
+        <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Discharge Patient</h3>
+        <p style="color: #64748b; font-size: 14px; margin-top: 8px;">Are you sure you want to discharge this patient and mark the bed as Vacant?</p>
+      </div>
+      <input type="hidden" id="dischargeBedId">
+      <input type="hidden" id="dischargePatientId">
+      <div style="display: flex; gap: 12px;">
+        <button onclick="document.getElementById('dischargeModal').style.display='none'" style="flex: 1; padding: 12px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">Cancel</button>
+        <button onclick="confirmDischarge()" style="flex: 1; padding: 12px; background: #ef4444; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(239, 68, 68, 0.2); transition: background 0.2s;">Confirm Discharge</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lab Results Modal -->
+  <div id="labResultModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 16px; padding: 32px; width: 100%; max-width: 450px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); animation: slideUp 0.3s forwards;">
+      <div style="margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+          <div style="width: 40px; height: 40px; background: #f3e8ff; color: #9333ea; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">🧪</div>
+          <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Enter Lab Results</h3>
+        </div>
+        <p style="color: #64748b; font-size: 14px; margin: 0;">Record diagnostic values for this order.</p>
+      </div>
+      <input type="hidden" id="labOrderId">
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px;">Clinical Findings / Values</label>
+        <textarea id="labResultText" rows="4" placeholder="e.g. Hemoglobin 12.5 g/dL, WBC 5.4..." style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-family: inherit; font-size: 14px; outline: none; transition: border-color 0.2s;"></textarea>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button onclick="document.getElementById('labResultModal').style.display='none'" style="flex: 1; padding: 12px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
+        <button onclick="confirmLabComplete()" style="flex: 2; padding: 12px; background: #9333ea; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(147, 51, 234, 0.2);">Mark as Completed</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Payment Receipt Modal -->
+  <div id="paymentModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 1000; justify-content: center; align-items: center;">
+    <div style="background: white; border-radius: 16px; padding: 32px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); animation: slideUp 0.3s forwards;">
+      <div style="text-align: center; margin-bottom: 24px; border-bottom: 2px dashed #e2e8f0; padding-bottom: 24px;">
+        <div style="width: 64px; height: 64px; background: #dcfce7; color: #16a34a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 16px;">💳</div>
+        <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Payment Processing</h3>
+        <p style="color: #64748b; font-size: 14px; margin-top: 8px;">Receive funds and generate digital receipt.</p>
+      </div>
+      <input type="hidden" id="paymentBillId">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px;">
+        <span style="color: #64748b;">Amount Due:</span>
+        <strong style="color: #0f172a; font-size: 20px;">₦<span id="paymentAmountDisplay"></span></strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 24px; font-size: 15px;">
+        <span style="color: #64748b;">Payment Method:</span>
+        <select style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 8px; font-size: 14px; outline: none;">
+          <option>Cash / POS</option>
+          <option>Bank Transfer</option>
+          <option>NHIS / HMO Claim</option>
+        </select>
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button onclick="document.getElementById('paymentModal').style.display='none'" style="flex: 1; padding: 12px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
+        <button onclick="confirmPayment()" style="flex: 2; padding: 12px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2);">Confirm Payment</button>
+      </div>
+    </div>
+  </div>
+  <style>
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    .terminal-scroll::-webkit-scrollbar { width: 8px; }
+    .terminal-scroll::-webkit-scrollbar-track { background: #0f172a; }
+    .terminal-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+  </style>
+
+  </div>
+  
+  <script>
+    function toggleSidebar() {
+      document.getElementById('ehrSidebar').classList.toggle('expanded');
+      document.getElementById('ehrSidebar').classList.toggle('collapsed');
+      
+      const isExpanded = document.getElementById('ehrSidebar').classList.contains('expanded');
+      document.getElementById('roleSwitcherContainer').style.display = isExpanded ? 'block' : 'none';
+    }
+    function enterEhrModule() {
+      document.getElementById('landingScreen').style.display = 'none';
+      document.getElementById('ehrAppShell').style.display = 'flex';
+      switchAppRole('admin'); // default to admin
+      switchEhrView('phcWorkflowView');
+    }
+
+    function switchAppRole(role) {
+      document.querySelectorAll('#ehrAppShell .nav-btn').forEach(btn => {
+        if (!btn.dataset.roles) return; // skip if no roles
+        const allowedRoles = btn.dataset.roles.split(' ');
+        if (allowedRoles.includes(role) || allowedRoles.includes('all')) {
+          btn.style.display = 'flex';
+        } else {
+          btn.style.display = 'none';
+        }
+      });
+      // Optionally route them to their default view if the current view isn't allowed
+      const currentActive = document.querySelector('#ehrAppShell .nav-btn.active');
+      if (currentActive && currentActive.style.display === 'none') {
+        if (role === 'physician') switchEhrView('encountersView');
+        if (role === 'nurse') switchEhrView('mpiView');
+      }
+    }
+
+    let billingInterval = null;
+
+    function switchEhrView(viewId, isPopState = false) {
+      document.querySelectorAll('.ehr-view').forEach(el => el.classList.add('hidden'));
+      document.getElementById(viewId).classList.remove('hidden');
+      
+      document.querySelectorAll('#ehrAppShell .nav-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.querySelector(`#ehrAppShell .nav-btn[onclick="switchEhrView('${viewId}')"]`);
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      if (!isPopState) {
+        history.pushState({ viewId }, "", "#" + viewId);
+      if(viewId === 'billingView') { fetchLiveBilling(); if(!billingInterval) billingInterval = setInterval(fetchLiveBilling, 5000); } else { clearInterval(billingInterval); billingInterval = null; }
+      }
+    }
+
+    window.addEventListener('popstate', (e) => {
+      if (e.state && e.state.viewId) {
+        document.getElementById('landingScreen').style.display = 'none';
+        document.getElementById('ehrAppShell').style.display = 'flex';
+        switchEhrView(e.state.viewId, true);
+      } else {
+        document.getElementById('landingScreen').style.display = 'flex';
+        document.getElementById('ehrAppShell').style.display = 'none';
+      }
+    });
+
+    // Preserve original handleMpiSubmit for local endpoints
+    function handleMpiSubmit(e) {
+      e.preventDefault();
+      const uuid = "UUID-v7-" + Date.now();
+      document.getElementById('patientQr').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${uuid}`;
+      document.getElementById('patientUuidDisplay').innerText = uuid;
+      document.getElementById('qrWalletContainer').style.display = 'block';
+      alert('Patient Data saved to local cache successfully!');
+    }
+
+    
+    // ── Live Backend Integration ─────────────────────────────────────
+    const API_URL = '/api/v2';
+
+    // Global Fetch Interceptor to attach Authorization header automatically
+    const originalFetch = window.fetch;
+    window.fetch = async function() {
+      let resource = arguments[0];
+      let config = arguments[1];
+      if (typeof resource === 'string' && resource.startsWith('/api/') && !resource.startsWith('/api/v1/auth/') && !resource.startsWith('/api/v2/auth/')) {
+        config = config || {};
+        config.headers = config.headers || {};
+        const token = localStorage.getItem('ehr_admin_token');
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
+      }
+      return originalFetch.call(window, resource, config);
+    };
+
+    async function fetchLivePhcData() {
+      try {
+        // Fetch Summary Stats
+        const summaryRes = await fetch(`${API_URL}/summary`);
+        if (summaryRes.ok) {
+          const summary = await summaryRes.json();
+          document.getElementById('liveTotalPatients').innerText = summary.patients;
+          document.getElementById('liveOpenEncounters').innerText = summary.openEncounters;
+          document.getElementById('livePhcCount').innerText = summary.phcs;
+        }
+
+        // Fetch Recent Patients
+        const patientsRes = await fetch(`${API_URL}/patients`);
+        if (patientsRes.ok) {
+          const patients = await patientsRes.json();
+          const tbody = document.getElementById('livePatientTableBody');
+          tbody.innerHTML = '';
+          
+          if (patients.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #9ca3af;">No patients registered yet.</td></tr>';
+          } else {
+            // Show top 10 recent
+            patients.slice(0, 10).forEach(p => {
+              tbody.innerHTML += `
+                <tr style="border-bottom: 1px solid #f3f4f6;">
+                  <td style="padding: 12px 8px; font-family: monospace; color: #3b82f6;">${p.id}</td>
+                  <td style="padding: 12px 8px; font-weight: 500;">${p.name}</td>
+                  <td style="padding: 12px 8px;">${p.age} / ${p.sex}</td>
+                  <td style="padding: 12px 8px;">${p.lga || 'Unspecified'}</td>
+                  <td style="padding: 12px 8px;">
+                    <span style="background: ${p.insurance === 'Private Pay' ? '#fee2e2' : '#dcfce3'}; color: ${p.insurance === 'Private Pay' ? '#b91c1c' : '#166534'}; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                      ${p.insurance || 'Private Pay'}
+                    </span>
+                  </td>
+                </tr>
+              `;
+            });
+          }
+        }
+      } catch (e) {
+          document.getElementById('livePatientTableBody').innerHTML = 
+            '<tr><td colspan="5" style="padding: 20px; text-align: center; color: #ef4444;">Connection failed. Is the API server running?</td></tr>';
+        }
+    }
+
+    // Call it immediately on load if we are somehow bypassing landing screen, otherwise call it on switch
+    // Actually, let's just intercept switchEhrView
+    const originalSwitch = switchEhrView;
+    switchEhrView = function(...args) {
+      originalSwitch(...args);
+      const viewId = args[0];
+      if (viewId === 'phcWorkflowView') {
+        fetchLivePhcData();
+      }
+    };
+
+
+    // ── EHR: Inpatient Wards (GET /api/v2/beds)
+    
+
+    async function fetchAuditLogs() {
+      try {
+        const res = await fetch(`${API_URL}/audit`);
+        if (res.ok) {
+          const logs = await res.json();
+          const list = document.getElementById('legalAuditList');
+          if (!list) return;
+          list.innerHTML = logs.slice(0, 5).map(log => `
+            <div style="padding: 16px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <div style="font-weight: 600; color: #1e293b;">${log.action}</div>
+                <div style="font-size: 13px; color: #64748b; margin-top: 4px;">User: ${log.user} | IP: ${log.ip}</div>
+              </div>
+              <div style="font-size: 12px; color: #94a3b8;">${new Date(log.timestamp).toLocaleTimeString()}</div>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        console.error("Audit load failed:", e);
+      }
+    }
+
+    
+    async function fetchRecordsRegistry() {
+      console.log('Fetching records registry...');
+    }
+
+    

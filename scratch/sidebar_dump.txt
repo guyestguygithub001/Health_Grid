@@ -1,0 +1,23 @@
+argin-top: 8px; padding-top: 16px;"><span>📂</span><span class="nav-text" style="color: #4f46e5;">Records Unit</span></button>
+      </div>
+
+      <div style="margin-top: auto; border-top: 1px solid #e5e7eb; padding-top: 16px;">
+        
+        <!-- Role Selector -->
+        <div class="nav-text" style="padding: 0 12px; margin-bottom: 16px; width: 100%;">
+            <p style="margin: 0 0 8px; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Active Context</p>
+            <div id="activeRoleDisplay" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #0f172a; font-weight: 700; font-size: 13px; margin-bottom: 8px;">
+                Role Loading...
+            </div>
+            <button id="emrSignupBtn" onclick="document.getElementById('emrSignupModal').style.display='flex'" style="width: 100%; padding: 8px 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">
+                Register Staff
+            </button>
+        </div>
+
+        <button class="nav-btn" onclick="window.location.href='/command.html'" title="Exit to EHR Dashboard"><span>🚪</span><span class="nav-text">Exit to Admin</span></button>
+      </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="mainContent" style="flex: 1; position: relative; overflow-y: auto;">
+      

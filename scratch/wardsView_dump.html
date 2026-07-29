@@ -1,0 +1,80 @@
+trong>
+          </p>
+        </div>
+      </div>
+
+
+      <!-- VIEW: INPATIENT WARDS -->
+      <div id="wardsView" class="ehr-view hidden" style="padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Inpatient Wards</h2>
+            <p style="color: #6b7280; font-size: 16px;">Live bed management and admission tracking.</p>
+          </div>
+          <button onclick="fetchLiveWards()" style="padding: 10px 20px; background: #0284c7; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+            🔄 Refresh Beds
+          </button>
+        </div>
+        
+        <div class="glass-card" style="margin-bottom: 24px; border-left: 4px solid #0284c7;">
+          <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Direct Admission Booking (Walk-In)</h3>
+          <form onsubmit="addToWardCart(event)">
+            <div style="display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 16px; margin-bottom: 16px;">
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Patient ID</label>
+                <input type="text" id="walkInWardPatientId" required placeholder="PT1001" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
+              </div>
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Select Ward / Bed Tier</label>
+                <select id="walkInWardType" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+                  <optgroup label="Standard Admissions">
+                    <option value="General Ward|5000">General Ward - ₦5,000/day</option>
+                    <option value="Pediatric Ward|6000">Pediatric Ward - ₦6,000/day</option>
+                    <option value="Maternity Ward|8000">Maternity Ward - ₦8,000/day</option>
+                  </optgroup>
+                  <optgroup label="Premium / Specialized">
+                    <option value="Semi-Private Room|12000">Semi-Private Room - ₦12,000/day</option>
+                    <option value="Private Suite|25000">Private Suite - ₦25,000/day</option>
+                    <option value="Intensive Care Unit (ICU)|50000">Intensive Care Unit (ICU) - ₦50,000/day</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div>
+                <label style="display:block; font-size:12px; font-weight:700; color:#4b5563; margin-bottom:6px;">Duration (Days)</label>
+                <input type="number" id="walkInWardDays" required min="1" value="1" style="width:100%; padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;" />
+              </div>
+            </div>
+            <button type="submit" style="width: 100%; padding: 12px; border-radius: 8px; background: #e2e8f0; color: #1e293b; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 16px;">[+] Add to Booking List</button>
+          </form>
+          
+          <div id="wardCartContainer" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+            <h4 style="margin: 0 0 12px; font-size: 14px; font-weight: 700;">Booking Summary</h4>
+            <ul id="wardCartList" style="list-style: none; padding: 0; margin: 0 0 16px; font-size: 13px;"></ul>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e2e8f0; padding-top: 12px;">
+              <strong style="font-size: 16px;">Total: ₦<span id="wardCartTotal">0</span></strong>
+              <button onclick="checkoutWardCart()" style="padding: 10px 20px; border-radius: 8px; background: #0284c7; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(2, 132, 199, 0.2);">Confirm Admission & Bill</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+              <thead>
+                <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280;">
+                  <th style="padding: 12px 8px;">Bed ID</th>
+                  <th style="padding: 12px 8px;">Ward</th>
+                  <th style="padding: 12px 8px;">Status</th>
+                  <th style="padding: 12px 8px;">Patient ID</th>
+                </tr>
+              </thead>
+              <tbody id="liveWardsTableBody">
+                <tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">Click refresh to fetch bed statuses...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: LABS -->
+      <div 

@@ -1,0 +1,45 @@
+placeholder="Phone Number">
+            <button onclick="submitQuickRegister()" class="btn btn-primary">Register &amp; Load</button>
+          </div>
+        </div>
+      </div>
+
+      
+      
+      <!-- VIEW: Clinics Dashboard (Categorized Unified Workspace) -->
+      <div id="clinicsDashboardView" class="emr-view hidden" style="padding: 40px; max-width: 1200px; margin: 0 auto;">
+        <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.02em;">Unified Clinical Workspace</h2>
+        <p style="color: #64748b; margin-bottom: 40px; font-size: 16px;">Select a department to manage its waiting list and active encounters.</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 32px;">
+          
+          <!-- Category: Primary & Emergency -->
+          <div>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Primary &amp; Emergency</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <button onclick="loadUnifiedWaitingList('GOPD')" class="clinic-btn">🩺 General Outpatient (GOPD)</button>
+              <button onclick="loadUnifiedWaitingList('A &amp; E')" class="clinic-btn" style="border-left-color: #ef4444;">🚨 Accident &amp; Emergency</button>
+              <button onclick="loadUnifiedWaitingList('EPU')" class="clinic-btn">🚑 Emergency Pediatric Unit (EPU)</button>
+              <button onclick="loadUnifiedWaitingList('Amenity Clinic')" class="clinic-btn">⭐ Amenity Clinic</button>
+            </div>
+          </div>
+
+          <!-- Category: Surgical & Theater -->
+          <div>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Surgical &amp; Procedures</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <button onclick="loadUnifiedWaitingList('Theater')" class="clinic-btn" style="border-left-color: #ef4444;">🔪 Theater (Surgery)</button>
+              <button onclick="loadUnifiedWaitingList('Orthopaedics')" class="clinic-btn">🦴 Orthopaedics</button>
+              <button onclick="loadUnifiedWaitingList('Endoscopy')" class="clinic-btn">🔍 Endoscopy</button>
+              <button onclick="loadUnifiedWaitingList('Procedure')" class="clinic-btn">💉 General Procedures</button>
+            </div>
+          </div>
+
+          <!-- Category: Specialist Care -->
+          <div>
+            <h3 style="font-size: 14px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Specialist Care</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              <button onclick="loadUnifiedWaitingList('Cardiac Centre')" class="clinic-btn" style="border-left-color: #ec4899;">❤️ Cardiac Centre</button>
+              <button onclick="loadUnifiedWaitingList('Cardiology')" class="clinic-btn" style="border-left-color: #ec4899;">🫀 Cardiology</button>
+              <button onclick="loadUnifiedWaitingList('Urology')" class="clinic-btn">💧 Urology</button>
+              <button onclick="loadUnifiedWaitingList('Renal')" class="clinic-btn">🩸 Renal</button>

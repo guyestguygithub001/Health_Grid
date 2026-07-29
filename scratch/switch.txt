@@ -1,0 +1,31 @@
+237: <button class="nav-btn active" data-roles="admin physician nurse" onclick="switchEhrView('phcWorkflowView')" title="Live PHC Workflow">
+240: <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('mpiView')" title="Patient Intake">
+243: <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('vitalsView')" title="Vitals & Triage">
+246: <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('encountersView')" title="Clinical Encounters">
+249: <button class="nav-btn" data-roles="admin nurse physician" onclick="switchEhrView('mchView')" title="Maternal & Child Health">
+254: <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('epidemicView')" title="Epidemic Radar">
+257: <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('pharmacyView')" title="Pharmacy Hub">
+260: <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('recordsMainView')" title="Records Unit">
+263: <button class="nav-btn" data-roles="admin" onclick="switchEhrView('legalView')" title="Legal Matrix">
+266: <button class="nav-btn" data-roles="admin physician nurse" onclick="switchEhrView('wardsView')" title="Inpatient Wards">
+269: <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('labsView')" title="Lab & Diagnostics">
+272: <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('billingView')" title="Billing & Claims">
+385: <button onclick="switchEhrView('patientRecordView')" style="margin-top:16px; width: 100%; padding: 12px; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);">Proceed to Records Unit ➔</button>
+398: <button onclick="switchEhrView('vitalsView')" style="padding: 12px 24px; border-radius: 8px; background: #3b82f6; color: white; border: none; font-weight: 700; cursor: pointer;">Start New Encounter</button>
+436: <form onsubmit="event.preventDefault(); alert('Appointment booked successfully!'); switchEhrView('encountersView');">
+495: <button onclick="let v = document.getElementById('vitalsEncounterDisplay').dataset; switchEhrView('encountersView'); if(v.encId) { setTimeout(() => openConsultation(v.encId, v.patId, v.vitals), 100); }" style="width: 100%; padding: 12px; border-radius: 8px; background: #3b82f6; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);">Proceed to Clinical Encounter ➔</button>
+1399: switchEhrView('phcWorkflowView');
+1415: if (role === 'physician') switchEhrView('encountersView');
+1416: if (role === 'nurse') switchEhrView('mpiView');
+1422: function switchEhrView(viewId, isPopState = false) {
+1427: const activeBtn = document.querySelector(`#ehrAppShell .nav-btn[onclick="switchEhrView('${viewId}')"]`);
+1440: switchEhrView(e.state.viewId, true);
+1523: // Actually, let's just intercept switchEhrView
+1524: const originalSwitch = switchEhrView;
+1525: switchEhrView = function(...args) {
+1688: // Intercept switchEhrView again to auto-load these views
+1689: const tertiarySwitch = switchEhrView;
+1690: switchEhrView = function(...args) {
+1888: // Intercept switchEhrView to auto-load encounters
+1889: const secondarySwitch = switchEhrView;
+1890: switchEhrView = function(...args) {

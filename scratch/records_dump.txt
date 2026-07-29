@@ -1,0 +1,8 @@
+id="recordsMainView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
+          <div>
+            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Records Unit</h2>
+            <p style="color: #64748b; font-size: 15px;">Centralized Patient Registry & Registration</p>
+          </div>
+          <div style="display: flex; gap: 8px; background: #e2e8f0; padding: 6px; border-radius: 12px;">
+            <button id="recTab-patients" onclick="switchRecordsTab('patients')" style="padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; borde

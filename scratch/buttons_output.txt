@@ -1,0 +1,8 @@
+263: <button class="nav-btn" data-roles="admin" onclick="switchEhrView('legalView')" title="Legal Matrix">
+264: <span class="nav-icon">⚖️</span><span class="nav-text">Legal Matrix</span>
+266: <button class="nav-btn" data-roles="admin physician nurse" onclick="switchEhrView('wardsView')" title="Inpatient Wards">
+267: <span class="nav-icon">🛏️</span><span class="nav-text">Inpatient Wards</span>
+269: <button class="nav-btn" data-roles="admin physician" onclick="switchEhrView('labsView')" title="Lab & Diagnostics">
+270: <span class="nav-icon">🧪</span><span class="nav-text">Lab & Diagnostics</span>
+272: <button class="nav-btn" data-roles="admin nurse" onclick="switchEhrView('billingView')" title="Billing & Claims">
+273: <span class="nav-icon">💳</span><span class="nav-text">Billing & Claims</span>

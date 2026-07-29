@@ -1,0 +1,9 @@
+id="billingView" class="emr-view hidden" style="height: 100%; padding: 24px; display: flex; flex-direction: column; background: #f8fafc;">
+        <!-- Legacy Header Bar -->
+        <div style="background: #10b981; color: white; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px 4px 0 0;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="font-size: 24px; background: white; color: #10b981; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-weight: bold;">₦</span>
+            <h3 style="margin: 0; font-size: 16px; font-weight: 600; text-transform: uppercase;">Central Billing & Accounts</h3>
+          </div>
+          <div>
+      

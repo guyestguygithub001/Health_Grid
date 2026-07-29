@@ -1,0 +1,9 @@
+/div>
+
+      <!-- VIEW 1: Omni-Bar -->
+      <div id="omniBar" class="emr-view hidden" style="padding: 60px 40px; width: 100%; display: flex; flex-direction: column; align-items: center; margin: 0 auto;">
+        <div class="search-card" style="width: 100%; max-width: 1200px; margin: 0 auto;">
+          <h1 style="text-align: center; margin-bottom: 32px; font-size: 32px; font-weight: 800; letter-spacing: -0.02em;">Omni-Bar</h1>
+          <div class="search-input-wrapper">
+            <span class="icon-btn">🔍</span>
+            <input type="text
