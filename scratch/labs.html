@@ -1,0 +1,32 @@
+<div id="labsView" class="ehr-view hidden" style="padding: 40px; max-width: 1200px; margin: 0 auto; width: 100%;">
+        <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
+          <div>
+            <h2 style="font-size: 32px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">Laboratory & Diagnostics</h2>
+            <p style="color: #6b7280; font-size: 16px;">Regional laboratory result processing.</p>
+          </div>
+          <button onclick="fetchLiveLabs()" style="padding: 10px 20px; background: #8b5cf6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">
+            🔄 Refresh Labs
+          </button>
+        </div>
+        
+        <div class="glass-card">
+          <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+              <thead>
+                <tr style="border-bottom: 2px solid #e5e7eb; color: #6b7280;">
+                  <th style="padding: 12px 8px;">Lab ID</th>
+                  <th style="padding: 12px 8px;">Patient ID</th>
+                  <th style="padding: 12px 8px;">Date</th>
+                  <th style="padding: 12px 8px;">Critical Flag</th>
+                </tr>
+              </thead>
+              <tbody id="liveLabsTableBody">
+                <tr><td colspan="4" style="padding: 20px; text-align: center; color: #9ca3af;">Click refresh to fetch labs...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW: BILLING -->
+      

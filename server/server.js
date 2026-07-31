@@ -884,6 +884,7 @@ async function handleApi(req, res, url) {
       body.labOrders.forEach(labTest => {
         const order = { id: nextId("ORD", data.orders), patientId: body.patientId, type: "Laboratory", item: labTest, priority: "Routine", status: "Pending", facilityId: body.facilityId || "FAC-PLSH", orderedBy: encounter.doctorId, date: encounter.date };
         data.orders.unshift(order);
+    createAutoBill(data, body.patientId, 'Laboratory', Lab Order: );
         createAutoBill(data, body.patientId, "Laboratory", `Lab Test: ${labTest}`);
       });
     }
@@ -953,6 +954,7 @@ async function handleApi(req, res, url) {
     const body = await collectBody(req);
     const order = { id: nextId("ORD", data.orders), patientId: body.patientId, type: body.type || "Laboratory", item: body.item || "Unspecified", priority: body.priority || "Routine", status: "Pending", facilityId: body.facilityId || "FAC-PLSH", orderedBy: body.orderedBy || "", date: new Date().toISOString().slice(0, 10) };
     data.orders.unshift(order);
+    createAutoBill(data, body.patientId, 'Laboratory', Lab Order: );
     queueDatabaseWrite(data);
     sendJson(res, 201, order);
     return;
