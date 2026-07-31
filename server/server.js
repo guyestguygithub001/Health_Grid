@@ -884,7 +884,6 @@ async function handleApi(req, res, url) {
       body.labOrders.forEach(labTest => {
         const order = { id: nextId("ORD", data.orders), patientId: body.patientId, type: "Laboratory", item: labTest, priority: "Routine", status: "Pending", facilityId: body.facilityId || "FAC-PLSH", orderedBy: encounter.doctorId, date: encounter.date };
         data.orders.unshift(order);
-    createAutoBill(data, body.patientId, 'Laboratory', Lab Order: );
         createAutoBill(data, body.patientId, "Laboratory", `Lab Test: ${labTest}`);
       });
     }
