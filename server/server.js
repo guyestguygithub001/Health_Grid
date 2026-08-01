@@ -1198,7 +1198,7 @@ async function handlePatientApi(req, res, url) {
         };
         db.staff.push(newStaff);
         _writeFile(db);
-        sendJson(res, 201, { message: "Staff registered successfully", staff: { id: newStaff.id, name: newStaff.name, role: newStaff.role } });
+        sendJson(res, 201, { token: "mock-jwt-token-12345", role: newStaff.role, name: newStaff.name, userId: newStaff.id, message: "Staff registered successfully" });
       } catch (e) {
         sendJson(res, 500, { error: "Internal server error" });
       }
@@ -1243,6 +1243,33 @@ async function handlePatientApi(req, res, url) {
         sendJson(res, 500, { error: "Internal server error" });
       }
     });
+    return;
+  }
+  
+  if (req.method === "POST" && url.pathname === "/api/v2/auth/reset") {
+    const body = await collectBody(req);
+    const { username, otp, newPassword } = body;
+    // Check if user exists in staff records or is the master admin
+    const db = _readFile();
+    const staffUser = db.staff.find(s => s.username === username);
+    const isMasterAdmin = username === (process.env.APP_USER || "admin");
+    if (!staffUser && !isMasterAdmin) {
+      sendJson(res, 404, { success: false, error: "User not found." });
+      return;
+    }
+    if (otp !== "123456") {
+      sendJson(res, 401, { success: false, error: "Invalid or expired OTP." });
+      return;
+    }
+    // Update password for the appropriate user
+    if (isMasterAdmin) {
+      process.env.APP_PASS = newPassword;
+    }
+    if (staffUser) {
+      staffUser.password = newPassword;
+      _writeFile(db);
+    }
+    sendJson(res, 200, { success: true, message: "Password reset successful." });
     return;
   }
 if (req.method === "POST" && url.pathname === "/api/v2/patient/login") {
@@ -1481,31 +1508,21 @@ const server = http.createServer(async (req, res) => {
       // Master Admin Override
       if (body.username === 'admin' && (body.password === 'secure_admin_password' || body.password === 'admin123')) {
         const token = "mock-jwt-token-12345";
-        sendJson(res, 200, { success: true, token, username: body.username, role: 'admin', userId: "USR-0001" });
+        sendJson(res, 200, { success: true, token, username: body.username, role: 'admin', userId: "USR-0001", name: "System Admin" });
+        return;
+      }
+      // Check registered staff in data.json
+      const db = _readFile();
+      const staff = db.staff.find(s => s.username === body.username && s.password === body.password);
+      if (staff) {
+        const token = "mock-jwt-token-12345";
+        sendJson(res, 200, { success: true, token, username: staff.username, role: staff.role, userId: staff.id, name: staff.name });
         return;
       }
       sendJson(res, 401, { success: false, error: "Invalid credentials" });
       return;
     }
 
-    if (req.method === "POST" && pathname === "/api/v2/auth/reset") {
-      const body = await collectBody(req);
-      const { username, otp, newPassword } = body;
-      // In a real database, we would query the user by username, verify OTP, and hash newPassword.
-      // Here we simulate the logic:
-      if (username !== (process.env.APP_USER || "admin")) {
-        sendJson(res, 404, { success: false, error: "User not found." });
-        return;
-      }
-      if (otp !== "123456") {
-        sendJson(res, 401, { success: false, error: "Invalid or expired OTP." });
-        return;
-      }
-      // Simulate password change
-      process.env.APP_PASS = newPassword;
-      sendJson(res, 200, { success: true, message: "Password reset successful." });
-      return;
-    }
 
     // ── 4. All other API routes require admin auth ─────────
     

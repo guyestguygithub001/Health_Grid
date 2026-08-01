@@ -2854,6 +2854,9 @@ Orders Generated:`;
           if (res.ok) {
             const data = await res.json();
             localStorage.setItem('ehr_admin_token', data.token);
+            localStorage.setItem('ehr_user_role', data.role || 'admin');
+            localStorage.setItem('ehr_user_name', data.name || data.username || 'User');
+            localStorage.setItem('ehr_user_id', data.userId || '');
             loginScreen.style.display = 'none';
           } else {
             errorDiv.style.display = 'block';
