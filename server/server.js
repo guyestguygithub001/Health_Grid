@@ -94,12 +94,15 @@ function _readFile() {
   if (memoryDb) return memoryDb;
   try {
     const data = JSON.parse(fs.readFileSync(DATA_FILE, "utf8"));
-    if (!data.staff) { data.staff = []; fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf8"); }
+    if (!data.staff) { 
+      data.staff = []; 
+      try { fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf8"); } catch(e) {} 
+    }
     return data;
   } catch (_) {
     const seed = _loadSeed();
     memoryDb = seed;
-    fs.writeFileSync(DATA_FILE, JSON.stringify(seed, null, 2), "utf8");
+    try { fs.writeFileSync(DATA_FILE, JSON.stringify(seed, null, 2), "utf8"); } catch(e) {}
     return seed;
   }
 }
