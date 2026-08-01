@@ -1306,6 +1306,20 @@ async function handlePatientApi(req, res, url) {
     return;
   }
   
+  
+  if (req.method === "GET" && pathname === "/api/v2/permissions") {
+    sendJson(res, 200, data.permissions || {});
+    return;
+  }
+  if (req.method === "POST" && pathname === "/api/v2/admin/permissions") {
+    const body = await collectBody(req);
+    // Overwrite the permissions matrix
+    data.permissions = body;
+    queueDatabaseWrite(data);
+    sendJson(res, 200, { success: true });
+    return;
+  }
+
   if (req.method === "POST" && url.pathname === "/api/v2/auth/reset") {
     const body = await collectBody(req);
     const { username, otp, newPassword } = body;
