@@ -135,7 +135,15 @@
         <div class="nav-text" style="color: #0284c7; font-weight: 800; font-size: 24px; letter-spacing: -1px; margin-left: 0;">EMR Unit</div>
       </div>
       
-      <div style="display: flex; flex-direction: column; width: 100%;">
+      <div class="nav-text" style="width: 100%; margin-top: 16px; margin-bottom: 24px; border-bottom: 1px solid rgb(229, 231, 235); padding: 0px 12px 16px;">
+            <p style="margin: 0 0 8px; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Active Context</p>
+            <div id="activeRoleDisplay" style="width: 100%; padding: 8px 12px; border: 1px solid #e2e8f0; border-radius: 8px; background: #f8fafc; color: #0f172a; font-weight: 700; font-size: 13px; margin-bottom: 8px;">
+                Role Loading...
+            </div>
+            <button id="emrSignupBtn" onclick="document.getElementById('emrSignupModal').style.display='flex'" style="width: 100%; padding: 8px 12px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);">
+                Register Staff
+            </button>
+        </div><div style="display: flex; flex-direction: column; width: 100%;">
         <button class="nav-btn active" onclick="switchEmrView('omniBar')" title="Search / Home"><span>🔍</span><span class="nav-text">Omni-Bar / Search</span></button>
         <button class="nav-btn" onclick="switchEmrView('triageView')" data-target-view="triageView" title="Triage &amp; Vitals"><span>🩺</span><span class="nav-text">Triage &amp; Vitals</span></button>
         <button class="nav-btn" onclick="switchEmrView('clinicsDashboardView')" data-target-view="clinicsDashboardView" title="Outpatient Clinics"><span>🏥</span><span class="nav-text">Outpatient Clinics</span></button>
@@ -2629,7 +2637,720 @@
           html = `<div style="padding: 12px; color: #6b7280; font-size: 14px;">No patients found. Use "+ New Patient" below.</div>`;
         }
         document.getElementById("searchResults").innerHTML = html;
-              } catch (err) {
+      } catch (err) {
+        console.error("Search error", err);
+      }
+    }
+
+    function toggleQuickRegister() {
+      document.getElementById("quickRegisterForm").classList.toggle("hidden");
+    }
+
+    async function submitQuickRegister() {
+      const name = document.getElementById("regName").value;
+      const dob = document.getElementById("regDob").value;
+      const gender = document.getElementById("regGender").value;
+      const phone = document.getElementById("regPhone").value;
+      
+      if (!name || !dob) { alert("Name and DOB required"); return; }
+      
+      const token = sessionStorage.getItem("ehr_creds");
+      try {
+        const res = await fetch(`/api/v2/mpi/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          body: JSON.stringify({ name, dob, gender, phone })
+        });
+        const data = await res.json();
+        if (data.success) {
+          loadPatient(data.patient);
+        }
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // ----------------------------------------------------
+    // Node K: Load Context & Workspace
+    // ----------------------------------------------------
+    async function loadPatient(patient) {
+      window.EMRContext.patient = patient;
+      switchEmrView('workspace');
+      
+      document.getElementById("patName").textContent = patient.name;
+      document.getElementById("patDetails").textContent = `${patient.id} | DOB: ${patient.dob || 'Unknown'} | ${patient.gender || ''}`;
+      
+      document.getElementById("composer").innerHTML = "";
+      document.getElementById("aiChips").innerHTML = "";
+      
+      const draft = localStorage.getItem(`emr_draft_${patient.id}`);
+      if (draft) {
+        if(confirm("Restore unsaved draft?")) {
+          document.getElementById("composer").innerText = draft;
+        } else {
+          localStorage.removeItem(`emr_draft_${patient.id}`);
+        }
+      }
+      
+      document.getElementById("composer").focus();
+      
+      // Node N: Auto-save scratchpad
+      if(autoSaveTimer) clearInterval(autoSaveTimer);
+      autoSaveTimer = setInterval(() => {
+        const text = document.getElementById("composer").innerText;
+        if(text.trim()) localStorage.setItem(`emr_draft_${patient.id}`, text);
+      }, 3000);
+      
+      // Setup Composer NLP Listener
+      document.getElementById("composer").addEventListener("input", () => {
+        clearTimeout(nlpTimer);
+        nlpTimer = setTimeout(triggerNLPEngine, 2000);
+      });
+      
+      await loadTimeline(patient.id);
+    }
+    
+    function exitEncounter() {
+      if(!confirm("Are you sure you want to cancel this encounter? Unsaved notes will be lost.")) return;
+      if(autoSaveTimer) clearInterval(autoSaveTimer);
+      window.EMRContext.patient = null;
+      document.getElementById("mpiSearch").value = "";
+      document.getElementById("searchResults").innerHTML = "";
+      document.getElementById("quickRegisterForm").classList.add("hidden");
+      showOmniBar();
+    }
+
+    async function loadTimeline(patientId) {
+      const token = sessionStorage.getItem("ehr_creds");
+      try {
+        const res = await fetch(`/api/v2/emr/encounters?patientId=${patientId}`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const data = await res.json();
+        const feed = document.getElementById("timelineFeed");
+        if (data.encounters && data.encounters.length > 0) {
+          feed.innerHTML = data.encounters.map(e => `
+            <div class="timeline-item" style="${e.type === 'Nursing Note' ? 'border-left-color: #0ea5e9;' : ''}">
+              <div class="timeline-date">${new Date(e.date).toLocaleDateString()} - ${e.id}</div>
+              ${e.type === 'Nursing Note' 
+                ? `<div style="display: inline-block; background: #e0f2fe; color: #0284c7; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; margin-bottom: 8px; letter-spacing: 0.05em; border: 1px solid #bae6fd;">🩺 NURSING LOG</div>`
+                : `<div class="timeline-dx">${e.icd11 ? `ICD-11: ${e.icd11}` : `Observation: ${e.icd11Display || 'N/A'}`}</div>`
+              }
+              <div style="font-size: 13px; color: #4b5563; margin-top:8px; line-height: 1.5;">
+                ${e.type === 'Nursing Note' ? (
+                  (e.vitals ? `<span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:600; color:#334155; margin-right:8px; font-size: 12px;">❤️ HR: ${e.vitals.heartRate}</span><span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:600; color:#334155; font-size: 12px; margin-bottom: 8px; display:inline-block;">🩸 BP: ${e.vitals.bloodPressureSystolic}/${e.vitals.bloodPressureDiastolic}</span><br>` : '') +
+                  (e.fluid ? `<b>Fluid Administered:</b> ${e.fluid}<br>` : '') +
+                  (e.text || '')
+                ) : (e.text || 'No clinical notes recorded.')}
+              </div>
+            </div>
+          `).join('');
+        } else {
+          feed.innerHTML = `<p style="font-size:13px; color:#9ca3af;">No historical encounters.</p>`;
+        }
+      } catch(err) {}
+    }
+
+    // ----------------------------------------------------
+    // Node O: Speech to Text (Web Speech API)
+    // ----------------------------------------------------
+    let recognition;
+    if ('webkitSpeechRecognition' in window) {
+      recognition = new webkitSpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      
+      recognition.onresult = function(event) {
+        let final_transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            final_transcript += event.results[i][0].transcript + ' ';
+          }
+        }
+        if (final_transcript) {
+          const comp = document.getElementById("composer");
+          comp.innerText += final_transcript;
+          // trigger NLP manually
+          clearTimeout(nlpTimer);
+          nlpTimer = setTimeout(triggerNLPEngine, 2000);
+        }
+      };
+    }
+    
+    document.getElementById("composerMicBtn").addEventListener("click", function() {
+      if(!recognition) return alert("Speech API not supported");
+      if(this.classList.contains("active")) {
+        recognition.stop();
+        this.classList.remove("active");
+        this.innerHTML = "🎤 Dictate";
+      } else {
+        recognition.start();
+        this.classList.add("active");
+        this.innerHTML = "🛑 Stop";
+      }
+    });
+
+    // ----------------------------------------------------
+    // Node P & Q: NLP Highlighting & AI Chips
+    // ----------------------------------------------------
+    async function triggerNLPEngine() {
+      const comp = document.getElementById("composer");
+      const text = comp.innerText;
+      if(!text.trim()) return;
+      
+      // Node P: Lightweight NLP highlighting overlay (simplified for non-destructive DOM updates without messing up caret)
+      // Because modifying innerHTML directly destroys the user's cursor position in contenteditable,
+      // true robust highlighting requires complex Range mapping. 
+      // For this isolated implementation, we'll focus on the AI chips which satisfy Nodes Q-U.
+      
+      const token = sessionStorage.getItem("ehr_creds");
+      try {
+        const res = await fetch(`/api/v2/emr/ai/suggest`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          body: JSON.stringify({ text })
+        });
+        const data = await res.json();
+        
+        const chipContainer = document.getElementById("aiChips");
+        chipContainer.innerHTML = "";
+        if(data.chips) {
+          data.chips.forEach(chip => {
+            const btn = document.createElement("button");
+            btn.className = "chip";
+            btn.textContent = chip;
+            btn.onclick = () => appendChipToPlan(chip);
+            chipContainer.appendChild(btn);
+          });
+        }
+      } catch(err) {}
+    }
+    
+    function appendChipToPlan(chipText) {
+      const comp = document.getElementById("composer");
+      let text = comp.innerText;
+      if(text.includes("Plan:")) {
+        comp.innerText = text.replace("Plan:", `Plan:
+- ${chipText}`);
+      } else {
+        comp.innerText = text + `
+
+Plan:
+- ${chipText}`;
+      }
+      triggerNLPEngine(); // refresh chips
+    }
+
+    // ----------------------------------------------------
+    // Node W-AE: Sign & Close Encounter
+    // ----------------------------------------------------
+    function saveDraft() {
+      const patientId = window.EMRContext.patient.id;
+      const text = document.getElementById("composer").innerText;
+      localStorage.setItem(`emr_draft_${patientId}`, text);
+      showToast("Draft saved.");
+    }
+    
+    let pendingEncounterPayload = null;
+    let pendingSubstitute = null;
+    
+    async function signAndClose() {
+      const text = document.getElementById("composer").innerText;
+      if(!text.trim()) return alert("Encounter is empty.");
+      
+      const patientId = window.EMRContext.patient.id;
+      
+      // Parse Plan for drugs (Mock regex for "Rx: drugname")
+      const rxMatches = [...text.matchAll(/Rx:\s*([A-Za-z0-9\s-]+)/g)];
+      const prescriptions = rxMatches.map(m => m[1].trim());
+      
+      const token = sessionStorage.getItem("ehr_creds");
+      
+      // Node X: Isolated Inventory Check
+      if(prescriptions.length > 0) {
+        try {
+          // Check the first drug for mock purposes
+          const res = await fetch(`/api/v2/emr/inventory/check?drug=${encodeURIComponent(prescriptions[0])}`, {
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          const data = await res.json();
+          if(!res.ok && data.substitute) {
+            // Node Y -> Z: Show Modal
+            pendingEncounterPayload = { text, patientId, prescriptions };
+            pendingSubstitute = { original: prescriptions[0], substitute: data.substitute };
+            document.getElementById("oosMessage").innerText = `"${prescriptions[0]}" is out of stock. Suggested substitute: ${data.substitute}.`;
+            document.getElementById("oosModal").style.display = "flex";
+            return; // Halt flow
+          }
+        } catch(err) { console.error(err); }
+      }
+      
+      // Proceed to commit
+      const admitWard = document.getElementById('admitWardSelect').value;
+      if (admitWard) {
+          // Find a vacant bed in the selected ward
+          try {
+              const bRes = await fetch('/api/v2/beds');
+              const beds = await bRes.json();
+              const vacantBed = beds.find(b => b.ward === admitWard && b.status === 'Vacant');
+              if (vacantBed) {
+                  await fetch('/api/v2/beds/admit', {
+                      method: 'POST',
+                      headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+                      body: JSON.stringify({ patientId: patientId, bedId: vacantBed.id, diagnosis: "Automated Admission from Consult" })
+                  });
+              } else {
+                  alert(`No vacant beds available in ${admitWard}!`);
+              }
+          } catch(e) { console.error("Admission failed", e); }
+      }
+      
+      await commitEncounter({ text, patientId, prescriptions });
+    }
+    
+    function closeOosModal() {
+      document.getElementById("oosModal").style.display = "none";
+      pendingEncounterPayload = null;
+      pendingSubstitute = null;
+    }
+    
+    async function acceptSubstitute() {
+      document.getElementById("oosModal").style.display = "none";
+      if(pendingEncounterPayload && pendingSubstitute) {
+        // Swap it in text
+        let newText = pendingEncounterPayload.text.replace(new RegExp(`Rx:\\s*${pendingSubstitute.original}`, "g"), `Rx: ${pendingSubstitute.substitute}`);
+        document.getElementById("composer").innerText = newText;
+        pendingEncounterPayload.text = newText;
+        pendingEncounterPayload.prescriptions = [pendingSubstitute.substitute];
+        
+        await commitEncounter(pendingEncounterPayload);
+      }
+    }
+    
+    async function commitEncounter(payload) {
+      const token = sessionStorage.getItem("ehr_creds");
+      try {
+        const res = await fetch(`/api/v2/emr/encounters/finalize`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if(data.success) {
+          // Reset
+          localStorage.removeItem(`emr_draft_${payload.patientId}`);
+          showToast("Encounter signed & closed successfully!");
+          setTimeout(() => {
+            window.EMRContext.patient = null;
+            if(autoSaveTimer) clearInterval(autoSaveTimer);
+            document.getElementById("mpiSearch").value = "";
+            document.getElementById("searchResults").innerHTML = "";
+            switchEmrView('postEncounterView');
+          }, 1500);
+        } else {
+          alert("Commit failed: " + data.error);
+        }
+      } catch(err) {
+        alert("Commit error");
+      }
+    }
+    
+    // Warn before exit if dirty form
+    window.addEventListener("beforeunload", (e) => {
+      if (!document.getElementById("workspace").classList.contains("hidden")) {
+        const text = document.getElementById("composer").innerText;
+        if (text.trim().length > 0) {
+          e.preventDefault();
+          e.returnValue = "";
+        }
+      }
+    });
+    
+    function showToast(msg) {
+      const toast = document.getElementById("toast");
+      toast.innerText = msg;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 3000);
+    }
+  </script>
+
+    <!-- UNIVERSAL WALK-IN MODAL -->
+    <div id="universalWalkInModal" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(2px);">
+        <div style="background: white; border-radius: 16px; width: 500px; max-width: 90%; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+            <div id="walkInHeader" style="background: #10b981; padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center;">
+                <h3 id="walkInTitle" style="margin: 0; font-size: 20px; font-weight: 800;">Pharmacy Walk-In Order</h3>
+                <button onclick="closeWalkInModal()" style="background: transparent; border: none; color: white; font-size: 24px; cursor: pointer;">×</button>
+            </div>
+            <div style="padding: 24px;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px;">Patient Name / ID</label>
+                    <input type="text" id="walkInPatientName" placeholder="e.g. Daobo Miapmuk or PL-001" style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 15px; outline: none; transition: all 0.2s;">
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px;">Select Items</label>
+                    <div id="walkInCatalog" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; padding: 4px;">
+                        <!-- Checkboxes injected by JS based on department -->
+                    </div>
+                </div>
+
+                <button onclick="dispatchWalkInOrder()" id="dispatchBtn" style="width: 100%; padding: 16px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 16px; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">Generate Slip &amp; Dispatch</button>
+            </div>
+        </div>
+    </div>
+
+
+
+            <!-- Slide-Out Nurses Workstation -->
+            <div id="nursingBackdrop" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.3s;"></div>
+            <div id="nursingPanel" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95); opacity: 0; pointer-events: none; z-index: 1000; width: 1000px; max-width: 95vw; height: 85vh; background: white; border-radius: 16px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); display: flex; flex-direction: column; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); overflow: hidden;">
+                
+                <!-- Workstation Header -->
+                <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; position: relative; background: #0f172a;">
+                    <button onclick="closeNursingPanel()" style="position: absolute; right: 16px; top: 16px; background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; transition: color 0.2s;">✕</button>
+                    <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                        <span id="np-bed" style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 800; letter-spacing: 0.05em;">BED --</span>
+                        <span id="np-mpi" style="background: #334155; color: #cbd5e1; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 700;">ID: --</span>
+                    </div>
+                    <h3 id="np-name" style="font-size: 24px; font-weight: 800; color: white; margin: 0 0 4px 0;">--</h3>
+                    <p id="np-dx" style="color: #94a3b8; font-size: 14px; margin: 0; font-weight: 500;">--</p>
+                </div>
+
+                <!-- Workstation Tabs -->
+                <div style="display: flex; background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 0 12px;">
+                    <button onclick="switchWorkstationTab('vitals')" id="tab-vitals" class="ws-tab active" style="padding: 16px 12px; border: none; background: transparent; font-weight: 700; font-size: 13px; color: #3b82f6; border-bottom: 3px solid #3b82f6; cursor: pointer;">Overview &amp; Vitals</button>
+                    <button onclick="switchWorkstationTab('fluids')" id="tab-fluids" class="ws-tab" style="padding: 16px 12px; border: none; background: transparent; font-weight: 600; font-size: 13px; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">Meds &amp; Fluids</button>
+                    <button onclick="switchWorkstationTab('discharge')" id="tab-discharge" class="ws-tab" style="padding: 16px 12px; border: none; background: transparent; font-weight: 600; font-size: 13px; color: #64748b; border-bottom: 3px solid transparent; cursor: pointer;">Discharge</button>
+                </div>
+
+                <div style="flex: 1; overflow-y: auto; background: white; position: relative;">
+                    
+                    <!-- TAB 1: VITALS & DASHBOARD -->
+                    <div id="content-vitals" class="ws-content" style="padding: 0; display: block; height: 100%;">
+                        <div style="display: flex; height: 100%;">
+                            
+                            <!-- Full Triage Form -->
+                            <div style="flex: 0 0 30%; max-width: 450px; min-width: 350px; background: #f8fafc; border-right: 1px solid #e2e8f0; padding: 24px; overflow-y: auto;">
+                                <h4 style="font-size: 12px; font-weight: 800; color: #0ea5e9; text-transform: uppercase; margin-bottom: 24px; letter-spacing: 0.05em;">Triage Vitals Form</h4>
+                                
+                                <div style="margin-bottom: 16px;">
+                                    <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Blood Pressure (mmHg)</label>
+                                    <input type="text" id="np-bp-input" placeholder="e.g. 120/80" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px; font-weight: 600;">
+                                </div>
+                                <div style="margin-bottom: 16px;">
+                                    <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Temperature (°C)</label>
+                                    <input type="number" id="np-temp-input" placeholder="e.g. 36.5" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px; font-weight: 600;">
+                                </div>
+                                <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                                    <div style="flex: 1;">
+                                        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Weight (kg)</label>
+                                        <input type="number" id="np-weight-input" placeholder="70" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px; font-weight: 600;">
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Pulse (bpm)</label>
+                                        <input type="number" id="np-hr-input" placeholder="72" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; font-size: 14px; font-weight: 600;">
+                                    </div>
+                                </div>
+                                <button onclick="saveNursingNote('vitals')" style="width: 100%; padding: 16px; background: #0f172a; color: white; border: none; border-radius: 8px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2); transition: transform 0.2s;">Log Vitals to Patient Dashboard</button>
+                                
+                                <div style="border-top: 2px dashed #cbd5e1; margin-top: 32px; padding-top: 24px;">
+                                    <h4 style="font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 12px;">Add Observation E-Note</h4>
+                                    <button onclick="saveNursingNote('text')" style="width: 100%; padding: 12px; background: white; color: #0ea5e9; border: 2px solid #0ea5e9; border-radius: 8px; font-weight: 800; cursor: pointer;">+ Write Nursing Note</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Patient Dashboard History -->
+                            <div style="flex: 1; padding: 24px; overflow-y: auto; background: white;">
+                                <div style="background: #fdfce8; border-left: 4px solid #facc15; padding: 16px; border-radius: 0 8px 8px 0; margin-bottom: 24px;">
+                                    <h4 style="font-size: 11px; font-weight: 800; color: #a16207; text-transform: uppercase; margin-bottom: 8px;">Admitting Physician E-Notes</h4>
+                                    <p id="np-enotes" style="font-size: 14px; color: #422006; line-height: 1.5; margin: 0;">--</p>
+                                </div>
+                                
+                                <h4 style="font-size: 14px; font-weight: 800; color: #0f172a; margin-bottom: 16px;">Universal Patient Timeline</h4>
+                                <div id="np-timeline" style="border-left: 2px solid #e2e8f0; padding-left: 20px; margin-left: 8px;">
+                                    <!-- Populated via JS -->
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: MEDS & FLUIDS -->
+                    <div id="content-fluids" class="ws-content" style="padding: 24px; display: none;">
+                        <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Active Prescriptions</h4>
+                        <div id="np-rx-list" style="margin-bottom: 32px;">
+                            <p style="font-size: 14px; color: #64748b;">No active prescriptions found.</p>
+                        </div>
+
+                        <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Log Fluid Administration</h4>
+                        <div style="background: #f8fafc; padding: 16px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                            <select id="np-fluid-select" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; margin-bottom: 12px; outline: none; font-size: 14px; color: #0f172a;">
+                                <option>0.9% Normal Saline (500ml)</option>
+                                <option>5% Dextrose (500ml)</option>
+                                <option>Ringer's Lactate (500ml)</option>
+                            </select>
+                            <button onclick="saveNursingNote('fluids')" style="width: 100%; padding: 12px; background: #8b5cf6; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2);">Log Fluid Administration</button>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: DISCHARGE -->
+                    <div id="content-discharge" class="ws-content" style="padding: 24px; display: none; text-align: center;">
+                        <div style="background: #fff1f2; border: 1px solid #fecaca; padding: 24px; border-radius: 12px; margin-top: 24px;">
+                            <h4 style="font-size: 16px; font-weight: 800; color: #991b1b; margin-bottom: 8px;">Official Discharge</h4>
+                            <p style="font-size: 14px; color: #ef4444; margin-bottom: 24px; line-height: 1.5;">Ensure the attending physician has provided final verdict before discharging the patient from the ward.</p>
+                            <input type="hidden" id="currentAdmissionId" value="">
+                            <button onclick="dischargePatient()" style="width: 100%; padding: 16px; background: #ef4444; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); transition: all 0.2s;">Execute Discharge</button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+  <!-- Global Error Handler -->
+  <style>
+    #global-error-toast {
+      position: fixed;
+      bottom: -100px;
+      right: 20px;
+      background: #ef4444;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-family: system-ui, sans-serif;
+      font-size: 14px;
+      z-index: 999999;
+      transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      max-width: 400px;
+    }
+    #global-error-toast.show {
+      bottom: 20px;
+    }
+    #global-error-toast .close-btn {
+      margin-left: auto;
+      cursor: pointer;
+      font-weight: bold;
+      opacity: 0.8;
+    }
+    #global-error-toast .close-btn:hover {
+      opacity: 1;
+    }
+  </style>
+  <div id="global-error-toast">
+    <span>⚠️</span>
+    <span id="global-error-msg">An unexpected error occurred.</span>
+    <span class="close-btn" onclick="document.getElementById('global-error-toast').classList.remove('show')">✕</span>
+  </div>
+  <script>
+    window.showGlobalError = function(msg) {
+      const toast = document.getElementById('global-error-toast');
+      const msgEl = document.getElementById('global-error-msg');
+      if(toast && msgEl) {
+        msgEl.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 5000);
+      } else {
+        console.error("Global error:", msg);
+      }
+    };
+    window.addEventListener('error', function(event) {
+      window.showGlobalError(event.message || 'A script error occurred.');
+    });
+    window.addEventListener('unhandledrejection', function(event) {
+      window.showGlobalError(event.reason ? (event.reason.message || event.reason) : 'An asynchronous error occurred.');
+    });
+    
+    // Intercept fetch to catch network errors globally
+    const originalFetch = window.fetch;
+    window.fetch = async function(...args) {
+      try {
+        const response = await originalFetch.apply(this, args);
+        if(!response.ok && response.status >= 500) {
+           window.showGlobalError(`Server Error: ${response.status} ${response.statusText}`);
+        }
+        return response;
+      } catch (err) {
+        window.showGlobalError('Network Error: Unable to reach the server.');
+        throw err;
+      }
+    };
+  </script>
+  <!-- End Global Error Handler -->
+
+
+  <!-- Clinical Staff Registration Modal (EMR) -->
+  <div id="emrSignupModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(15,23,42,0.8); z-index:99999; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
+    <div style="background:white; padding:32px; border-radius:16px; width:400px; max-width:90%; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04); position:relative;">
+      <span onclick="document.getElementById('emrSignupModal').style.display='none'" style="position:absolute; top:16px; right:16px; font-size:24px; color:#94a3b8; cursor:pointer; font-weight:bold;">×</span>
+      <h3 style="margin:0 0 8px; font-size:24px; font-weight:800; color:#1e293b; letter-spacing:-0.02em;">Register Clinical Staff</h3>
+      <p style="margin:0 0 24px; color:#64748b; font-size:14px;">Create a new staff identity and assign clinical access levels.</p>
+      
+      <form id="emrSignupForm">
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Full Name</label>
+          <input type="text" id="emrSignupName" required="" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; font-size:15px; outline:none;" placeholder="Dr. John Doe">
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Username</label>
+          <input type="text" id="emrSignupUser" required="" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; font-size:15px; outline:none;" placeholder="johndoe">
+        </div>
+        <div style="margin-bottom:16px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Password</label>
+          <input type="password" id="emrSignupPass" required="" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; font-size:15px; outline:none;" placeholder="••••••••">
+        </div>
+        <div style="margin-bottom:24px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:#475569; margin-bottom:6px; text-transform:uppercase;">Clinical Role</label>
+          <select id="emrSignupRole" required="" style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #cbd5e1; font-size:15px; outline:none; background:white;">
+            <option value="physician">Physician (Clerking / Rx)</option>
+            <option value="nurse">Nurse (Triage / Wards)</option>
+            <option value="pharmacist">Pharmacist</option>
+            <option value="admin">System Admin</option>
+          </select>
+        </div>
+        <div id="emrSignupError" style="display:none; margin-bottom:16px; padding:10px; background:#fef2f2; border:1px solid #fecaca; color:#ef4444; border-radius:8px; font-size:13px; font-weight:500;"></div>
+        <button type="submit" style="width:100%; padding:12px; background:#2563eb; color:white; border:none; border-radius:8px; font-weight:700; font-size:15px; cursor:pointer; box-shadow:0 4px 6px -1px rgba(37,99,235,0.2);">Register Staff Member</button>
+      </form>
+    </div>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById('emrSignupForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const user = document.getElementById('emrSignupUser').value;
+        const pass = document.getElementById('emrSignupPass').value;
+        const name = document.getElementById('emrSignupName').value;
+        const role = document.getElementById('emrSignupRole').value;
+        const errorDiv = document.getElementById('emrSignupError');
+        errorDiv.style.display = 'none';
+        
+        try {
+          const res = await fetch('/api/v2/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: user, password: pass, name: name, role: role })
+          });
+          
+          if (res.ok) {
+            alert('Staff registered successfully!');
+            document.getElementById('emrSignupModal').style.display = 'none';
+            document.getElementById('emrSignupForm').reset();
+          } else {
+            const data = await res.json();
+            errorDiv.style.display = 'block';
+            errorDiv.innerText = data.error || 'Registration failed.';
+          }
+        } catch (err) {
+          errorDiv.style.display = 'block';
+          errorDiv.innerText = 'Server unreachable.';
+        }
+      });
+    });
+  </script>
+
+
+
+</div>
+
+<script>
+  // Auth and RBAC Logic
+  let globalPermissions = {};
+  
+  async function loadPermissions() {
+    try {
+      const res = await fetch('/api/v2/permissions');
+      globalPermissions = await res.json();
+    } catch(e) { console.error("Failed to load permissions", e); }
+  }
+  loadPermissions();
+
+  function applyRbac(role) {
+    let allowedViews = globalPermissions[role] || [];
+    if (allowedViews.includes("all") || role === 'admin' || role === 'super_admin') {
+      allowedViews = ['omniBar', 'triageView', 'clinicsDashboardView', 'wardsView', 'pharmacyView', 'labView', 'radView', 'billingView', 'recordsMainView', 'postEncounterView', 'workspace'];
+    }
+    
+    // Hide all sidebar buttons first
+    document.querySelectorAll('#emrSidebar .nav-btn').forEach(btn => {
+      // Find what view this button switches to by looking at its onclick or data-target-view
+      const onclickAttr = btn.getAttribute('onclick') || '';
+      let targetViewMatch = onclickAttr.match(/switchEmrView\('([^']+)'\)/);
+      if (targetViewMatch) {
+        const viewId = targetViewMatch[1];
+        if (!allowedViews.includes(viewId)) {
+          btn.style.display = 'none';
+        } else {
+          btn.style.display = 'flex';
+        }
+      } else {
+         // Things like "Exit to Admin" or others - keep them visible
+         // Ensure they are visible if they were accidentally hidden
+      }
+    });
+
+    // Auto-navigate to the first allowed view (usually omniBar)
+    if (allowedViews.length > 0) {
+      switchEmrView(allowedViews[0]);
+    }
+  }
+
+  function checkSession() {
+    const token = sessionStorage.getItem('staff_token');
+    const role = sessionStorage.getItem('staff_role');
+    const name = sessionStorage.getItem('staff_name');
+    
+    if (token && role) {
+      document.getElementById('emrAuthGateway').style.display = 'none';
+      document.getElementById('emrMainApp').style.display = 'flex';
+      
+      const roleNames = {
+        'admin': 'System Admin (Full Access)',
+        'physician': 'Physician (Clerking / Rx)',
+        'nurse': 'Nurse (Triage / Wards)',
+        'pharmacist': 'Pharmacist'
+      };
+      
+      const roleText = (name ? name + " - " : "") + (roleNames[role] || role);
+      document.getElementById('activeRoleDisplay').innerText = roleText;
+      
+      applyRbac(role);
+    } else {
+      document.getElementById('emrAuthGateway').style.display = 'flex';
+      document.getElementById('emrMainApp').style.display = 'none';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    checkSession();
+    
+    const loginForm = document.getElementById('staffLoginForm');
+    if (loginForm) {
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const u = document.getElementById('loginUser').value;
+        const p = document.getElementById('loginPass').value;
+        const errDiv = document.getElementById('loginError');
+        errDiv.style.display = 'none';
+        
+        try {
+          const res = await fetch('/api/v2/auth/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({username: u, password: p})
+          });
+          const data = await res.json();
+          if (res.ok) {
+            sessionStorage.setItem('staff_token', data.token);
+            sessionStorage.setItem('staff_role', data.user.role);
+            sessionStorage.setItem('staff_name', data.user.name);
+            checkSession();
+          } else {
+            errDiv.style.display = 'block';
+            errDiv.innerText = data.error || 'Login failed.';
+          }
+        } catch (err) {
           console.warn("API unreachable. Falling back to static Vercel preview.");
           if (u === 'admin' && (p === 'admin123' || p === 'secure_admin_password')) {
             sessionStorage.setItem('staff_token', 'vercel-mock-token-123');
