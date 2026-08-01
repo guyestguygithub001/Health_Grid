@@ -1,6 +1,6 @@
 /**
  * SmartClinic Enterprise Module
- * Injected into the existing Plateau EHR hybrid server
+ * Injected into the existing Regional EHR hybrid server
  * Namespace: /api/v1/* — no collision with existing /api/*
  * All routes, RBAC, blockchain integrity, telehealth, theatre, supply chain
  */
@@ -294,7 +294,7 @@ function buildFhirPatient(patient) {
     id: patient.id,
     meta: { versionId: "1", lastUpdated: patient.lastVisit || new Date().toISOString() },
     identifier: [
-      { system: "urn:plateau-ehr:patient-id", value: patient.id },
+      { system: "urn:health-grid-ehr:patient-id", value: patient.id },
       patient.nin ? { system: "urn:nigeria:nin", value: patient.nin } : null,
       patient.nemsasId ? { system: "urn:nigeria:nemsas", value: patient.nemsasId } : null
     ].filter(Boolean),
@@ -306,10 +306,10 @@ function buildFhirPatient(patient) {
     address: [{ use: "home", text: patient.community || patient.address || "" }],
     contact: patient.nextOfKin ? [{ name: { text: patient.nextOfKin }, telecom: [{ system: "phone", value: patient.emergencyPhone || "" }] }] : [],
     extension: [
-      { url: "urn:plateau-ehr:blood-group",   valueString: patient.bloodGroup || "" },
-      { url: "urn:plateau-ehr:genotype",       valueString: patient.genotype || "" },
-      { url: "urn:plateau-ehr:insurance",      valueString: patient.insurance || "Private Pay" },
-      { url: "urn:plateau-ehr:hiv-status",     valueString: patient.hivStatus || "Unknown" }
+      { url: "urn:health-grid-ehr:blood-group",   valueString: patient.bloodGroup || "" },
+      { url: "urn:health-grid-ehr:genotype",       valueString: patient.genotype || "" },
+      { url: "urn:health-grid-ehr:insurance",      valueString: patient.insurance || "Private Pay" },
+      { url: "urn:health-grid-ehr:hiv-status",     valueString: patient.hivStatus || "Unknown" }
     ]
   };
 }

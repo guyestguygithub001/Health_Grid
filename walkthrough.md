@@ -1,12 +1,12 @@
 # EHR Walkthrough and Journey
 
-Welcome to the Global Health Grid! This document provides a plain-English walkthrough of the recent architectural leaps and features we've built to make this system robust, secure, and beautiful.
+Welcome to the Health Grid! This document provides a plain-English walkthrough of the recent architectural leaps and features we've built to make this system robust, secure, and beautiful.
 
 ## 1. Enterprise Docker Architecture
 We upgraded the backend from a simple Node script into a full-scale Enterprise architecture running on **Docker Compose**.
 - **The API Container**: Handles all traffic efficiently and securely.
-- **The Redis Cache**: Added a blazing-fast memory cache (`plateau-ehr-redis`) to manage active user sessions without slowing down the database.
-- **The Background Worker**: A dedicated BullMQ worker (`plateau-ehr-worker`) now silently crunches heavy tasks in the background—like processing the Dunning Revenue Cycle and organizing billing retries—so the frontend remains lightning fast for doctors.
+- **The Redis Cache**: Added a blazing-fast memory cache (`health-grid-ehr-redis`) to manage active user sessions without slowing down the database.
+- **The Background Worker**: A dedicated BullMQ worker (`health-grid-ehr-worker`) now silently crunches heavy tasks in the background—like processing the Dunning Revenue Cycle and organizing billing retries—so the frontend remains lightning fast for doctors.
 
 ## 2. Omni-Shield AI Security
 To prevent unauthorized users from hijacking or hacking the AI modules, we introduced the **Omni-Shield Constitution**. 

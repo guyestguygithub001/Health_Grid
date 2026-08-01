@@ -1,5 +1,5 @@
 // ============================================================
-//  PlateauCare EHR — Application JavaScript (Complete)
+//  Health Grid EHR — Application JavaScript (Complete)
 // ============================================================
 
 // ── Login / Session Controller ─────────────────────────────
@@ -198,7 +198,7 @@ function switchView(id) {
   document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.view === id));
   const viewTitleEl = document.querySelector("#viewTitle");
   if (viewTitleEl) {
-    viewTitleEl.textContent = titles[id] || "PlateauCare EHR";
+    viewTitleEl.textContent = titles[id] || "Health Grid EHR";
   }
 
   // Scroll view content container back to the top
@@ -1742,7 +1742,7 @@ const unitDefs = {
         <label>Insurance Scheme
           <select name="insurance" required>
             <option value="">— Select scheme —</option>
-            <option value="PLASCHEMA">PLASCHEMA — Plateau State Health Insurance</option>
+            <option value="PLASCHEMA">PLASCHEMA — The State Health Insurance</option>
             <option value="NHIA">NHIA — National Health Insurance Authority</option>
             <option value="Basic Health Care Provision Fund">BHCPF — Basic Health Care Provision Fund</option>
             <option value="NHIA">NHIS — National Health Insurance Scheme (Legacy)</option>
@@ -1791,7 +1791,7 @@ const unitDefs = {
               <option>Federal Medical Centre (FMC) Wase</option>
               <option>University of Jos Teaching Hospital (UniJOS)</option>
             </optgroup>
-            <optgroup label="General Hospitals — Plateau State">
+            <optgroup label="General Hospitals — The State">
               <option>General Hospital Shendam</option>
               <option>General Hospital Mangu</option>
               <option>General Hospital Pankshin</option>
@@ -3601,7 +3601,7 @@ function searchLiveHospitals() {
   const list = [
     { name: "National Hospital Abuja", loc: "Abuja, FCT", beds: 14, status: "Accepting" },
     { name: "Lagos University Teaching Hospital (LUTH)", loc: "Idi-Araba, Lagos", beds: 4, status: "Accepting" },
-    { name: "Jos University Teaching Hospital (JUTH)", loc: "Jos, Plateau", beds: 0, status: "Full" },
+    { name: "Jos University Teaching Hospital (JUTH)", loc: "Jos", beds: 0, status: "Full" },
     { name: "Federal Medical Centre Asaba", loc: "Asaba, Delta", beds: 22, status: "Accepting" },
     { name: "Aminu Kano Teaching Hospital (AKTH)", loc: "Kano", beds: 8, status: "Accepting" }
   ];

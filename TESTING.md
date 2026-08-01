@@ -1,18 +1,18 @@
-# Testing PlateauCare EHR
+# Testing Health Grid EHR
 
 ## Start The Server
 
 PowerShell:
 
 ```powershell
-cd "C:\Users\HP\Documents\Web E - Profile for the Boys\plateau-ehr"
+cd "C:\Users\HP\Documents\Web E - Profile for the Boys\health-grid-ehr"
 powershell -ExecutionPolicy Bypass -File .\start-server.ps1
 ```
 
 Command Prompt:
 
 ```bat
-cd /d "C:\Users\HP\Documents\Web E - Profile for the Boys\plateau-ehr"
+cd /d "C:\Users\HP\Documents\Web E - Profile for the Boys\health-grid-ehr"
 start-server.cmd
 ```
 

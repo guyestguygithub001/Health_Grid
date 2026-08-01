@@ -1,7 +1,7 @@
 {
   "name": "health-grid-ehr",
   "version": "1.0.0",
-  "description": "Health Grid — Plateau State hospital and PHC EHR system",
+  "description": "Health Grid — The State hospital and PHC EHR system",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",

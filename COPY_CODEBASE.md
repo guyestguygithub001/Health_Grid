@@ -1,4 +1,4 @@
-﻿# PlateauCare EHR Full Codebase
+﻿# Health Grid EHR Full Codebase
 
 Copy each file into the same folder structure shown below.
 
@@ -6,9 +6,9 @@ Copy each file into the same folder structure shown below.
 
 ```json
 {
-  "name": "plateau-ehr",
+  "name": "health-grid-ehr",
   "version": "1.0.0",
-  "description": "Plateau State hospital and PHC EHR prototype with AI medical scrub/inquiry support.",
+  "description": "The State hospital and PHC EHR prototype with AI medical scrub/inquiry support.",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js"
@@ -38,9 +38,9 @@ server.err.log
 ## `README.md`
 
 ```markdown
-# PlateauCare EHR
+# Health Grid EHR
 
-PlateauCare EHR is a full-stack prototype Electronic Health Record designed for hospitals, general hospitals, specialist units, and Primary Health Centres across Plateau State.
+Health Grid EHR is a full-stack prototype Electronic Health Record designed for hospitals, general hospitals, specialist units, and Primary Health Centres across The State.
 
 It includes a hospital-grade clinical workflow, PHC-friendly public health modules, and a doctor-facing AI Medical Scrub/Inquiry assistant. The AI module in this prototype is rule-based and safe for local testing; it is structured so a real clinical AI model can be connected later.
 
@@ -69,7 +69,7 @@ It includes a hospital-grade clinical workflow, PHC-friendly public health modul
 ## Project Structure
 
 ```text
-plateau-ehr/
+health-grid-ehr/
   package.json
   README.md
   server/
@@ -86,7 +86,7 @@ plateau-ehr/
 If Node.js is installed:
 
 ```bash
-cd plateau-ehr
+cd health-grid-ehr
 npm start
 ```
 
@@ -99,7 +99,7 @@ http://localhost:8080
 If Node.js is not available on your PATH in Codex Desktop, use the bundled Node executable:
 
 ```powershell
-& "C:\Users\HP\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" "C:\Users\HP\Documents\Web E - Profile for the Boys\plateau-ehr\server\server.js"
+& "C:\Users\HP\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe" "C:\Users\HP\Documents\Web E - Profile for the Boys\health-grid-ehr\server\server.js"
 ```
 
 ## API Endpoints
@@ -124,21 +124,21 @@ This is a prototype. It must not be used for real patient care until it has gone
 ## `TESTING.md`
 
 ```markdown
-# Testing PlateauCare EHR
+# Testing Health Grid EHR
 
 ## Start The Server
 
 PowerShell:
 
 ```powershell
-cd "C:\Users\HP\Documents\Web E - Profile for the Boys\plateau-ehr"
+cd "C:\Users\HP\Documents\Web E - Profile for the Boys\health-grid-ehr"
 powershell -ExecutionPolicy Bypass -File .\start-server.ps1
 ```
 
 Command Prompt:
 
 ```bat
-cd /d "C:\Users\HP\Documents\Web E - Profile for the Boys\plateau-ehr"
+cd /d "C:\Users\HP\Documents\Web E - Profile for the Boys\health-grid-ehr"
 start-server.cmd
 ```
 
@@ -185,7 +185,7 @@ cd /d "%~dp0"
 $NodeExe = "C:\Users\HP\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe"
 $ProjectRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ProjectRoot
-Write-Host "Starting PlateauCare EHR..."
+Write-Host "Starting Health Grid EHR..."
 Write-Host "Open http://localhost:8080 in your browser."
 & $NodeExe "server\server.js"
 ```
@@ -554,7 +554,7 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`PlateauCare EHR running at http://localhost:${PORT}`);
+  console.log(`Health Grid EHR running at http://localhost:${PORT}`);
 });
 ```
 
@@ -824,8 +824,8 @@ server.listen(PORT, () => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PlateauCare EHR | Hospitals and PHCs</title>
-  <meta name="description" content="A Plateau State hospital and PHC electronic health record prototype with clinical, operational, reporting, and AI medical scrub modules." />
+  <title>Health Grid EHR | Hospitals and PHCs</title>
+  <meta name="description" content="A The State hospital and PHC electronic health record prototype with clinical, operational, reporting, and AI medical scrub modules." />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -834,7 +834,7 @@ server.listen(PORT, () => {
       <div class="brand">
         <div class="brand-mark">PC</div>
         <div>
-          <strong>PlateauCare</strong>
+          <strong>Health Grid</strong>
           <span>EHR Command</span>
         </div>
       </div>
@@ -859,7 +859,7 @@ server.listen(PORT, () => {
     <main class="main">
       <header class="topbar">
         <div>
-          <span class="eyebrow">Plateau State health system</span>
+          <span class="eyebrow">The State health system</span>
           <h1 id="viewTitle">State Command Dashboard</h1>
         </div>
         <div class="top-actions">
@@ -920,7 +920,7 @@ server.listen(PORT, () => {
           <div class="panel-head">
             <div>
               <span class="eyebrow">Facility map</span>
-              <h2>Plateau Network Readiness</h2>
+              <h2>Regional Network Readiness</h2>
             </div>
           </div>
           <div id="facilityGrid" class="facility-grid"></div>
@@ -1751,7 +1751,7 @@ async function api(path, options = {}) {
 }
 
 function viewName(id) {
-  return titles[id] || "PlateauCare EHR";
+  return titles[id] || "Health Grid EHR";
 }
 
 function switchView(id) {

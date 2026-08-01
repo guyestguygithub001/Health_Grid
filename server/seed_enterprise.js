@@ -362,14 +362,14 @@ const telehealthSessions = patients.slice(0, 8).map((p, i) => {
 
 // ── Staff Users ───────────────────────────────────────────────────────────────
 const staffUsers = [
-  { id: "USR-0001", username: "guyestguy", fullName: "System Administrator", role: "system_admin", email: "admin@plateaucare.gov.ng", department: "Administration", specialisation: "" },
-  { id: "USR-0002", username: "dr.mwanret", fullName: "Dr. A. Mwanret", role: "doctor", email: "mwanret@plateaucare.gov.ng", department: "Internal Medicine", specialisation: "Internal Medicine" },
-  { id: "USR-0003", username: "dr.dashe", fullName: "Dr. B. Dashe", role: "doctor", email: "dashe@plateaucare.gov.ng", department: "Surgery", specialisation: "General Surgery" },
-  { id: "USR-0004", username: "nurse.pam", fullName: "Nurse Esther Pam", role: "nurse", email: "pam@plateaucare.gov.ng", department: "Ward A", specialisation: "" },
-  { id: "USR-0005", username: "pharm.bulus", fullName: "Pharm. Miriam Bulus", role: "pharmacist", email: "bulus@plateaucare.gov.ng", department: "Pharmacy", specialisation: "" },
-  { id: "USR-0006", username: "lab.gwar", fullName: "MLT Emmanuel Gwar", role: "lab_technician", email: "gwar@plateaucare.gov.ng", department: "Laboratory", specialisation: "Haematology" },
-  { id: "USR-0007", username: "acct.chollom", fullName: "Rebecca Chollom", role: "accountant", email: "chollom@plateaucare.gov.ng", department: "Finance", specialisation: "" },
-  { id: "USR-0008", username: "hmo.lalong", fullName: "Solomon Lalong", role: "hmo_manager", email: "lalong@plateaucare.gov.ng", department: "HMO Desk", specialisation: "" }
+  { id: "USR-0001", username: "guyestguy", fullName: "System Administrator", role: "system_admin", email: "admin@healthgrid.org", department: "Administration", specialisation: "" },
+  { id: "USR-0002", username: "dr.mwanret", fullName: "Dr. A. Mwanret", role: "doctor", email: "mwanret@healthgrid.org", department: "Internal Medicine", specialisation: "Internal Medicine" },
+  { id: "USR-0003", username: "dr.dashe", fullName: "Dr. B. Dashe", role: "doctor", email: "dashe@healthgrid.org", department: "Surgery", specialisation: "General Surgery" },
+  { id: "USR-0004", username: "nurse.pam", fullName: "Nurse Esther Pam", role: "nurse", email: "pam@healthgrid.org", department: "Ward A", specialisation: "" },
+  { id: "USR-0005", username: "pharm.bulus", fullName: "Pharm. Miriam Bulus", role: "pharmacist", email: "bulus@healthgrid.org", department: "Pharmacy", specialisation: "" },
+  { id: "USR-0006", username: "lab.gwar", fullName: "MLT Emmanuel Gwar", role: "lab_technician", email: "gwar@healthgrid.org", department: "Laboratory", specialisation: "Haematology" },
+  { id: "USR-0007", username: "acct.chollom", fullName: "Rebecca Chollom", role: "accountant", email: "chollom@healthgrid.org", department: "Finance", specialisation: "" },
+  { id: "USR-0008", username: "hmo.lalong", fullName: "Solomon Lalong", role: "hmo_manager", email: "lalong@healthgrid.org", department: "HMO Desk", specialisation: "" }
 ].map(u => ({ ...u, isActive: true, createdAt: daysAgo(rand(90, 365)), lastLogin: daysAgo(rand(0, 7)) }));
 
 // ── Appointments ──────────────────────────────────────────────────────────────
