@@ -1530,7 +1530,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ── 2b. Legal & Compliance Audit Matrix (unauthenticated) ─────
-    if (req.method === "GET" && pathname === "/api/legal/audit-matrix") {
+    if (req.method === "GET" && pathname === "/api/v2/legal/audit-matrix") {
       sendJson(res, 200, {
         status: "100% GREEN LIGHT - PASSED",
         auditTimestamp: new Date().toISOString(),
@@ -1643,7 +1643,7 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    if (pathname === "/api/stream") {
+    if (pathname === "/api/v2/stream") {
       res.writeHead(200, {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",

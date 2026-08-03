@@ -10,7 +10,7 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: linear-gradient(160deg, #0B1426 0%, #0f2347 55%, #0B2458 100%); background-attachment: fixed; color: #fff; line-height: 1.6; min-height: 100vh; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f4f9f9 0%, #e0f2fe 100%); background-attachment: fixed; background-attachment: fixed; color: #1e293b; line-height: 1.6; min-height: 100vh; }
 
     /* ── NAV ─────────────────────────────────────────────── */
     nav {
@@ -25,7 +25,7 @@
       width: 36px; height: 36px; border-radius: 9px;
       background: linear-gradient(135deg, #2563EB, #1d4ed8);
       display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 13px; color: #fff; letter-spacing: -0.5px;
+      font-weight: 800; font-size: 13px; color: #1e293b; letter-spacing: -0.5px;
     }
     .nav-name { font-weight: 700; font-size: 15px; color: #0F172A; }
     .nav-name span { color: #2563EB; }
@@ -48,11 +48,7 @@
       background: transparent;
       position: relative; overflow: hidden;
     }
-    .hero::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse 80% 60% at 60% 30%, rgba(37,99,235,0.18) 0%, transparent 70%),
-                  radial-gradient(ellipse 50% 40% at 10% 80%, rgba(16,185,129,0.10) 0%, transparent 60%);
-    }
+    .hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at top right, rgba(14, 165, 233, 0.1) 0%, transparent 60%); }
     .hero-badge {
       position: relative; display: inline-flex; align-items: center; gap: 6px;
       background: rgba(37,99,235,0.18); border: 1px solid rgba(37,99,235,0.3);
@@ -63,14 +59,14 @@
     .hero-badge::before { content: '●'; color: #10B981; font-size: 8px; }
     .hero h1 {
       position: relative; font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 800; color: #fff; text-align: center;
+      font-weight: 800; color: #1e293b; text-align: center;
       line-height: 1.15; letter-spacing: -0.02em; max-width: 780px;
       margin-bottom: 20px;
     }
     .hero h1 span { color: #60a5fa; }
     .hero p {
       position: relative; font-size: clamp(0.95rem, 1.8vw, 1.1rem);
-      color: rgba(255,255,255,0.55); text-align: center;
+      color: #475569; text-align: center;
       max-width: 520px; margin-bottom: 56px; font-weight: 400;
     }
 
@@ -81,7 +77,7 @@
       gap: 20px; max-width: 680px; width: 100%;
     }
     .pcard {
-      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(14, 165, 233, 0.15); box-shadow: 0 10px 30px rgba(14, 165, 233, 0.08); backdrop-filter: blur(10px);
       border-radius: 20px; padding: 36px 32px; text-decoration: none;
       cursor: pointer; transition: all 0.3s; display: flex; flex-direction: column;
       align-items: center; text-align: center;
@@ -91,7 +87,7 @@
       content: ''; position: absolute; inset: 0; opacity: 0;
       transition: opacity 0.3s;
     }
-    .pcard:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.2); }
+    .pcard:hover { transform: translateY(-4px); border-color: rgba(14, 165, 233, 0.3); }
     .pcard:hover::before { opacity: 1; }
     .pcard.patient { }
     .pcard.patient::before { background: linear-gradient(135deg, rgba(16,185,129,0.08), transparent); }
@@ -106,7 +102,7 @@
     }
     .pcard.patient .pcard-icon { background: rgba(16,185,129,0.15); }
     .pcard.admin .pcard-icon { background: rgba(37,99,235,0.15); }
-    .pcard h2 { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+    .pcard h2 { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
     .pcard p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.55; flex: 1; margin-bottom: 24px; }
     .pcard-btn {
       display: inline-flex; align-items: center; gap: 6px;
@@ -115,9 +111,9 @@
       text-decoration: none;
     }
     .pcard.patient .pcard-btn { background: rgba(16,185,129,0.2); color: #34d399; }
-    .pcard.patient:hover .pcard-btn { background: #10B981; color: #fff; }
+    .pcard.patient:hover .pcard-btn { background: #10B981; color: #1e293b; }
     .pcard.admin .pcard-btn { background: rgba(37,99,235,0.2); color: #93c5fd; }
-    .pcard.admin:hover .pcard-btn { background: #2563EB; color: #fff; }
+    .pcard.admin:hover .pcard-btn { background: #2563EB; color: #1e293b; }
 
     /* ── STATS BAR ───────────────────────────────────────── */
     .stats-bar {
@@ -129,22 +125,22 @@
       border-right: 1px solid rgba(255,255,255,0.1);
     }
     .stat:last-child { border-right: none; }
-    .stat-num { font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+    .stat-num { font-size: 28px; font-weight: 800; color: #1e293b; letter-spacing: -0.02em; }
     .stat-label { font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 500; margin-top: 2px; }
 
     /* ── FEATURES ────────────────────────────────────────── */
     .features { padding: 80px 6vw; background: transparent; }
     .features-header { text-align: center; margin-bottom: 52px; }
-    .features-header h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; color: #fff; letter-spacing: -0.02em; }
+    .features-header h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; color: #1e293b; letter-spacing: -0.02em; }
     .features-header p { color: rgba(255,255,255,0.6); margin-top: 10px; font-size: 15px; }
     .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto; }
     .feat {
       padding: 28px; border-radius: 16px; background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.1); transition: all 0.25s;
     }
-    .feat:hover { border-color: rgba(255,255,255,0.2); box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translateY(-2px); }
+    .feat:hover { border-color: rgba(14, 165, 233, 0.3); box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translateY(-2px); }
     .feat-icon { font-size: 28px; margin-bottom: 14px; display: block; }
-    .feat h3 { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .feat h3 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
     .feat p { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.55; }
 
     /* ── FOOTER ──────────────────────────────────────────── */
@@ -168,8 +164,8 @@
 
   <!-- ── HERO ─────────────────────────────────────── -->
   <section class="hero reveal">
-    <h1 style="font-weight: 400; font-size: 2.2rem; margin-bottom: 12px;">Your Health Records, Anywhere You Are</h1>
-    <p style="font-weight: 300; font-size: 1.1rem; opacity: 0.7;">Integrated electronic health records for patients, clinicians, and administrators across The State hospitals and PHCs.</p>
+    <h1 style="font-weight: 400; font-size: 2.2rem; margin-bottom: 12px;">Health Records Simplified.</h1>
+    <p style="font-weight: 300; font-size: 1.1rem; opacity: 0.7;">Integrated health records.</p>
 
     <div class="portal-cards reveal">
       <a class="pcard patient" href="portal.html">
@@ -198,16 +194,16 @@
   <!-- ── FEATURES ──────────────────────────────────── -->
   <section class="features" id="features">
     <div class="features-header">
-      <h2>Everything in One System</h2>
-      <p>Designed for The State's unique health landscape from referral hospitals to rural PHCs.</p>
+      <h2>Unified System</h2>
+      <p>Designed for our unique health landscape.</p>
     </div>
     <div class="features-grid reveal">
-      <div class="feat"><span class="feat-icon">🩺</span><h3>Clinical Consultations</h3><p>Full SOAP notes with ICD-11 coded diagnoses, prescriptions, and referrals.</p></div>
-      <div class="feat"><span class="feat-icon">📅</span><h3>Appointment Scheduling</h3><p>Book, reschedule, and track appointments across all departments.</p></div>
-      <div class="feat"><span class="feat-icon">🧪</span><h3>Laboratory Results</h3><p>Receive and view lab reports linked directly to patient records.</p></div>
-      <div class="feat"><span class="feat-icon">💳</span><h3>Billing & Insurance</h3><p>PLASCHEMA, NHIA, and private pay claims managed in one workflow.</p></div>
-      <div class="feat"><span class="feat-icon">🛏</span><h3>Ward Management</h3><p>Real-time bed census across clinical units and wards.</p></div>
-      <div class="feat"><span class="feat-icon">📊</span><h3>Analytics & Reports</h3><p>State-level health metrics, disease surveillance, and quality indicators.</p></div>
+      <div class="feat"><span class="feat-icon">🩺</span><h3>Consultations</h3><p>Full SOAP notes with ICD-11 coded diagnoses, prescriptions, and referrals.</p></div>
+      <div class="feat"><span class="feat-icon">📅</span><h3>Scheduling</h3><p>Book, reschedule, and track appointments across all departments.</p></div>
+      <div class="feat"><span class="feat-icon">🧪</span><h3>Labs</h3><p>Receive and view lab reports linked directly to patient records.</p></div>
+      <div class="feat"><span class="feat-icon">💳</span><h3>Billing</h3><p>PLASCHEMA, NHIA, and private pay claims managed in one workflow.</p></div>
+      <div class="feat"><span class="feat-icon">🛏</span><h3>Wards</h3><p>Real-time bed census across clinical units and wards.</p></div>
+      <div class="feat"><span class="feat-icon">📊</span><h3>Analytics</h3><p>State-level health metrics, disease surveillance, and quality indicators.</p></div>
     </div>
   </section>
 

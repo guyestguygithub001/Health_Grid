@@ -132,7 +132,7 @@ function createTelehealthSession(doctorId, patientId, scheduledTime) {
     startedAt: null,
     endedAt: null,
     duration: 0,
-    roomToken: crypto.randomBytes(16).toString("hex"),
+    roomToken: crypto.randomBytes(32).toString("hex"), // rotated length
     intakeForm: null,
     notes: "",
     prescriptions: [],
@@ -391,7 +391,7 @@ async function handleEnterpriseApi(req, res, url, data, user) {
       isActive: true,
       createdAt: new Date().toISOString(),
       lastLogin: null,
-      passwordHash: crypto.createHash("sha256").update(body.password || "changeme123").digest("hex")
+      passwordHash: crypto.createHash("sha256").update(body.password || crypto.randomBytes(8).toString("hex")).digest("hex")
     };
     data.staffUsers.push(staffUser);
     appendToChain("CREATE", "staffUsers", staffUser.id, user, staffUser);

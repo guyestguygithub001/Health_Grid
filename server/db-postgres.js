@@ -49,7 +49,7 @@ function getDb() {
             port:     parseInt(process.env.POSTGRES_PORT || '5432'),
             database: process.env.POSTGRES_DB       || 'healthgrid_db',
             user:     process.env.POSTGRES_USER     || 'healthgrid',
-            password: process.env.POSTGRES_PASSWORD || 'healthgrid2026',
+            password: process.env.POSTGRES_PASSWORD,
             max: 20,
             idleTimeoutMillis: 30000,
             connectionTimeoutMillis: 5000,
