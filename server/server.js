@@ -3,6 +3,13 @@ const fs   = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 
+// ─── PostgreSQL Database + New Patient API ────────────────────
+const db = require('./db-postgres');
+const { handlePatientApi: handlePatientApiV2 } = require('./patient-api');
+
+// Run migrations on startup (idempotent - safe to call every boot)
+db.runMigrations().catch(err => console.error('[DB] Migration failed:', err.message));
+
 // ── Security & Architecture Modules ────────────────────────────
 class AppError extends Error {
   constructor(message, statusCode, isOperational = true) {
@@ -1402,6 +1409,7 @@ if (req.method === "POST" && url.pathname === "/api/v2/patient/login") {
 //   /api/v2/patient/*      → patient auth endpoints
 const PUBLIC_PATHS = ["/", "/index.html", "/portal.html", "/legal.html"];
 const PUBLIC_API   = "/api/v2/patient/";
+const DOCTOR_API   = "/api/v2/doctor/";
 
 
 // ============================================================================
@@ -1511,8 +1519,12 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
-    // ── 2. Patient & Staff Auth API (no admin auth needed) ─────────────
-    if (pathname.startsWith(PUBLIC_API) || pathname.startsWith("/api/v2/auth/")) {
+    // ── 2. Patient & Staff Auth API (PostgreSQL-backed) ─────────────────
+    if (pathname.startsWith(PUBLIC_API) || pathname.startsWith("/api/v2/auth/") || pathname.startsWith(DOCTOR_API)) {
+      const body = ['POST','PUT','PATCH'].includes(req.method) ? await collectBody(req) : {};
+      const handled = await handlePatientApiV2(req, res, url, body);
+      if (handled !== null) return;  // null means "not matched", fall through
+      // Legacy flat-file patient routes still needed for registration/login fallback:
       await handlePatientApi(req, res, url);
       return;
     }

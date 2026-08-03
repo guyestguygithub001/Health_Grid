@@ -17,12 +17,15 @@
   "author": "Daniel Kingsley Ene",
   "license": "MIT",
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "acorn": "^8.17.0",
+    "bcrypt": "^6.0.0",
     "bullmq": "^5.81.1",
     "connect-redis": "^9.0.0",
     "express-session": "^1.19.0",
     "ioredis": "^5.11.1",
     "jsdom": "^30.0.0",
+    "jsonwebtoken": "^9.0.3",
     "pg": "^8.11.3",
     "puppeteer": "^25.4.0",
     "sql.js": "^1.14.1",
@@ -32,5 +35,8 @@
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "allowScripts": {
+    "bcrypt@6.0.0": true
   }
 }

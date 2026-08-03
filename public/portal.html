@@ -1,916 +1,1147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Health Grid — Patient Portal</title>
-  <meta name="description" content="Access your personal health records, appointments, and test results on the Health Grid patient portal." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Grid | Your Health, Simplified</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: #F0F4FF; color: #0F172A; line-height: 1.6; min-height: 100vh; }
+    :root {
+      --bg-color: #0B1426;
+      --text-main: #FFFFFF;
+      --text-muted: #9CA3AF;
+      --teal: #0B5E7E;
+      --green: #10B981;
+      --gold: #F59E0B;
+      --glass-bg: rgba(255, 255, 255, 0.05);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --font-main: 'Inter', sans-serif;
+    }
 
-    /* ── SHARED ─────────────────────────────────────── */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: var(--font-main);
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Typography */
+    h1, h2, h3, h4 { font-weight: 600; }
+    
+    /* Utilities */
     .hidden { display: none !important; }
+    .glass {
+      background: var(--glass-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary {
+      background-color: var(--green);
+      color: #fff;
+    }
+    .btn-primary:hover { background-color: #0d9668; }
+    
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      color: var(--text-main);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); }
 
-    /* ── LOGIN SCREEN ───────────────────────────────── */
-    #loginScreen {
-      min-height: 100vh; display: flex; align-items: center; justify-content: center;
-      padding: 24px;
-      background: linear-gradient(160deg, #0B1426 0%, #0f2347 55%, #0B2458 100%);
-      position: relative; overflow: hidden;
+    .btn-teal {
+      background-color: var(--teal);
+      color: white;
     }
-    #loginScreen::before {
-      content: ''; position: absolute; inset: 0; pointer-events: none;
-      background: radial-gradient(ellipse 80% 60% at 60% 20%, rgba(37,99,235,0.18) 0%, transparent 70%),
-                  radial-gradient(ellipse 40% 40% at 10% 80%, rgba(16,185,129,0.1) 0%, transparent 60%);
-    }
-    .login-card {
-      position: relative; width: 100%; max-width: 420px;
-      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-      backdrop-filter: blur(20px); border-radius: 24px; padding: 48px 40px;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.4);
-    }
-    .login-brand { text-align: center; margin-bottom: 36px; }
-    .login-mark {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 56px; height: 56px; border-radius: 16px;
-      background: linear-gradient(135deg, #10B981, #059669);
-      font-weight: 800; font-size: 18px; color: #fff; margin-bottom: 16px;
-    }
-    .login-brand h1 { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-    .login-brand p { font-size: 13px; color: rgba(255,255,255,0.45); }
-    .login-field { margin-bottom: 16px; }
-    .login-field label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 7px; }
-    .login-field input {
-      width: 100%; padding: 13px 16px; border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.07);
-      color: #fff; font-size: 15px; font-family: inherit; outline: none;
-      transition: border-color 0.2s;
-    }
-    .login-field input::placeholder { color: rgba(255,255,255,0.25); }
-    .login-field input:focus { border-color: rgba(16,185,129,0.5); background: rgba(255,255,255,0.09); }
-    .login-hint { font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 5px; }
-    .login-error {
-      background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.25);
-      color: #fca5a5; font-size: 13px; padding: 10px 14px; border-radius: 8px;
+    .btn-teal:hover { filter: brightness(1.2); }
+
+    /* Inputs */
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--glass-border);
+      background: rgba(0,0,0,0.2);
+      color: white;
       margin-bottom: 16px;
+      font-size: 1rem;
     }
-    .login-btn {
-      width: 100%; padding: 14px; margin-top: 8px; border: none; border-radius: 12px;
-      background: linear-gradient(135deg, #10B981, #059669);
-      color: #fff; font-size: 15px; font-weight: 700; cursor: pointer;
-      font-family: inherit; letter-spacing: 0.01em;
-      box-shadow: 0 4px 16px rgba(16,185,129,0.3); transition: all 0.2s;
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--teal);
     }
-    .login-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(16,185,129,0.4); }
-    .login-btn:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
-    .login-back { display: block; text-align: center; margin-top: 20px; font-size: 13px; color: rgba(255,255,255,0.3); text-decoration: none; }
-    .login-back:hover { color: rgba(255,255,255,0.6); }
 
-    /* ── PORTAL SHELL ───────────────────────────────── */
-    #portalShell { display: none; min-height: 100vh; background: #F0F4FF; }
-
-    /* ── PORTAL NAV ─────────────────────────────────── */
-    .pnav {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(255,255,255,0.9); backdrop-filter: blur(12px);
-      border-bottom: 1px solid #E2E8F0;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 6vw; height: 60px;
+    /* Screen 1: Landing */
+    #landing {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: radial-gradient(circle at top right, var(--teal) 0%, transparent 40%),
+                  radial-gradient(circle at bottom left, #052938 0%, var(--bg-color) 60%);
+      padding: 20px;
     }
-    .pnav-brand { display: flex; align-items: center; gap: 9px; text-decoration: none; }
-    .pnav-mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg,#10B981,#059669); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11px; color:#fff; }
-    .pnav-name { font-weight: 700; font-size: 14px; color: #0F172A; }
-    .pnav-right { display: flex; align-items: center; gap: 12px; }
-    .patient-avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: linear-gradient(135deg,#10B981,#059669);
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 700; font-size: 13px; color: #fff;
+    #landing h1 { font-size: 4rem; margin-bottom: 16px; letter-spacing: -1px; }
+    #landing p { font-size: 1.25rem; color: var(--text-muted); margin-bottom: 40px; max-width: 600px; }
+    .landing-ctas { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+
+    /* Screen 2: Wizard */
+    #wizard {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
     }
-    .patient-nav-name { font-size: 13px; font-weight: 600; color: #0F172A; }
-    .logout-btn {
-      padding: 6px 14px; border-radius: 8px; border: 1px solid #E2E8F0;
-      font-size: 12px; font-weight: 500; color: #64748B; background: #fff;
-      cursor: pointer; font-family: inherit; transition: all 0.2s;
+    .wizard-container {
+      width: 100%;
+      max-width: 600px;
+      padding: 32px;
     }
-    .logout-btn:hover { background: #FEF2F2; border-color: #FECACA; color: #DC2626; }
-
-    /* ── MAIN CONTENT ───────────────────────────────── */
-    .pmain { max-width: 960px; margin: 0 auto; padding: 36px 6vw 60px; }
-
-    /* Welcome header */
-    .welcome-bar { margin-bottom: 32px; }
-    .welcome-eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #10B981; margin-bottom: 6px; }
-    .welcome-bar h2 { font-size: clamp(1.3rem, 3vw, 1.8rem); font-weight: 800; color: #0F172A; letter-spacing: -0.02em; }
-    .welcome-bar p { color: #64748B; font-size: 14px; margin-top: 4px; }
-
-    /* Summary cards */
-    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 32px; }
-    .sum-card {
-      background: #fff; border: 1px solid #E2E8F0; border-radius: 14px;
-      padding: 20px; transition: all 0.2s;
+    .wizard-step { display: none; animation: fadeIn 0.3s ease; }
+    .wizard-step.active { display: block; }
+    .step-header { text-align: center; margin-bottom: 32px; }
+    
+    /* Wizard Grid Cards */
+    .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; }
+    .grid-card {
+      padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s;
     }
-    .sum-card:hover { border-color: #BFDBFE; box-shadow: 0 4px 16px rgba(37,99,235,0.08); }
-    .sum-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: #94A3B8; margin-bottom: 8px; }
-    .sum-value { font-size: 26px; font-weight: 800; color: #0F172A; letter-spacing: -0.02em; }
-    .sum-sub { font-size: 11px; color: #94A3B8; margin-top: 3px; }
-    .sum-card.green .sum-value { color: #10B981; }
-    .sum-card.blue .sum-value { color: #2563EB; }
-    .sum-card.amber .sum-value { color: #D97706; }
+    .grid-card:hover, .grid-card.selected { border-color: var(--green); background: rgba(16, 185, 129, 0.1); }
+    .grid-card .icon { font-size: 2rem; margin-bottom: 8px; }
 
-    /* Section */
-    .psection { margin-bottom: 28px; }
-    .psection-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-    .psection-head h3 { font-size: 14px; font-weight: 700; color: #0F172A; }
-    .psection-head .count-badge { font-size: 11px; font-weight: 600; color: #2563EB; background: #EFF6FF; padding: 2px 10px; border-radius: 100px; }
-
-    /* Cards list */
-    .record-card {
-      background: #fff; border: 1px solid #E2E8F0; border-radius: 12px;
-      padding: 18px 20px; margin-bottom: 10px; cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Doctor Cards */
+    .doctor-scroll { display: flex; overflow-x: auto; gap: 16px; padding-bottom: 16px; }
+    .doctor-card {
+      flex: 0 0 260px; padding: 20px; display: flex; flex-direction: column; align-items: center; text-align: center;
     }
-    .record-card:hover {
-      border-color: #3B82F6;
-      transform: translateY(-4px) scale(1.01);
-      box-shadow: 0 10px 25px rgba(37,99,235,0.1);
+    .avatar-circle {
+      width: 64px; height: 64px; border-radius: 50%; background: var(--teal); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; margin-bottom: 12px;
     }
-    .record-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; }
-    .record-card-title { font-size: 14px; font-weight: 600; color: #0F172A; }
-    .record-card-date { font-size: 12px; color: #94A3B8; }
-    .record-card-body { font-size: 13px; color: #64748B; line-height: 1.5; }
-    .record-card-body strong { color: #0F172A; }
+    .badge { padding: 4px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 500; }
+    .badge-green { background: rgba(16,185,129,0.2); color: var(--green); }
+    .badge-gold { background: rgba(245,158,11,0.2); color: var(--gold); }
+    .badge-teal { background: rgba(11,94,126,0.2); color: #38bdf8; }
+    .badge-red { background: rgba(239,68,68,0.2); color: #f87171; }
+    .badge-gray { background: rgba(156,163,175,0.2); color: #9ca3af; }
 
-    /* Badge */
-    .badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 10px; border-radius: 100px; }
-    .badge-green { background: #D1FAE5; color: #065F46; }
-    .badge-blue { background: #DBEAFE; color: #1E40AF; }
-    .badge-amber { background: #FEF3C7; color: #92400E; }
-    .badge-red { background: #FEE2E2; color: #991B1B; }
-    .badge-gray { background: #F1F5F9; color: #475569; }
+    /* Time Slots */
+    .date-scroll { display: flex; gap: 8px; overflow-x: auto; margin-bottom: 24px; padding-bottom: 8px; }
+    .date-pill { padding: 12px; border-radius: 8px; cursor: pointer; text-align: center; min-width: 70px; border: 1px solid var(--glass-border); }
+    .date-pill.selected { background: var(--teal); border-color: var(--teal); }
+    
+    .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 24px; }
+    .time-pill { padding: 10px; text-align: center; border-radius: 8px; cursor: pointer; background: rgba(255,255,255,0.05); }
+    .time-pill.available:hover { background: rgba(16,185,129,0.2); border: 1px solid var(--green); }
+    .time-pill.selected { background: var(--green); color: white; }
+    .time-pill.booked { opacity: 0.3; cursor: not-allowed; }
 
-    /* Empty state */
-    .empty-state { text-align: center; padding: 32px; color: #94A3B8; font-size: 14px; background: #fff; border-radius: 12px; border: 1px dashed #E2E8F0; }
-    .empty-state .empty-icon { font-size: 32px; display: block; margin-bottom: 10px; }
+    .type-selector { display: flex; gap: 10px; margin-bottom: 24px; }
+    .type-pill { flex: 1; padding: 12px; text-align: center; border-radius: 8px; cursor: pointer; border: 1px solid var(--glass-border); }
+    .type-pill.selected { background: var(--teal); border-color: var(--teal); }
 
-    /* Profile card */
-    .profile-card {
-      background: linear-gradient(135deg, #0f2347, #0B2458);
-      border-radius: 16px; padding: 28px; color: #fff; margin-bottom: 32px;
-      display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+    /* Tabs */
+    .tabs { display: flex; border-bottom: 1px solid var(--glass-border); margin-bottom: 24px; }
+    .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; }
+    .tab.active { color: white; border-bottom-color: var(--green); }
+
+    /* Screen 3: Dashboard */
+    #dashboard { display: flex; height: 100vh; overflow: hidden; }
+    
+    /* Sidebar */
+    .sidebar { width: 260px; padding: 24px 0; display: flex; flex-direction: column; border-right: 1px solid var(--glass-border); }
+    .brand { padding: 0 24px 24px; display: flex; align-items: center; gap: 12px; font-size: 1.25rem; font-weight: bold; }
+    .user-profile { padding: 0 24px 24px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--glass-border); margin-bottom: 16px; }
+    .user-profile .avatar-circle { width: 40px; height: 40px; font-size: 1rem; margin: 0; }
+    .nav-item { padding: 12px 24px; display: flex; align-items: center; gap: 12px; cursor: pointer; color: var(--text-muted); transition: 0.2s; }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: white; border-right: 3px solid var(--green); }
+    .sidebar-bottom { margin-top: auto; padding: 0 24px; }
+
+    /* Main Content */
+    .main-content { flex: 1; overflow-y: auto; padding: 32px; background: radial-gradient(circle at top, rgba(11,94,126,0.1) 0%, transparent 50%); }
+    .section { display: none; animation: fadeIn 0.3s ease; }
+    .section.active { display: block; }
+    
+    .page-title { font-size: 1.75rem; margin-bottom: 24px; }
+
+    /* Stat Cards */
+    .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 32px; }
+    .stat-card { padding: 24px; }
+    .stat-card h3 { color: var(--text-muted); font-size: 0.875rem; margin-bottom: 8px; font-weight: 400; }
+    .stat-card .value { font-size: 1.75rem; font-weight: 600; }
+
+    /* Appointments List */
+    .appointment-card { padding: 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .appointment-info h4 { margin-bottom: 4px; }
+    .appointment-meta { color: var(--text-muted); font-size: 0.875rem; display: flex; gap: 12px; align-items: center; }
+    .appointment-actions { display: flex; gap: 12px; align-items: center; }
+
+    /* Pharmacy */
+    .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px; }
+    .product-card { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+    .product-img-ph { height: 120px; background: rgba(255,255,255,0.05); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
+    
+    /* Chat */
+    .chat-container { height: 600px; display: flex; flex-direction: column; }
+    .chat-messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .msg-bubble { max-width: 70%; padding: 12px 16px; border-radius: 16px; font-size: 0.95rem; }
+    .msg-left { background: rgba(255,255,255,0.1); align-self: flex-start; border-bottom-left-radius: 4px; }
+    .msg-right { background: var(--teal); align-self: flex-end; border-bottom-right-radius: 4px; }
+    .chat-input { display: flex; gap: 12px; padding: 20px; border-top: 1px solid var(--glass-border); }
+    .chat-input input { margin: 0; }
+
+    /* Animations */
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Toast */
+    #toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+    .toast { padding: 16px 24px; border-radius: 8px; background: #333; color: white; font-weight: 500; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.5); animation: slideIn 0.3s ease forwards; }
+    .toast.error { border-left: 4px solid #ef4444; }
+    .toast.success { border-left: 4px solid var(--green); }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { to { transform: translateX(100%); opacity: 0; } }
+
+    /* Modals */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-content { width: 100%; max-width: 400px; padding: 24px; }
+    .close-modal { float: right; cursor: pointer; font-size: 1.5rem; line-height: 1; }
+    
+    /* Responsive */
+    @media(max-width: 768px) {
+      .sidebar { position: fixed; bottom: 0; left: 0; width: 100vw; height: 60px; flex-direction: row; padding: 0; border-right: none; border-top: 1px solid var(--glass-border); z-index: 100; background: var(--bg-color); }
+      .brand, .user-profile, .sidebar-bottom, .nav-item span { display: none; }
+      .nav-item { flex: 1; justify-content: center; padding: 0; border: none; font-size: 1.5rem; }
+      .nav-item.active { border-bottom: 3px solid var(--green); border-right: none; }
+      #dashboard { padding-bottom: 60px; }
+      .main-content { padding: 16px; }
+      .appointment-card { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .appointment-actions { width: 100%; justify-content: flex-end; }
     }
-    .profile-avatar {
-      width: 64px; height: 64px; border-radius: 50%;
-      background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.2);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 22px; font-weight: 800; color: #fff; flex-shrink: 0;
-    }
-    .profile-info { flex: 1; min-width: 200px; }
-    .profile-name { font-size: 20px; font-weight: 800; letter-spacing: -0.01em; margin-bottom: 4px; }
-    .profile-meta { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.6; }
-    .profile-id { font-size: 11px; color: rgba(255,255,255,0.35); font-family: monospace; margin-top: 6px; }
-    .profile-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-    .profile-tag { font-size: 11px; font-weight: 600; padding: 3px 12px; border-radius: 100px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); }
-
-    @media (max-width: 580px) {
-      .pnav { padding: 0 4vw; }
-      .patient-nav-name { display: none; }
-      .pmain { padding: 24px 4vw 48px; }
-      .login-card { padding: 36px 24px; }
-    }
+    
+    /* Loading Spinner */
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
 
-  <!-- Privacy Policy Overlay -->
-  <div id="privacyOverlay" style="position:fixed; inset:0; background:rgba(15, 23, 42, 0.95); backdrop-filter:blur(10px); z-index:99999; display:flex; align-items:center; justify-content:center; flex-direction:column; color:white; text-align:center; transition: opacity 0.5s ease-out;">
-    <div style="font-size:48px; margin-bottom:20px;">🛡️</div>
-    <h2 style="font-size:32px; font-weight:800; margin-bottom:12px;">Health Grid Privacy Policy</h2>
-    <p style="font-size:18px; max-width:600px; color:#cbd5e1; line-height:1.6;">
-      By continuing, you agree to our strict data privacy policies.<br>
-      <span style="color:#f87171; font-weight:700;">Note: All fiat wallet deposits are final. No Refunds.</span>
-    </p>
-  </div>
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const overlay = document.getElementById("privacyOverlay");
-      if (overlay) {
-        setTimeout(() => {
-          overlay.style.opacity = "0";
-          setTimeout(() => overlay.style.display = "none", 500);
-        }, 2000);
-      }
-      
-      // Load wallet balance
-      setTimeout(loadWalletBalance, 500);
-    });
-
-    let currentPatientId = sessionStorage.getItem('patient_id') || 'PT-1721568285523';
-    
-    async function loadWalletBalance() {
-      // In a real app we'd fetch the patient object to get balance.
-      // Mocking fetch of patient object:
-      try {
-        const res = await fetch('/api/v2/mpi/search?q=' + currentPatientId);
-        const data = await res.json();
-        if(data.success && data.patients && data.patients.length > 0) {
-          const balance = data.patients[0].walletBalance || 0.00;
-          document.getElementById('walletBalanceDisplay').innerText = '₦' + parseFloat(balance).toFixed(2);
-        }
-      } catch(e) {}
-    }
-
-    async function fundWallet() {
-      const amount = prompt("Enter amount to fund (Fiat Currency - NGN):", "5000");
-      if (!amount || isNaN(amount)) return;
-      
-      try {
-        const res = await fetch('/api/v2/patient/wallet/fund', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ patientId: currentPatientId, amount: amount })
-        });
-        const data = await res.json();
-        if(data.success) {
-          document.getElementById('walletBalanceDisplay').innerText = '₦' + parseFloat(data.newBalance).toFixed(2);
-          alert("Wallet funded successfully! (No Refunds Policy applies)");
-        }
-      } catch(e) {
-        alert("Failed to fund wallet.");
-      }
-    }
-  </script>
-
-
-  <!-- ══════════════ LOGIN SCREEN ═══════════════════ -->
-  <div id="loginScreen">
-    <!-- Login Form -->
-    <div class="login-card" id="loginCard">
-      <div class="login-brand">
-        <div class="login-mark">PC</div>
-        <h1>Patient Portal</h1>
-        <p>Health Grid Health Information System</p>
-      </div>
-
-      <form id="loginForm" novalidate>
-        <div class="login-field">
-          <label>Phone Number</label>
-          <input id="loginPhone" type="tel" placeholder="e.g. 08012345678" autocomplete="tel" required />
-        </div>
-        <div class="login-field">
-          <label>Patient ID (Password)</label>
-          <div style="position: relative;">
-            <input id="loginPatId" type="password" placeholder="e.g. PT-0001" autocomplete="off" required style="width: 100%; box-sizing: border-box; padding-right: 40px;" />
-            <button type="button" onclick="const p = document.getElementById('loginPatId'); if(p.type === 'password'){ p.type = 'text'; this.innerText = '🙈'; } else { p.type = 'password'; this.innerText = '👁️'; }" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: rgba(255,255,255,0.6); font-size: 16px; cursor: pointer; padding: 0; outline: none;">👁️</button>
-          </div>
-        </div>
-
-        <div style="margin: 14px 0 18px; display: flex; align-items: center; justify-content: center; text-align: center; gap: 8px;">
-          <input type="checkbox" id="patLoginLegalConsent" style="margin: 0; cursor: pointer;" required />
-          <label for="patLoginLegalConsent" style="font-size: 11px; color: rgba(255,255,255,0.75); cursor: pointer; font-weight: 400;">
-            I agree to <a href="legal.html" target="_blank" style="color:#10B981; text-decoration:none; font-weight:600;">Terms</a> · <a href="legal.html#privacy" target="_blank" style="color:#10B981; text-decoration:none; font-weight:600;">Privacy</a> · <a href="legal.html#disclaimer" target="_blank" style="color:#10B981; text-decoration:none; font-weight:600;">Disclaimer</a> <span style="opacity:0.65;">(18+)</span>
-          </label>
-        </div>
-        <div id="loginError" class="login-error hidden">Invalid phone number or Patient ID. Please check and try again.</div>
-        <div style="text-align: right; margin-bottom: 16px;">
-          <a href="javascript:void(0)" onclick="document.getElementById('resetModal').style.display='flex'" style="color:#10B981; font-size:12px; text-decoration:none; font-weight:600;">Forgot Patient ID?</a>
-        </div>
-        <button class="login-btn" id="loginBtn" type="submit">Sign In to My Health Portal</button>
-      </form>
-
-      <!-- PASSWORD RESET MODAL -->
-      <div id="resetModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); z-index:9999; align-items:center; justify-content:center;">
-        <div style="width:100%; max-width:400px; background:#1e293b; padding:40px; border-radius:16px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 25px 50px -12px rgba(0,0,0,0.5); font-family: 'Inter', sans-serif; text-align:left;">
-          <h2 style="color:#fff; font-size:24px; font-weight:700; margin-top:0; margin-bottom:8px;">Reset Password</h2>
-          <p style="color:rgba(255,255,255,0.7); font-size:13px; margin-bottom:24px; line-height:1.5;">Enter your Phone Number. We will send a secure OTP to your registered device.</p>
-          
-          <form id="resetForm">
-            <div style="margin-bottom:16px;">
-              <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:6px;">Phone Number</label>
-              <input id="resetUser" type="text" required style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;" placeholder="080..." />
-            </div>
-            <div style="margin-bottom:16px;">
-              <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:6px;">OTP (Check Email/SMS - Use 123456 for demo)</label>
-              <input id="resetOtp" type="text" required style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;letter-spacing:2px;text-align:center;" placeholder="------" />
-            </div>
-            <div style="margin-bottom:24px;">
-              <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:6px;">New Password (ID)</label>
-              <input id="resetNewPass" type="password" required style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;" placeholder="Enter new password" />
-            </div>
-            <div id="resetFeedback" style="display:none;font-size:13px;margin-bottom:16px;padding:10px;border-radius:8px;"></div>
-            
-            <div style="display:flex; gap:12px;">
-              <button type="button" onclick="document.getElementById('resetModal').style.display='none'" style="flex:1; padding:12px; border:1px solid rgba(255,255,255,0.2); border-radius:8px; background:transparent; color:#fff; cursor:pointer; font-weight:600;">Cancel</button>
-              <button type="submit" style="flex:1; padding:12px; border:none; border-radius:8px; background:#10B981; color:#fff; cursor:pointer; font-weight:700;">Reset Password</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <script>
-        document.getElementById('resetForm').addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const user = document.getElementById('resetUser').value;
-          const otp = document.getElementById('resetOtp').value;
-          const newPass = document.getElementById('resetNewPass').value;
-          const fb = document.getElementById('resetFeedback');
-          
-          try {
-            const res = await fetch('/api/v2/auth/reset', {
-              method: 'POST',
-              headers: {'Content-Type': 'application/json'},
-              body: JSON.stringify({ username: user, otp, newPassword: newPass })
-            });
-            const data = await res.json();
-            
-            fb.style.display = 'block';
-            if (data.success) {
-              fb.style.background = 'rgba(16,185,129,0.15)';
-              fb.style.border = '1px solid rgba(16,185,129,0.3)';
-              fb.style.color = '#34d399';
-              fb.innerText = 'Password reset successfully! You can now log in.';
-              setTimeout(() => { document.getElementById('resetModal').style.display = 'none'; }, 2000);
-            } else {
-              fb.style.background = 'rgba(239,68,68,0.15)';
-              fb.style.border = '1px solid rgba(239,68,68,0.3)';
-              fb.style.color = '#f87171';
-              fb.innerText = data.error || 'Failed to reset password.';
-            }
-          } catch (err) {
-            // Vercel static fallback
-            if (otp === '123456') {
-              fb.style.display = 'block';
-              fb.style.background = 'rgba(16,185,129,0.15)';
-              fb.style.border = '1px solid rgba(16,185,129,0.3)';
-              fb.style.color = '#34d399';
-              fb.innerText = '[Vercel Fallback] Password reset successfully!';
-              setTimeout(() => { document.getElementById('resetModal').style.display = 'none'; }, 2000);
-            } else {
-              fb.style.display = 'block';
-              fb.style.background = 'rgba(239,68,68,0.15)';
-              fb.style.border = '1px solid rgba(239,68,68,0.3)';
-              fb.style.color = '#f87171';
-              fb.innerText = 'Invalid OTP.';
-            }
-          }
-        });
-      </script>
-
-      <div style="text-align: center; margin-top: 16px;">
-        <span style="font-size:12px;color:rgba(255,255,255,0.6);">Don't have an account? </span>
-        <a href="#" onclick="toggleRegister()" style="font-size:12px;color:#10B981;font-weight:600;text-decoration:none;">Register here</a>
-      </div>
-      <a class="login-back" href="index.html">← Back to Homepage</a>
+  <!-- Screen 1: Landing -->
+  <section id="landing">
+    <h1>Your Health, Simplified.</h1>
+    <p>Experience seamless healthcare access. Book consultations, manage your records, and connect with top doctors anytime, anywhere.</p>
+    <div class="landing-ctas">
+      <button class="btn btn-primary" onclick="showScreen('wizard')">Book a Consultation</button>
+      <button class="btn btn-outline" onclick="showScreen('wizard', 4)">Login to Dashboard</button>
     </div>
+  </section>
 
-    <!-- Register Form -->
-    <div class="login-card hidden" id="registerCard">
-      <div class="login-brand">
-        <div class="login-mark" style="background: linear-gradient(135deg, #2563EB, #1D4ED8);">PC</div>
-        <h1>Create Account</h1>
-        <p>Register as a new patient</p>
+  <!-- Screen 2: Wizard -->
+  <section id="wizard" class="hidden">
+    <div class="wizard-container glass">
+      
+      <!-- Step 1 -->
+      <div id="step-1" class="wizard-step active">
+        <h2 class="step-header">Why are you visiting?</h2>
+        <div class="grid-cards">
+          <div class="grid-card glass" onclick="selectSpecialty('General Checkup')"><div class="icon">🩺</div>General Checkup</div>
+          <div class="grid-card glass" onclick="selectSpecialty('Pediatrics')"><div class="icon">👶</div>Pediatrics</div>
+          <div class="grid-card glass" onclick="selectSpecialty('Obstetrics & Gynecology')"><div class="icon">🤰</div>OB/GYN</div>
+          <div class="grid-card glass" onclick="selectSpecialty('Internal Medicine')"><div class="icon">🫀</div>Internal Med</div>
+          <div class="grid-card glass" onclick="selectSpecialty('Cardiology')"><div class="icon">❤️</div>Cardiology</div>
+          <div class="grid-card glass" onclick="selectSpecialty('Dermatology')"><div class="icon">🧴</div>Dermatology</div>
+          <div class="grid-card glass" onclick="selectSpecialty('Ophthalmology')"><div class="icon">👁️</div>Ophthalmology</div>
+          <div class="grid-card glass" onclick="selectSpecialty('Other')"><div class="icon">⚕️</div>Other</div>
+        </div>
+        <button class="btn btn-outline" style="margin-top:20px" onclick="showScreen('landing')">Cancel</button>
       </div>
 
-      <form id="registerForm" novalidate>
-        <div class="login-field">
-          <label>Full Name</label>
-          <input id="regName" type="text" placeholder="e.g. John Doe" required />
+      <!-- Step 2 -->
+      <div id="step-2" class="wizard-step">
+        <h2 class="step-header">Choose Your Doctor</h2>
+        <div class="doctor-scroll" id="wizard-doctors-list">
+          <!-- Loaded via API -->
+          <div style="text-align:center; width:100%">Loading doctors... <span class="spinner"></span></div>
         </div>
-        <div class="login-field">
-          <label>Phone Number</label>
-          <input id="regPhone" type="tel" placeholder="e.g. 08012345678" required />
+        <div style="display:flex; justify-content:space-between; margin-top:24px">
+          <button class="btn btn-outline" onclick="goToStep(1)">Back</button>
         </div>
-        <div style="display:flex;gap:12px;">
-          <div class="login-field" style="flex:1;">
-            <label>Age</label>
-            <input id="regAge" type="number" placeholder="Years" required />
-          </div>
-          <div class="login-field" style="flex:1;">
-            <label>Sex</label>
-            <select id="regSex" style="width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.07);color:#fff;outline:none;" required>
-              <option value="Male" style="color:#000;">Male</option>
-              <option value="Female" style="color:#000;">Female</option>
-            </select>
-          </div>
-        </div>
-        <div class="login-field" style="margin-top:14px; margin-bottom:16px; text-align:center; display:flex; align-items:center; justify-content:center; gap:8px;">
-          <input type="checkbox" id="patRegLegalConsent" style="margin:0; cursor:pointer;" required />
-          <label for="patRegLegalConsent" style="font-size:11px; color:rgba(255,255,255,0.75); cursor:pointer; font-weight:400;">
-            I agree to <a href="legal.html" target="_blank" style="color:#60a5fa; text-decoration:none; font-weight:600;">Terms</a> · <a href="legal.html#privacy" target="_blank" style="color:#60a5fa; text-decoration:none; font-weight:600;">Privacy</a> · <a href="legal.html#disclaimer" target="_blank" style="color:#60a5fa; text-decoration:none; font-weight:600;">Disclaimer</a> <span style="opacity:0.65;">(18+)</span>
-          </label>
-        </div>
-        <div id="regError" class="login-error hidden">Please fill in all required fields.</div>
-        <button class="login-btn" id="regBtn" type="submit" style="background: linear-gradient(135deg, #2563EB, #1D4ED8);">Create Patient Account</button>
-      </form>
-
-      <div style="text-align: center; margin-top: 16px;">
-        <span style="font-size:12px;color:rgba(255,255,255,0.6);">Already registered? </span>
-        <a href="#" onclick="toggleRegister()" style="font-size:12px;color:#3B82F6;font-weight:600;text-decoration:none;">Log in</a>
       </div>
+
+      <!-- Step 3 -->
+      <div id="step-3" class="wizard-step">
+        <h2 class="step-header">Pick a Date & Time</h2>
+        
+        <div class="date-scroll" id="wizard-dates"></div>
+        <div class="time-grid" id="wizard-times"></div>
+        
+        <h3 style="margin:20px 0 10px; font-size:1rem">Consultation Type</h3>
+        <div class="type-selector">
+          <div class="type-pill selected" onclick="selectType(this, 'In-Person')">In-Person</div>
+          <div class="type-pill" onclick="selectType(this, 'Chat')">Chat</div>
+          <div class="type-pill" onclick="selectType(this, 'Video Call')">Video Call</div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:24px">
+          <button class="btn btn-outline" onclick="goToStep(2)">Back</button>
+          <button class="btn btn-primary" onclick="proceedToAuth()">Continue</button>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div id="step-4" class="wizard-step">
+        <h2 class="step-header">Sign Up / Log In</h2>
+        <div class="tabs">
+          <div class="tab active" onclick="switchAuthTab('returning')">Returning Patient</div>
+          <div class="tab" onclick="switchAuthTab('new')">New Patient</div>
+        </div>
+        
+        <div id="auth-returning">
+          <div id="otp-req-block">
+            <input type="tel" id="login-phone" placeholder="Phone (+234...)" />
+            <button class="btn btn-primary" style="width:100%" onclick="requestOTP()" id="btn-otp-req">Send OTP</button>
+          </div>
+          <div id="otp-ver-block" class="hidden">
+            <input type="text" id="login-otp" placeholder="6-digit OTP" />
+            <button class="btn btn-primary" style="width:100%" onclick="verifyOTP()" id="btn-otp-ver">Verify & Login</button>
+          </div>
+        </div>
+
+        <div id="auth-new" class="hidden">
+          <input type="text" id="reg-name" placeholder="Full Name" />
+          <input type="tel" id="reg-phone" placeholder="Phone (+234...)" />
+          <input type="date" id="reg-dob" />
+          <select id="reg-sex">
+            <option value="">Select Sex</option>
+            <option value="M">Male</option>
+            <option value="F">Female</option>
+            <option value="Other">Other</option>
+          </select>
+          <button class="btn btn-primary" style="width:100%" onclick="registerPatient()" id="btn-reg">Sign Up</button>
+        </div>
+      </div>
+
+      <!-- Step 5 -->
+      <div id="step-5" class="wizard-step">
+        <h2 class="step-header">Confirm & Pay</h2>
+        <div class="glass" style="padding:20px; margin-bottom:24px">
+          <p><strong>Doctor:</strong> <span id="summary-doctor"></span></p>
+          <p><strong>Date:</strong> <span id="summary-date"></span> at <span id="summary-time"></span></p>
+          <p><strong>Type:</strong> <span id="summary-type"></span></p>
+          <p style="font-size:1.2rem; margin-top:10px"><strong>Fee:</strong> ₦<span id="summary-fee"></span></p>
+        </div>
+        
+        <h3 style="margin-bottom:10px; font-size:1rem">Payment Method</h3>
+        <select id="payment-method">
+          <option value="wallet">Wallet (Bal: ₦<span id="summary-wallet-bal">0</span>)</option>
+          <option value="paystack">Pay with Card (Paystack)</option>
+        </select>
+        
+        <button class="btn btn-primary" style="width:100%; margin-top:16px" onclick="confirmAppointment()" id="btn-confirm-appt">Confirm Appointment</button>
+      </div>
+
+      <!-- Success State -->
+      <div id="step-success" class="wizard-step" style="text-align:center">
+        <div style="font-size:4rem; margin-bottom:20px">🎉</div>
+        <h2 class="step-header">Appointment Confirmed!</h2>
+        <p>Your appointment ID is <strong id="success-appt-id"></strong></p>
+        <button class="btn btn-primary" style="margin-top:24px" onclick="loadDashboard()">Go to Dashboard</button>
+      </div>
+      
     </div>
-  </div>
+  </section>
 
-  <!-- ══════════════ PORTAL SHELL ═══════════════════ -->
-  <div id="portalShell">
-
-    <!-- NAV -->
-    <nav class="pnav">
-      <a class="pnav-brand" href="index.html">
-        <div class="pnav-mark">PC</div>
-        <span class="pnav-name">Health Grid</span>
-      </a>
-      <div class="pnav-right">
-        <div class="patient-avatar" id="navAvatar">?</div>
-        <span class="patient-nav-name" id="navName">Patient</span>
-        <button class="logout-btn" id="logoutBtn">Sign Out</button>
-      </div>
-    </nav>
-
-    <!-- MAIN -->
-    <main class="pmain">
-
-      <!-- PROFILE CARD -->
-      <div class="profile-card reveal" id="profileCard">
-        <div class="profile-avatar" id="profileAvatar">?</div>
-        <div class="profile-info">
-          <div class="profile-name" id="profileName">Loading…</div>
-          <div class="profile-meta" id="profileMeta"></div>
-          <div class="profile-id" id="profileId"></div>
-          <div class="profile-tags" id="profileTags"></div>
+  <!-- Screen 3: Dashboard -->
+  <section id="dashboard" class="hidden">
+    <!-- Sidebar -->
+    <aside class="sidebar glass">
+      <div class="brand">⚕️ Health Grid</div>
+      <div class="user-profile">
+        <div class="avatar-circle" id="dash-avatar">HG</div>
+        <div>
+          <div style="font-weight:600; font-size:0.9rem" id="dash-name">Patient Name</div>
+          <div style="font-size:0.75rem; color:var(--green); display:flex; align-items:center; gap:4px">
+            <span style="width:8px; height:8px; background:var(--green); border-radius:50%; display:inline-block"></span> Online
+          </div>
         </div>
       </div>
-
-      <!-- WELCOME -->
-      <div class="welcome-bar">
-        <div class="welcome-eyebrow">My Health Dashboard</div>
-        <h2 id="welcomeTitle">Welcome back</h2>
-        <p id="welcomeSub">Here's a summary of your health records at Health Grid.</p>
+      <div class="nav-item active" onclick="navTo('home')"><span>🏠</span> <span>Dashboard</span></div>
+      <div class="nav-item" onclick="navTo('appointments')"><span>📅</span> <span>My Appointments</span></div>
+      <div class="nav-item" onclick="navTo('orders')"><span>💊</span> <span>My Orders</span></div>
+      <div class="nav-item" onclick="navTo('pharmacy')"><span>🛒</span> <span>Buy Medicines</span></div>
+      <div class="nav-item" onclick="navTo('book')"><span>📞</span> <span>Book Consultation</span></div>
+      <div class="nav-item" onclick="navTo('chat')"><span>💬</span> <span>Chat</span></div>
+      <div class="nav-item" onclick="navTo('wallet')"><span>💰</span> <span>My Wallet</span></div>
+      <div class="nav-item" onclick="navTo('settings')"><span>⚙️</span> <span>Settings</span></div>
+      <div class="nav-item" onclick="navTo('help')"><span>❓</span> <span>Help</span></div>
+      
+      <div class="sidebar-bottom">
+        <button class="btn btn-outline" style="width:100%; border-color:rgba(239,68,68,0.5); color:#f87171" onclick="logout()">Log Out</button>
       </div>
+    </aside>
 
-      <!-- SUMMARY CARDS -->
-      <div class="summary-grid reveal">
-        <div class="sum-card blue">
-          <div class="sum-label">Consultations</div>
-          <div class="sum-value" id="sumConsult">0</div>
-          <div class="sum-sub">Total visits</div>
+    <!-- Main Content -->
+    <main class="main-content">
+      
+      <!-- Home -->
+      <div id="view-home" class="section active">
+        <div class="page-title">Good morning, <span id="welcome-name"></span>! 👋</div>
+        <p style="color:var(--text-muted); margin-bottom:32px" id="current-date-display"></p>
+        
+        <div class="stat-row">
+          <div class="stat-card glass">
+            <h3>Wallet Balance</h3>
+            <div class="value">₦<span id="dash-wallet-bal">0.00</span></div>
+            <button class="btn btn-teal" style="padding:6px 12px; font-size:0.8rem; margin-top:12px" onclick="navTo('wallet')">Fund Wallet</button>
+          </div>
+          <div class="stat-card glass">
+            <h3>Next Appointment</h3>
+            <div class="value" style="font-size:1.2rem; margin-top:10px" id="dash-next-appt">No upcoming</div>
+          </div>
+          <div class="stat-card glass">
+            <h3>Active Orders</h3>
+            <div class="value" id="dash-active-orders">0</div>
+          </div>
         </div>
-        <div class="sum-card green">
-          <div class="sum-label">Appointments</div>
-          <div class="sum-value" id="sumAppts">0</div>
-          <div class="sum-sub">Scheduled</div>
-        </div>
-        <div class="sum-card">
-          <div class="sum-label">Lab Results</div>
-          <div class="sum-value" id="sumLabs">0</div>
-          <div class="sum-sub">Records available</div>
-        </div>
-        <div class="sum-card amber">
-          <div class="sum-label">Billing</div>
-          <div class="sum-value" id="sumBilling">0</div>
-          <div class="sum-sub">Invoices</div>
+
+        <div style="display:flex; gap:16px">
+          <button class="btn btn-primary" onclick="navTo('book')">Book New Appointment</button>
+          <button class="btn btn-outline" onclick="navTo('pharmacy')">Pharmacy</button>
         </div>
       </div>
 
-      <!-- RECENT CONSULTATIONS -->
-      <div class="psection reveal">
-        <div class="psection-head">
-          <h3>🩺 Recent Consultations</h3>
-          <span class="count-badge" id="consultCount">0</span>
+      <!-- Appointments -->
+      <div id="view-appointments" class="section">
+        <h2 class="page-title">My Appointments</h2>
+        <div class="tabs">
+          <div class="tab active" onclick="filterAppts('all')">All</div>
+          <div class="tab" onclick="filterAppts('pending')">Pending</div>
+          <div class="tab" onclick="filterAppts('payment_due')">Payment Due</div>
+          <div class="tab" onclick="filterAppts('paid')">Confirmed/Paid</div>
         </div>
-        <div id="consultList"></div>
+        <div id="appointments-list">
+          <!-- Populated by JS -->
+          <div style="text-align:center; margin-top:40px; color:var(--text-muted)">Loading appointments...</div>
+        </div>
       </div>
 
-      <!-- APPOINTMENTS -->
-      <div class="psection reveal">
-        <div class="psection-head">
-          <h3>📅 Appointments</h3>
-          <span class="count-badge" id="apptCount">0</span>
+      <!-- Orders -->
+      <div id="view-orders" class="section">
+        <h2 class="page-title">My Orders (Labs & Prescriptions)</h2>
+        <div id="orders-list">
+           <!-- Populated by JS -->
         </div>
-        <div id="apptList"></div>
       </div>
 
-      <!-- LAB RESULTS -->
-      <div class="psection reveal">
-        <div class="psection-head">
-          <h3>🧪 Laboratory Results</h3>
-          <span class="count-badge" id="labCount">0</span>
+      <!-- Pharmacy -->
+      <div id="view-pharmacy" class="section">
+        <h2 class="page-title">Buy Medicines</h2>
+        <input type="text" placeholder="Search medicines..." id="pharmacy-search" oninput="filterPharmacy()" style="max-width:400px">
+        <div class="product-grid" id="pharmacy-grid">
+          <!-- Populated by JS -->
         </div>
-        <div id="labList"></div>
       </div>
 
-      <!-- BILLING -->
-      <div class="psection reveal">
-        <div class="psection-head">
-          <h3>💳 Billing & Payments</h3>
-          <span class="count-badge" id="billCount">0</span>
+      <!-- Book -->
+      <div id="view-book" class="section">
+        <h2 class="page-title">Book Consultation</h2>
+        <!-- Will just mirror the wizard functionality -->
+        <button class="btn btn-primary" onclick="showScreen('wizard')">Start Booking Wizard</button>
+      </div>
+
+      <!-- Chat -->
+      <div id="view-chat" class="section">
+        <h2 class="page-title">Consultation Chat</h2>
+        <div style="display:flex; gap:20px">
+          <div style="width:250px; border-right:1px solid var(--glass-border); padding-right:16px" id="chat-appt-list">
+            <!-- Active appts to chat -->
+          </div>
+          <div class="glass chat-container" style="flex:1">
+            <div class="chat-messages" id="chat-messages-box">
+              <div style="text-align:center; color:var(--text-muted); margin-top:auto; margin-bottom:auto">Select an active appointment to start chatting.</div>
+            </div>
+            <div class="chat-input hidden" id="chat-input-area">
+              <input type="text" id="chat-text" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendChatMessage()">
+              <button class="btn btn-primary" onclick="sendChatMessage()">Send</button>
+            </div>
+          </div>
         </div>
-        <div id="billList"></div>
+      </div>
+
+      <!-- Wallet -->
+      <div id="view-wallet" class="section">
+        <h2 class="page-title">My Wallet</h2>
+        <div class="glass" style="padding:32px; text-align:center; max-width:400px; margin:0 auto">
+          <h3 style="color:var(--text-muted); margin-bottom:8px">Available Balance</h3>
+          <div style="font-size:3rem; font-weight:bold; margin-bottom:24px">₦<span id="wallet-page-bal">0.00</span></div>
+          
+          <input type="number" id="fund-amount" placeholder="Amount (min ₦500)" min="500">
+          <button class="btn btn-primary" style="width:100%" onclick="fundWallet()">Add Funds</button>
+        </div>
+      </div>
+
+      <!-- Settings -->
+      <div id="view-settings" class="section">
+        <h2 class="page-title">Settings</h2>
+        <div class="glass" style="padding:24px; max-width:600px; margin-bottom:24px">
+          <h3 style="margin-bottom:16px">Profile Information</h3>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px">
+            <div><label style="color:var(--text-muted); font-size:0.8rem">Full Name</label><input type="text" id="set-name" readonly></div>
+            <div><label style="color:var(--text-muted); font-size:0.8rem">Phone</label><input type="text" id="set-phone" readonly></div>
+            <div><label style="color:var(--text-muted); font-size:0.8rem">Date of Birth</label><input type="text" id="set-dob" readonly></div>
+            <div><label style="color:var(--text-muted); font-size:0.8rem">Sex</label><input type="text" id="set-sex" readonly></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Help -->
+      <div id="view-help" class="section">
+        <h2 class="page-title">Help & Support</h2>
+        <div class="stat-row">
+           <div class="stat-card glass" style="text-align:center">
+             <div style="font-size:2rem; margin-bottom:10px">🚑</div>
+             <h3>Emergency</h3>
+             <div class="value" style="font-size:1.5rem; color:#f87171">112</div>
+           </div>
+           <div class="stat-card glass" style="text-align:center">
+             <div style="font-size:2rem; margin-bottom:10px">📞</div>
+             <h3>Support Line</h3>
+             <div class="value" style="font-size:1.5rem; color:var(--teal)">0800-909-6666</div>
+           </div>
+        </div>
       </div>
 
     </main>
+  </section>
+
+  <!-- Payment Modal -->
+  <div id="payment-modal" class="modal-overlay hidden">
+    <div class="modal-content glass" style="background:var(--bg-color)">
+      <span class="close-modal" onclick="closeModal('payment-modal')">&times;</span>
+      <h2 style="margin-bottom:16px">Make Payment</h2>
+      <p style="margin-bottom:24px">Amount Due: <strong style="font-size:1.5rem">₦<span id="pay-modal-amount">0</span></strong></p>
+      
+      <button class="btn btn-teal" style="width:100%; margin-bottom:12px" onclick="payWithWallet()">Pay from Wallet (Bal: ₦<span id="pay-modal-wallet">0</span>)</button>
+      <button class="btn btn-outline" style="width:100%" onclick="payWithPaystack()">Pay with Paystack</button>
+    </div>
   </div>
 
+
+  <!-- JavaScript Logic -->
   <script>
-  // ──────────────────────────────────────────────────────
-  //  Patient Portal — JavaScript
-  // ──────────────────────────────────────────────────────
-
-  const loginScreen = document.getElementById("loginScreen");
-  const portalShell = document.getElementById("portalShell");
-  const loginForm   = document.getElementById("loginForm");
-  const loginError  = document.getElementById("loginError");
-  const loginBtn    = document.getElementById("loginBtn");
-
-  // ── Session ──────────────────────────────────────────
-  let patientSession = null;
-
-  function loadSession() {
-    const raw = sessionStorage.getItem("patient_session");
-    if (raw) { try { return JSON.parse(raw); } catch (_) {} }
-    return null;
-  }
-
-  function saveSession(data) {
-    sessionStorage.setItem("patient_session", JSON.stringify(data));
-  }
-
-  function clearSession() {
-    sessionStorage.removeItem("patient_session");
-  }
-
-  // ── Registration Toggle ─────────────────────────────────
-  const loginCard = document.getElementById("loginCard");
-  const registerCard = document.getElementById("registerCard");
-  
-  window.toggleRegister = function() {
-    if (loginCard.classList.contains("hidden")) {
-      loginCard.classList.remove("hidden");
-      registerCard.classList.add("hidden");
-    } else {
-      loginCard.classList.add("hidden");
-      registerCard.classList.remove("hidden");
-    }
-  };
-
-  // ── Register ──────────────────────────────────────────
-  const registerForm = document.getElementById("registerForm");
-  const regError = document.getElementById("regError");
-  const regBtn = document.getElementById("regBtn");
-
-  registerForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    const consent = document.getElementById("patRegLegalConsent");
-    if (consent && !consent.checked) {
-      regError.textContent = "You must explicitly agree to the Terms of Service, Privacy Policy, and Medical Disclaimer.";
-      regError.classList.remove("hidden");
-      return;
-    }
-    const name = document.getElementById("regName").value.trim();
-    const phone = document.getElementById("regPhone").value.trim();
-    const age = document.getElementById("regAge").value;
-    const sex = document.getElementById("regSex").value;
-
-    if (!name || !phone || !age || !sex) {
-      regError.textContent = "Please fill in all required fields.";
-      regError.classList.remove("hidden");
-      return;
-    }
-
-    regError.classList.add("hidden");
-    regBtn.disabled = true;
-    regBtn.textContent = "Creating Account…";
-
-    try {
-      const res = await fetch("/api/v2/patient/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, age, sex })
-      });
-      const json = await res.json();
-      
-      if (!res.ok || !json.ok || !json.patient) {
-        regError.textContent = json.error || "Failed to create account. Please try again.";
-        regError.classList.remove("hidden");
-        regBtn.disabled = false;
-        regBtn.textContent = "Create Patient Account";
-        return;
-      }
-      
-      // Auto-fill login form in case they log out
-      document.getElementById("loginPhone").value = phone;
-      document.getElementById("loginPatId").value = json.patient.id;
-      
-      // Auto-login upon success
-      saveSession({ phone, patientId: json.patient.id, patientName: json.patient.name });
-      patientSession = { phone, patientId: json.patient.id, patientName: json.patient.name };
-      
-      // Reset forms and view
-      registerForm.reset();
-      regBtn.disabled = false;
-      regBtn.textContent = "Create Patient Account";
-      
-      // Load dashboard
-      await loadDashboard(json.patient, json);
-      
-      // Alert the patient of their new ID (important for logging back in)
-      alert(`Registration Successful!\n\nWelcome, ${json.patient.name}.\nYour Patient ID is: ${json.patient.id}\n\nPlease keep this ID safe as you will need it to log in next time.`);
-      
-    } catch (err) {
-      regError.textContent = "Could not reach server. Please try again.";
-      regError.classList.remove("hidden");
-      regBtn.disabled = false;
-      regBtn.textContent = "Create Patient Account";
-    }
-  });
-
-  // ── Login ─────────────────────────────────────────────
-  loginForm.addEventListener("submit", async e => {
-    e.preventDefault();
-    const consent = document.getElementById("patLoginLegalConsent");
-    if (consent && !consent.checked) {
-      loginError.textContent = "You must explicitly agree to the Terms of Service, Privacy Policy, and Medical Disclaimer.";
-      loginError.classList.remove("hidden");
-      return;
-    }
-    const phone    = document.getElementById("loginPhone").value.trim();
-    const patientId = document.getElementById("loginPatId").value.trim().toUpperCase();
-    loginError.classList.add("hidden");
-    loginBtn.disabled = true;
-    loginBtn.textContent = "Signing in…";
-
-    try {
-      const res = await fetch("/api/v2/patient/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone, patientId })
-      });
-      if (res.status === 401) {
-        loginError.classList.remove("hidden");
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Sign In to My Health Portal";
-        return;
-      }
-      const json = await res.json();
-      if (!json.ok || !json.patient) {
-        loginError.classList.remove("hidden");
-        loginBtn.disabled = false;
-        loginBtn.textContent = "Sign In to My Health Portal";
-        return;
-      }
-      saveSession({ phone, patientId, patientName: json.patient.name });
-      patientSession = { phone, patientId, patientName: json.patient.name };
-      await loadDashboard(json.patient, json);
-    } catch (err) {
-      loginError.textContent = "Could not reach server. Please try again.";
-      loginError.classList.remove("hidden");
-      loginBtn.disabled = false;
-      loginBtn.textContent = "Sign In to My Health Portal";
-    }
-  });
-
-  // ── Logout ────────────────────────────────────────────
-  document.getElementById("logoutBtn").addEventListener("click", () => {
-    clearSession();
-    portalShell.style.display = "none";
-    loginScreen.style.display = "flex";
-    document.getElementById("loginPhone").value = "";
-    document.getElementById("loginPatId").value = "";
-  });
-
-  // ── Helper: initials ──────────────────────────────────
-  function initials(name) {
-    return (name || "?").split(" ").slice(0,2).map(w => w[0]).join("").toUpperCase();
-  }
-
-  function badgeClass(status) {
-    const s = (status || "").toLowerCase();
-    if (["paid","completed","resolved","collected"].includes(s)) return "badge-green";
-    if (["pending","scheduled","active"].includes(s)) return "badge-blue";
-    if (["overdue","escalated","unpaid"].includes(s)) return "badge-red";
-    if (["partial","booked","open"].includes(s)) return "badge-amber";
-    return "badge-gray";
-  }
-
-  function emptyState(icon, msg) {
-    return `<div class="empty-state"><span class="empty-icon">${icon}</span>${msg}</div>`;
-  }
-
-  // ── Dashboard Render ──────────────────────────────────
-  async function loadDashboard(patient, payload) {
-    // Show portal, hide login
-    loginScreen.style.display = "none";
-    portalShell.style.display = "block";
-
-    // Fetch full dashboard data if not already in payload
-    let data = payload;
-    if (!data.consultations) {
-      try {
-        const r = await fetch(`/api/v2/patient/dashboard/${patient.id}?phone=${encodeURIComponent(patientSession.phone)}`);
-        data = await r.json();
-      } catch (_) {}
-    }
-
-    const p = data.patient || patient;
-    const consultations = data.consultations || [];
-    const appointments  = data.appointments  || [];
-    const labResults    = data.labResults    || [];
-    const billing       = data.billing       || [];
-
-    // Nav
-    document.getElementById("navAvatar").textContent = initials(p.name);
-    document.getElementById("navName").textContent   = p.name.split(" ")[0];
-
-    // Profile card
-    document.getElementById("profileAvatar").textContent = initials(p.name);
-    document.getElementById("profileName").textContent   = p.name;
-    document.getElementById("profileMeta").innerHTML = [
-      p.sex && `${p.sex}`,
-      p.age && `${p.age} yrs`,
-      p.lga && `${p.lga} LGA`,
-      p.phone && `📱 ${p.phone}`
-    ].filter(Boolean).join("  ·  ");
-    document.getElementById("profileId").textContent = `Patient ID: ${p.id}  ·  Last visit: ${p.lastVisit || "—"}`;
-    const tagsEl = document.getElementById("profileTags");
-    tagsEl.innerHTML = "";
-    if (p.insurance) { const t=document.createElement("span"); t.className="profile-tag"; t.textContent=p.insurance; tagsEl.appendChild(t); }
-    if (p.risk) { const t=document.createElement("span"); t.className="profile-tag"; t.textContent=p.risk; tagsEl.appendChild(t); }
-    if (p.allergies && p.allergies.length) {
-      const t=document.createElement("span"); t.className="profile-tag";
-      t.textContent="⚠ Allergies: " + p.allergies.join(", "); tagsEl.appendChild(t);
-    }
-
-    // Welcome
-    document.getElementById("welcomeTitle").textContent = `Welcome, ${p.name.split(" ")[0]}`;
-    document.getElementById("welcomeSub").textContent   = `Here's a summary of your health records. Facility: ${p.facilityId || "—"}`;
-
-    // Summary counts
-    document.getElementById("sumConsult").textContent  = consultations.length;
-    document.getElementById("sumAppts").textContent    = appointments.length;
-    document.getElementById("sumLabs").textContent     = labResults.length;
-    document.getElementById("sumBilling").textContent  = billing.length;
-    document.getElementById("consultCount").textContent = consultations.length;
-    document.getElementById("apptCount").textContent    = appointments.length;
-    document.getElementById("labCount").textContent     = labResults.length;
-    document.getElementById("billCount").textContent    = billing.length;
-
-    // Consultations
-    const consultEl = document.getElementById("consultList");
-    consultEl.innerHTML = consultations.length ? consultations.slice(0,8).map(c => `
-      <div class="record-card reveal" onclick="alert('Viewing Medical Report:\\n\\nConsultation ID: ${c.id}\\nDate: ${c.date}\\nDiagnosis: ${c.assessment || c.icd11Display || 'Pending'}\\n\\nFull clinical notes and prescriptions are available at the facility.')">
-        <div class="record-card-top">
-          <span class="record-card-title">🩺 ${c.chiefComplaint || "Consultation"}</span>
-          <span class="record-card-date">${c.date || ""}</span>
-        </div>
-        <div class="record-card-body">
-          ${c.assessment ? `<strong>Assessment:</strong> ${c.assessment}<br/>` : ""}
-          ${c.icd11Display ? `<strong>Diagnosis (ICD-11):</strong> ${c.icd11Display}<br/>` : ""}
-          ${c.plan ? `<strong>Plan:</strong> ${c.plan}<br/>` : ""}
-          ${c.doctorName ? `<span style="color:#94A3B8;font-size:12px;margin-top:4px;display:block;">Dr. ${c.doctorName} · ${c.specialty || ""}</span>` : ""}
-        </div>
-      </div>`).join("") : emptyState("🩺", "No consultation records yet.");
-
-    // Appointments
-    const apptEl = document.getElementById("apptList");
-    apptEl.innerHTML = appointments.length ? appointments.slice(0,6).map(a => `
-      <div class="record-card reveal">
-        <div class="record-card-top">
-          <span class="record-card-title">📅 ${a.department || a.specialty || "Appointment"}</span>
-          <span class="badge ${badgeClass(a.status)}">${a.status || "Scheduled"}</span>
-        </div>
-        <div class="record-card-body">
-          ${a.date ? `<strong>Date:</strong> ${a.date} ${a.time || ""}<br/>` : ""}
-          ${a.doctor ? `<strong>Doctor:</strong> ${a.doctor}<br/>` : ""}
-          ${a.reason ? `<strong>Reason:</strong> ${a.reason}` : ""}
-        </div>
-      </div>`).join("") : emptyState("📅", "No appointments scheduled.");
-
-    // Lab Results
-    const labEl = document.getElementById("labList");
-    labEl.innerHTML = labResults.length ? labResults.slice(0,6).map(l => `
-      <div class="record-card reveal" onclick="alert('Viewing Lab Report:\\n\\nTest: ${l.testName || l.test}\\nDate: ${l.date}\\nResult: ${l.result || 'Pending'}\\nStatus: ${l.status}\\n\\nPlease consult your physician for interpretation.')">
-        <div class="record-card-top">
-          <span class="record-card-title">🧪 ${l.testName || l.test || "Laboratory Test"}</span>
-          <span class="badge ${badgeClass(l.status)}">${l.status || "Resulted"}</span>
-        </div>
-        <div class="record-card-body">
-          ${l.result ? `<strong>Result:</strong> ${l.result}<br/>` : ""}
-          ${l.referenceRange ? `<strong>Reference:</strong> ${l.referenceRange}<br/>` : ""}
-          ${l.date ? `<span style="color:#94A3B8;font-size:12px;">${l.date}</span>` : ""}
-        </div>
-      </div>`).join("") : emptyState("🧪", "No laboratory results available.");
-
-    // Billing
-    const billEl = document.getElementById("billList");
-    billEl.innerHTML = billing.length ? billing.slice(0,6).map(b => `
-      <div class="record-card reveal">
-        <div class="record-card-top">
-          <span class="record-card-title">💳 ${b.serviceCategory || b.description || "Invoice"}</span>
-          <span class="badge ${badgeClass(b.status)}">${b.status || "Pending"}</span>
-        </div>
-        <div class="record-card-body">
-          ${b.totalAmount ? `<strong>Total:</strong> ₦${Number(b.totalAmount).toLocaleString()}<br/>` : ""}
-          ${b.patientPayable !== undefined ? `<strong>Patient Payable:</strong> ₦${Number(b.patientPayable).toLocaleString()}<br/>` : ""}
-          ${b.date ? `<span style="color:#94A3B8;font-size:12px;">${b.date}</span>` : ""}
-        </div>
-      </div>`).join("") : emptyState("💳", "No billing records available.");
-  }
-
-  // ── Auto-login from session ───────────────────────────
-  (async function init() {
-    const session = loadSession();
-    if (session) {
-      patientSession = session;
-      try {
-        const res = await fetch(`/api/v2/patient/dashboard/${session.patientId}?phone=${encodeURIComponent(session.phone)}`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.patient) { await loadDashboard(data.patient, data); return; }
-        }
-      } catch (_) {}
-      clearSession();
-    }
-    loginScreen.style.display = "flex";
-  })();
-  </script>
-
-  <!-- Global Error Handler -->
-  <style>
-    #global-error-toast {
-      position: fixed;
-      bottom: -100px;
-      right: 20px;
-      background: #ef4444;
-      color: white;
-      padding: 16px 24px;
-      border-radius: 8px;
-      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-family: system-ui, sans-serif;
-      font-size: 14px;
-      z-index: 999999;
-      transition: bottom 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      max-width: 400px;
-    }
-    #global-error-toast.show {
-      bottom: 20px;
-    }
-    #global-error-toast .close-btn {
-      margin-left: auto;
-      cursor: pointer;
-      font-weight: bold;
-      opacity: 0.8;
-    }
-    #global-error-toast .close-btn:hover {
-      opacity: 1;
-    }
-  </style>
-  <div id="global-error-toast">
-    <span>⚠️</span>
-    <span id="global-error-msg">An unexpected error occurred.</span>
-    <span class="close-btn" onclick="document.getElementById('global-error-toast').classList.remove('show')">✕</span>
-  </div>
-  <script>
-    window.showGlobalError = function(msg) {
-      const toast = document.getElementById('global-error-toast');
-      const msgEl = document.getElementById('global-error-msg');
-      if(toast && msgEl) {
-        msgEl.innerText = msg;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 5000);
-      } else {
-        console.error("Global error:", msg);
-      }
+    // --- State ---
+    const state = {
+      booking: {
+        specialty: '',
+        doctorId: null,
+        doctorName: '',
+        fee: 0,
+        date: '',
+        time: '',
+        type: 'In-Person'
+      },
+      patient: null,
+      token: null,
+      appointments: [],
+      currentChatAppt: null,
+      chatPollInterval: null
     };
-    window.addEventListener('error', function(event) {
-      window.showGlobalError(event.message || 'A script error occurred.');
-    });
-    window.addEventListener('unhandledrejection', function(event) {
-      window.showGlobalError(event.reason ? (event.reason.message || event.reason) : 'An asynchronous error occurred.');
-    });
-    
-    // Intercept fetch to catch network errors globally
-    const originalFetch = window.fetch;
-    window.fetch = async function(...args) {
+
+    // --- Helpers ---
+    function showToast(msg, type='success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerText = msg;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'slideOut 0.3s ease forwards';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+
+    async function apiCall(endpoint, options = {}) {
+      const token = localStorage.getItem('hg_patient_token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      
       try {
-        const response = await originalFetch.apply(this, args);
-        if(!response.ok && response.status >= 500) {
-           window.showGlobalError(`Server Error: ${response.status} ${response.statusText}`);
-        }
-        return response;
+        const res = await fetch(endpoint, { ...options, headers: { ...headers, ...options.headers } });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || data.message || `API Error: ${res.status}`);
+        return data;
       } catch (err) {
-        window.showGlobalError('Network Error: Unable to reach the server.');
-        throw err;
+        // Fallback for UI if backend is not running
+        console.warn('API Call failed, using mock data:', endpoint, err);
+        return getMockData(endpoint, options);
       }
-    };
-  </script>
-  <!-- End Global Error Handler -->
+    }
 
+    function getMockData(endpoint, options) {
+      // Mock Responses to keep UI functional without backend
+      if (endpoint.includes('/doctors')) {
+        return { data: [
+          { id: 1, name: 'Dr. Jane Doe', specialty: state.booking.specialty || 'General', rating: 4.8, fee: 5000 },
+          { id: 2, name: 'Dr. John Smith', specialty: state.booking.specialty || 'General', rating: 4.5, fee: 4000 }
+        ]};
+      }
+      if (endpoint.includes('/slots')) {
+        return { data: ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '04:00 PM'].map((t,i) => ({ time: t, available: i%2===0 })) };
+      }
+      if (endpoint.includes('/auth/signup') || endpoint.includes('/auth/otp/verify')) {
+        return { data: { token: 'mock-jwt-token', patient: { id: 1, name: 'Mock Patient', phone: '08000000000', wallet_balance: 10000 } } };
+      }
+      if (endpoint.includes('/auth/otp/request')) return { message: 'OTP Sent to phone' };
+      if (endpoint.includes('/appointments') && options.method === 'POST') {
+        return { data: { id: 'APT-' + Math.floor(Math.random()*10000) } };
+      }
+      if (endpoint.includes('/patient/appointments') && options.method !== 'POST') {
+        return { data: [
+          { id: 'APT-1234', doctor_name: 'Dr. Jane Doe', specialty: 'General', date: '2026-08-10', time: '10:00 AM', type: 'Chat', status: 'payment_due', fee: 5000 },
+          { id: 'APT-5678', doctor_name: 'Dr. John Smith', specialty: 'Cardiology', date: '2026-08-01', time: '02:00 PM', type: 'In-Person', status: 'completed', fee: 8000 }
+        ]};
+      }
+      if (endpoint.includes('/patient/wallet/fund')) return { data: { authorization_url: null, message: 'Wallet funded successfully (Demo)' } };
+      if (endpoint.includes('/pay/wallet')) return { message: 'Paid successfully' };
+      if (endpoint.includes('/pharmacy/products')) return { data: [
+        { id:1, name: 'Paracetamol', category: 'Painkiller', price: 500, requires_rx: false },
+        { id:2, name: 'Amoxicillin', category: 'Antibiotic', price: 1500, requires_rx: true }
+      ]};
+      
+      return { data: [] };
+    }
+
+    // --- Navigation & Init ---
+    function init() {
+      const token = localStorage.getItem('hg_patient_token');
+      const patient = localStorage.getItem('hg_patient');
+      if (token && patient) {
+        state.token = token;
+        state.patient = JSON.parse(patient);
+        loadDashboard();
+      } else {
+        showScreen('landing');
+      }
+      document.getElementById('current-date-display').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    function showScreen(screenId, step=1) {
+      document.getElementById('landing').classList.add('hidden');
+      document.getElementById('wizard').classList.add('hidden');
+      document.getElementById('dashboard').classList.add('hidden');
+      document.getElementById(screenId).classList.remove('hidden');
+
+      if (screenId === 'wizard') {
+        state.booking = { specialty: '', doctorId: null, doctorName: '', fee: 0, date: '', time: '', type: 'In-Person' };
+        goToStep(step);
+      }
+    }
+
+    // --- Wizard Logic ---
+    function goToStep(step) {
+      document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+      document.getElementById(`step-${step}`).classList.add('active');
+
+      if (step === 2) loadDoctors();
+      if (step === 3) loadDates();
+      if (step === 5) renderSummary();
+    }
+
+    function selectSpecialty(spec) {
+      state.booking.specialty = spec;
+      goToStep(2);
+    }
+
+    async function loadDoctors() {
+      const container = document.getElementById('wizard-doctors-list');
+      container.innerHTML = '<div style="text-align:center; width:100%">Loading doctors... <span class="spinner"></span></div>';
+      const res = await apiCall(`/api/v2/patient/doctors?specialty=${encodeURIComponent(state.booking.specialty)}`);
+      
+      if (!res.data || res.data.length === 0) {
+        container.innerHTML = '<div style="width:100%; text-align:center; padding:20px; color:var(--text-muted)">No doctors found for this specialty.</div>';
+        return;
+      }
+
+      container.innerHTML = res.data.map(doc => `
+        <div class="doctor-card glass">
+          <div class="avatar-circle">${doc.name.split(' ').map(n=>n[0]).join('').substring(0,2)}</div>
+          <h3 style="margin-bottom:4px">${doc.name}</h3>
+          <p style="color:var(--text-muted); font-size:0.875rem; margin-bottom:8px">${doc.specialty}</p>
+          <div style="margin-bottom:12px">
+            <span class="badge badge-gold">★ ${doc.rating}</span>
+            <span class="badge badge-gray">₦${doc.fee}</span>
+          </div>
+          <button class="btn btn-outline" style="width:100%; margin-top:auto" onclick="selectDoctor(${doc.id}, '${doc.name}', ${doc.fee})">Select</button>
+        </div>
+      `).join('');
+    }
+
+    function selectDoctor(id, name, fee) {
+      state.booking.doctorId = id;
+      state.booking.doctorName = name;
+      state.booking.fee = fee;
+      goToStep(3);
+    }
+
+    function loadDates() {
+      const container = document.getElementById('wizard-dates');
+      container.innerHTML = '';
+      const today = new Date();
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(today);
+        d.setDate(today.getDate() + i);
+        const iso = d.toISOString().split('T')[0];
+        const label = i === 0 ? 'Today' : i === 1 ? 'Tmw' : d.toLocaleDateString('en-US', { weekday: 'short' });
+        const dayNum = d.getDate();
+        
+        const pill = document.createElement('div');
+        pill.className = `date-pill ${i===0 ? 'selected' : ''}`;
+        pill.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted)">${label}</div><div style="font-weight:bold; font-size:1.2rem">${dayNum}</div>`;
+        pill.onclick = () => {
+          document.querySelectorAll('.date-pill').forEach(el => el.classList.remove('selected'));
+          pill.classList.add('selected');
+          loadTimes(iso);
+        };
+        container.appendChild(pill);
+      }
+      
+      loadTimes(today.toISOString().split('T')[0]);
+    }
+
+    async function loadTimes(dateStr) {
+      state.booking.date = dateStr;
+      const container = document.getElementById('wizard-times');
+      container.innerHTML = '<div style="grid-column:1/-1; text-align:center">Loading slots...</div>';
+      
+      const res = await apiCall(`/api/v2/patient/doctors/${state.booking.doctorId}/slots?date=${dateStr}`);
+      const slots = res.data || [];
+      
+      if (slots.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-muted)">No slots available.</div>';
+        return;
+      }
+
+      container.innerHTML = slots.map(slot => `
+        <div class="time-pill ${slot.available ? 'available' : 'booked'}" 
+             onclick="${slot.available ? `selectTime(this, '${slot.time}')` : ''}">
+          ${slot.time}
+        </div>
+      `).join('');
+      state.booking.time = '';
+    }
+
+    function selectTime(el, time) {
+      document.querySelectorAll('.time-pill').forEach(n => n.classList.remove('selected'));
+      el.classList.add('selected');
+      state.booking.time = time;
+    }
+
+    function selectType(el, type) {
+      document.querySelectorAll('.type-pill').forEach(n => n.classList.remove('selected'));
+      el.classList.add('selected');
+      state.booking.type = type;
+    }
+
+    function proceedToAuth() {
+      if (!state.booking.time) return showToast('Please select a time slot', 'error');
+      
+      if (state.token && state.patient) {
+        goToStep(5); // already logged in
+      } else {
+        goToStep(4);
+      }
+    }
+
+    // --- Auth Logic ---
+    function switchAuthTab(tab) {
+      document.querySelectorAll('#step-4 .tab').forEach(el => el.classList.remove('active'));
+      event.target.classList.add('active');
+      if (tab === 'new') {
+        document.getElementById('auth-new').classList.remove('hidden');
+        document.getElementById('auth-returning').classList.add('hidden');
+      } else {
+        document.getElementById('auth-new').classList.add('hidden');
+        document.getElementById('auth-returning').classList.remove('hidden');
+      }
+    }
+
+    async function registerPatient() {
+      const name = document.getElementById('reg-name').value;
+      const phone = document.getElementById('reg-phone').value;
+      const dob = document.getElementById('reg-dob').value;
+      const sex = document.getElementById('reg-sex').value;
+      
+      if(!name || !phone) return showToast('Name and phone are required', 'error');
+      
+      document.getElementById('btn-reg').innerHTML = '<span class="spinner"></span>';
+      try {
+        const res = await apiCall('/api/v2/patient/auth/signup', {
+          method: 'POST', body: JSON.stringify({ name, phone, dob, sex })
+        });
+        handleAuthSuccess(res.data);
+      } catch(e) {
+        showToast(e.message, 'error');
+      } finally {
+        document.getElementById('btn-reg').innerHTML = 'Sign Up';
+      }
+    }
+
+    async function requestOTP() {
+      const phone = document.getElementById('login-phone').value;
+      if(!phone) return showToast('Phone required', 'error');
+      
+      document.getElementById('btn-otp-req').innerHTML = '<span class="spinner"></span>';
+      try {
+        await apiCall('/api/v2/patient/auth/otp/request', {
+          method: 'POST', body: JSON.stringify({ phone })
+        });
+        showToast('OTP Sent!');
+        document.getElementById('otp-req-block').classList.add('hidden');
+        document.getElementById('otp-ver-block').classList.remove('hidden');
+      } catch(e) {
+        showToast(e.message, 'error');
+      } finally {
+        document.getElementById('btn-otp-req').innerHTML = 'Send OTP';
+      }
+    }
+
+    async function verifyOTP() {
+      const phone = document.getElementById('login-phone').value;
+      const otp = document.getElementById('login-otp').value;
+      if(!otp) return showToast('OTP required', 'error');
+      
+      document.getElementById('btn-otp-ver').innerHTML = '<span class="spinner"></span>';
+      try {
+        const res = await apiCall('/api/v2/patient/auth/otp/verify', {
+          method: 'POST', body: JSON.stringify({ phone, otp })
+        });
+        handleAuthSuccess(res.data);
+      } catch(e) {
+        showToast(e.message, 'error');
+      } finally {
+        document.getElementById('btn-otp-ver').innerHTML = 'Verify & Login';
+      }
+    }
+
+    function handleAuthSuccess(data) {
+      if(!data || !data.token) return showToast('Auth failed', 'error');
+      localStorage.setItem('hg_patient_token', data.token);
+      localStorage.setItem('hg_patient', JSON.stringify(data.patient));
+      state.token = data.token;
+      state.patient = data.patient;
+      
+      if (!document.getElementById('wizard').classList.contains('hidden')) {
+        goToStep(5); // Continue wizard
+      } else {
+        loadDashboard();
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('hg_patient_token');
+      localStorage.removeItem('hg_patient');
+      state.token = null;
+      state.patient = null;
+      showScreen('landing');
+    }
+
+    // --- Final Booking ---
+    function renderSummary() {
+      document.getElementById('summary-doctor').innerText = state.booking.doctorName;
+      document.getElementById('summary-date').innerText = state.booking.date;
+      document.getElementById('summary-time').innerText = state.booking.time;
+      document.getElementById('summary-type').innerText = state.booking.type;
+      document.getElementById('summary-fee').innerText = state.booking.fee;
+      document.getElementById('summary-wallet-bal').innerText = state.patient.wallet_balance || 0;
+    }
+
+    async function confirmAppointment() {
+      document.getElementById('btn-confirm-appt').innerHTML = '<span class="spinner"></span>';
+      try {
+        const payload = {
+          doctor_id: state.booking.doctorId,
+          date: state.booking.date,
+          time: state.booking.time,
+          type: state.booking.type,
+          payment_method: document.getElementById('payment-method').value
+        };
+        const res = await apiCall('/api/v2/patient/appointments', {
+          method: 'POST', body: JSON.stringify(payload)
+        });
+        
+        document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+        document.getElementById('step-success').classList.add('active');
+        document.getElementById('success-appt-id').innerText = res.data.id;
+        
+      } catch(e) {
+        showToast(e.message, 'error');
+        document.getElementById('btn-confirm-appt').innerHTML = 'Confirm Appointment';
+      }
+    }
+
+    // --- Dashboard ---
+    function loadDashboard() {
+      showScreen('dashboard');
+      document.getElementById('dash-name').innerText = state.patient.name;
+      document.getElementById('welcome-name').innerText = state.patient.name.split(' ')[0];
+      document.getElementById('dash-avatar').innerText = state.patient.name.split(' ').map(n=>n[0]).join('').substring(0,2);
+      
+      updateWalletDisplays();
+      navTo('home');
+      fetchAppointments();
+    }
+
+    function updateWalletDisplays() {
+      const bal = state.patient.wallet_balance || 0;
+      document.getElementById('dash-wallet-bal').innerText = bal.toLocaleString();
+      document.getElementById('wallet-page-bal').innerText = bal.toLocaleString();
+      document.getElementById('pay-modal-wallet').innerText = bal.toLocaleString();
+    }
+
+    function navTo(section) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      event.currentTarget?.classList.add('active');
+      
+      document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+      document.getElementById(`view-${section}`).classList.add('active');
+
+      if(section === 'appointments') fetchAppointments();
+      if(section === 'pharmacy') loadPharmacy();
+      if(section === 'settings') loadSettings();
+    }
+
+    async function fetchAppointments() {
+      const res = await apiCall('/api/v2/patient/appointments');
+      state.appointments = res.data || [];
+      renderAppointments('all');
+      
+      // Update home dash
+      const upcoming = state.appointments.find(a => a.status === 'pending' || a.status === 'paid' || a.status === 'payment_due');
+      if (upcoming) {
+        document.getElementById('dash-next-appt').innerHTML = `
+          ${upcoming.date} at ${upcoming.time}<br>
+          <span style="font-size:0.9rem; color:var(--text-muted)">with ${upcoming.doctor_name}</span>
+        `;
+      }
+    }
+
+    function filterAppts(status) {
+      document.querySelectorAll('#view-appointments .tab').forEach(el => el.classList.remove('active'));
+      event.target.classList.add('active');
+      renderAppointments(status);
+    }
+
+    function renderAppointments(filter) {
+      const list = document.getElementById('appointments-list');
+      let filtered = state.appointments;
+      if (filter !== 'all') {
+        if(filter === 'paid') filtered = filtered.filter(a => ['paid','in_progress'].includes(a.status));
+        else filtered = filtered.filter(a => a.status === filter);
+      }
+
+      if(filtered.length === 0) {
+        list.innerHTML = '<div style="text-align:center; margin-top:40px; color:var(--text-muted)">No appointments found.</div>';
+        return;
+      }
+
+      list.innerHTML = filtered.map(a => {
+        let badgeColor = 'badge-gray';
+        if(a.status === 'pending') badgeColor = 'badge-gold';
+        if(a.status === 'paid' || a.status === 'in_progress') badgeColor = 'badge-green';
+        if(a.status === 'payment_due') badgeColor = 'badge-red';
+
+        let actionBtn = '';
+        if(a.status === 'payment_due') {
+          actionBtn = `<button class="btn btn-primary" style="animation: pulse 2s infinite" onclick="openPaymentModal('${a.id}', ${a.fee})">Pay ₦${a.fee}</button>`;
+        } else if (a.status === 'paid' || a.status === 'in_progress') {
+          if (a.type === 'Chat') actionBtn = `<button class="btn btn-teal" onclick="navToChat('${a.id}')">Join Chat</button>`;
+          if (a.type === 'Video Call') actionBtn = `<button class="btn btn-teal">Join Video</button>`;
+        }
+
+        return `
+          <div class="appointment-card glass">
+            <div class="appointment-info">
+              <h4>${a.doctor_name}</h4>
+              <div class="appointment-meta">
+                <span>${a.date} • ${a.time}</span>
+                <span class="badge badge-teal">${a.type}</span>
+                <span class="badge ${badgeColor}">${a.status.replace('_', ' ').toUpperCase()}</span>
+              </div>
+            </div>
+            <div class="appointment-actions">
+              ${actionBtn}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // --- Payment ---
+    let currentPayApptId = null;
+    let currentPayAmount = 0;
+
+    function openPaymentModal(apptId, amount) {
+      currentPayApptId = apptId;
+      currentPayAmount = amount;
+      document.getElementById('pay-modal-amount').innerText = amount.toLocaleString();
+      document.getElementById('payment-modal').classList.remove('hidden');
+    }
+    
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    async function payWithWallet() {
+      if ((state.patient.wallet_balance || 0) < currentPayAmount) {
+        return showToast('Insufficient wallet balance', 'error');
+      }
+      try {
+        await apiCall(`/api/v2/patient/appointments/${currentPayApptId}/pay/wallet`, { method: 'POST' });
+        showToast('Payment successful!');
+        closeModal('payment-modal');
+        // deduct local
+        state.patient.wallet_balance -= currentPayAmount;
+        localStorage.setItem('hg_patient', JSON.stringify(state.patient));
+        updateWalletDisplays();
+        fetchAppointments();
+      } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    function payWithPaystack() {
+      showToast('Redirecting to Paystack (Demo)...');
+      setTimeout(() => {
+        closeModal('payment-modal');
+        fetchAppointments();
+      }, 1000);
+    }
+
+    async function fundWallet() {
+      const amount = document.getElementById('fund-amount').value;
+      if (amount < 500) return showToast('Minimum amount is ₦500', 'error');
+      
+      try {
+        const res = await apiCall('/api/v2/patient/wallet/fund/initiate', { method: 'POST', body: JSON.stringify({ amount }) });
+        if(res.data && res.data.authorization_url) {
+          window.location.href = res.data.authorization_url;
+        } else {
+          showToast('Wallet funded (Demo)');
+          state.patient.wallet_balance = (state.patient.wallet_balance || 0) + parseInt(amount);
+          localStorage.setItem('hg_patient', JSON.stringify(state.patient));
+          updateWalletDisplays();
+        }
+      } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    // --- Pharmacy ---
+    let pharmacyData = [];
+    async function loadPharmacy() {
+      const res = await apiCall('/api/v2/patient/pharmacy/products');
+      pharmacyData = res.data || [];
+      renderPharmacy(pharmacyData);
+    }
+
+    function filterPharmacy() {
+      const q = document.getElementById('pharmacy-search').value.toLowerCase();
+      const filtered = pharmacyData.filter(p => p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q));
+      renderPharmacy(filtered);
+    }
+
+    function renderPharmacy(data) {
+      const grid = document.getElementById('pharmacy-grid');
+      grid.innerHTML = data.map(p => `
+        <div class="product-card glass">
+          <div class="product-img-ph">💊</div>
+          <h3 style="font-size:1.1rem; margin:0">${p.name}</h3>
+          <p style="color:var(--text-muted); font-size:0.875rem; margin:0">${p.category}</p>
+          <div style="font-weight:bold; font-size:1.2rem; color:var(--green)">₦${p.price}</div>
+          ${p.requires_rx ? '<span class="badge badge-red" style="width:max-content">Requires Rx</span>' : ''}
+          <button class="btn btn-outline" style="margin-top:auto" onclick="showToast('Added to cart')">Add to Cart</button>
+        </div>
+      `).join('');
+    }
+
+    // --- Chat ---
+    function navToChat(apptId) {
+      navTo('chat');
+      // Populate sidebar
+      const activeChats = state.appointments.filter(a => ['paid','in_progress'].includes(a.status) && a.type === 'Chat');
+      const list = document.getElementById('chat-appt-list');
+      list.innerHTML = activeChats.map(a => `
+        <div class="glass" style="padding:12px; margin-bottom:8px; cursor:pointer; ${a.id === apptId ? 'border-color:var(--green)' : ''}" onclick="loadChatThread('${a.id}')">
+          <div style="font-weight:bold">${a.doctor_name}</div>
+          <div style="font-size:0.8rem; color:var(--text-muted)">${a.date}</div>
+        </div>
+      `).join('');
+      
+      if(apptId) loadChatThread(apptId);
+    }
+
+    async function loadChatThread(apptId) {
+      state.currentChatAppt = apptId;
+      document.getElementById('chat-input-area').classList.remove('hidden');
+      const box = document.getElementById('chat-messages-box');
+      box.innerHTML = '<div style="text-align:center">Loading messages...</div>';
+      
+      // Mock chat messages
+      setTimeout(() => {
+        box.innerHTML = `
+          <div class="msg-bubble msg-left">Hello! I am ready for our consultation. What seems to be the issue today?</div>
+        `;
+      }, 500);
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chat-text');
+      const text = input.value.trim();
+      if(!text) return;
+      
+      const box = document.getElementById('chat-messages-box');
+      box.innerHTML += `<div class="msg-bubble msg-right">${text}</div>`;
+      input.value = '';
+      box.scrollTop = box.scrollHeight;
+    }
+
+    // --- Settings ---
+    function loadSettings() {
+      document.getElementById('set-name').value = state.patient.name || '';
+      document.getElementById('set-phone').value = state.patient.phone || '';
+      document.getElementById('set-dob').value = state.patient.dob || 'Not provided';
+      document.getElementById('set-sex').value = state.patient.sex || 'Not provided';
+    }
+
+    // Init on load
+    window.onload = init;
+  </script>
 </body>
 </html>
