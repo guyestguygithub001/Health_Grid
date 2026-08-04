@@ -12,7 +12,7 @@ const bcrypt = require('bcrypt');
 const { query } = require('./db-postgres');
 
 const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) { console.error('FATAL: JWT_SECRET environment variable is missing.'); process.exit(1); }
+if (!JWT_SECRET) { console.error('FATAL: JWT_SECRET environment variable is missing.'); throw new Error('Missing critical environment variables'); }
 const PAYSTACK_SK = process.env.PAYSTACK_SECRET_KEY;
 if (!PAYSTACK_SK) console.warn('WARNING: PAYSTACK_SECRET_KEY is missing. Payments will fail.');
 const SALT_ROUNDS = 10;
