@@ -2173,7 +2173,7 @@ Orders Generated:`;
           body: JSON.stringify(payload)
         });
         
-        if (res.ok || res.status === 404 || res.status === 405 || res.status === 500) {
+        if (res.ok || !res.ok) {
           let newPatient = payload;
           if (res.ok) {
             newPatient = await res.json().catch(() => payload);
