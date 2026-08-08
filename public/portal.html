@@ -291,7 +291,88 @@
     /* Loading Spinner */
     .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-  </style>
+  
+    /* Scheduler Enhancements */
+    .date-scroll {
+      display: flex; overflow-x: auto; gap: 12px; padding-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .date-scroll::-webkit-scrollbar { display: none; }
+    
+    .date-pill {
+      min-width: 72px; text-align: center; padding: 14px 10px;
+      border-radius: 16px; border: 1px solid rgba(14, 165, 233, 0.2);
+      cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: rgba(255, 255, 255, 0.7);
+    }
+    .date-pill:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+    }
+    .date-pill.selected {
+      background: linear-gradient(135deg, #2563EB, #1d4ed8);
+      color: white; border-color: transparent;
+      box-shadow: 0 8px 20px rgba(37,99,235,0.3);
+      transform: scale(1.05);
+    }
+    .date-pill.selected > div { color: white !important; }
+
+    .time-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 12px; margin-top: 16px;
+    }
+    .time-pill {
+      padding: 12px; text-align: center; border-radius: 12px;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      transition: all 0.2s;
+    }
+    .time-pill.available {
+      background: rgba(255, 255, 255, 0.8); color: #1e293b;
+    }
+    .time-pill.available:hover {
+      border-color: #2563EB; background: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37,99,235,0.1);
+    }
+    .time-pill.selected {
+      background: #2563EB; color: white; border-color: transparent;
+      box-shadow: 0 4px 15px rgba(37,99,235,0.3);
+      transform: scale(1.05);
+    }
+    .time-pill.booked {
+      background: rgba(0, 0, 0, 0.05); color: #94a3b8;
+      border-color: transparent; cursor: not-allowed; text-decoration: line-through;
+    }
+
+
+    .sleek-date-picker {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 1.1rem;
+      font-family: 'Inter', sans-serif;
+      color: #1e293b;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+      border-radius: 12px;
+      outline: none;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .sleek-date-picker:hover {
+      background: #ffffff;
+      border-color: #2563EB;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.1);
+    }
+    .sleek-date-picker:focus {
+      background: #ffffff;
+      border-color: #2563EB;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+    }
+
+</style>
 
   <style>
     body {
@@ -330,7 +411,88 @@
       border: 1px solid #cbd5e1 !important;
       color: #1e293b !important;
     }
-  </style>
+  
+    /* Scheduler Enhancements */
+    .date-scroll {
+      display: flex; overflow-x: auto; gap: 12px; padding-bottom: 12px;
+      scrollbar-width: none;
+    }
+    .date-scroll::-webkit-scrollbar { display: none; }
+    
+    .date-pill {
+      min-width: 72px; text-align: center; padding: 14px 10px;
+      border-radius: 16px; border: 1px solid rgba(14, 165, 233, 0.2);
+      cursor: pointer; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      background: rgba(255, 255, 255, 0.7);
+    }
+    .date-pill:hover {
+      background: rgba(255, 255, 255, 1);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.1);
+    }
+    .date-pill.selected {
+      background: linear-gradient(135deg, #2563EB, #1d4ed8);
+      color: white; border-color: transparent;
+      box-shadow: 0 8px 20px rgba(37,99,235,0.3);
+      transform: scale(1.05);
+    }
+    .date-pill.selected > div { color: white !important; }
+
+    .time-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 12px; margin-top: 16px;
+    }
+    .time-pill {
+      padding: 12px; text-align: center; border-radius: 12px;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer;
+      border: 1px solid rgba(14, 165, 233, 0.2);
+      transition: all 0.2s;
+    }
+    .time-pill.available {
+      background: rgba(255, 255, 255, 0.8); color: #1e293b;
+    }
+    .time-pill.available:hover {
+      border-color: #2563EB; background: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(37,99,235,0.1);
+    }
+    .time-pill.selected {
+      background: #2563EB; color: white; border-color: transparent;
+      box-shadow: 0 4px 15px rgba(37,99,235,0.3);
+      transform: scale(1.05);
+    }
+    .time-pill.booked {
+      background: rgba(0, 0, 0, 0.05); color: #94a3b8;
+      border-color: transparent; cursor: not-allowed; text-decoration: line-through;
+    }
+
+
+    .sleek-date-picker {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 1.1rem;
+      font-family: 'Inter', sans-serif;
+      color: #1e293b;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+      border-radius: 12px;
+      outline: none;
+      transition: all 0.2s ease-in-out;
+      cursor: pointer;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .sleek-date-picker:hover {
+      background: #ffffff;
+      border-color: #2563EB;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.1);
+    }
+    .sleek-date-picker:focus {
+      background: #ffffff;
+      border-color: #2563EB;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.2);
+    }
+
+</style>
 </head>
 <body>
 
@@ -383,8 +545,8 @@
       <div id="step-3" class="wizard-step">
         <h2 class="step-header">Pick a Date & Time</h2>
         
-        <div class="date-scroll" id="wizard-dates"></div>
-        <div class="time-grid" id="wizard-times"></div>
+        <input type="date" id="wizard-date-picker" class="sleek-date-picker" onchange="handleDateChange(this.value)" />
+        <input type="time" id="wizard-time-picker" class="sleek-date-picker" style="margin-top: 12px;" onchange="handleTimeChange(this.value)" />
         
         <h3 style="margin:20px 0 10px; font-size:1rem">Consultation Type</h3>
         <div class="type-selector">
@@ -409,7 +571,7 @@
         
         <div id="auth-returning">
           <div id="otp-req-block">
-            <input type="tel" id="login-phone" placeholder="Phone (+234...)" />
+            <input type="text" id="login-contact" placeholder="Phone (+234...) or Email" class="form-input-field" style="width:100%; padding:14px; border-radius:12px; border:1px solid rgba(14,165,233,0.3); outline:none; margin-bottom:12px;" />
             <button class="btn btn-primary" style="width:100%" onclick="requestOTP()" id="btn-otp-req">Send OTP</button>
           </div>
           <div id="otp-ver-block" class="hidden">
@@ -745,7 +907,8 @@
 
 
   <!-- JavaScript Logic -->
-  <script>
+  <script src="/js/apiClient.js"></script>
+<script>
     // --- State ---
     const state = {
       booking: {
@@ -777,56 +940,9 @@
       }, 3000);
     }
 
-    async function apiCall(endpoint, options = {}) {
-      const token = localStorage.getItem('hg_patient_token');
-      const headers = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      
-      try {
-        const res = await fetch(endpoint, { ...options, headers: { ...headers, ...options.headers } });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.error || data.message || `API Error: ${res.status}`);
-        return data;
-      } catch (err) {
-        // Fallback for UI if backend is not running
-        console.warn('API Call failed, using mock data:', endpoint, err);
-        return getMockData(endpoint, options);
-      }
-    }
+    
 
-    function getMockData(endpoint, options) {
-      // Mock Responses to keep UI functional without backend
-      if (endpoint.includes('/doctors')) {
-        return { data: [
-          { id: 1, name: 'Dr. Jane Doe', specialty: state.booking.specialty || 'General', rating: 4.8, fee: 5000 },
-          { id: 2, name: 'Dr. John Smith', specialty: state.booking.specialty || 'General', rating: 4.5, fee: 4000 }
-        ]};
-      }
-      if (endpoint.includes('/slots')) {
-        return { data: ['09:00 AM', '10:00 AM', '11:00 AM', '02:00 PM', '04:00 PM'].map((t,i) => ({ time: t, available: i%2===0 })) };
-      }
-      if (endpoint.includes('/auth/signup') || endpoint.includes('/auth/otp/verify')) {
-        return { data: { token: 'mock-jwt-token', patient: { id: 1, name: 'Mock Patient', phone: '08000000000', wallet_balance: 10000 } } };
-      }
-      if (endpoint.includes('/auth/otp/request')) return { message: 'OTP Sent to phone' };
-      if (endpoint.includes('/appointments') && options.method === 'POST') {
-        return { data: { id: 'APT-' + Math.floor(Math.random()*10000) } };
-      }
-      if (endpoint.includes('/patient/appointments') && options.method !== 'POST') {
-        return { data: [
-          { id: 'APT-1234', doctor_name: 'Dr. Jane Doe', specialty: 'General', date: '2026-08-10', time: '10:00 AM', type: 'Chat', status: 'payment_due', fee: 5000 },
-          { id: 'APT-5678', doctor_name: 'Dr. John Smith', specialty: 'Cardiology', date: '2026-08-01', time: '02:00 PM', type: 'In-Person', status: 'completed', fee: 8000 }
-        ]};
-      }
-      if (endpoint.includes('/patient/wallet/fund')) return { data: { authorization_url: null, message: 'Wallet funded successfully (Demo)' } };
-      if (endpoint.includes('/pay/wallet')) return { message: 'Paid successfully' };
-      if (endpoint.includes('/pharmacy/products')) return { data: [
-        { id:1, name: 'Paracetamol', category: 'Painkiller', price: 500, requires_rx: false },
-        { id:2, name: 'Amoxicillin', category: 'Antibiotic', price: 1500, requires_rx: true }
-      ]};
-      
-      return { data: [] };
-    }
+    
 
     // --- Navigation & Init ---
     function init() {
@@ -872,7 +988,7 @@
     async function loadDoctors() {
       const container = document.getElementById('wizard-doctors-list');
       container.innerHTML = '<div style="text-align:center; width:100%">Loading doctors... <span class="spinner"></span></div>';
-      const res = await apiCall(`/api/v2/patient/doctors?specialty=${encodeURIComponent(state.booking.specialty)}`);
+      const res = await window.apiClient.request(`/api/v2/patient/doctors?specialty=${encodeURIComponent(state.booking.specialty)}`);
       
       if (!res.data || res.data.length === 0) {
         container.innerHTML = '<div style="width:100%; text-align:center; padding:20px; color:var(--text-muted)">No doctors found for this specialty.</div>';
@@ -900,58 +1016,45 @@
       goToStep(3);
     }
 
+    
     function loadDates() {
-      const container = document.getElementById('wizard-dates');
-      container.innerHTML = '';
+      const picker = document.getElementById('wizard-date-picker');
+      if (!picker) return;
       const today = new Date();
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(today);
-        d.setDate(today.getDate() + i);
-        const iso = d.toISOString().split('T')[0];
-        const label = i === 0 ? 'Today' : i === 1 ? 'Tmw' : d.toLocaleDateString('en-US', { weekday: 'short' });
-        const dayNum = d.getDate();
-        
-        const pill = document.createElement('div');
-        pill.className = `date-pill ${i===0 ? 'selected' : ''}`;
-        pill.innerHTML = `<div style="font-size:0.8rem; color:var(--text-muted)">${label}</div><div style="font-weight:bold; font-size:1.2rem">${dayNum}</div>`;
-        pill.onclick = () => {
-          document.querySelectorAll('.date-pill').forEach(el => el.classList.remove('selected'));
-          pill.classList.add('selected');
-          loadTimes(iso);
-        };
-        container.appendChild(pill);
-      }
-      
-      loadTimes(today.toISOString().split('T')[0]);
+      const iso = today.toISOString().split('T')[0];
+      picker.min = iso;
+      picker.value = iso;
+      loadTimes(iso);
+    }
+    
+    function handleDateChange(dateStr) {
+      if (!dateStr) return;
+      loadTimes(dateStr);
     }
 
+
+    
     async function loadTimes(dateStr) {
       state.booking.date = dateStr;
-      const container = document.getElementById('wizard-times');
-      container.innerHTML = '<div style="grid-column:1/-1; text-align:center">Loading slots...</div>';
-      
-      const res = await apiCall(`/api/v2/patient/doctors/${state.booking.doctorId}/slots?date=${dateStr}`);
-      const slots = res.data || [];
-      
-      if (slots.length === 0) {
-        container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:var(--text-muted)">No slots available.</div>';
-        return;
+      // We are using a native time picker now, so we don't need to fetch slots from the API here.
+      // Just ensure the time picker is visible and ready.
+      const timePicker = document.getElementById('wizard-time-picker');
+      if (timePicker && !timePicker.value) {
+         timePicker.value = "09:00"; // default time
+         state.booking.time = "09:00";
       }
-
-      container.innerHTML = slots.map(slot => `
-        <div class="time-pill ${slot.available ? 'available' : 'booked'}" 
-             onclick="${slot.available ? `selectTime(this, '${slot.time}')` : ''}">
-          ${slot.time}
-        </div>
-      `).join('');
-      state.booking.time = '';
     }
-
+    
+    function handleTimeChange(timeStr) {
+      if (!timeStr) return;
+      state.booking.time = timeStr;
+    }
+    
     function selectTime(el, time) {
-      document.querySelectorAll('.time-pill').forEach(n => n.classList.remove('selected'));
-      el.classList.add('selected');
+      // deprecated, kept for safety
       state.booking.time = time;
     }
+
 
     function selectType(el, type) {
       document.querySelectorAll('.type-pill').forEach(n => n.classList.remove('selected'));
@@ -1007,7 +1110,7 @@
       btn.innerHTML = '<span class="spinner"></span> Creating account…';
       btn.disabled = true;
       try {
-        const res = await apiCall('/api/v2/patient/auth/signup', {
+        const res = await window.apiClient.request('/api/v2/patient/auth/signup', {
           method: 'POST',
           body: JSON.stringify({
             name, phone, dob, sex, marital_status: marital,
@@ -1026,13 +1129,13 @@
     }
 
     async function requestOTP() {
-      const phone = document.getElementById('login-phone').value;
-      if(!phone) return showToast('Phone required', 'error');
+      const contact = document.getElementById('login-contact').value;
+      if(!contact) return showToast('Phone or Email required', 'error');
       
       document.getElementById('btn-otp-req').innerHTML = '<span class="spinner"></span>';
       try {
-        await apiCall('/api/v2/patient/auth/otp/request', {
-          method: 'POST', body: JSON.stringify({ phone })
+        await window.apiClient.request('/api/v2/patient/auth/otp/request', {
+          method: 'POST', body: JSON.stringify({ contact })
         });
         showToast('OTP Sent!');
         document.getElementById('otp-req-block').classList.add('hidden');
@@ -1045,14 +1148,14 @@
     }
 
     async function verifyOTP() {
-      const phone = document.getElementById('login-phone').value;
+      const contact = document.getElementById('login-contact').value;
       const otp = document.getElementById('login-otp').value;
       if(!otp) return showToast('OTP required', 'error');
       
       document.getElementById('btn-otp-ver').innerHTML = '<span class="spinner"></span>';
       try {
-        const res = await apiCall('/api/v2/patient/auth/otp/verify', {
-          method: 'POST', body: JSON.stringify({ phone, otp })
+        const res = await window.apiClient.request('/api/v2/patient/auth/otp/verify', {
+          method: 'POST', body: JSON.stringify({ contact, otp })
         });
         handleAuthSuccess(res.data);
       } catch(e) {
@@ -1104,7 +1207,7 @@
           type: state.booking.type,
           payment_method: document.getElementById('payment-method').value
         };
-        const res = await apiCall('/api/v2/patient/appointments', {
+        const res = await window.apiClient.request('/api/v2/patient/appointments', {
           method: 'POST', body: JSON.stringify(payload)
         });
         
@@ -1150,7 +1253,7 @@
     }
 
     async function fetchAppointments() {
-      const res = await apiCall('/api/v2/patient/appointments');
+      const res = await window.apiClient.request('/api/v2/patient/appointments');
       state.appointments = res.data || [];
       renderAppointments('all');
       
@@ -1235,7 +1338,7 @@
         return showToast('Insufficient wallet balance', 'error');
       }
       try {
-        await apiCall(`/api/v2/patient/appointments/${currentPayApptId}/pay/wallet`, { method: 'POST' });
+        await window.apiClient.request(`/api/v2/patient/appointments/${currentPayApptId}/pay/wallet`, { method: 'POST' });
         showToast('Payment successful!');
         closeModal('payment-modal');
         // deduct local
@@ -1259,7 +1362,7 @@
       if (amount < 500) return showToast('Minimum amount is ₦500', 'error');
       
       try {
-        const res = await apiCall('/api/v2/patient/wallet/fund/initiate', { method: 'POST', body: JSON.stringify({ amount }) });
+        const res = await window.apiClient.request('/api/v2/patient/wallet/fund/initiate', { method: 'POST', body: JSON.stringify({ amount }) });
         if(res.data && res.data.authorization_url) {
           window.location.href = res.data.authorization_url;
         } else {
@@ -1274,7 +1377,7 @@
     // --- Pharmacy ---
     let pharmacyData = [];
     async function loadPharmacy() {
-      const res = await apiCall('/api/v2/patient/pharmacy/products');
+      const res = await window.apiClient.request('/api/v2/patient/pharmacy/products');
       pharmacyData = res.data || [];
       renderPharmacy(pharmacyData);
     }

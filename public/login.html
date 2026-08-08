@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!DOCTYPE html><html lang="en"><head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Health Grid | Sign In</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #060d1f;
@@ -239,7 +237,7 @@
     .status-dot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; animation: blink 1.5s infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
   </style>
-</head>
+<script src="/js/healthgrid-auth.js"></script></head>
 <body>
 
   <div class="bg-orbs">
@@ -263,7 +261,7 @@
         <label>Username</label>
         <div class="input-wrap">
           <span class="input-icon">👤</span>
-          <input type="text" id="username" placeholder="Enter username" autocomplete="username" />
+          <input type="text" id="username" placeholder="Enter username" autocomplete="username">
         </div>
       </div>
 
@@ -271,14 +269,14 @@
         <label>Password</label>
         <div class="input-wrap" style="position: relative;">
           <span class="input-icon">🔒</span>
-          <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" />
+          <input type="password" id="password" placeholder="Enter password" autocomplete="current-password">
           <button type="button" onclick="const p = document.getElementById('password'); if(p.type === 'password'){ p.type = 'text'; this.innerText = '🙈'; } else { p.type = 'password'; this.innerText = '👁️'; }" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted-light); font-size: 16px; cursor: pointer; padding: 0; outline: none;">👁️</button>
         </div>
       </div>
 
       <div class="form-group" style="margin: 16px auto 20px; text-align: center; display: flex; align-items: center; justify-content: center; width: 100%;">
         <label for="agreeLegalConsent" style="font-size: 11px; text-transform: none; letter-spacing: normal; color: var(--muted-light); cursor: pointer; font-weight: 400; display: inline-flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto; text-align: center;">
-          <input type="checkbox" id="agreeLegalConsent" style="margin: 0; cursor: pointer; flex-shrink: 0;" required />
+          <input type="checkbox" id="agreeLegalConsent" style="margin: 0; cursor: pointer; flex-shrink: 0;" required="">
           <span>I agree to <a href="legal.html#tos" target="_blank" style="color:var(--brand); text-decoration:none; font-weight:600;">Terms</a> · <a href="legal.html#privacy" target="_blank" style="color:var(--brand); text-decoration:none; font-weight:600;">Privacy</a> · <a href="legal.html#disclaimer" target="_blank" style="color:var(--brand); text-decoration:none; font-weight:600;">Disclaimer</a> <span style="opacity:0.65;">(18+)</span></span>
         </label>
       </div>
@@ -296,7 +294,7 @@
       <a href="/portal.html" class="portal-link">👤 Patient Self-Service Portal</a>
 
       <div class="hint" style="margin-top:18px;">
-        <p>Staff credentials: <strong>guyestguy</strong> / <strong>guyestguygithub001</strong><br />
+        <p>Staff credentials: <strong>guyestguy</strong> / <strong>guyestguygithub001</strong><br>
         Patients use the self-service portal to register and access their records.</p>
       </div>
     </div>
@@ -311,15 +309,15 @@
       <form id="resetForm">
         <div style="margin-bottom:16px;">
           <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:6px;">Username</label>
-          <input id="resetUser" type="text" required style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;" placeholder="Enter username" />
+          <input id="resetUser" type="text" required="" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;" placeholder="Enter username">
         </div>
         <div style="margin-bottom:16px;">
           <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:6px;">OTP (Check Email/SMS - Use 123456 for demo)</label>
-          <input id="resetOtp" type="text" required style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;letter-spacing:2px;text-align:center;" placeholder="------" />
+          <input id="resetOtp" type="text" required="" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;letter-spacing:2px;text-align:center;" placeholder="------">
         </div>
         <div style="margin-bottom:24px;">
           <label style="display:block;color:rgba(255,255,255,0.7);font-size:12px;font-weight:600;text-transform:uppercase;margin-bottom:6px;">New Password</label>
-          <input id="resetNewPass" type="password" required style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;" placeholder="Enter new password" />
+          <input id="resetNewPass" type="password" required="" style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;" placeholder="Enter new password">
         </div>
         <div id="resetFeedback" style="display:none;font-size:13px;margin-bottom:16px;padding:10px;border-radius:8px;"></div>
         
@@ -454,5 +452,6 @@
       err.classList.add("show");
     }
   </script>
-</body>
-</html>
+
+
+</body></html>

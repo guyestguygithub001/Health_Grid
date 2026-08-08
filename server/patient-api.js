@@ -9,6 +9,7 @@
 
 const jwt  = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const { query } = require('./db-postgres');
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -89,7 +90,7 @@ async function handlePatientApi(req, res, url, body) {
     if (!phone || !phone.trim()) return sendJson(res, 400, { error: 'Phone number is required' });
 
     // Check duplicate
-    const exists = await query('SELECT id FROM patients WHERE phone = $1', [phone.trim()]);
+    const exists = await query('SELECT id FROM patients WHERE phone = $1 OR email = $1', [phone.trim()]);
     if (exists.rows.length > 0) return sendJson(res, 409, { error: 'Phone number already registered. Please log in.' });
 
     const { rows } = await query(`
@@ -120,19 +121,19 @@ async function handlePatientApi(req, res, url, body) {
 
   // ── POST /api/v2/patient/auth/otp/request ────────────────────────────────
   if (method === 'POST' && pathname === '/api/v2/patient/auth/otp/request') {
-    const { phone } = body;
-    if (!phone) return sendJson(res, 400, { error: 'Phone is required' });
+    const contact = body.contact || body.phone;
+    if (!contact) return sendJson(res, 400, { error: 'Phone or Email is required' });
 
-    const { rows } = await query('SELECT id, name FROM patients WHERE phone = $1', [phone]);
+    const { rows } = await query('SELECT id, name FROM patients WHERE phone = $1 OR email = $1 OR email = $1', [contact]);
     if (rows.length === 0) return sendJson(res, 404, { error: 'No account found for this phone number.' });
 
-    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const otp = crypto.randomInt(100000, 1000000).toString();
     const expires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    await query('UPDATE patients SET otp_code = $1, otp_expires_at = $2 WHERE phone = $3', [otp, expires, phone]);
+    await query('UPDATE patients SET otp_code = $1, otp_expires_at = $2 WHERE phone = $3 OR email = $3', [otp, expires, contact]);
 
-    // TODO: Send OTP via Termii/Africa's Talking SMS in production
-    console.log(`[OTP] Code for ${phone}: ${otp}`);
+    // TODO: Integrate SendGrid, AWS SES (Email) or Termii (SMS) to deliver this OTP securely to the user.
+    console.log(`[OTP] Code for ${contact}: ${otp}`);
 
     return sendJson(res, 200, {
       ok: true,
@@ -144,20 +145,49 @@ async function handlePatientApi(req, res, url, body) {
 
   // ── POST /api/v2/patient/auth/otp/verify ─────────────────────────────────
   if (method === 'POST' && pathname === '/api/v2/patient/auth/otp/verify') {
-    const { phone, otp } = body;
-    if (!phone || !otp) return sendJson(res, 400, { error: 'Phone and OTP are required' });
+    const contact = body.contact || body.phone;
+    const { otp } = body;
+    if (!contact || !otp) return sendJson(res, 400, { error: 'Phone/Email and OTP are required' });
 
+    
     const { rows } = await query(
-      'SELECT id, name, phone, email, sex, otp_code, otp_expires_at FROM patients WHERE phone = $1',
-      [phone]
+      'SELECT id, name, phone, email, sex, otp_code, otp_expires_at, locked_until, otp_failed_attempts FROM patients WHERE phone = $1 OR email = $1',
+      [contact]
     );
     if (rows.length === 0) return sendJson(res, 404, { error: 'Patient not found' });
 
     const patient = rows[0];
-    if (patient.otp_code !== otp) return sendJson(res, 401, { error: 'Invalid OTP code' });
-    if (new Date(patient.otp_expires_at) < new Date()) return sendJson(res, 401, { error: 'OTP has expired. Request a new one.' });
 
-    await query('UPDATE patients SET otp_code = NULL, otp_expires_at = NULL WHERE id = $1', [patient.id]);
+    // Check if locked
+    if (patient.locked_until && new Date(patient.locked_until) > new Date()) {
+      const minutesLeft = Math.ceil((new Date(patient.locked_until) - new Date()) / 60000);
+      return sendJson(res, 403, { error: `Account is temporarily locked. Try again in ${minutesLeft} minutes.` });
+    }
+
+    if (patient.otp_code !== otp) {
+      let attempts = (patient.otp_failed_attempts || 0) + 1;
+      let updateQuery = 'UPDATE patients SET otp_failed_attempts = $1 WHERE id = $2';
+      let params = [attempts, patient.id];
+      let errorMsg = 'Invalid OTP code';
+
+      if (attempts >= 5) {
+        const lockoutTime = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+        updateQuery = 'UPDATE patients SET otp_failed_attempts = $1, locked_until = $2 WHERE id = $3';
+        params = [attempts, lockoutTime, patient.id];
+        errorMsg = 'Too many failed attempts. Account locked for 15 minutes.';
+      }
+      
+      await query(updateQuery, params);
+      return sendJson(res, 401, { error: errorMsg });
+    }
+
+    if (new Date(patient.otp_expires_at) < new Date()) {
+      return sendJson(res, 401, { error: 'OTP has expired. Request a new one.' });
+    }
+
+    // Success: Reset security columns
+    await query('UPDATE patients SET otp_code = NULL, otp_expires_at = NULL, otp_failed_attempts = 0, locked_until = NULL, otp_request_count = 0 WHERE id = $1', [patient.id]);
+
 
     const token = issuePatientToken(patient);
     return sendJson(res, 200, { ok: true, patient, token });

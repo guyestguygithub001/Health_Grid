@@ -10,7 +10,7 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
-    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f4f9f9 0%, #e0f2fe 100%); background-attachment: fixed; background-attachment: fixed; color: #1e293b; line-height: 1.6; min-height: 100vh; }
+    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #0b192c 0%, #1e3a8a 100%); background-attachment: fixed; background-attachment: fixed; color: #ffffff; line-height: 1.6; min-height: 100vh; }
 
     /* ── NAV ─────────────────────────────────────────────── */
     nav {
@@ -25,14 +25,14 @@
       width: 36px; height: 36px; border-radius: 9px;
       background: linear-gradient(135deg, #2563EB, #1d4ed8);
       display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: 13px; color: #1e293b; letter-spacing: -0.5px;
+      font-weight: 800; font-size: 13px; color: #ffffff; letter-spacing: -0.5px;
     }
-    .nav-name { font-weight: 700; font-size: 15px; color: #0F172A; }
+    .nav-name { font-weight: 700; font-size: 15px; color: #ffffff; }
     .nav-name span { color: #2563EB; }
     .nav-links { display: flex; align-items: center; gap: 8px; }
     .nav-links a {
       padding: 7px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
-      text-decoration: none; color: #475569; transition: all 0.2s;
+      text-decoration: none; color: rgba(255, 255, 255, 0.85); transition: all 0.2s;
     }
     .nav-links a:hover { background: #EFF6FF; color: #2563EB; }
     .nav-cta {
@@ -59,14 +59,14 @@
     .hero-badge::before { content: '●'; color: #10B981; font-size: 8px; }
     .hero h1 {
       position: relative; font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 800; color: #1e293b; text-align: center;
+      font-weight: 800; color: #ffffff; text-align: center;
       line-height: 1.15; letter-spacing: -0.02em; max-width: 780px;
       margin-bottom: 20px;
     }
     .hero h1 span { color: #60a5fa; }
     .hero p {
       position: relative; font-size: clamp(0.95rem, 1.8vw, 1.1rem);
-      color: #475569; text-align: center;
+      color: rgba(255, 255, 255, 0.85); text-align: center;
       max-width: 520px; margin-bottom: 56px; font-weight: 400;
     }
 
@@ -76,8 +76,7 @@
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 20px; max-width: 680px; width: 100%;
     }
-    .pcard {
-      background: rgba(255, 255, 255, 0.85); border: 1px solid rgba(14, 165, 233, 0.15); box-shadow: 0 10px 30px rgba(14, 165, 233, 0.08); backdrop-filter: blur(10px);
+    .pcard { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(14, 165, 233, 0.15); box-shadow: 0 10px 30px rgba(14, 165, 233, 0.08); backdrop-filter: blur(10px);
       border-radius: 20px; padding: 36px 32px; text-decoration: none;
       cursor: pointer; transition: all 0.3s; display: flex; flex-direction: column;
       align-items: center; text-align: center;
@@ -102,8 +101,8 @@
     }
     .pcard.patient .pcard-icon { background: rgba(16,185,129,0.15); }
     .pcard.admin .pcard-icon { background: rgba(37,99,235,0.15); }
-    .pcard h2 { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 8px; }
-    .pcard p { font-size: 13px; color: rgba(255,255,255,0.45); line-height: 1.55; flex: 1; margin-bottom: 24px; }
+    .pcard h2 { font-size: 18px; font-weight: 700; color: #ffffff; margin-bottom: 8px; }
+    .pcard p { font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.55; flex: 1; margin-bottom: 24px; }
     .pcard-btn {
       display: inline-flex; align-items: center; gap: 6px;
       font-size: 13px; font-weight: 600; padding: 10px 20px;
@@ -111,9 +110,9 @@
       text-decoration: none;
     }
     .pcard.patient .pcard-btn { background: rgba(16,185,129,0.2); color: #34d399; }
-    .pcard.patient:hover .pcard-btn { background: #10B981; color: #1e293b; }
+    .pcard.patient:hover .pcard-btn { background: #10B981; color: #ffffff; }
     .pcard.admin .pcard-btn { background: rgba(37,99,235,0.2); color: #93c5fd; }
-    .pcard.admin:hover .pcard-btn { background: #2563EB; color: #1e293b; }
+    .pcard.admin:hover .pcard-btn { background: #2563EB; color: #ffffff; }
 
     /* ── STATS BAR ───────────────────────────────────────── */
     .stats-bar {
@@ -125,23 +124,22 @@
       border-right: 1px solid rgba(255,255,255,0.1);
     }
     .stat:last-child { border-right: none; }
-    .stat-num { font-size: 28px; font-weight: 800; color: #1e293b; letter-spacing: -0.02em; }
-    .stat-label { font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 500; margin-top: 2px; }
+    .stat-num { font-size: 28px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; }
+    .stat-label { font-size: 12px; color: rgba(255,255,255,0.9); font-weight: 500; margin-top: 2px; }
 
     /* ── FEATURES ────────────────────────────────────────── */
     .features { padding: 80px 6vw; background: transparent; }
     .features-header { text-align: center; margin-bottom: 52px; }
-    .features-header h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; color: #1e293b; letter-spacing: -0.02em; }
-    .features-header p { color: rgba(255,255,255,0.6); margin-top: 10px; font-size: 15px; }
+    .features-header h2 { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 800; color: #ffffff; letter-spacing: -0.02em; }
+    .features-header p { color: rgba(255,255,255,0.9); margin-top: 10px; font-size: 15px; }
     .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto; }
-    .feat {
-      padding: 28px; border-radius: 16px; background: rgba(255,255,255,0.05);
+    .feat { padding: 28px; border-radius: 16px; background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255,255,255,0.1); transition: all 0.25s;
     }
     .feat:hover { border-color: rgba(14, 165, 233, 0.3); box-shadow: 0 8px 24px rgba(0,0,0,0.2); transform: translateY(-2px); }
     .feat-icon { font-size: 28px; margin-bottom: 14px; display: block; }
-    .feat h3 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
-    .feat p { font-size: 13px; color: rgba(255,255,255,0.6); line-height: 1.55; }
+    .feat h3 { font-size: 14px; font-weight: 700; color: #ffffff; margin-bottom: 6px; }
+    .feat p { font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.55; }
 
     /* ── FOOTER ──────────────────────────────────────────── */
     footer {
@@ -151,7 +149,7 @@
     footer p { font-size: 12px; color: rgba(255,255,255,0.3); }
     .footer-links { display: flex; gap: 20px; }
     .footer-links a { font-size: 12px; color: rgba(255,255,255,0.3); text-decoration: none; }
-    .footer-links a:hover { color: rgba(255,255,255,0.6); }
+    .footer-links a:hover { color: rgba(255,255,255,0.9); }
 
     @media (max-width: 600px) {
       .nav-links { display: none; }
@@ -164,8 +162,8 @@
 
   <!-- ── HERO ─────────────────────────────────────── -->
   <section class="hero reveal">
-    <h1 style="font-weight: 400; font-size: 2.2rem; margin-bottom: 12px;">Health Records Simplified.</h1>
-    <p style="font-weight: 300; font-size: 1.1rem; opacity: 0.7;">Integrated health records.</p>
+    <h1 style="font-weight: 400; font-size: 2.2rem; margin-bottom: 12px; color: #ffffff;">Health Records Simplified.</h1>
+    <p style="font-weight: 300; font-size: 1.1rem; opacity: 0.9; color: #ffffff;">Integrated health records.</p>
 
     <div class="portal-cards reveal">
       <a class="pcard patient" href="portal.html">
@@ -260,7 +258,8 @@
     <span id="global-error-msg">An unexpected error occurred.</span>
     <span class="close-btn" onclick="document.getElementById('global-error-toast').classList.remove('show')">✕</span>
   </div>
-  <script>
+  <script src="/js/apiClient.js"></script>
+<script>
     window.showGlobalError = function(msg) {
       const toast = document.getElementById('global-error-toast');
       const msgEl = document.getElementById('global-error-msg');
