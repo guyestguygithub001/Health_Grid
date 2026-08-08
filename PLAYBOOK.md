@@ -47,3 +47,18 @@ The EMR module is secured behind a Staff Authentication Gateway (`emrAuthGateway
 - **PHC Isolation**: The PHC (Primary Health Care) module is fully isolated from the EHR. When navigating to the PHC module, all hospital-specific (EHR) features are hidden.
 - **HIE Referral System**: PHC workers (e.g. CHEWs using the IMCI or ANC workflows) can escalate cases using the `Escalate to EHR` button. This creates a pending referral in the Master Record Unit for the central hospital to review.
 > >   * * M a s t e r   A d m i n   L o g i n * * :   Y o u   c a n   n o w   u s e   t h e   u s e r n a m e   \   d m i n \   a n d   p a s s w o r d   \   d m i n 1 2 3 \   a n y w h e r e   i n   t h e   s o f t w a r e   ( b o t h   i n   t h e   E n t e r p r i s e   D a s h b o a r d   a n d   t h e   n e w   S t a f f   G a t e w a y )   t o   a u t o m a t i c a l l y   g a i n   S y s t e m   A d m i n   a c c e s s .  
+
+## Recent Updates (Aug 7 - Aug 8)
+
+### Architecture & Scaling
+- **Neon Serverless PostgreSQL**: Transitioned Health Grid backend off of local JSON mocks and provisioned a highly scalable Neon Database cluster. Migrated all core schemas and integrated the connection pool (`NEON_DATABASE_URL`).
+- **Vercel Edge Resiliency**: Implemented robust 'Static Mock Fallbacks' for Vercel preview environments, intercepting backend 404/500 routing errors to ensure the frontend prototype remains seamlessly interactive for investors and testers.
+
+### PHC Module Enhancements
+- **MPI Fallback Registration**: Expanded the Master Patient Index (MPI) to gracefully handle patients without a National ID by capturing comprehensive fallback demographics including Religion, Nationality, and Ethnicity.
+- **Schema Evolution**: Altered the `patients` Postgres schema via a new migration script (`005_mpi_demographics.sql`) to safely persist the new fallback fields across the database network.
+- **Workflow Streamlining**: Overhauled the registration handoff protocol. Creating an MPI now automatically generates the UUID and bridges directly into the Patient Records Unit for immediate Appointment Booking.
+
+### Backend Fixes
+- Resolved critical Node.js `collectBody` asynchronous stream deadlock in `server.js` that previously blocked authentication routing.
+- Re-mapped the `POST /api/v2/patients` route to properly intersect with the PostgreSQL `patient-api.js` handler.

@@ -91,3 +91,19 @@ This repository is configured with a Git `pre-commit` hook located at `.git/hook
 - **Purpose**: It uses regular expressions to scan every staged commit for patterns matching AWS keys, Stripe/Paystack keys, JWT tokens, and hardcoded passwords.
 - **Action**: If a secret is detected, the commit is blocked to prevent accidental leaks.
 - **Bypass**: If you encounter a false positive (e.g., a documentation example), you can bypass the hook using `git commit --no-verify`. **Use this with extreme caution.**
+
+
+## Recent Updates (Aug 7 - Aug 8)
+
+### Architecture & Scaling
+- **Neon Serverless PostgreSQL**: Transitioned Health Grid backend off of local JSON mocks and provisioned a highly scalable Neon Database cluster. Migrated all core schemas and integrated the connection pool (`NEON_DATABASE_URL`).
+- **Vercel Edge Resiliency**: Implemented robust 'Static Mock Fallbacks' for Vercel preview environments, intercepting backend 404/500 routing errors to ensure the frontend prototype remains seamlessly interactive for investors and testers.
+
+### PHC Module Enhancements
+- **MPI Fallback Registration**: Expanded the Master Patient Index (MPI) to gracefully handle patients without a National ID by capturing comprehensive fallback demographics including Religion, Nationality, and Ethnicity.
+- **Schema Evolution**: Altered the `patients` Postgres schema via a new migration script (`005_mpi_demographics.sql`) to safely persist the new fallback fields across the database network.
+- **Workflow Streamlining**: Overhauled the registration handoff protocol. Creating an MPI now automatically generates the UUID and bridges directly into the Patient Records Unit for immediate Appointment Booking.
+
+### Backend Fixes
+- Resolved critical Node.js `collectBody` asynchronous stream deadlock in `server.js` that previously blocked authentication routing.
+- Re-mapped the `POST /api/v2/patients` route to properly intersect with the PostgreSQL `patient-api.js` handler.
