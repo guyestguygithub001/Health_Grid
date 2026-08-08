@@ -119,7 +119,30 @@ async function handlePatientApi(req, res, url, body) {
     return sendJson(res, 201, { ok: true, patient, token });
   }
 
-  // ── POST /api/v2/patient/auth/otp/request ────────────────────────────────
+  // ── POST /api/v2/patients (MPI Registration) ──────────────────────────────
+  if (method === 'POST' && pathname === '/api/v2/patients') {
+    const { name, phone, sex, age, dob, religion, nationality, tribe, lga, insurance } = body;
+    
+    // Minimal validation for MPI fallback
+    if (!name || !name.trim()) return sendJson(res, 400, { error: 'Full name is required' });
+
+    const { rows } = await query(`
+      INSERT INTO patients (
+        name, phone, sex, dob, religion, nationality, tribe, lga, facility_id, status
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8, 'FAC-PLSH','active')
+      RETURNING id, name, phone, sex, dob, created_at
+    `, [
+      name.trim(), phone || null, sex || null, dob || null, 
+      religion || null, nationality || null, tribe || null, lga || null
+    ]);
+
+    const patient = rows[0];
+    patient.age = age; // Keep age in memory for frontend UI
+    return sendJson(res, 201, patient);
+  }
+
+  // ── POST /api/v2/patient/auth/otp/request ─────────────────────────────────
   if (method === 'POST' && pathname === '/api/v2/patient/auth/otp/request') {
     const contact = body.contact || body.phone;
     if (!contact) return sendJson(res, 400, { error: 'Phone or Email is required' });

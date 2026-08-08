@@ -1539,7 +1539,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ── 2. Patient & Staff Auth API (PostgreSQL-backed) ─────────────────
-    if (pathname.startsWith(PUBLIC_API) || pathname.startsWith("/api/v2/auth/") || pathname.startsWith(DOCTOR_API)) {
+    if (pathname.startsWith(PUBLIC_API) || pathname.startsWith("/api/v2/auth/") || pathname.startsWith(DOCTOR_API) || pathname.startsWith("/api/v2/patients")) {
       const body = ['POST','PUT','PATCH'].includes(req.method) ? await collectBody(req) : {};
         req._precollectedBody = body;
       const handled = await handlePatientApiV2(req, res, url, body);
