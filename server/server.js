@@ -254,6 +254,7 @@ function escapeXSS(obj) {
 }
 
 function collectBody(req) {
+  if (req._precollectedBody) return Promise.resolve(req._precollectedBody);
   return new Promise((resolve, reject) => {
     let raw = "";
     req.on("data", chunk => { raw += chunk; if (raw.length > 2_000_000) reject(new AppError("Payload Too Large", 413)); });
@@ -1540,6 +1541,7 @@ const server = http.createServer(async (req, res) => {
     // ── 2. Patient & Staff Auth API (PostgreSQL-backed) ─────────────────
     if (pathname.startsWith(PUBLIC_API) || pathname.startsWith("/api/v2/auth/") || pathname.startsWith(DOCTOR_API)) {
       const body = ['POST','PUT','PATCH'].includes(req.method) ? await collectBody(req) : {};
+        req._precollectedBody = body;
       const handled = await handlePatientApiV2(req, res, url, body);
       if (handled !== null) return;  // null means "not matched", fall through
       // Legacy flat-file patient routes still needed for registration/login fallback:
