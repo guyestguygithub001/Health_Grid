@@ -58,11 +58,45 @@
 
       <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;">
         
-        <button onclick="enterPhcModule()" class="module-btn" style="background:#fff; color:#059669; border:none; padding:16px 36px; font-weight:700; border-radius:50px; cursor:pointer; font-size:16px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);">PHC Module</button>
+        <button onclick="document.getElementById('phcAuthGateway').style.display='flex'" class="module-btn" style="background:#fff; color:#059669; border:none; padding:16px 36px; font-weight:700; border-radius:50px; cursor:pointer; font-size:16px; box-shadow: 0 8px 30px rgba(0,0,0,0.2);">PHC Module</button>
         <button onclick="window.location.href='/emr.html'" class="module-btn" style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.4); color:#fff; padding:16px 36px; font-weight:600; border-radius:50px; cursor:pointer; font-size:16px; backdrop-filter: blur(8px);">🖥️ EMR Module</button>
       </div>
     </div>
   </div>
+<div id="phcAuthGateway" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(8px); z-index: 999999; display: none; flex-direction: column; align-items: center; justify-content: center; font-family: system-ui, sans-serif;">
+  <div style="background: white; padding: 40px; border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); width: 400px; max-width: 90%; position: relative;">
+    
+    <button onclick="document.getElementById('phcAuthGateway').style.display='none'" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; font-size: 24px; cursor: pointer; color: #94a3b8;">×</button>
+    
+    <h2 style="margin: 0 0 8px; font-size: 24px; font-weight: 800; color: #0f172a; text-align: center;">Clinical Staff Gateway</h2>
+    <p style="margin: 0 0 24px; color: #64748b; font-size: 14px; text-align: center;">Authenticate to access the PHC module.</p>
+    
+    <div style="padding: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 24px;">
+      <p style="margin: 0 0 8px; font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em;">Active Context</p>
+      <div id="phcGatewayRoleDisplay" style="width: 100%; font-weight: 700; font-size: 14px; color: #0f172a;">
+        Not Authenticated
+      </div>
+    </div>
+
+    <form id="phcLoginForm">
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase;">Username</label>
+        <input type="text" id="phcLoginUser" required="" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 15px; outline: none;">
+      </div>
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase;">Password</label>
+        <input type="password" id="phcLoginPass" required="" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 15px; outline: none;">
+      </div>
+      <div id="phcLoginError" style="display: none; margin-bottom: 16px; padding: 10px; background: #fef2f2; color: #ef4444; border: 1px solid #fecaca; border-radius: 8px; font-size: 13px; font-weight: 500;"></div>
+      <button type="submit" style="width: 100%; padding: 12px; background: #059669; color: white; border: none; border-radius: 8px; font-weight: 700; font-size: 15px; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(5,150,105,0.2); margin-bottom: 16px;">Secure Login</button>
+    </form>
+    
+    <div style="border-top: 1px solid #e5e7eb; padding-top: 16px; text-align: center;">
+      <button onclick="alert('Contact System Administrator to register new staff')" style="background: transparent; border: none; color: #10b981; font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: underline;">Register New Staff</button>
+    </div>
+  </div>
+</div>
+
   <!-- APP SHELL FOR EHR/PHC MODULE -->
   <div id="ehrAppShell" style="display:none; height:100vh; overflow:hidden; background:#f3f4f6; font-family: 'Inter', system-ui, sans-serif;">
     
@@ -2315,4 +2349,26 @@ Orders Generated:`;
 <style>
   @keyframes spin { 100% { transform: rotate(360deg); } }
 </style>
-</body></html>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const phcLoginForm = document.getElementById('phcLoginForm');
+    if (phcLoginForm) {
+        phcLoginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const u = document.getElementById('phcLoginUser').value;
+            const p = document.getElementById('phcLoginPass').value;
+            const errDiv = document.getElementById('phcLoginError');
+            
+            if (typeof GlobalAuthManager !== 'undefined') {
+                GlobalAuthManager.login(u, p, errDiv, (data) => {
+                    document.getElementById('phcAuthGateway').style.display = 'none';
+                    enterPhcModule();
+                });
+            } else {
+                errDiv.style.display = 'block';
+                errDiv.innerText = 'System Error: Auth Manager not loaded.';
+            }
+        });
+    }
+});
+</script></body></html>
