@@ -1315,7 +1315,7 @@ async function handlePatientApi(req, res, url) {
         staff = resDb.rows[0];
       } catch (dbErr) {
         const db = _readFile();
-        staff = db.staff.find(s => s.username === payload.username && s.password === payload.password);
+        staff = (db.staff || []).find(s => s.username === payload.username && s.password === payload.password);
       }
       
       if (!staff) {
