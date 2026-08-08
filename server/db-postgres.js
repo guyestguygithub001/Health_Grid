@@ -12,59 +12,50 @@
 const fs = require('fs');
 const path = require('path');
 
-// ─── Detect environment ───────────────────────────────────────────────────────
-const DATABASE_URL = process.env.DATABASE_URL || '';
-const IS_NEON = DATABASE_URL.includes('neon.tech') || DATABASE_URL.includes('neon.tech') || process.env.USE_NEON === 'true';
+// ── Detect environment ──────────────────────────────────────────────────
+const DATABASE_URL = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL || '';
+const IS_NEON = DATABASE_URL.includes('neon.tech') || process.env.USE_NEON === 'true';
 const IS_SERVERLESS = process.env.VERCEL === '1' || process.env.NETLIFY === 'true';
 
 let _pool = null;
-let _neonQuery = null;
 
 /**
  * Get database query function.
  * Returns a unified async `query(sql, params)` function.
  */
 function getDb() {
-  if (IS_NEON || IS_SERVERLESS) {
-    // ── Neon Serverless HTTP Driver (no connection pool, no cold start) ──────
-    // Uses HTTP-based queries - no TCP pool to warm up, eliminates cold starts
-    if (!_neonQuery) {
-      const { neons } = require('@neondatabase/serverless');
-      const sql = neons({ connectionString: DATABASE_URL });
-      _neonQuery = async (text, params = []) => {
-        // neons() accepts { query, params } objects and returns { rows, rowCount }
-        const result = await sql({ query: text, params });
-        return { rows: result.rows || [], rowCount: result.rowCount || 0 };
-      };
-    }
-    return { query: _neonQuery };
-  } else {
-    // ── Standard pg Pool (for Docker / local Postgres) ───────────────────────
-    if (!_pool) {
-      const { Pool } = require('pg');
-      const config = DATABASE_URL
-        ? { connectionString: DATABASE_URL }
-        : {
-            host:     process.env.POSTGRES_HOST     || 'localhost',
-            port:     parseInt(process.env.POSTGRES_PORT || '5432'),
-            database: process.env.POSTGRES_DB       || 'healthgrid_db',
-            user:     process.env.POSTGRES_USER     || 'healthgrid',
-            password: process.env.POSTGRES_PASSWORD,
-            max: 20,
-            idleTimeoutMillis: 30000,
-            connectionTimeoutMillis: 5000,
-          };
+  // ── Standard pg Pool (Optimized for Free Tier constraints) ───────────────
+  if (!_pool) {
+    const { Pool } = require('pg');
+    
+    // Zero-Cost Optimization: Aggressively cap max connections per instance to 5
+    // so Vercel horizontally scaling won't exceed Neon's 100 max global limit.
+    const baseConfig = {
+      max: 5,
+      idleTimeoutMillis: 10000,
+      connectionTimeoutMillis: 5000,
+    };
 
-      _pool = new Pool(config);
+    const config = DATABASE_URL
+      ? { ...baseConfig, connectionString: DATABASE_URL }
+      : {
+          ...baseConfig,
+          host:     process.env.POSTGRES_HOST     || 'localhost',
+          port:     parseInt(process.env.POSTGRES_PORT || '5432'),
+          database: process.env.POSTGRES_DB       || 'healthgrid_db',
+          user:     process.env.POSTGRES_USER     || 'healthgrid',
+          password: process.env.POSTGRES_PASSWORD,
+        };
 
-      _pool.on('error', (err) => {
-        console.error('[DB] Pool error:', err.message);
-      });
+    _pool = new Pool(config);
 
-      console.log(`[DB] Connected to PostgreSQL (${DATABASE_URL ? 'URL' : 'local Docker'})`);
-    }
-    return _pool;
+    _pool.on('error', (err) => {
+      console.error('[DB] Pool error:', err.message);
+    });
+
+    console.log(`[DB] Connected to PostgreSQL (${DATABASE_URL ? 'URL' : 'local Docker'}) with Max Pool: 5`);
   }
+  return _pool;
 }
 
 

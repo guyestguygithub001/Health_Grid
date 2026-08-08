@@ -1444,6 +1444,11 @@ function checkRateLimit(ip, endpoint, limit, windowMs) {
   const timestamps = rateLimits.get(key).filter(t => now - t < windowMs);
   timestamps.push(now);
   rateLimits.set(key, timestamps);
+    // Zero-Cost Opt: Cap Map to 5000 IPs to prevent Vercel 1024MB RAM OOM
+    if (rateLimits.size > 5000) {
+      const firstKey = rateLimits.keys().next().value;
+      rateLimits.delete(firstKey);
+    }
   return timestamps.length <= limit;
 }
 
@@ -1469,6 +1474,11 @@ function getCache(key) {
 }
 function setCache(key, data, ttlMs) {
   redisCache.set(key, { data, expires: Date.now() + ttlMs });
+  // Zero-Cost Opt: Cap Redis Cache simulation to 1000 items
+  if (redisCache.size > 1000) {
+    const firstKey = redisCache.keys().next().value;
+    redisCache.delete(firstKey);
+  }
 }
 
 // 4. Async Job Queue (BullMQ Simulation)
@@ -1476,6 +1486,11 @@ const jobQueue = new Map();
 function enqueueJob(taskName, payload) {
   const jobId = 'JOB-' + crypto.randomUUID();
   jobQueue.set(jobId, { status: 'processing', progress: 0 });
+  // Zero-Cost Opt: Cap jobs to 500
+  if (jobQueue.size > 500) {
+    const firstKey = jobQueue.keys().next().value;
+    jobQueue.delete(firstKey);
+  }
   // Process async
   setTimeout(() => {
     jobQueue.set(jobId, { status: 'completed', result: 'Generated successfully' });
@@ -1516,6 +1531,11 @@ const server = http.createServer(async (req, res) => {
       return;
     }
     processedRequests.add(idempotencyKey);
+    // Zero-Cost Opt: Cap idempotency keys to 10000
+    if (processedRequests.size > 10000) {
+      const first = processedRequests.values().next().value;
+      processedRequests.delete(first);
+    }
   }
 
 
