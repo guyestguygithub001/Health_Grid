@@ -293,6 +293,15 @@
               <select id="mpiSex" style="padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
                 <option>Female</option><option>Male</option>
               </select>
+              <select id="mpiReligion" style="padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+                <option value="">Select Religion (Optional)</option>
+                <option>Christianity</option>
+                <option>Islam</option>
+                <option>Traditional</option>
+                <option>Other</option>
+              </select>
+              <input type="text" id="mpiNationality" placeholder="Nationality (e.g. Nigerian)" style="padding: 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+              <input type="text" id="mpiEthnicity" placeholder="Ethnicity / Tribe" style="padding: 12px; border-radius: 8px; border: 1px solid #d1d5db; grid-column: span 2;">
             </div>
 
             <div style="background: rgba(59,130,246,0.05); padding: 16px; border-radius: 12px; border: 1px solid rgba(59,130,246,0.1); margin-bottom: 24px;">
@@ -310,7 +319,7 @@
             <h4 style="margin:0 0 10px; font-size:14px;">Digital Wallet QR</h4>
             <img id="patientQr" src="" style="border-radius:12px; border:4px solid #fff; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
             <p id="patientUuidDisplay" style="margin-top:8px; font-size:11px; color:#6b7280; font-family:monospace;"></p>
-            <button onclick="switchEhrView('patientRecordView')" style="margin-top:16px; width: 100%; padding: 12px; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);">Proceed to Records Unit ➔</button>
+            <button onclick="switchEhrView('patientRecordView')" style="margin-top:16px; width: 100%; padding: 12px; border-radius: 8px; background: #10b981; color: white; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);">Book Appointment ➔</button>
           </div>
         </div>
       </div>
@@ -2146,6 +2155,9 @@ Orders Generated:`;
         name: document.getElementById('mpiName').value,
         age: parseInt(document.getElementById('mpiAge').value, 10),
         sex: document.getElementById('mpiSex').value,
+        religion: document.getElementById('mpiReligion').value,
+        nationality: document.getElementById('mpiNationality').value,
+        tribe: document.getElementById('mpiEthnicity').value,
         insurance: "Private Pay", // Default for now
         lga: "Jos North" // Default for now
       };
