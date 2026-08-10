@@ -3373,31 +3373,6 @@ Plan:
         });
       });
     }
-            
-          const data = await res.json();
-          if (res.ok) {
-            sessionStorage.setItem('staff_token', data.token);
-            sessionStorage.setItem('staff_role', data.user.role);
-            sessionStorage.setItem('staff_name', data.user.name);
-            checkSession();
-          } else {
-            errDiv.style.display = 'block';
-            errDiv.innerText = data.error || 'Login failed.';
-          }
-        } catch (err) {
-          console.warn("API unreachable. Falling back to static Vercel preview.");
-          if (u === 'admin' && (p === 'admin123' || p === 'secure_admin_password')) {
-            sessionStorage.setItem('staff_token', 'vercel-mock-token-123');
-            sessionStorage.setItem('staff_role', 'admin');
-            sessionStorage.setItem('staff_name', 'System Admin');
-            checkSession();
-          } else {
-            errDiv.style.display = 'block';
-            errDiv.innerText = 'Network error. Try admin / admin123 for static preview.';
-          }
-        }
-      });
-    }
   });
 
   function staffLogout() {
