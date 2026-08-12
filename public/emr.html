@@ -2691,19 +2691,38 @@ setInterval(function() {
       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Full Name</label>
       <input type="text" id="triageWalkinName" placeholder="e.g. Jane Doe" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
     </div>
-    <div style="margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-      <div>
-          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Age</label>
-          <input type="number" id="triageWalkinAge" placeholder="e.g. 30" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
+    <details style="margin-bottom: 24px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; cursor: pointer;">
+      <summary style="font-weight: 700; font-size: 14px; color: #334155; outline: none; margin-bottom: 8px;">Demographics (Age, Gender, etc.)</summary>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; cursor: default;">
+        <div>
+            <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Age</label>
+            <input type="number" id="triageWalkinAge" placeholder="e.g. 30" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
+        </div>
+        <div>
+            <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Gender</label>
+            <select id="triageWalkinGender" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; background: white;">
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+            </select>
+        </div>
+        <div>
+            <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Religion</label>
+            <select id="triageWalkinReligion" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; background: white;">
+                <option value="Christianity">Christianity</option>
+                <option value="Islam">Islam</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <div>
+            <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Nationality</label>
+            <input type="text" id="triageWalkinNationality" value="Nigerian" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
+        </div>
+        <div style="grid-column: span 2;">
+            <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Tribe / Ethnicity</label>
+            <input type="text" id="triageWalkinTribe" placeholder="e.g. Hausa, Igbo, Yoruba" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
+        </div>
       </div>
-      <div>
-          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Gender</label>
-          <select id="triageWalkinGender" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; background: white;">
-              <option value="Female">Female</option>
-              <option value="Male">Male</option>
-          </select>
-      </div>
-    </div>
+    </details>
     
     <div style="display: flex; gap: 12px; justify-content: flex-end;">
       <button onclick="document.getElementById('addTriagePatientModal').style.display='none'" style="padding: 10px 16px; background: transparent; color: #64748b; font-weight: 600; border: none; cursor: pointer;">Cancel</button>
@@ -2740,6 +2759,9 @@ function submitWalkinTriage() {
     
     document.getElementById('addTriagePatientModal').style.display = 'none';
     document.getElementById('triageWalkinName').value = '';
+    document.getElementById('triageWalkinAge').value = '';
+    document.getElementById('triageWalkinNationality').value = 'Nigerian';
+    document.getElementById('triageWalkinTribe').value = '';
 }
 </script>
 </body></html>
