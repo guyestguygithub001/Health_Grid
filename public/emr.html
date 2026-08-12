@@ -2680,4 +2680,66 @@ setInterval(function() {
 
   <script>lucide.createIcons();</script>
 <div style="position: fixed; bottom: 8px; right: 8px; font-size: 10px; color: #94a3b8; z-index: 9999; font-family: monospace;">Build v0.8.4-beta | Internal</div>
+
+<!-- Walk-In Triage Modal -->
+<div id="addTriagePatientModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center;">
+  <div style="background: white; border-radius: 16px; width: 90%; max-width: 400px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+    <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 16px;">Direct Walk-In (Triage)</h3>
+    <p style="font-size: 14px; color: #64748b; margin-bottom: 24px;">Register a patient directly into the nursing queue.</p>
+    
+    <div style="margin-bottom: 16px;">
+      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Full Name</label>
+      <input type="text" id="triageWalkinName" placeholder="e.g. Jane Doe" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
+    </div>
+    <div style="margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Age</label>
+          <input type="number" id="triageWalkinAge" placeholder="e.g. 30" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
+      </div>
+      <div>
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Gender</label>
+          <select id="triageWalkinGender" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; background: white;">
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+          </select>
+      </div>
+    </div>
+    
+    <div style="display: flex; gap: 12px; justify-content: flex-end;">
+      <button onclick="document.getElementById('addTriagePatientModal').style.display='none'" style="padding: 10px 16px; background: transparent; color: #64748b; font-weight: 600; border: none; cursor: pointer;">Cancel</button>
+      <button onclick="submitWalkinTriage()" style="padding: 10px 16px; background: #3b82f6; color: white; font-weight: 600; border: none; border-radius: 8px; cursor: pointer;">Add to Queue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function submitWalkinTriage() {
+    const name = document.getElementById('triageWalkinName').value;
+    const age = document.getElementById('triageWalkinAge').value || '30';
+    const gender = document.getElementById('triageWalkinGender').value;
+    if (!name) return alert('Name is required.');
+    
+    const id = 'PT' + Math.floor(1000 + Math.random() * 9000);
+    
+    const q = document.getElementById('triagePendingQueue');
+    const item = document.createElement('div');
+    item.className = 'queue-item';
+    item.innerHTML = `
+        <div class="q-time">Now</div>
+        <div class="q-info">
+          <strong>${name}</strong>
+          <span>${id} &bull; ${age} Yrs &bull; ${gender}</span>
+        </div>
+        <div class="q-action">
+          <button onclick="selectTriagePatient('${id}', '${name}', '${age}', '${gender}')">Review</button>
+        </div>
+    `;
+    // Insert at beginning
+    if(q.firstChild) q.insertBefore(item, q.firstChild);
+    else q.appendChild(item);
+    
+    document.getElementById('addTriagePatientModal').style.display = 'none';
+    document.getElementById('triageWalkinName').value = '';
+}
+</script>
 </body></html>
