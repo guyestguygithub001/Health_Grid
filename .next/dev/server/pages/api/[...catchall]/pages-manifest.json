@@ -1,0 +1,3 @@
+{
+  "/api/[...catchall]": "pages/api/[...catchall].js"
+}

@@ -1452,7 +1452,7 @@ function checkRateLimit(ip, endpoint, limit, windowMs) {
   return timestamps.length <= limit;
 }
 
-// 2. ACID Transaction Wrapper (Atomicity & Consistency)
+// run tx - throws if constraint fails
 async function runTransaction(operations) {
   const clone = JSON.parse(JSON.stringify(memoryDb));
   try {

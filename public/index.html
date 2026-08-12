@@ -157,6 +157,7 @@
       .stats-bar { display: none; }
     }
   </style>
+  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
 
@@ -167,7 +168,7 @@
 
     <div class="portal-cards reveal">
       <a class="pcard patient" href="portal.html">
-        <div class="pcard-icon">🏥</div>
+        <div class="pcard-icon"><i data-lucide="plus-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
         <h2>Patient Portal</h2>
         <p>View your health history, appointments, lab results, prescriptions, and billing all in one place.</p>
         <span class="pcard-btn">Access Patient Portal →</span>
@@ -196,12 +197,12 @@
       <p>Designed for our unique health landscape.</p>
     </div>
     <div class="features-grid reveal">
-      <div class="feat"><span class="feat-icon">🩺</span><h3>Consultations</h3><p>Full SOAP notes with ICD-11 coded diagnoses, prescriptions, and referrals.</p></div>
-      <div class="feat"><span class="feat-icon">📅</span><h3>Scheduling</h3><p>Book, reschedule, and track appointments across all departments.</p></div>
-      <div class="feat"><span class="feat-icon">🧪</span><h3>Labs</h3><p>Receive and view lab reports linked directly to patient records.</p></div>
-      <div class="feat"><span class="feat-icon">💳</span><h3>Billing</h3><p>PLASCHEMA, NHIA, and private pay claims managed in one workflow.</p></div>
-      <div class="feat"><span class="feat-icon">🛏</span><h3>Wards</h3><p>Real-time bed census across clinical units and wards.</p></div>
-      <div class="feat"><span class="feat-icon">📊</span><h3>Analytics</h3><p>State-level health metrics, disease surveillance, and quality indicators.</p></div>
+      <div class="feat"><span class="feat-icon"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><h3>Consultations</h3><p>Full SOAP notes with ICD-11 coded diagnoses, prescriptions, and referrals.</p></div>
+      <div class="feat"><span class="feat-icon"><i data-lucide="calendar" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><h3>Scheduling</h3><p>Book, reschedule, and track appointments across all departments.</p></div>
+      <div class="feat"><span class="feat-icon"><i data-lucide="flask-conical" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><h3>Labs</h3><p>Receive and view lab reports linked directly to patient records.</p></div>
+      <div class="feat"><span class="feat-icon"><i data-lucide="credit-card" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><h3>Billing</h3><p>PLASCHEMA, NHIA, and private pay claims managed in one workflow.</p></div>
+      <div class="feat"><span class="feat-icon"><i data-lucide="bed" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><h3>Wards</h3><p>Real-time bed census across clinical units and wards.</p></div>
+      <div class="feat"><span class="feat-icon"><i data-lucide="bar-chart" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><h3>Analytics</h3><p>State-level health metrics, disease surveillance, and quality indicators.</p></div>
     </div>
   </section>
 
@@ -254,7 +255,7 @@
     }
   </style>
   <div id="global-error-toast">
-    <span>⚠️</span>
+    <span><i data-lucide="alert-triangle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️</span>
     <span id="global-error-msg">An unexpected error occurred.</span>
     <span class="close-btn" onclick="document.getElementById('global-error-toast').classList.remove('show')">✕</span>
   </div>
@@ -295,5 +296,7 @@
   </script>
   <!-- End Global Error Handler -->
 
+  <script>lucide.createIcons();</script>
+<div style="position: fixed; bottom: 8px; right: 8px; font-size: 10px; color: #94a3b8; z-index: 9999; font-family: monospace;">Build v0.8.4-beta | Internal</div>
 </body>
 </html>

@@ -1,0 +1,20 @@
+[
+  {
+    "route": "/404",
+    "firstLoadUncompressedJsBytes": 343549,
+    "firstLoadChunkPaths": [
+      ".next\\static\\chunks\\1646pv3p7z828.js",
+      ".next\\static\\chunks\\3xb0t_x_1u14v.js",
+      ".next\\static\\chunks\\turbopack-28zg5c8qvpmv1.js"
+    ]
+  },
+  {
+    "route": "/api/[...catchall]",
+    "firstLoadUncompressedJsBytes": 343549,
+    "firstLoadChunkPaths": [
+      ".next\\static\\chunks\\1646pv3p7z828.js",
+      ".next\\static\\chunks\\3xb0t_x_1u14v.js",
+      ".next\\static\\chunks\\turbopack-28zg5c8qvpmv1.js"
+    ]
+  }
+]

@@ -54,7 +54,8 @@
     .search-result-item { padding: 16px; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: background 0.2s; display: flex; justify-content: space-between; align-items: center; }
     .search-result-item:hover { background: #f9fafb; }
   </style>
-<script src="/js/healthgrid-auth.js"></script></head>
+<script src="/js/healthgrid-auth.js"></script>  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
 <body>
 
 <div id="emrAuthGateway" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #f1f5f9; z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: system-ui, sans-serif;">
@@ -136,16 +137,16 @@
       </div>
       
       <div style="display: flex; flex-direction: column; width: 100%;">
-        <button class="nav-btn active" onclick="switchEmrView('omniBar')" title="Search / Home"><span>🔍</span><span class="nav-text">Omni-Bar / Search</span></button>
-        <button class="nav-btn" onclick="switchEmrView('triageView')" data-target-view="triageView" title="Triage &amp; Vitals"><span>🩺</span><span class="nav-text">Triage &amp; Vitals</span></button>
-        <button class="nav-btn" onclick="switchEmrView('clinicsDashboardView')" data-target-view="clinicsDashboardView" title="Outpatient Clinics"><span>🏥</span><span class="nav-text">Outpatient Clinics</span></button>
-        <button class="nav-btn" onclick="switchEmrView('wardsView')" data-target-view="wardsView" title="Inpatient Wards"><span>🛏️</span><span class="nav-text">Inpatient Wards</span></button>
-        <button class="nav-btn" onclick="switchEmrView('pharmacyView')" data-target-view="pharmacyView" title="Pharmacy"><span>💊</span><span class="nav-text">Pharmacy</span></button>
-        <button class="nav-btn" onclick="switchEmrView('labView')" data-target-view="labView" title="Laboratory"><span>🧪</span><span class="nav-text">Laboratory</span></button>
-        <button class="nav-btn" onclick="switchEmrView('radView')" data-target-view="radView" title="Radiology"><span>☢️</span><span class="nav-text">Radiology</span></button>
-        <button class="nav-btn" onclick="switchEmrView('billingView')" data-target-view="billingView" title="Billing"><span>💳</span><span class="nav-text">Billing</span></button>
-        <button class="nav-btn" onclick="switchEmrView('recordsMainView')" data-target-view="recordsMainView" title="Records Unit" style="border-top: 1px solid #e5e7eb; border-radius: 0; margin-top: 8px; padding-top: 16px;"><span>📂</span><span class="nav-text" style="color: #4f46e5;">Records Unit</span></button>
-        <button class="nav-btn" onclick="switchEmrView('appointmentRequestsView')" data-target-view="appointmentRequestsView" title="Appointment Requests" style="position:relative;"><span>📅</span><span class="nav-text" style="color: #f59e0b;">Appt. Requests</span><span id="apptBadge" style="display:none;position:absolute;top:6px;right:6px;width:18px;height:18px;background:#ef4444;color:white;border-radius:50%;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;">!</span></button>
+        <button class="nav-btn active" onclick="switchEmrView('omniBar')" title="Search / Home"><span><i data-lucide="search" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Omni-Bar / Search</span></button>
+        <button class="nav-btn" onclick="switchEmrView('triageView')" data-target-view="triageView" title="Triage &amp; Vitals"><span><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Triage &amp; Vitals</span></button>
+        <button class="nav-btn" onclick="switchEmrView('clinicsDashboardView')" data-target-view="clinicsDashboardView" title="Outpatient Clinics"><span><i data-lucide="plus-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Outpatient Clinics</span></button>
+        <button class="nav-btn" onclick="switchEmrView('wardsView')" data-target-view="wardsView" title="Inpatient Wards"><span><i data-lucide="bed" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️</span><span class="nav-text">Inpatient Wards</span></button>
+        <button class="nav-btn" onclick="switchEmrView('pharmacyView')" data-target-view="pharmacyView" title="Pharmacy"><span><i data-lucide="pill" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Pharmacy</span></button>
+        <button class="nav-btn" onclick="switchEmrView('labView')" data-target-view="labView" title="Laboratory"><span><i data-lucide="flask-conical" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Laboratory</span></button>
+        <button class="nav-btn" onclick="switchEmrView('radView')" data-target-view="radView" title="Radiology"><span><i data-lucide="radio" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️</span><span class="nav-text">Radiology</span></button>
+        <button class="nav-btn" onclick="switchEmrView('billingView')" data-target-view="billingView" title="Billing"><span><i data-lucide="credit-card" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Billing</span></button>
+        <button class="nav-btn" onclick="switchEmrView('recordsMainView')" data-target-view="recordsMainView" title="Records Unit" style="border-top: 1px solid #e5e7eb; border-radius: 0; margin-top: 8px; padding-top: 16px;"><span><i data-lucide="folder" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text" style="color: #4f46e5;">Records Unit</span></button>
+        <button class="nav-btn" onclick="switchEmrView('appointmentRequestsView')" data-target-view="appointmentRequestsView" title="Appointment Requests" style="position:relative;"><span><i data-lucide="calendar" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text" style="color: #f59e0b;">Appt. Requests</span><span id="apptBadge" style="display:none;position:absolute;top:6px;right:6px;width:18px;height:18px;background:#ef4444;color:white;border-radius:50%;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;">!</span></button>
       </div>
 
       <div style="margin-top: auto; border-top: 1px solid #e5e7eb; padding-top: 16px;">
@@ -153,7 +154,7 @@
         <!-- Role Selector -->
         
 
-        <button class="nav-btn" onclick="staffLogout()" title="Logout"><span>🚪</span><span class="nav-text">Logout</span></button>
+        <button class="nav-btn" onclick="staffLogout()" title="Logout"><span><i data-lucide="log-out" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Logout</span></button>
       </div>
     </nav>
 
@@ -188,10 +189,10 @@
         <div class="search-card" style="width: 100%; max-width: 800px; margin: 0 auto;">
           <h1 style="text-align: center; margin-bottom: 32px; font-size: 32px; font-weight: 800; letter-spacing: -0.02em;">Omni-Bar</h1>
           <div class="search-input-wrapper">
-            <span class="icon-btn">🔍</span>
+            <span class="icon-btn"><i data-lucide="search" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span>
             <input type="text" id="mpiSearch" placeholder="Search patient by name or ID..." oninput="debounceSearch()">
-            <button class="icon-btn mic-btn" title="Voice Search">🎤</button>
-            <button class="icon-btn" title="Scan QR">📷</button>
+            <button class="icon-btn mic-btn" title="Voice Search"><i data-lucide="mic" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></button>
+            <button class="icon-btn" title="Scan QR"><i data-lucide="camera" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></button>
           </div>
           <div style="text-align: center; margin-top: 12px;">
             <a href="javascript:void(0)" onclick="toggleQuickRegister()" style="color: #0B5E7E; font-size: 14px; text-decoration: none; font-weight: bold;">+ New Patient</a>
@@ -212,17 +213,17 @@
       <div id="appointmentRequestsView" class="emr-view hidden" style="width: 100%; max-width: 1000px; margin: 0 auto; padding: 32px 48px; display: flex; flex-direction: column; flex: 1;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
           <div>
-            <h1 style="font-size:28px;font-weight:800;letter-spacing:-0.02em;margin:0;">📅 Patient Appointment Requests</h1>
+            <h1 style="font-size:28px;font-weight:800;letter-spacing:-0.02em;margin:0;"><i data-lucide="calendar" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Patient Appointment Requests</h1>
             <p style="color:#6b7280;font-size:14px;margin-top:4px;">Review and confirm or decline patient-booked appointments from the portal.</p>
           </div>
-          <button onclick="loadAppointmentRequests()" style="background:#0B5E7E;color:white;border:none;padding:10px 20px;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;">🔄 Refresh</button>
+          <button onclick="loadAppointmentRequests()" style="background:#0B5E7E;color:white;border:none;padding:10px 20px;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;"><i data-lucide="refresh-cw" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Refresh</button>
         </div>
         <!-- Filter tabs -->
         <div style="display:flex;gap:8px;margin-bottom:20px;background:#f1f5f9;padding:4px;border-radius:12px;width:fit-content;">
-          <button id="apptTab_pending" onclick="filterApptRequests('pending')" style="padding:8px 18px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;background:white;color:#0B5E7E;box-shadow:0 2px 4px rgba(0,0,0,.08);">⏳ Pending</button>
-          <button id="apptTab_confirmed" onclick="filterApptRequests('confirmed')" style="padding:8px 18px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;background:transparent;color:#6b7280;">✅ Confirmed</button>
-          <button id="apptTab_payment_due" onclick="filterApptRequests('payment_due')" style="padding:8px 18px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;background:transparent;color:#6b7280;">💳 Awaiting Payment</button>
-          <button id="apptTab_paid" onclick="filterApptRequests('paid')" style="padding:8px 18px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;background:transparent;color:#6b7280;">✅ Paid</button>
+          <button id="apptTab_pending" onclick="filterApptRequests('pending')" style="padding:8px 18px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;background:white;color:#0B5E7E;box-shadow:0 2px 4px rgba(0,0,0,.08);"><i data-lucide="clock" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Pending</button>
+          <button id="apptTab_confirmed" onclick="filterApptRequests('confirmed')" style="padding:8px 18px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;background:transparent;color:#6b7280;"><i data-lucide="check-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Confirmed</button>
+          <button id="apptTab_payment_due" onclick="filterApptRequests('payment_due')" style="padding:8px 18px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;background:transparent;color:#6b7280;"><i data-lucide="credit-card" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Awaiting Payment</button>
+          <button id="apptTab_paid" onclick="filterApptRequests('paid')" style="padding:8px 18px;border:none;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;background:transparent;color:#6b7280;"><i data-lucide="check-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Paid</button>
         </div>
         <div id="apptRequestsList" style="display:flex;flex-direction:column;gap:12px;">
           <div style="color:#9ca3af;text-align:center;padding:48px;">Loading appointments…</div>
@@ -240,37 +241,37 @@
         <div id="clinicsCategoriesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); justify-content: center; gap: 24px;">
           
           <div onclick="showClinicCategory('cat_primary')" class="clinic-category-card">
-            <div class="cat-icon" style="background: #eff6ff; color: #3b82f6;">🚨</div>
+            <div class="cat-icon" style="background: #eff6ff; color: #3b82f6;"><i data-lucide="alert-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
             <h3>Primary &amp; Emergency</h3>
             <p>GOPD, A&amp;E, EPU, Amenity</p>
           </div>
 
           <div onclick="showClinicCategory('cat_surgical')" class="clinic-category-card">
-            <div class="cat-icon" style="background: #fef2f2; color: #ef4444;">🔪</div>
+            <div class="cat-icon" style="background: #fef2f2; color: #ef4444;"><i data-lucide="scissors" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
             <h3>Surgical &amp; Procedures</h3>
             <p>Theater, Ortho, Endoscopy</p>
           </div>
 
           <div onclick="showClinicCategory('cat_specialist')" class="clinic-category-card">
-            <div class="cat-icon" style="background: #fdf2f8; color: #ec4899;">🫀</div>
+            <div class="cat-icon" style="background: #fdf2f8; color: #ec4899;"><i data-lucide="heart" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
             <h3>Specialist Care</h3>
             <p>Cardiac, Renal, Oncology...</p>
           </div>
 
           <div onclick="showClinicCategory('cat_women')" class="clinic-category-card">
-            <div class="cat-icon" style="background: #faf5ff; color: #a855f7;">🤰</div>
+            <div class="cat-icon" style="background: #faf5ff; color: #a855f7;"><i data-lucide="user" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
             <h3>Women &amp; Children</h3>
             <p>O&amp;G, Antenatal, Pediatrics</p>
           </div>
 
           <div onclick="showClinicCategory('cat_mental')" class="clinic-category-card">
-            <div class="cat-icon" style="background: #f0fdf4; color: #22c55e;">🧠</div>
+            <div class="cat-icon" style="background: #f0fdf4; color: #22c55e;"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
             <h3>Mental &amp; Allied Health</h3>
             <p>Psychiatry, Physio, Nutrition</p>
           </div>
 
           <div onclick="showClinicCategory('cat_dental')" class="clinic-category-card">
-            <div class="cat-icon" style="background: #f0f9ff; color: #0ea5e9;">🦷</div>
+            <div class="cat-icon" style="background: #f0f9ff; color: #0ea5e9;"><i data-lucide="smile" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
             <h3>Dental &amp; Head</h3>
             <p>Dentistry, Maxillofacial, Eye</p>
           </div>
@@ -287,10 +288,10 @@
           <div id="cat_primary" class="clinic-category-units" style="display: none;">
             <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Primary &amp; Emergency Units</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <button onclick="loadUnifiedWaitingList('GOPD')" class="clinic-btn">🩺 General Outpatient (GOPD)</button>
-              <button onclick="loadUnifiedWaitingList('A &amp; E')" class="clinic-btn" style="border-left-color: #ef4444;">🚨 Accident &amp; Emergency</button>
-              <button onclick="loadUnifiedWaitingList('EPU')" class="clinic-btn">🚑 Emergency Pediatric Unit (EPU)</button>
-              <button onclick="loadUnifiedWaitingList('Amenity Clinic')" class="clinic-btn">⭐ Amenity Clinic</button>
+              <button onclick="loadUnifiedWaitingList('GOPD')" class="clinic-btn"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> General Outpatient (GOPD)</button>
+              <button onclick="loadUnifiedWaitingList('A &amp; E')" class="clinic-btn" style="border-left-color: #ef4444;"><i data-lucide="alert-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Accident &amp; Emergency</button>
+              <button onclick="loadUnifiedWaitingList('EPU')" class="clinic-btn"><i data-lucide="truck" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Emergency Pediatric Unit (EPU)</button>
+              <button onclick="loadUnifiedWaitingList('Amenity Clinic')" class="clinic-btn"><i data-lucide="star" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Amenity Clinic</button>
             </div>
           </div>
 
@@ -298,10 +299,10 @@
           <div id="cat_surgical" class="clinic-category-units" style="display: none;">
             <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Surgical &amp; Procedures Units</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <button onclick="loadUnifiedWaitingList('Theater')" class="clinic-btn" style="border-left-color: #ef4444;">🔪 Theater (Surgery)</button>
-              <button onclick="loadUnifiedWaitingList('Orthopaedics')" class="clinic-btn">🦴 Orthopaedics</button>
-              <button onclick="loadUnifiedWaitingList('Endoscopy')" class="clinic-btn">🔍 Endoscopy</button>
-              <button onclick="loadUnifiedWaitingList('Procedure')" class="clinic-btn">💉 General Procedures</button>
+              <button onclick="loadUnifiedWaitingList('Theater')" class="clinic-btn" style="border-left-color: #ef4444;"><i data-lucide="scissors" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Theater (Surgery)</button>
+              <button onclick="loadUnifiedWaitingList('Orthopaedics')" class="clinic-btn"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Orthopaedics</button>
+              <button onclick="loadUnifiedWaitingList('Endoscopy')" class="clinic-btn"><i data-lucide="search" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Endoscopy</button>
+              <button onclick="loadUnifiedWaitingList('Procedure')" class="clinic-btn"><i data-lucide="syringe" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> General Procedures</button>
             </div>
           </div>
 
@@ -309,13 +310,13 @@
           <div id="cat_specialist" class="clinic-category-units" style="display: none;">
             <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Specialist Care Units</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <button onclick="loadUnifiedWaitingList('Cardiac Centre')" class="clinic-btn" style="border-left-color: #ec4899;">❤️ Cardiac Centre</button>
-              <button onclick="loadUnifiedWaitingList('Cardiology')" class="clinic-btn" style="border-left-color: #ec4899;">🫀 Cardiology</button>
-              <button onclick="loadUnifiedWaitingList('Urology')" class="clinic-btn">💧 Urology</button>
-              <button onclick="loadUnifiedWaitingList('Renal')" class="clinic-btn">🩸 Renal</button>
-              <button onclick="loadUnifiedWaitingList('Endocrinology')" class="clinic-btn">🧪 Endocrinology</button>
-              <button onclick="loadUnifiedWaitingList('Dermatology')" class="clinic-btn">✋ Dermatology</button>
-              <button onclick="loadUnifiedWaitingList('Oncology')" class="clinic-btn">🎗️ Oncology</button>
+              <button onclick="loadUnifiedWaitingList('Cardiac Centre')" class="clinic-btn" style="border-left-color: #ec4899;"><i data-lucide="heart" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Cardiac Centre</button>
+              <button onclick="loadUnifiedWaitingList('Cardiology')" class="clinic-btn" style="border-left-color: #ec4899;"><i data-lucide="heart" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Cardiology</button>
+              <button onclick="loadUnifiedWaitingList('Urology')" class="clinic-btn"><i data-lucide="droplet" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Urology</button>
+              <button onclick="loadUnifiedWaitingList('Renal')" class="clinic-btn"><i data-lucide="droplet" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Renal</button>
+              <button onclick="loadUnifiedWaitingList('Endocrinology')" class="clinic-btn"><i data-lucide="flask-conical" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Endocrinology</button>
+              <button onclick="loadUnifiedWaitingList('Dermatology')" class="clinic-btn"><i data-lucide="hand" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Dermatology</button>
+              <button onclick="loadUnifiedWaitingList('Oncology')" class="clinic-btn"><i data-lucide="award" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Oncology</button>
             </div>
           </div>
 
@@ -323,11 +324,11 @@
           <div id="cat_women" class="clinic-category-units" style="display: none;">
             <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Women &amp; Children Units</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <button onclick="loadUnifiedWaitingList('O &amp; G')" class="clinic-btn" style="border-left-color: #a855f7;">🤰 Obstetrics &amp; Gynaecology</button>
-              <button onclick="loadUnifiedWaitingList('Antenatal')" class="clinic-btn" style="border-left-color: #a855f7;">👶 Antenatal</button>
-              <button onclick="loadUnifiedWaitingList('Post Natal')" class="clinic-btn" style="border-left-color: #a855f7;">🍼 Post Natal</button>
-              <button onclick="loadUnifiedWaitingList('Pediatrics')" class="clinic-btn">🧸 Pediatrics</button>
-              <button onclick="loadUnifiedWaitingList('Family Planning')" class="clinic-btn">👨‍👩‍👧 Family Planning</button>
+              <button onclick="loadUnifiedWaitingList('O &amp; G')" class="clinic-btn" style="border-left-color: #a855f7;"><i data-lucide="user" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Obstetrics &amp; Gynaecology</button>
+              <button onclick="loadUnifiedWaitingList('Antenatal')" class="clinic-btn" style="border-left-color: #a855f7;"><i data-lucide="user" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Antenatal</button>
+              <button onclick="loadUnifiedWaitingList('Post Natal')" class="clinic-btn" style="border-left-color: #a855f7;"><i data-lucide="coffee" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Post Natal</button>
+              <button onclick="loadUnifiedWaitingList('Pediatrics')" class="clinic-btn"><i data-lucide="smile" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Pediatrics</button>
+              <button onclick="loadUnifiedWaitingList('Family Planning')" class="clinic-btn"><i data-lucide="user" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>‍<i data-lucide="user" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>‍<i data-lucide="user" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Family Planning</button>
             </div>
           </div>
 
@@ -335,10 +336,10 @@
           <div id="cat_mental" class="clinic-category-units" style="display: none;">
             <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Mental &amp; Allied Health Units</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <button onclick="loadUnifiedWaitingList('Psychiatry')" class="clinic-btn">🧠 Psychiatry</button>
-              <button onclick="loadUnifiedWaitingList('Psychology')" class="clinic-btn">🛋️ Psychology</button>
-              <button onclick="loadUnifiedWaitingList('Physiotherapy')" class="clinic-btn">🏃 Physiotherapy</button>
-              <button onclick="loadUnifiedWaitingList('Nutrition &amp; Dietetics')" class="clinic-btn">🥗 Nutrition &amp; Dietetics</button>
+              <button onclick="loadUnifiedWaitingList('Psychiatry')" class="clinic-btn"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Psychiatry</button>
+              <button onclick="loadUnifiedWaitingList('Psychology')" class="clinic-btn"><i data-lucide="archive" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Psychology</button>
+              <button onclick="loadUnifiedWaitingList('Physiotherapy')" class="clinic-btn"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Physiotherapy</button>
+              <button onclick="loadUnifiedWaitingList('Nutrition &amp; Dietetics')" class="clinic-btn"><i data-lucide="coffee" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Nutrition &amp; Dietetics</button>
             </div>
           </div>
 
@@ -346,11 +347,11 @@
           <div id="cat_dental" class="clinic-category-units" style="display: none;">
             <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Dental &amp; Head Units</h3>
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <button onclick="loadUnifiedWaitingList('Dentistry')" class="clinic-btn" style="border-left-color: #0ea5e9;">🦷 Dentistry</button>
-              <button onclick="loadUnifiedWaitingList('Maxillofacial')" class="clinic-btn" style="border-left-color: #0ea5e9;">💀 Maxillofacial</button>
-              <button onclick="loadUnifiedWaitingList('Dental Therapy')" class="clinic-btn" style="border-left-color: #0ea5e9;">🪥 Dental Therapy</button>
-              <button onclick="loadUnifiedWaitingList('E.N.T.')" class="clinic-btn">👂 E.N.T. Clinic</button>
-              <button onclick="loadUnifiedWaitingList('Eye Clinic')" class="clinic-btn">👁️ Eye Clinic</button>
+              <button onclick="loadUnifiedWaitingList('Dentistry')" class="clinic-btn" style="border-left-color: #0ea5e9;"><i data-lucide="smile" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Dentistry</button>
+              <button onclick="loadUnifiedWaitingList('Maxillofacial')" class="clinic-btn" style="border-left-color: #0ea5e9;"><i data-lucide="alert-triangle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Maxillofacial</button>
+              <button onclick="loadUnifiedWaitingList('Dental Therapy')" class="clinic-btn" style="border-left-color: #0ea5e9;"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Dental Therapy</button>
+              <button onclick="loadUnifiedWaitingList('E.N.T.')" class="clinic-btn"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> E.N.T. Clinic</button>
+              <button onclick="loadUnifiedWaitingList('Eye Clinic')" class="clinic-btn"><i data-lucide="eye" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Eye Clinic</button>
             </div>
           </div>
 
@@ -473,7 +474,7 @@
           <div id="aiChips" style="margin-top: 16px; min-height: 32px;"></div>
           
           <div id="bottomActions" style="margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 16px; display: flex; gap: 12px; align-items: center;">
-            <button class="btn mic-btn" id="composerMicBtn" style="width: auto; background: #f1f5f9; color: #374151; border: 1px solid #d1d5db;">🎤 Dictate</button>
+            <button class="btn mic-btn" id="composerMicBtn" style="width: auto; background: #f1f5f9; color: #374151; border: 1px solid #d1d5db;"><i data-lucide="mic" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Dictate</button>
             <button class="btn" style="width: auto; background: #f1f5f9; color: #374151; border: 1px solid #d1d5db;" onclick="saveDraft()">Save as Draft</button>
             <div style="margin-left: auto; display: flex; gap: 12px; align-items: center;">
                 <select id="admitWardSelect" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; background: #f8fafc; color: #0f172a; font-weight: 600;">
@@ -491,7 +492,7 @@
           <div id="recordsTabContent" class="hidden" style="flex: 1; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); width: 100%; transition: opacity 0.2s;">
             <h3 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 24px;">Departmental Records Log</h3>
             <div class="search-input-wrapper" style="max-width: 400px; margin-bottom: 24px;">
-              <span class="icon-btn">🔍</span>
+              <span class="icon-btn"><i data-lucide="search" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span>
               <input type="text" placeholder="Search historical records..." style="font-size: 16px;">
             </div>
             
@@ -518,15 +519,15 @@
       <!-- VIEW 3: Post-Encounter UI (Node AD) -->
       <div id="postEncounterView" class="emr-view hidden" style="width: 95%; max-width: 1600px; margin: 0 auto; align-self: center; padding: 32px 48px; display: flex; flex-direction: column; flex: 1; background: transparent;">
         <div class="white-card" style="padding: 48px;">
-          <div style="font-size: 48px; margin-bottom: 16px;">✅</div>
+          <div style="font-size: 48px; margin-bottom: 16px;"><i data-lucide="check-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
           <h2 style="font-size: 28px; color: #111827; margin-bottom: 8px;">Encounter Closed Successfully</h2>
           <p style="color: #6b7280; margin-bottom: 32px; font-size: 16px;">Patient documentation has been saved securely. What would you like to do next?</p>
           
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <button onclick="printSummary()" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #1f2937; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">🖨️ Print Patient Summary</button>
-            <button onclick="switchEmrView('pharmacyView')" data-target-view="pharmacyView" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #10b981; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">💊 Proceed to Pharmacy</button>
-            <button onclick="switchEmrView('labView')" data-target-view="labView" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #8b5cf6; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">🧪 Proceed to Laboratory</button>
-            <button onclick="switchEmrView('omniBar')" style="padding: 16px; background: #0B5E7E; border: none; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: white; transition: all 0.2s; box-shadow: 0 4px 6px rgba(11,94,126,0.2);">🔍 Return to Omni-Bar</button>
+            <button onclick="printSummary()" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #1f2937; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><i data-lucide="printer" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Print Patient Summary</button>
+            <button onclick="switchEmrView('pharmacyView')" data-target-view="pharmacyView" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #10b981; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><i data-lucide="pill" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Proceed to Pharmacy</button>
+            <button onclick="switchEmrView('labView')" data-target-view="labView" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #8b5cf6; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><i data-lucide="flask-conical" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Proceed to Laboratory</button>
+            <button onclick="switchEmrView('omniBar')" style="padding: 16px; background: #0B5E7E; border: none; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: white; transition: all 0.2s; box-shadow: 0 4px 6px rgba(11,94,126,0.2);"><i data-lucide="search" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Return to Omni-Bar</button>
           </div>
         </div>
       </div>
@@ -565,7 +566,7 @@
                 <h3 id="pharmacyView-patientName" style="font-size: 24px; font-weight: 800; color: #0f172a;">Select an Order</h3>
                 <p id="pharmacyView-orderId" style="font-size: 14px; color: #64748b;">Waiting for selection...</p>
               </div>
-              <button onclick="fulfillAncillaryOrder('pharmacyView')" style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #10b98140; transition: all 0.2s;">✔️ Fulfill &amp; Bill</button>
+              <button onclick="fulfillAncillaryOrder('pharmacyView')" style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #10b98140; transition: all 0.2s;"><i data-lucide="check" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Fulfill &amp; Bill</button>
             </div>
             
             <div style="display: flex; flex: 1; overflow: hidden;">
@@ -672,7 +673,7 @@
                 <h3 id="labView-patientName" style="font-size: 24px; font-weight: 800; color: #0f172a;">Select an Order</h3>
                 <p id="labView-orderId" style="font-size: 14px; color: #64748b;">Waiting for selection...</p>
               </div>
-              <button onclick="fulfillAncillaryOrder('labView')" style="background: #8b5cf6; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #8b5cf640; transition: all 0.2s;">✔️ Fulfill &amp; Bill</button>
+              <button onclick="fulfillAncillaryOrder('labView')" style="background: #8b5cf6; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #8b5cf640; transition: all 0.2s;"><i data-lucide="check" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Fulfill &amp; Bill</button>
             </div>
             
             <div style="display: flex; flex: 1; overflow: hidden;">
@@ -773,7 +774,7 @@
           <!-- Assessment Pane -->
           <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
             <div id="triageEmptyState" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center;">
-              <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;">🩺</div>
+              <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
               <h3 style="font-size: 20px; font-weight: 700; color: #334155; margin-bottom: 8px;">Select a Patient</h3>
               <p style="color: #64748b; font-size: 15px; max-width: 300px;">Choose a patient from the queue to record their vitals and assign clinical priority.</p>
             </div>
@@ -793,7 +794,7 @@
               <div style="padding: 24px; flex: 1; overflow-y: auto;">
                 <form id="vitalsForm" onsubmit="submitVitals(event)">
                   <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                    <span style="background: #e0e7ff; color: #4f46e5; padding: 4px; border-radius: 6px;">📊</span> Standard Vitals
+                    <span style="background: #e0e7ff; color: #4f46e5; padding: 4px; border-radius: 6px;"><i data-lucide="bar-chart" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span> Standard Vitals
                   </h4>
                   
                   <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px;">
@@ -824,7 +825,7 @@
                   </div>
 
                   <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                    <span style="background: #fef3c7; color: #d97706; padding: 4px; border-radius: 6px;">⚠️</span> Triage Priority
+                    <span style="background: #fef3c7; color: #d97706; padding: 4px; border-radius: 6px;"><i data-lucide="alert-triangle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️</span> Triage Priority
                   </h4>
                   
                   <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 32px;">
@@ -947,7 +948,7 @@
                 <h3 id="radView-patientName" style="font-size: 24px; font-weight: 800; color: #0f172a;">Select an Order</h3>
                 <p id="radView-orderId" style="font-size: 14px; color: #64748b;">Waiting for selection...</p>
               </div>
-              <button onclick="fulfillAncillaryOrder('radView')" style="background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #f59e0b40; transition: all 0.2s;">✔️ Fulfill &amp; Bill</button>
+              <button onclick="fulfillAncillaryOrder('radView')" style="background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #f59e0b40; transition: all 0.2s;"><i data-lucide="check" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Fulfill &amp; Bill</button>
             </div>
             
             <div style="display: flex; flex: 1; overflow: hidden;">
@@ -1005,8 +1006,8 @@
           </div>
           <div style="display: flex; gap: 12px; align-items: center;">
              <button onclick="openWalkInAdmissionModal()" style="background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(239, 68, 68, 0.2); transition: background 0.2s;">+ Direct Admission (Walk-In)</button>
-             <span style="background: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #166534; border: 1px solid #bbf7d0;">🟢 12 Available</span>
-             <span style="background: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #991b1b; border: 1px solid #fecaca;">🔴 4 Occupied</span>
+             <span style="background: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #166534; border: 1px solid #bbf7d0;"><i data-lucide="circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> 12 Available</span>
+             <span style="background: white; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; color: #991b1b; border: 1px solid #fecaca;"><i data-lucide="circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> 4 Occupied</span>
           </div>
         </div>
 
@@ -1075,7 +1076,7 @@
             </div>
             <div>
               <button style="background: #facc15; color: #854d0e; font-weight: 700; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="loadBilling()">
-                <span>🔄</span> Refresh
+                <span><i data-lucide="refresh-cw" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span> Refresh
               </button>
             </div>
           </div>
@@ -1145,7 +1146,7 @@
               <div style="padding: 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
                 <h3 style="font-size: 18px; font-weight: 700; color: #0f172a;">Patient Database</h3>
                 <div class="search-input-wrapper" style="margin: 0; padding: 6px 12px; max-width: 300px;">
-                  <span class="icon-btn" style="font-size: 16px;">🔍</span>
+                  <span class="icon-btn" style="font-size: 16px;"><i data-lucide="search" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span>
                   <input type="text" id="recSearchInput" placeholder="Search Hospital Number..." style="font-size: 14px; padding: 4px;" onkeyup="filterRecordsTable()">
                 </div>
               </div>
@@ -1257,7 +1258,7 @@
           <!-- RECORDS: APPOINTMENTS SHELL -->
           <div id="recContent-appointments" class="rec-tab-content hidden" style="animation: fadeIn 0.3s ease-out;">
             <div class="white-card" style="padding: 40px; text-align: center; min-height: 300px; display: flex; flex-direction: column; align-items: stretch; justify-content: center;">
-              <div style="font-size: 48px; margin-bottom: 16px;">📅</div>
+              <div style="font-size: 48px; margin-bottom: 16px;"><i data-lucide="calendar" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
               <h3 style="font-size: 20px; font-weight: 700; color: #0f172a;">All Appointments</h3>
               <p style="color: #64748b;">No appointments scheduled for today.</p>
             </div>
@@ -1317,7 +1318,7 @@
                 </div>
                 <div>
                   <button style="background: #facc15; color: #854d0e; font-weight: 700; border: none; padding: 8px 16px; border-radius: 4px; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="loadReferrals()">
-                    <span>🔄</span> Refresh
+                    <span><i data-lucide="refresh-cw" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span> Refresh
                   </button>
                 </div>
               </div>
@@ -1357,7 +1358,7 @@
   <!-- Out of Stock Modal -->
   <div id="oosModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(2px);">
     <div class="white-card" style="width: 400px;">
-      <h2 style="margin-bottom: 16px; color: #ef4444;">⚠️ Out of Stock</h2>
+      <h2 style="margin-bottom: 16px; color: #ef4444;"><i data-lucide="alert-triangle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Out of Stock</h2>
       <p id="oosMessage" style="margin-bottom: 24px; font-size: 15px; color: #4b5563;"></p>
       <div style="display: flex; gap: 12px;">
         <button onclick="closeOosModal()" class="btn" style="background: #e5e7eb; color: #374151;">Cancel</button>
@@ -1753,7 +1754,7 @@
                         <div style="position: absolute; left: -25px; top: 0; width: 10px; height: 10px; background: ${e.type === 'Nursing Note' ? '#0ea5e9' : '#8b5cf6'}; border-radius: 50%; border: 2px solid white;"></div>
                         <div style="font-size: 11px; font-weight: 700; color: #94a3b8; margin-bottom: 4px;">${new Date(e.date).toLocaleDateString()} - ${e.id}</div>
                         ${e.type === 'Nursing Note' 
-                            ? `<span style="background: #e0f2fe; color: #0284c7; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 800;">🩺 NURSING LOG</span>`
+                            ? `<span style="background: #e0f2fe; color: #0284c7; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 800;"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> NURSING LOG</span>`
                             : `<span style="font-weight: 700; color: #475569; font-size: 12px;">${e.icd11Display || 'Encounter'}</span>`
                         }
                         <p style="font-size: 13px; color: #334155; margin-top: 6px; line-height: 1.5;">
@@ -1824,8 +1825,8 @@
             db.inventory.forEach(item => {
                 const isLow = item.quantity <= item.reorderLevel;
                 const statusBadge = isLow ? 
-                    `<span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 11px;">🔴 LOW STOCK</span>` : 
-                    `<span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 11px;">🟢 IN STOCK</span>`;
+                    `<span style="background: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 11px;"><i data-lucide="circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> LOW STOCK</span>` : 
+                    `<span style="background: #dcfce7; color: #166534; padding: 4px 8px; border-radius: 4px; font-weight: 800; font-size: 11px;"><i data-lucide="circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> IN STOCK</span>`;
                 
                 html += `
                     <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background='transparent'">
@@ -2113,9 +2114,9 @@
               
               <!-- Clean Kebab Dropdown -->
               <div id="kebab-${p.id}" class="kebab-menu hidden" style="position: absolute; right: 24px; top: 40px; background: white; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 180px; z-index: 100; text-align: left; overflow: hidden;">
-                <button onclick="startUnifiedConsult('${p.id}', '${p.name}')" style="width: 100%; text-align: left; padding: 12px 16px; background: transparent; border: none; border-bottom: 1px solid #f1f5f9; cursor: pointer; color: #0f172a; font-size: 13px; font-weight: 600;">🩺 Start Encounter</button>
-                <button style="width: 100%; text-align: left; padding: 12px 16px; background: transparent; border: none; border-bottom: 1px solid #f1f5f9; cursor: pointer; color: #475569; font-size: 13px;">🔄 Route Patient</button>
-                <button style="width: 100%; text-align: left; padding: 12px 16px; background: transparent; border: none; cursor: pointer; color: #ef4444; font-size: 13px;">❌ Remove from Queue</button>
+                <button onclick="startUnifiedConsult('${p.id}', '${p.name}')" style="width: 100%; text-align: left; padding: 12px 16px; background: transparent; border: none; border-bottom: 1px solid #f1f5f9; cursor: pointer; color: #0f172a; font-size: 13px; font-weight: 600;"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Start Encounter</button>
+                <button style="width: 100%; text-align: left; padding: 12px 16px; background: transparent; border: none; border-bottom: 1px solid #f1f5f9; cursor: pointer; color: #475569; font-size: 13px;"><i data-lucide="refresh-cw" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Route Patient</button>
+                <button style="width: 100%; text-align: left; padding: 12px 16px; background: transparent; border: none; cursor: pointer; color: #ef4444; font-size: 13px;"><i data-lucide="x" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Remove from Queue</button>
               </div>
             </td>
           `;
@@ -2222,7 +2223,7 @@
         
         const tbody = document.getElementById('billingTableBody');
         if(bills.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px; color:#94a3b8; font-weight:bold; font-size:16px;"><div style="font-size:48px; margin-bottom:16px;">💳</div>No Invoices Found!</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px; color:#94a3b8; font-weight:bold; font-size:16px;"><div style="font-size:48px; margin-bottom:16px;"><i data-lucide="credit-card" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>No Invoices Found!</td></tr>`;
           return;
         }
         
@@ -2289,7 +2290,7 @@
         
         const tbody = document.getElementById('referralsTableBody');
         if(refs.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px; color:#94a3b8; font-weight:bold; font-size:16px;"><div style="font-size:48px; margin-bottom:16px;">🚫</div>No Records Found!</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:40px; color:#94a3b8; font-weight:bold; font-size:16px;"><div style="font-size:48px; margin-bottom:16px;"><i data-lucide="slash" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>No Records Found!</td></tr>`;
           return;
         }
         
@@ -2766,12 +2767,12 @@
             <div class="timeline-item" style="${e.type === 'Nursing Note' ? 'border-left-color: #0ea5e9;' : ''}">
               <div class="timeline-date">${new Date(e.date).toLocaleDateString()} - ${e.id}</div>
               ${e.type === 'Nursing Note' 
-                ? `<div style="display: inline-block; background: #e0f2fe; color: #0284c7; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; margin-bottom: 8px; letter-spacing: 0.05em; border: 1px solid #bae6fd;">🩺 NURSING LOG</div>`
+                ? `<div style="display: inline-block; background: #e0f2fe; color: #0284c7; font-size: 10px; font-weight: 800; padding: 4px 10px; border-radius: 12px; margin-bottom: 8px; letter-spacing: 0.05em; border: 1px solid #bae6fd;"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> NURSING LOG</div>`
                 : `<div class="timeline-dx">${e.icd11 ? `ICD-11: ${e.icd11}` : `Observation: ${e.icd11Display || 'N/A'}`}</div>`
               }
               <div style="font-size: 13px; color: #4b5563; margin-top:8px; line-height: 1.5;">
                 ${e.type === 'Nursing Note' ? (
-                  (e.vitals ? `<span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:600; color:#334155; margin-right:8px; font-size: 12px;">❤️ HR: ${e.vitals.heartRate}</span><span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:600; color:#334155; font-size: 12px; margin-bottom: 8px; display:inline-block;">🩸 BP: ${e.vitals.bloodPressureSystolic}/${e.vitals.bloodPressureDiastolic}</span><br>` : '') +
+                  (e.vitals ? `<span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:600; color:#334155; margin-right:8px; font-size: 12px;"><i data-lucide="heart" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ HR: ${e.vitals.heartRate}</span><span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:600; color:#334155; font-size: 12px; margin-bottom: 8px; display:inline-block;"><i data-lucide="droplet" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> BP: ${e.vitals.bloodPressureSystolic}/${e.vitals.bloodPressureDiastolic}</span><br>` : '') +
                   (e.fluid ? `<b>Fluid Administered:</b> ${e.fluid}<br>` : '') +
                   (e.text || '')
                 ) : (e.text || 'No clinical notes recorded.')}
@@ -2815,11 +2816,11 @@
       if(this.classList.contains("active")) {
         recognition.stop();
         this.classList.remove("active");
-        this.innerHTML = "🎤 Dictate";
+        this.innerHTML = "<i data-lucide="mic" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Dictate";
       } else {
         recognition.start();
         this.classList.add("active");
-        this.innerHTML = "🛑 Stop";
+        this.innerHTML = "<i data-lucide="octagon" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Stop";
       }
     });
 
@@ -3173,7 +3174,7 @@ Plan:
     }
   </style>
   <div id="global-error-toast">
-    <span>⚠️</span>
+    <span><i data-lucide="alert-triangle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️</span>
     <span id="global-error-msg">An unexpected error occurred.</span>
     <span class="close-btn" onclick="document.getElementById('global-error-toast').classList.remove('show')">✕</span>
   </div>
@@ -3493,4 +3494,6 @@ setInterval(function() {
 }, 30000);
 </script>
 
+  <script>lucide.createIcons();</script>
+<div style="position: fixed; bottom: 8px; right: 8px; font-size: 10px; color: #94a3b8; z-index: 9999; font-family: monospace;">Build v0.8.4-beta | Internal</div>
 </body></html>
