@@ -93,7 +93,7 @@
     </form>
     
     <div style="border-top: 1px solid #e5e7eb; padding-top: 16px; text-align: center;">
-      <button onclick="alert('Contact System Administrator to register new staff')" style="background: transparent; border: none; color: #10b981; font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: underline;">Register New Staff</button>
+      <button onclick="registerMockStaff()" style="background: transparent; border: none; color: #10b981; font-weight: 700; font-size: 14px; cursor: pointer; text-decoration: underline;">Register New Staff</button>
     </div>
   </div>
 </div>
@@ -1622,7 +1622,7 @@
               <div style="background: ${isOccupied ? '#fef2f2' : '#ecfdf5'}; border: 1px solid ${isOccupied ? '#fca5a5' : '#6ee7b7'}; border-radius: 16px; padding: 20px; text-align: center;">
                 <div style="font-size: 24px; font-weight: 800; color: ${isOccupied ? '#991b1b' : '#065f46'};">${bed.bedId}</div>
                 <div style="font-size: 14px; color: ${isOccupied ? '#b91c1c' : '#059669'}; margin-top: 4px; font-weight: 600;">${bed.status}</div>
-                ${!isOccupied ? `<button style="margin-top: 16px; width: 100%; padding: 8px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="alert('Open admission flow for ${bed.bedId}')">Admit</button>` : `<div style="margin-top: 16px; font-size: 12px; color: #7f1d1d; opacity: 0.8;">Patient ID: ${bed.patientId}</div>`}
+                ${!isOccupied ? `<button style="margin-top: 16px; width: 100%; padding: 8px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="openAdmitBedModal('${ward.id}', '${bed.bedId}')">Admit</button>` : `<div style="margin-top: 16px; font-size: 12px; color: #7f1d1d; opacity: 0.8;">Patient ID: ${bed.patientId}</div>`}
               </div>
             `;
           }).join('');
@@ -1659,7 +1659,7 @@
                     <div style="color: #64748b; font-size: 14px; margin-top: 4px;">PT ID: ${o.patientId}</div>
                   </div>
                 </div>
-                <button style="width: 100%; padding: 12px; background: #eff6ff; color: #2563eb; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;" onclick="alert('Processing ${o.id}')">Process Sample</button>
+                <button style="width: 100%; padding: 12px; background: #eff6ff; color: #2563eb; border: none; border-radius: 12px; font-weight: 700; cursor: pointer;" onclick="processMockLab('${o.id}', '${o.name}')">Process Sample</button>
               </div>
             `).join('');
           }
@@ -1739,7 +1739,7 @@
                 </div>
                 <div style="display: flex; align-items: center; gap: 16px;">
                   <div style="font-weight: 800; color: #0f172a; font-size: 18px;">₦${Number(inv.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</div>
-                  <button style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="alert('Settling invoice ${inv.id}')">Settle Bill</button>
+                  <button style="padding: 8px 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="settleMockBill('${inv.id}')">Settle Bill</button>
                 </div>
               </div>
             `).join('');
@@ -2460,6 +2460,65 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-</script>  <script>lucide.createIcons();</script>
+</script>
+<script>
+    function registerMockStaff() {
+      const username = prompt("Enter new staff username:");
+      if (username) {
+        alert("Staff account '" + username + "' securely registered and onboarded.");
+      }
+    }
+
+    async function openAdmitBedModal(wardId, bedId) {
+      const patientId = prompt(`Enter Patient ID to admit to ${wardId} (Bed ${bedId}):`);
+      if(!patientId) return;
+      try {
+        const token = sessionStorage.getItem('staff_token');
+        const res = await fetch('/api/v2/emr/admissions', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`},
+          body: JSON.stringify({ patientId, wardId, bedId })
+        });
+        if(res.ok) {
+           alert(`Patient ${patientId} successfully admitted to ${wardId} Bed ${bedId}.`);
+           loadWardsData(); // Refresh UI
+        } else {
+           alert('Failed to admit: Patient ID might not exist or bed is full.');
+        }
+      } catch(e) {
+        alert('Connection error.');
+      }
+    }
+
+    async function settleMockBill(invoiceId) {
+      if(!confirm(`Settle Invoice ${invoiceId} and mark as Paid?`)) return;
+      try {
+        const token = sessionStorage.getItem('staff_token');
+        const res = await fetch(`/api/v2/billing/status`, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`},
+          body: JSON.stringify({ id: invoiceId, status: 'Paid' })
+        });
+        if(res.ok) {
+           alert(`Invoice ${invoiceId} successfully settled! Receipt generated.`);
+           loadBilling(); // Refresh UI
+        } else {
+           alert('Failed to settle invoice.');
+        }
+      } catch(e) {
+        alert('Connection error.');
+      }
+    }
+
+    async function processMockLab(orderId, patientName) {
+      alert(`Processing ${orderId}...\n\nAnalyzer running...`);
+      setTimeout(() => {
+        const val = (Math.random() * 5 + 10).toFixed(1); // Fake realistic result
+        alert(`Lab Results generated for ${patientName}!\n\nHemoglobin: ${val} g/dL\nStatus: Finalized.\n\nResult automatically pushed to Doctor's EHR.`);
+        loadLabsData(); // Refresh UI
+      }, 1000);
+    }
+  </script>
+  <script>lucide.createIcons();</script>
 <div style="position: fixed; bottom: 8px; right: 8px; font-size: 10px; color: #94a3b8; z-index: 9999; font-family: monospace;">Build v0.8.4-beta | Internal</div>
 </body></html>

@@ -317,10 +317,32 @@ function selectConsultationPatient(id, name, temp, bp) {
     lucide.createIcons();
 }
 
-function dischargeConsultation() {
-    alert("Encounter Finalized and sent to Billing. Patient discharged.");
-    document.getElementById('activeConsultationPane').style.display = 'none';
-    document.getElementById('consultationEmptyState').style.display = 'flex';
+async function dischargeConsultation() {
+    const patientId = document.getElementById('consultPatientId').innerText;
+    if(!patientId) return alert("Select a patient first.");
+    
+    // Gather form data
+    const chiefComplaint = document.querySelector('#activeConsultationPane textarea:nth-of-type(1)')?.value || "";
+    const notes = document.querySelector('#activeConsultationPane textarea:nth-of-type(2)')?.value || "";
+    const icd11 = document.querySelector('#activeConsultationPane input')?.value || "";
+
+    try {
+        const token = sessionStorage.getItem('staff_token');
+        const res = await fetch('/api/v2/emr/encounters/finalize', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ patientId, chiefComplaint, notes, icd11 })
+        });
+        if(res.ok) {
+            alert(`Encounter finalized for ${patientId} and sent to Billing! Patient discharged.`);
+            document.getElementById('activeConsultationPane').style.display = 'none';
+            document.getElementById('consultationEmptyState').style.display = 'flex';
+        } else {
+            alert('Failed to finalize encounter.');
+        }
+    } catch(e) {
+        alert('Connection error. Is server running?');
+    }
 }
 </script>
 
@@ -1397,13 +1419,14 @@ function dischargeConsultation() {
         if(!res.ok) throw new Error("API failed");
         const allPatients = await res.json();
         
-        // Mock filtering: just take a random subset for demo purposes to simulate departmental queues
-        const numWaiting = Math.floor(Math.random() * 8) + 2; // 2 to 10 patients
-        const queue = [...allPatients].sort(() => 0.5 - Math.random()).slice(0, numWaiting);
+        // Deterministic filtering for Pitch Demo (Ensures queues never randomly appear empty)
+        const numWaiting = deptName.length % 3 + 2; // Always generates 2, 3, or 4 patients based on dept string length
+        // Sort deterministically by name so it looks consistent during the pitch
+        const queue = [...allPatients].sort((a,b) => a.name.localeCompare(b.name)).slice(0, numWaiting);
         
         document.getElementById('wlStatTotal').innerText = queue.length;
-        document.getElementById('wlStatAssigned').innerText = Math.floor(queue.length / 3);
-        document.getElementById('wlStatCompleted').innerText = Math.floor(Math.random() * 5);
+        document.getElementById('wlStatAssigned').innerText = Math.max(1, Math.floor(queue.length / 3));
+        document.getElementById('wlStatCompleted').innerText = 0;
         
         tbody.innerHTML = '';
         if(queue.length === 0) {
@@ -1962,7 +1985,40 @@ function dischargeConsultation() {
     }
     
     function printSummary() {
-      alert("Printing Patient Summary... (Mock)");
+      const pName = document.getElementById('recName').innerText || 'Unknown Patient';
+      const pId = document.getElementById('recId').innerText || 'Unknown ID';
+      const vitals = document.getElementById('recTemp').innerText || '--';
+      
+      const printWin = window.open('', '', 'width=800,height=600');
+      printWin.document.write(`
+        <html>
+          <head>
+            <title>Patient Summary - ${pName}</title>
+            <style>
+              body { font-family: sans-serif; padding: 40px; color: #0f172a; }
+              h1 { border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+              .section { margin-top: 30px; }
+            </style>
+          </head>
+          <body>
+            <h1>Plateau State EMR - Patient Summary</h1>
+            <div class="section">
+              <h3>Patient Details</h3>
+              <p><strong>Name:</strong> ${pName}</p>
+              <p><strong>ID:</strong> ${pId}</p>
+              <p><strong>Last Vitals:</strong> ${vitals}</p>
+            </div>
+            <div class="section">
+              <h3>Clinical Notes</h3>
+              <p>Summary generated securely via Health Grid.</p>
+            </div>
+            <script>
+              window.onload = function() { window.print(); window.close(); }
+            </script>
+          </body>
+        </html>
+      `);
+      printWin.document.close();
     }
 
 
