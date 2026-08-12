@@ -139,7 +139,7 @@
       <div style="display: flex; flex-direction: column; width: 100%;">
         <button class="nav-btn active" onclick="switchEmrView('omniBar')" title="Search / Home"><span><i data-lucide="search" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Omni-Bar / Search</span></button>
         <button class="nav-btn" onclick="switchEmrView('triageView')" data-target-view="triageView" title="Triage &amp; Vitals"><span><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Triage &amp; Vitals</span></button>
-        <button class="nav-btn" onclick="switchEmrView('clinicsDashboardView')" data-target-view="clinicsDashboardView" title="Outpatient Clinics"><span><i data-lucide="plus-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Outpatient Clinics</span></button>
+        <button class="nav-btn" onclick="switchEmrView('consultationView')" data-target-view="consultationView" title="Doctor's Consultation"><span><i data-lucide="plus-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Doctor's Consultation</span></button>
         <button class="nav-btn" onclick="switchEmrView('wardsView')" data-target-view="wardsView" title="Inpatient Wards"><span><i data-lucide="bed" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️</span><span class="nav-text">Inpatient Wards</span></button>
         <button class="nav-btn" onclick="switchEmrView('pharmacyView')" data-target-view="pharmacyView" title="Pharmacy"><span><i data-lucide="pill" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Pharmacy</span></button>
         <button class="nav-btn" onclick="switchEmrView('labView')" data-target-view="labView" title="Laboratory"><span><i data-lucide="flask-conical" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Laboratory</span></button>
@@ -233,770 +233,99 @@
       <!-- VIEW: Clinics Dashboard (Categorized Unified Workspace) -->
       
       <!-- VIEW: Clinics Dashboard (Categorized Unified Workspace) -->
-      <div id="clinicsDashboardView" class="emr-view hidden" style="width: 95%; max-width: 1600px; margin: 0 auto; align-self: center; padding: 32px 48px; display: flex; flex-direction: column; flex: 1; background: transparent;">
-        <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.02em;">Unified Clinical Workspace</h2>
-        <p id="clinicsSubtitle" style="color: #64748b; margin-bottom: 40px; font-size: 16px;">Select a department category to manage its waiting list and active encounters.</p>
-        
-        <!-- LEVEL 1: Categories Grid -->
-        <div id="clinicsCategoriesGrid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); justify-content: center; gap: 24px;">
-          
-          <div onclick="showClinicCategory('cat_primary')" class="clinic-category-card">
-            <div class="cat-icon" style="background: #eff6ff; color: #3b82f6;"><i data-lucide="alert-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
-            <h3>Primary &amp; Emergency</h3>
-            <p>GOPD, A&amp;E, EPU, Amenity</p>
-          </div>
-
-          <div onclick="showClinicCategory('cat_surgical')" class="clinic-category-card">
-            <div class="cat-icon" style="background: #fef2f2; color: #ef4444;"><i data-lucide="scissors" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
-            <h3>Surgical &amp; Procedures</h3>
-            <p>Theater, Ortho, Endoscopy</p>
-          </div>
-
-          <div onclick="showClinicCategory('cat_specialist')" class="clinic-category-card">
-            <div class="cat-icon" style="background: #fdf2f8; color: #ec4899;"><i data-lucide="heart" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
-            <h3>Specialist Care</h3>
-            <p>Cardiac, Renal, Oncology...</p>
-          </div>
-
-          <div onclick="showClinicCategory('cat_women')" class="clinic-category-card">
-            <div class="cat-icon" style="background: #faf5ff; color: #a855f7;"><i data-lucide="user" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
-            <h3>Women &amp; Children</h3>
-            <p>O&amp;G, Antenatal, Pediatrics</p>
-          </div>
-
-          <div onclick="showClinicCategory('cat_mental')" class="clinic-category-card">
-            <div class="cat-icon" style="background: #f0fdf4; color: #22c55e;"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
-            <h3>Mental &amp; Allied Health</h3>
-            <p>Psychiatry, Physio, Nutrition</p>
-          </div>
-
-          <div onclick="showClinicCategory('cat_dental')" class="clinic-category-card">
-            <div class="cat-icon" style="background: #f0f9ff; color: #0ea5e9;"><i data-lucide="smile" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
-            <h3>Dental &amp; Head</h3>
-            <p>Dentistry, Maxillofacial, Eye</p>
-          </div>
-
+      <div id="consultationView" class="emr-view hidden" style="width: 95%; max-width: 1600px; margin: 0 auto; align-self: center; padding: 32px 48px; display: flex; flex-direction: column; flex: 1; background: transparent;">
+  <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 8px; letter-spacing: -0.02em;">Doctor's Consultation</h2>
+  <p style="color: #64748b; margin-bottom: 24px; font-size: 16px;">Select a patient from the queue to begin the clinical encounter.</p>
+  
+  <div style="display: flex; gap: 24px; flex: 1; min-height: 600px;">
+    <!-- LEFT: Queue -->
+    <div style="width: 350px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 24px; display: flex; flex-direction: column;">
+      <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px;">Waiting List</h3>
+      <div id="consultationQueue" style="flex: 1; overflow-y: auto;">
+        <!-- Mock patients in queue -->
+        <div onclick="selectConsultationPatient('PT-9901', 'Sarah Jenkins', '38.2°C', '140/90')" style="padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; background: #f8fafc;">
+          <div style="font-weight: 700; font-size: 15px; color: #0f172a;">Sarah Jenkins</div>
+          <div style="font-size: 13px; color: #64748b; margin-top: 4px;">ID: PT-9901 | Triage: Priority</div>
         </div>
-
-        <!-- LEVEL 2: Units Containers (Hidden by default) -->
-        <div id="clinicsUnitsContainer" style="display: none;">
-          <button onclick="showClinicsGrid()" style="background: transparent; border: none; color: #64748b; font-weight: 700; font-size: 14px; cursor: pointer; margin-bottom: 24px; display: flex; align-items: center; gap: 8px;">
-            <span>←</span> Back to Categories
-          </button>
-          
-          <!-- Category: Primary & Emergency -->
-          <div id="cat_primary" class="clinic-category-units" style="display: none;">
-            <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Primary &amp; Emergency Units</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <button onclick="loadUnifiedWaitingList('GOPD')" class="clinic-btn"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> General Outpatient (GOPD)</button>
-              <button onclick="loadUnifiedWaitingList('A &amp; E')" class="clinic-btn" style="border-left-color: #ef4444;"><i data-lucide="alert-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Accident &amp; Emergency</button>
-              <button onclick="loadUnifiedWaitingList('EPU')" class="clinic-btn"><i data-lucide="truck" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Emergency Pediatric Unit (EPU)</button>
-              <button onclick="loadUnifiedWaitingList('Amenity Clinic')" class="clinic-btn"><i data-lucide="star" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Amenity Clinic</button>
-            </div>
-          </div>
-
-          <!-- Category: Surgical & Theater -->
-          <div id="cat_surgical" class="clinic-category-units" style="display: none;">
-            <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Surgical &amp; Procedures Units</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <button onclick="loadUnifiedWaitingList('Theater')" class="clinic-btn" style="border-left-color: #ef4444;"><i data-lucide="scissors" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Theater (Surgery)</button>
-              <button onclick="loadUnifiedWaitingList('Orthopaedics')" class="clinic-btn"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Orthopaedics</button>
-              <button onclick="loadUnifiedWaitingList('Endoscopy')" class="clinic-btn"><i data-lucide="search" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Endoscopy</button>
-              <button onclick="loadUnifiedWaitingList('Procedure')" class="clinic-btn"><i data-lucide="syringe" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> General Procedures</button>
-            </div>
-          </div>
-
-          <!-- Category: Specialist Care -->
-          <div id="cat_specialist" class="clinic-category-units" style="display: none;">
-            <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Specialist Care Units</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <button onclick="loadUnifiedWaitingList('Cardiac Centre')" class="clinic-btn" style="border-left-color: #ec4899;"><i data-lucide="heart" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Cardiac Centre</button>
-              <button onclick="loadUnifiedWaitingList('Cardiology')" class="clinic-btn" style="border-left-color: #ec4899;"><i data-lucide="heart" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Cardiology</button>
-              <button onclick="loadUnifiedWaitingList('Urology')" class="clinic-btn"><i data-lucide="droplet" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Urology</button>
-              <button onclick="loadUnifiedWaitingList('Renal')" class="clinic-btn"><i data-lucide="droplet" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Renal</button>
-              <button onclick="loadUnifiedWaitingList('Endocrinology')" class="clinic-btn"><i data-lucide="flask-conical" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Endocrinology</button>
-              <button onclick="loadUnifiedWaitingList('Dermatology')" class="clinic-btn"><i data-lucide="hand" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Dermatology</button>
-              <button onclick="loadUnifiedWaitingList('Oncology')" class="clinic-btn"><i data-lucide="award" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Oncology</button>
-            </div>
-          </div>
-
-          <!-- Category: Women & Children -->
-          <div id="cat_women" class="clinic-category-units" style="display: none;">
-            <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Women &amp; Children Units</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <button onclick="loadUnifiedWaitingList('O &amp; G')" class="clinic-btn" style="border-left-color: #a855f7;"><i data-lucide="user" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Obstetrics &amp; Gynaecology</button>
-              <button onclick="loadUnifiedWaitingList('Antenatal')" class="clinic-btn" style="border-left-color: #a855f7;"><i data-lucide="user" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Antenatal</button>
-              <button onclick="loadUnifiedWaitingList('Post Natal')" class="clinic-btn" style="border-left-color: #a855f7;"><i data-lucide="coffee" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Post Natal</button>
-              <button onclick="loadUnifiedWaitingList('Pediatrics')" class="clinic-btn"><i data-lucide="smile" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Pediatrics</button>
-              <button onclick="loadUnifiedWaitingList('Family Planning')" class="clinic-btn"><i data-lucide="user" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>‍<i data-lucide="user" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>‍<i data-lucide="user" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Family Planning</button>
-            </div>
-          </div>
-
-          <!-- Category: Mental & Allied Health -->
-          <div id="cat_mental" class="clinic-category-units" style="display: none;">
-            <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Mental &amp; Allied Health Units</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <button onclick="loadUnifiedWaitingList('Psychiatry')" class="clinic-btn"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Psychiatry</button>
-              <button onclick="loadUnifiedWaitingList('Psychology')" class="clinic-btn"><i data-lucide="archive" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Psychology</button>
-              <button onclick="loadUnifiedWaitingList('Physiotherapy')" class="clinic-btn"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Physiotherapy</button>
-              <button onclick="loadUnifiedWaitingList('Nutrition &amp; Dietetics')" class="clinic-btn"><i data-lucide="coffee" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Nutrition &amp; Dietetics</button>
-            </div>
-          </div>
-
-          <!-- Category: Dental & ENT -->
-          <div id="cat_dental" class="clinic-category-units" style="display: none;">
-            <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 24px; border-bottom: 2px solid #e2e8f0; padding-bottom: 12px;">Dental &amp; Head Units</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <button onclick="loadUnifiedWaitingList('Dentistry')" class="clinic-btn" style="border-left-color: #0ea5e9;"><i data-lucide="smile" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Dentistry</button>
-              <button onclick="loadUnifiedWaitingList('Maxillofacial')" class="clinic-btn" style="border-left-color: #0ea5e9;"><i data-lucide="alert-triangle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Maxillofacial</button>
-              <button onclick="loadUnifiedWaitingList('Dental Therapy')" class="clinic-btn" style="border-left-color: #0ea5e9;"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Dental Therapy</button>
-              <button onclick="loadUnifiedWaitingList('E.N.T.')" class="clinic-btn"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> E.N.T. Clinic</button>
-              <button onclick="loadUnifiedWaitingList('Eye Clinic')" class="clinic-btn"><i data-lucide="eye" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Eye Clinic</button>
-            </div>
-          </div>
-
+        <div onclick="selectConsultationPatient('PT-9902', 'Nnamdi Okafor', '36.5°C', '120/80')" style="padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; background: white;">
+          <div style="font-weight: 700; font-size: 15px; color: #0f172a;">Nnamdi Okafor</div>
+          <div style="font-size: 13px; color: #64748b; margin-top: 4px;">ID: PT-9902 | Triage: Routine</div>
         </div>
-
-        <style>
-          .clinic-category-card { background: white; border: 1px solid #e2e8f0; padding: 24px; border-radius: 16px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-          .clinic-category-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-color: #cbd5e1; }
-          .clinic-category-card .cat-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 16px; }
-          .clinic-category-card h3 { font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 8px 0; }
-          .clinic-category-card p { font-size: 13px; color: #64748b; margin: 0; line-height: 1.5; }
-          
-          .clinic-btn { background: white; border: 1px solid #e2e8f0; border-left: 4px solid #0B5E7E; padding: 16px 20px; border-radius: 8px; font-size: 15px; font-weight: 600; color: #1e293b; text-align: left; cursor: pointer; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-          .clinic-btn:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: #cbd5e1; }
-        </style>
-        
-        <script>
-          function showClinicCategory(catId) {
-            document.getElementById('clinicsCategoriesGrid').style.display = 'none';
-            document.getElementById('clinicsUnitsContainer').style.display = 'block';
-            
-            // Hide all
-            document.querySelectorAll('.clinic-category-units').forEach(el => el.style.display = 'none');
-            
-            // Show selected
-            document.getElementById(catId).style.display = 'block';
-            document.getElementById('clinicsSubtitle').style.display = 'none';
-          }
-          
-          function showClinicsGrid() {
-            document.getElementById('clinicsCategoriesGrid').style.display = 'grid';
-            document.getElementById('clinicsUnitsContainer').style.display = 'none';
-            document.getElementById('clinicsSubtitle').style.display = 'block';
-          }
-        </script>
       </div>
-<!-- VIEW 2: Clinical Workspace -->
-      <div id="workspace" class="emr-view hidden" style="width: 95%; max-width: 1600px; margin: 0 auto; align-self: center; padding: 32px 48px; display: flex; flex-direction: column; flex: 1; background: transparent;">
-        
-        <!-- Clinic Context Header & Tab Bar -->
-        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; padding: 0 16px;">
-          <div>
-            <h2 id="clinicHeaderTitle" style="font-size: 28px; font-weight: 800; color: #111827; letter-spacing: -0.02em;">GOPD Workspace</h2>
-            <p style="color: #6b7280; font-size: 14px;">Select patient from Omni-Bar or review departmental records.</p>
-          </div>
-          <div style="display: flex; gap: 8px; background: #e5e7eb; padding: 4px; border-radius: 12px;">
-            
-            <button id="tabWaiting" onclick="switchClinicTab('waiting')" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: white; color: #0B5E7E; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">Waiting List Queue</button>
-            <button id="tabConsult" onclick="switchClinicTab('consult')" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: transparent; color: #6b7280; display: none;">Active Consult</button>
-            <button id="tabRecords" onclick="switchClinicTab('records')" style="padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.2s; background: transparent; color: #6b7280;">Records Sub-Unit</button>
+    </div>
 
-          </div>
+    <!-- RIGHT: Active Encounter -->
+    <div id="activeConsultationPane" style="flex: 1; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 32px; display: none; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px;">
+        <div>
+          <h2 id="consultPatientName" style="font-size: 24px; font-weight: 800; color: #0f172a;"></h2>
+          <p id="consultPatientId" style="color: #64748b; font-family: monospace; font-size: 14px;"></p>
         </div>
+        <div style="background: #f8fafc; padding: 12px 24px; border-radius: 8px; border: 1px solid #e2e8f0; display: flex; gap: 24px;">
+          <div><div style="font-size: 12px; color: #64748b; font-weight: 600;">TEMP</div><div id="consultTemp" style="font-weight: 700;"></div></div>
+          <div><div style="font-size: 12px; color: #64748b; font-weight: 600;">BP</div><div id="consultBp" style="font-weight: 700;"></div></div>
+        </div>
+      </div>
 
-        <!-- Main Workspace Area -->
-        <div style="display: flex; gap: 24px; flex: 1; overflow: hidden; position: relative;">
-          
-          
-          <!-- WAITING LIST TAB (SMART TABLE) -->
-          <div id="waitingListTabContent" style="display: flex; flex-direction: column; flex: 1; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); overflow: hidden; transition: opacity 0.2s;">
-            <!-- Metrics Ribbon -->
-            <div style="display: flex; gap: 24px; padding: 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc;">
-              <div style="flex: 1; background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #3b82f6;">
-                <p style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Waiting</p>
-                <h4 id="wlStatTotal" style="font-size: 28px; font-weight: 800; color: #0f172a; margin-top: 4px;">0</h4>
-              </div>
-              <div style="flex: 1; background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #10b981;">
-                <p style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Assigned To Me</p>
-                <h4 id="wlStatAssigned" style="font-size: 28px; font-weight: 800; color: #0f172a; margin-top: 4px;">0</h4>
-              </div>
-              <div style="flex: 1; background: white; padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; border-left: 4px solid #64748b;">
-                <p style="font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Completed</p>
-                <h4 id="wlStatCompleted" style="font-size: 28px; font-weight: 800; color: #0f172a; margin-top: 4px;">0</h4>
-              </div>
-            </div>
-
-            <!-- Smart Table -->
-            <div style="flex: 1; overflow-y: auto;">
-              <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                <thead style="background: white; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 #e2e8f0;">
-                  <tr>
-                    <th style="padding: 16px 24px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase;">Patient</th>
-                    <th style="padding: 16px 24px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase;">Time In</th>
-                    <th style="padding: 16px 24px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase;">Payment</th>
-                    <th style="padding: 16px 24px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase;">Type</th>
-                    <th style="padding: 16px 24px; color: #64748b; font-size: 12px; font-weight: 700; text-transform: uppercase; text-align: right;">Action</th>
-                  </tr>
-                </thead>
-                <tbody id="waitingListBody">
-                  <!-- Empty State SVG -->
-                  <tr>
-                    <td colspan="5" style="padding: 60px; text-align: center;">
-                      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px;"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-                      <h4 style="font-size: 18px; font-weight: 600; color: #64748b;">No patients currently in queue.</h4>
-                      <p style="color: #94a3b8; font-size: 14px; margin-top: 8px;">Waiting list is clear for this department.</p>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- CONSULTATION TAB (The original right/left panels) -->
-          <div id="consultTabContent" class="hidden" style="display: none; gap: 24px; flex: 1; width: 100%; transition: opacity 0.2s;">
-
-        <!-- Left Panel -->
-        <div id="leftPanel" style="flex: 0 0 30%; max-width: 450px; min-width: 320px; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
-          <div id="patientHeader" style="border-bottom: 1px solid #e5e7eb; padding-bottom: 16px; margin-bottom: 16px;">
-            <h2 id="patName" style="font-size: 20px; font-weight: 700;">Loading...</h2>
-            <p id="patDetails" style="font-size: 14px; color: #6b7280; margin-top: 4px;"></p>
-            <button onclick="exitEncounter()" style="background: none; color: #ef4444; border: 1px solid #ef4444; margin-top: 12px; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: all 0.2s;">Cancel Encounter</button>
-          </div>
-          <h3 style="font-size: 14px; text-transform: uppercase; color: #9ca3af; margin-bottom: 16px; letter-spacing: 0.05em; font-weight: 700;">Historical Timeline</h3>
-          <div id="timelineFeed" style="flex: 1; overflow-y: auto;"></div>
+      <div style="display: flex; flex-direction: column; gap: 20px; flex: 1; overflow-y: auto; padding-right: 8px;">
+        <div>
+          <label style="font-size: 13px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Chief Complaint / HPI</label>
+          <textarea style="width: 100%; height: 100px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; resize: vertical;" placeholder="Describe symptoms and history..."></textarea>
+        </div>
+        <div>
+          <label style="font-size: 13px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Clinical Examination & Notes</label>
+          <textarea style="width: 100%; height: 150px; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; resize: vertical;" placeholder="Systemic examination findings..."></textarea>
+        </div>
+        <div>
+          <label style="font-size: 13px; font-weight: 700; color: #475569; display: block; margin-bottom: 6px;">Diagnosis (ICD-11)</label>
+          <input type="text" style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px;" placeholder="e.g. Essential Hypertension">
         </div>
         
-        <!-- Right Panel -->
-        <div id="rightPanel" style="flex: 1; background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column;">
-          <div id="composer" contenteditable="true" placeholder="Start typing or use the microphone to dictate..." style="flex: 1; outline: none; font-size: 16px; line-height: 1.6; color: #1f2937; overflow-y: auto;"></div>
-          <div id="aiChips" style="margin-top: 16px; min-height: 32px;"></div>
-          
-          <div id="bottomActions" style="margin-top: 24px; border-top: 1px solid #e5e7eb; padding-top: 16px; display: flex; gap: 12px; align-items: center;">
-            <button class="btn mic-btn" id="composerMicBtn" style="width: auto; background: #f1f5f9; color: #374151; border: 1px solid #d1d5db;"><i data-lucide="mic" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Dictate</button>
-            <button class="btn" style="width: auto; background: #f1f5f9; color: #374151; border: 1px solid #d1d5db;" onclick="saveDraft()">Save as Draft</button>
-            <div style="margin-left: auto; display: flex; gap: 12px; align-items: center;">
-                <select id="admitWardSelect" style="padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; outline: none; background: #f8fafc; color: #0f172a; font-weight: 600;">
-                    <option value="">Discharge (No Admission)</option>
-                    <option value="Male Medical Ward (A)">Admit to Male Medical Ward (A)</option>
-                    <option value="Intensive Care Unit (ICU)">Admit to ICU</option>
-                </select>
-                <button class="btn btn-primary" style="width: auto;" onclick="signAndClose()">Sign &amp; Close Encounter</button>
-            </div>
-          </div>
-        </div>
-          </div> <!-- End Consult Tab Content -->
-
-          <!-- RECORDS SUB-UNIT TAB -->
-          <div id="recordsTabContent" class="hidden" style="flex: 1; background: white; border-radius: 12px; padding: 32px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); width: 100%; transition: opacity 0.2s;">
-            <h3 style="font-size: 20px; font-weight: 700; color: #111827; margin-bottom: 24px;">Departmental Records Log</h3>
-            <div class="search-input-wrapper" style="max-width: 400px; margin-bottom: 24px;">
-              <span class="icon-btn"><i data-lucide="search" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span>
-              <input type="text" placeholder="Search historical records..." style="font-size: 16px;">
-            </div>
-            
-            <table style="width: 100%; border-collapse: collapse; text-align: left;">
-              <thead>
-                <tr style="border-bottom: 2px solid #e5e7eb;">
-                  <th style="padding: 12px; color: #6b7280; font-size: 14px;">Date</th>
-                  <th style="padding: 12px; color: #6b7280; font-size: 14px;">Patient</th>
-                  <th style="padding: 12px; color: #6b7280; font-size: 14px;">Primary ICD</th>
-                  <th style="padding: 12px; color: #6b7280; font-size: 14px;">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colspan="4" style="padding: 32px; text-align: center; color: #9ca3af;">No records available for this department.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div> <!-- End Records Tab Content -->
-
-        </div> <!-- End Main Workspace Area -->
-      </div>
-
-      <!-- VIEW 3: Post-Encounter UI (Node AD) -->
-      <div id="postEncounterView" class="emr-view hidden" style="width: 95%; max-width: 1600px; margin: 0 auto; align-self: center; padding: 32px 48px; display: flex; flex-direction: column; flex: 1; background: transparent;">
-        <div class="white-card" style="padding: 48px;">
-          <div style="font-size: 48px; margin-bottom: 16px;"><i data-lucide="check-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
-          <h2 style="font-size: 28px; color: #111827; margin-bottom: 8px;">Encounter Closed Successfully</h2>
-          <p style="color: #6b7280; margin-bottom: 32px; font-size: 16px;">Patient documentation has been saved securely. What would you like to do next?</p>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-            <button onclick="printSummary()" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #1f2937; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><i data-lucide="printer" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Print Patient Summary</button>
-            <button onclick="switchEmrView('pharmacyView')" data-target-view="pharmacyView" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #10b981; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><i data-lucide="pill" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Proceed to Pharmacy</button>
-            <button onclick="switchEmrView('labView')" data-target-view="labView" style="padding: 16px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: #8b5cf6; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"><i data-lucide="flask-conical" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Proceed to Laboratory</button>
-            <button onclick="switchEmrView('omniBar')" style="padding: 16px; background: #0B5E7E; border: none; border-radius: 12px; font-weight: 600; font-size: 16px; cursor: pointer; color: white; transition: all 0.2s; box-shadow: 0 4px 6px rgba(11,94,126,0.2);"><i data-lucide="search" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Return to Omni-Bar</button>
-          </div>
+        <div style="border-top: 1px solid #e2e8f0; padding-top: 20px; display: flex; gap: 12px;">
+           <button onclick="openWalkInModal('Laboratory')" style="padding: 10px 16px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; cursor: pointer;"><i data-lucide="flask-conical" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Order Labs</button>
+           <button onclick="openWalkInModal('Radiology')" style="padding: 10px 16px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; cursor: pointer;"><i data-lucide="radio" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Order Scans</button>
+           <button onclick="openWalkInModal('Pharmacy')" style="padding: 10px 16px; background: white; border: 1px solid #cbd5e1; border-radius: 6px; font-weight: 600; cursor: pointer;"><i data-lucide="pill" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Prescribe Rx</button>
         </div>
       </div>
 
-      
-      <!-- VIEW: Pharmacy Command Center -->
-      <div id="pharmacyView" class="emr-view hidden" style="width: 95%; max-width: 1600px; margin: 0 auto; align-self: center; padding: 32px 48px; display: flex; flex-direction: column; flex: 1; background: transparent;">
-        <!-- Header -->
-        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
-          <div>
-            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Pharmacy Command Center</h2>
-            <p style="color: #64748b; font-size: 15px;">Live E-Notes Queue &amp; Drugs Fulfillment</p>
-          </div>
-          <div style="background: #10b98115; padding: 8px 16px; border-radius: 8px; border: 1px solid #10b98140;">
-            <button onclick="openWalkInModal('Pharmacy')" style="background: #10b981; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">+ Walk-In Order</button>
-          </div>
-        </div>
-
-        <!-- Split Pane Layout -->
-        <div style="display: flex; gap: 24px; flex: 1; overflow: hidden; position: relative;">
-          
-          <!-- Left Pane: Live Queue -->
-          <div style="flex: 0 0 30%; max-width: 450px; min-width: 350px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; border-top: 4px solid #10b981; overflow: hidden;">
-            <div style="padding: 16px; border-bottom: 1px solid #f1f5f9; background: #f8fafc;">
-              <h3 style="font-size: 14px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Live Incoming Orders</h3>
-            </div>
-            <div style="flex: 1; overflow-y: auto; padding: 16px;" id="pharmacyView-queue">
-              <!-- Dynamic Queue -->
-            </div>
-          </div>
-
-          <!-- Right Pane: Fulfillment Cart -->
-          <div id="pharmacyView-fulfillment" style="flex: 1; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; opacity: 0.5; pointer-events: none; transition: opacity 0.3s;">
-            <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <h3 id="pharmacyView-patientName" style="font-size: 24px; font-weight: 800; color: #0f172a;">Select an Order</h3>
-                <p id="pharmacyView-orderId" style="font-size: 14px; color: #64748b;">Waiting for selection...</p>
-              </div>
-              <button onclick="fulfillAncillaryOrder('pharmacyView')" style="background: #10b981; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #10b98140; transition: all 0.2s;"><i data-lucide="check" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Fulfill &amp; Bill</button>
-            </div>
-            
-            <div style="display: flex; flex: 1; overflow: hidden;">
-              <!-- Catalog -->
-              <div style="flex: 1; padding: 24px; border-right: 1px solid #f1f5f9; overflow-y: auto;">
-                <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Available Drugs</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                  <button onclick="addToAncillaryCart('pharmacyView', 'Amoxicillin 500mg', 1500)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
-                    <div style="font-weight: 600; color: #1e293b;">Amoxicillin 500mg</div>
-                    <div style="font-size: 12px; color: #10b981; font-weight: 700; margin-top: 4px;">₦1,500</div>
-                  </button>
-                  <button onclick="addToAncillaryCart('pharmacyView', 'Paracetamol', 500)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
-                    <div style="font-weight: 600; color: #1e293b;">Paracetamol</div>
-                    <div style="font-size: 12px; color: #10b981; font-weight: 700; margin-top: 4px;">₦500</div>
-                  </button>
-                  <button onclick="addToAncillaryCart('pharmacyView', 'Full Blood Count (FBC)', 4000)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
-                    <div style="font-weight: 600; color: #1e293b;">Full Blood Count (FBC)</div>
-                    <div style="font-size: 12px; color: #10b981; font-weight: 700; margin-top: 4px;">₦4,000</div>
-                  </button>
-                  <button onclick="addToAncillaryCart('pharmacyView', 'Malaria Parasite (MP)', 2000)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
-                    <div style="font-weight: 600; color: #1e293b;">Malaria Parasite (MP)</div>
-                    <div style="font-size: 12px; color: #10b981; font-weight: 700; margin-top: 4px;">₦2,000</div>
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Cart Invoice -->
-              <div style="flex: 0 0 300px; background: #f8fafc; padding: 24px; display: flex; flex-direction: column;">
-                <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Current Invoice Cart</h4>
-                <div id="pharmacyView-cart" style="flex: 1; overflow-y: auto;">
-                  <!-- Items go here -->
-                </div>
-                <div style="border-top: 2px dashed #cbd5e1; padding-top: 16px; margin-top: 16px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 14px; font-weight: 700; color: #64748b;">GRAND TOTAL</span>
-                    <span id="pharmacyView-total" style="font-size: 20px; font-weight: 800; color: #10b981;">₦0</span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-
-
-        <!-- Live Pharmacy Inventory Widget -->
-        <div style="margin-top: 24px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); padding: 24px; flex: 1; display: flex; flex-direction: column; overflow: hidden; border-top: 4px solid #3b82f6;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0;">Live Medication Inventory</h3>
-                <span style="font-size: 12px; font-weight: 700; color: #64748b; background: #f1f5f9; padding: 4px 8px; border-radius: 4px;">Updates every 10s</span>
-            </div>
-            <div style="overflow-y: auto; flex: 1;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                    <thead>
-                        <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-size: 12px; font-weight: 700;">
-                            <th style="padding: 12px; position: sticky; top: 0; background: white;">ID</th>
-                            <th style="padding: 12px; position: sticky; top: 0; background: white;">MEDICATION</th>
-                            <th style="padding: 12px; position: sticky; top: 0; background: white;">CATEGORY</th>
-                            <th style="padding: 12px; position: sticky; top: 0; background: white;">STOCK LEVEL</th>
-                            <th style="padding: 12px; position: sticky; top: 0; background: white;">STATUS</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pharmacyInventoryBody">
-                        <!-- JS renders this -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        </div>
+      <div style="border-top: 1px solid #e2e8f0; padding-top: 24px; margin-top: 24px; display: flex; justify-content: flex-end; gap: 16px;">
+        <button style="padding: 12px 24px; background: white; color: #ef4444; border: 1px solid #fecaca; border-radius: 8px; font-weight: 700; cursor: pointer;">Admit to Wards</button>
+        <button onclick="dischargeConsultation()" style="padding: 12px 24px; background: #0f172a; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">Finalize & Discharge</button>
       </div>
-
-      
-      <!-- VIEW: Laboratory Command Center -->
-      <div id="labView" class="emr-view hidden" style="width: 95%; max-width: 1600px; margin: 0 auto; align-self: center; padding: 32px 48px; display: flex; flex-direction: column; flex: 1; background: transparent;">
-        <!-- Header -->
-        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
-          <div>
-            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Laboratory Command Center</h2>
-            <p style="color: #64748b; font-size: 15px;">Live E-Notes Queue &amp; Tests Fulfillment</p>
-          </div>
-          <div style="background: #8b5cf615; padding: 8px 16px; border-radius: 8px; border: 1px solid #8b5cf640;">
-            <button onclick="openWalkInModal('Laboratory')" style="background: #8b5cf6; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2);">+ Walk-In Order</button>
-          </div>
-        </div>
-
-        <!-- Split Pane Layout -->
-        <div style="display: flex; gap: 24px; flex: 1; overflow: hidden; position: relative;">
-          
-          <!-- Left Pane: Live Queue -->
-          <div style="flex: 0 0 30%; max-width: 450px; min-width: 350px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; border-top: 4px solid #8b5cf6; overflow: hidden;">
-            <div style="padding: 16px; border-bottom: 1px solid #f1f5f9; background: #f8fafc;">
-              <h3 style="font-size: 14px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Live Incoming Orders</h3>
-            </div>
-            <div style="flex: 1; overflow-y: auto; padding: 16px;" id="labView-queue">
-              <!-- Dynamic Queue -->
-            </div>
-          </div>
-
-          <!-- Right Pane: Fulfillment Cart -->
-          <div id="labView-fulfillment" style="flex: 1; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; opacity: 0.5; pointer-events: none; transition: opacity 0.3s;">
-            <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <h3 id="labView-patientName" style="font-size: 24px; font-weight: 800; color: #0f172a;">Select an Order</h3>
-                <p id="labView-orderId" style="font-size: 14px; color: #64748b;">Waiting for selection...</p>
-              </div>
-              <button onclick="fulfillAncillaryOrder('labView')" style="background: #8b5cf6; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #8b5cf640; transition: all 0.2s;"><i data-lucide="check" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Fulfill &amp; Bill</button>
-            </div>
-            
-            <div style="display: flex; flex: 1; overflow: hidden;">
-              <!-- Catalog -->
-              <div style="flex: 1; padding: 24px; border-right: 1px solid #f1f5f9; overflow-y: auto;">
-                <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Available Tests</h4>
-                <div id="labView-catalog" style="display: flex; flex-direction: column; gap: 16px;">
-                    <!-- Javascript will render Lab Catalog here -->
-                </div>
-              </div>
-              
-              <!-- Cart Invoice -->
-              <div style="flex: 0 0 300px; background: #f8fafc; padding: 24px; display: flex; flex-direction: column;">
-                <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Current Invoice Cart</h4>
-                <div id="labView-cart" style="flex: 1; overflow-y: auto;">
-                  <!-- Items go here -->
-                </div>
-                <div style="border-top: 2px dashed #cbd5e1; padding-top: 16px; margin-top: 16px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 14px; font-weight: 700; color: #64748b;">GRAND TOTAL</span>
-                    <span id="labView-total" style="font-size: 20px; font-weight: 800; color: #8b5cf6;">₦0</span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
+    </div>
+    
+    <!-- Empty State -->
+    <div id="consultationEmptyState" style="flex: 1; display: flex; align-items: center; justify-content: center; background: #f8fafc; border-radius: 12px; border: 2px dashed #cbd5e1;">
+      <div style="text-align: center; color: #94a3b8;">
+         <i data-lucide="clipboard-list" style="width: 48px; height: 48px; margin-bottom: 16px; display: inline-block;"></i>
+         <p style="font-size: 18px; font-weight: 600;">No Patient Selected</p>
+         <p style="font-size: 14px;">Select a patient from the queue to start consulting.</p>
       </div>
+    </div>
+  </div>
+</div>
 
-      <!-- VIEW 6: Triage Shell -->
-            <div id="triageView" class="emr-view hidden" style="width: 95%; max-width: 1600px; margin: 0 auto; align-self: center; padding: 32px 48px; display: flex; flex-direction: column; flex: 1; background: transparent;">
-        <div style="margin-bottom: 32px; display: flex; justify-content: space-between; align-items: flex-end;">
-          <div>
-            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Triage &amp; Vitals</h2>
-            <p style="color: #64748b; font-size: 16px; margin-top: 4px;">Assess arriving patients, record vitals, and assign priority.</p>
-          </div>
-          <button style="padding: 10px 20px; background: #0f172a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; gap: 8px; align-items: center; box-shadow: 0 4px 6px rgba(15, 23, 42, 0.2);" onclick="document.getElementById('addTriagePatientModal').style.display='flex'">
-            <span>+</span> Walk-in Patient
-          </button>
-        </div>
+<script>
+function selectConsultationPatient(id, name, temp, bp) {
+    document.getElementById('consultationEmptyState').style.display = 'none';
+    document.getElementById('activeConsultationPane').style.display = 'flex';
+    document.getElementById('consultPatientName').innerText = name;
+    document.getElementById('consultPatientId').innerText = id;
+    document.getElementById('consultTemp').innerText = temp;
+    document.getElementById('consultBp').innerText = bp;
+    document.querySelectorAll('#activeConsultationPane textarea, #activeConsultationPane input').forEach(el => el.value = '');
+    lucide.createIcons();
+}
 
-        <div style="display: grid; grid-template-columns: minmax(350px, 35%) 1fr; gap: 24px; min-height: 600px;">
-          <!-- Queue Pane -->
-          <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-            <div style="padding: 16px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; font-weight: 700; color: #334155; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; display: flex; justify-content: space-between; align-items: center;">
-              Waiting Queue
-              <span style="background: #ef4444; color: white; border-radius: 999px; padding: 2px 8px; font-size: 12px;">3</span>
-            </div>
-            <div style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-              
-              <!-- Patient Card 1 -->
-              <div onclick="selectTriagePatient('PT-889', 'Musa Ibrahim', '45 yrs', 'Male')" class="triage-card" style="padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1; background: white; cursor: pointer; transition: all 0.2s;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <div style="font-weight: 700; color: #0f172a; font-size: 15px;">Musa Ibrahim</div>
-                  <div style="font-size: 12px; color: #64748b; font-weight: 600;">PT-889</div>
-                </div>
-                <div style="display: flex; gap: 12px; font-size: 13px; color: #475569; margin-bottom: 12px;">
-                  <span>45 yrs</span><span>•</span><span>Male</span>
-                </div>
-                <div style="font-size: 12px; font-weight: 600; color: #ef4444; display: flex; align-items: center; gap: 4px;">
-                  <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#ef4444;"></span> Chest Pain
-                </div>
-              </div>
+function dischargeConsultation() {
+    alert("Encounter Finalized and sent to Billing. Patient discharged.");
+    document.getElementById('activeConsultationPane').style.display = 'none';
+    document.getElementById('consultationEmptyState').style.display = 'flex';
+}
+</script>
 
-              <!-- Patient Card 2 -->
-              <div onclick="selectTriagePatient('PT-902', 'Ngozi Okafor', '28 yrs', 'Female')" class="triage-card" style="padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1; background: white; cursor: pointer; transition: all 0.2s;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <div style="font-weight: 700; color: #0f172a; font-size: 15px;">Ngozi Okafor</div>
-                  <div style="font-size: 12px; color: #64748b; font-weight: 600;">PT-902</div>
-                </div>
-                <div style="display: flex; gap: 12px; font-size: 13px; color: #475569; margin-bottom: 12px;">
-                  <span>28 yrs</span><span>•</span><span>Female</span>
-                </div>
-                <div style="font-size: 12px; font-weight: 600; color: #f59e0b; display: flex; align-items: center; gap: 4px;">
-                  <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#f59e0b;"></span> Fever, Nausea
-                </div>
-              </div>
-
-              <!-- Patient Card 3 -->
-              <div onclick="selectTriagePatient('PT-915', 'Tunde Bakare', '62 yrs', 'Male')" class="triage-card" style="padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1; background: white; cursor: pointer; transition: all 0.2s;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <div style="font-weight: 700; color: #0f172a; font-size: 15px;">Tunde Bakare</div>
-                  <div style="font-size: 12px; color: #64748b; font-weight: 600;">PT-915</div>
-                </div>
-                <div style="display: flex; gap: 12px; font-size: 13px; color: #475569; margin-bottom: 12px;">
-                  <span>62 yrs</span><span>•</span><span>Male</span>
-                </div>
-                <div style="font-size: 12px; font-weight: 600; color: #3b82f6; display: flex; align-items: center; gap: 4px;">
-                  <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#3b82f6;"></span> Routine Checkup
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- Assessment Pane -->
-          <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
-            <div id="triageEmptyState" style="flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center;">
-              <div style="font-size: 48px; margin-bottom: 16px; opacity: 0.5;"><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></div>
-              <h3 style="font-size: 20px; font-weight: 700; color: #334155; margin-bottom: 8px;">Select a Patient</h3>
-              <p style="color: #64748b; font-size: 15px; max-width: 300px;">Choose a patient from the queue to record their vitals and assign clinical priority.</p>
-            </div>
-
-            <div id="triageFormContainer" style="display: none; flex: 1; flex-direction: column;">
-              <div style="padding: 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <h3 id="triagePatientName" style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 4px;">-</h3>
-                  <div id="triagePatientDetails" style="font-size: 14px; color: #64748b; font-weight: 500;">-</div>
-                </div>
-                <div style="text-align: right;">
-                  <div style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px;">Time Arrived</div>
-                  <div style="font-size: 15px; font-weight: 600; color: #334155;">10:15 AM (15m ago)</div>
-                </div>
-              </div>
-
-              <div style="padding: 24px; flex: 1; overflow-y: auto;">
-                <form id="vitalsForm" onsubmit="submitVitals(event)">
-                  <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                    <span style="background: #e0e7ff; color: #4f46e5; padding: 4px; border-radius: 6px;"><i data-lucide="bar-chart" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span> Standard Vitals
-                  </h4>
-                  
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px;">
-                    <div>
-                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Blood Pressure (mmHg)</label>
-                      <input type="text" placeholder="120/80" required="" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: border-color 0.2s;">
-                    </div>
-                    <div>
-                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Heart Rate (bpm)</label>
-                      <input type="number" placeholder="72" required="" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
-                    </div>
-                    <div>
-                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Temperature (°C)</label>
-                      <input type="number" step="0.1" placeholder="36.5" required="" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
-                    </div>
-                    <div>
-                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">SpO2 (%)</label>
-                      <input type="number" placeholder="98" required="" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
-                    </div>
-                    <div>
-                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Weight (kg)</label>
-                      <input type="number" step="0.1" placeholder="75" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
-                    </div>
-                    <div>
-                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Height (cm)</label>
-                      <input type="number" placeholder="175" style="width: 100%; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none;">
-                    </div>
-                  </div>
-
-                  <h4 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                    <span style="background: #fef3c7; color: #d97706; padding: 4px; border-radius: 6px;"><i data-lucide="alert-triangle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️</span> Triage Priority
-                  </h4>
-                  
-                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 32px;">
-                    <label class="priority-radio" style="cursor: pointer;">
-                      <input type="radio" name="priority" value="routine" style="display: none;" checked="">
-                      <div class="p-card" style="padding: 16px; border: 2px solid #3b82f6; border-radius: 12px; text-align: center; background: #eff6ff; color: #1e3a8a;">
-                        <div style="font-weight: 800; font-size: 15px; margin-bottom: 4px;">Routine</div>
-                        <div style="font-size: 12px; opacity: 0.8;">Normal Queue</div>
-                      </div>
-                    </label>
-                    <label class="priority-radio" style="cursor: pointer;">
-                      <input type="radio" name="priority" value="urgent" style="display: none;">
-                      <div class="p-card" style="padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; text-align: center; color: #64748b;">
-                        <div style="font-weight: 800; font-size: 15px; margin-bottom: 4px;">Urgent</div>
-                        <div style="font-size: 12px; opacity: 0.8;">See within 1hr</div>
-                      </div>
-                    </label>
-                    <label class="priority-radio" style="cursor: pointer;">
-                      <input type="radio" name="priority" value="emergency" style="display: none;">
-                      <div class="p-card" style="padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; text-align: center; color: #64748b;">
-                        <div style="font-weight: 800; font-size: 15px; margin-bottom: 4px;">Emergency</div>
-                        <div style="font-size: 12px; opacity: 0.8;">Immediate</div>
-                      </div>
-                    </label>
-                  </div>
-
-                  <div style="margin-bottom: 32px;">
-                    <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Chief Complaint / Nurse Notes</label>
-                    <textarea rows="3" placeholder="Brief description of patient condition..." style="width: 100%; padding: 12px 14px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; font-family: inherit; resize: vertical;"></textarea>
-                  </div>
-
-                  <div style="display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid #e2e8f0; padding-top: 24px;">
-                    <button type="button" onclick="cancelTriage()" style="padding: 12px 24px; background: white; color: #475569; border: 1px solid #cbd5e1; border-radius: 8px; font-weight: 700; cursor: pointer;">Cancel</button>
-                    <button type="submit" style="padding: 12px 32px; background: #10b981; color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">Save Vitals &amp; Dispatch</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <style>
-          .triage-card:hover { border-color: #94a3b8 !important; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-          .priority-radio input:checked + .p-card { border-color: currentColor !important; }
-          .priority-radio input[value="routine"]:checked + .p-card { background: #eff6ff !important; color: #1e3a8a !important; border-color: #3b82f6 !important; }
-          .priority-radio input[value="urgent"]:checked + .p-card { background: #fffbeb !important; color: #92400e !important; border-color: #f59e0b !important; }
-          .priority-radio input[value="emergency"]:checked + .p-card { background: #fef2f2 !important; color: #991b1b !important; border-color: #ef4444 !important; }
-          .priority-radio input:not(:checked) + .p-card { background: white !important; color: #64748b !important; border-color: #e2e8f0 !important; }
-        </style>
         
-        <script>
-          function selectTriagePatient(id, name, age, gender) {
-            document.getElementById('triageEmptyState').style.display = 'none';
-            document.getElementById('triageFormContainer').style.display = 'flex';
-            document.getElementById('triagePatientName').innerText = name;
-            document.getElementById('triagePatientDetails').innerText = `${id} • ${age} • ${gender}`;
-            document.getElementById('vitalsForm').reset();
-            
-            // Reset priority UI
-            document.querySelector('input[value="routine"]').checked = true;
-          }
-          
-          function cancelTriage() {
-            document.getElementById('triageFormContainer').style.display = 'none';
-            document.getElementById('triageEmptyState').style.display = 'flex';
-          }
-          
-          function submitVitals(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button[type="submit"]');
-            const ogText = btn.innerText;
-            btn.innerText = 'Saving...';
-            btn.style.opacity = '0.7';
-            setTimeout(() => {
-              btn.innerText = 'Dispatched!';
-              btn.style.background = '#3b82f6';
-              setTimeout(() => {
-                btn.innerText = ogText;
-                btn.style.background = '#10b981';
-                btn.style.opacity = '1';
-                cancelTriage();
-                alert('Vitals saved successfully. Patient moved to physician queue.');
-              }, 1500);
-            }, 800);
-          }
-        </script>
-      </div>
-
-      
-      <!-- VIEW: Radiology Command Center -->
-      <div id="radView" class="emr-view hidden" style="width: 95%; max-width: 1600px; margin: 0 auto; align-self: center; padding: 32px 48px; display: flex; flex-direction: column; flex: 1; background: transparent;">
-        <!-- Header -->
-        <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
-          <div>
-            <h2 style="font-size: 32px; font-weight: 800; color: #0f172a; letter-spacing: -0.02em;">Radiology Command Center</h2>
-            <p style="color: #64748b; font-size: 15px;">Live E-Notes Queue &amp; Scans Fulfillment</p>
-          </div>
-          <div style="background: #f59e0b15; padding: 8px 16px; border-radius: 8px; border: 1px solid #f59e0b40;">
-            <button onclick="openWalkInModal('Radiology')" style="background: #f59e0b; color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);">+ Walk-In Order</button>
-          </div>
-        </div>
-
-        <!-- Split Pane Layout -->
-        <div style="display: flex; gap: 24px; flex: 1; overflow: hidden; position: relative;">
-          
-          <!-- Left Pane: Live Queue -->
-          <div style="flex: 0 0 30%; max-width: 450px; min-width: 350px; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; border-top: 4px solid #f59e0b; overflow: hidden;">
-            <div style="padding: 16px; border-bottom: 1px solid #f1f5f9; background: #f8fafc;">
-              <h3 style="font-size: 14px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.05em;">Live Incoming Orders</h3>
-            </div>
-            <div style="flex: 1; overflow-y: auto; padding: 16px;" id="radView-queue">
-              <!-- Dynamic Queue -->
-            </div>
-          </div>
-
-          <!-- Right Pane: Fulfillment Cart -->
-          <div id="radView-fulfillment" style="flex: 1; background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); display: flex; flex-direction: column; opacity: 0.5; pointer-events: none; transition: opacity 0.3s;">
-            <div style="padding: 24px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-              <div>
-                <h3 id="radView-patientName" style="font-size: 24px; font-weight: 800; color: #0f172a;">Select an Order</h3>
-                <p id="radView-orderId" style="font-size: 14px; color: #64748b;">Waiting for selection...</p>
-              </div>
-              <button onclick="fulfillAncillaryOrder('radView')" style="background: #f59e0b; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px #f59e0b40; transition: all 0.2s;"><i data-lucide="check" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️ Fulfill &amp; Bill</button>
-            </div>
-            
-            <div style="display: flex; flex: 1; overflow: hidden;">
-              <!-- Catalog -->
-              <div style="flex: 1; padding: 24px; border-right: 1px solid #f1f5f9; overflow-y: auto;">
-                <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Available Scans</h4>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                  <button onclick="addToAncillaryCart('radView', 'Amoxicillin 500mg', 1500)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
-                    <div style="font-weight: 600; color: #1e293b;">Amoxicillin 500mg</div>
-                    <div style="font-size: 12px; color: #f59e0b; font-weight: 700; margin-top: 4px;">₦1,500</div>
-                  </button>
-                  <button onclick="addToAncillaryCart('radView', 'Paracetamol', 500)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
-                    <div style="font-weight: 600; color: #1e293b;">Paracetamol</div>
-                    <div style="font-size: 12px; color: #f59e0b; font-weight: 700; margin-top: 4px;">₦500</div>
-                  </button>
-                  <button onclick="addToAncillaryCart('radView', 'Full Blood Count (FBC)', 4000)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
-                    <div style="font-weight: 600; color: #1e293b;">Full Blood Count (FBC)</div>
-                    <div style="font-size: 12px; color: #f59e0b; font-weight: 700; margin-top: 4px;">₦4,000</div>
-                  </button>
-                  <button onclick="addToAncillaryCart('radView', 'Malaria Parasite (MP)', 2000)" style="padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; text-align: left; cursor: pointer;">
-                    <div style="font-weight: 600; color: #1e293b;">Malaria Parasite (MP)</div>
-                    <div style="font-size: 12px; color: #f59e0b; font-weight: 700; margin-top: 4px;">₦2,000</div>
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Cart Invoice -->
-              <div style="flex: 0 0 300px; background: #f8fafc; padding: 24px; display: flex; flex-direction: column;">
-                <h4 style="font-size: 12px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 16px;">Current Invoice Cart</h4>
-                <div id="radView-cart" style="flex: 1; overflow-y: auto;">
-                  <!-- Items go here -->
-                </div>
-                <div style="border-top: 2px dashed #cbd5e1; padding-top: 16px; margin-top: 16px;">
-                  <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 14px; font-weight: 700; color: #64748b;">GRAND TOTAL</span>
-                    <span id="radView-total" style="font-size: 20px; font-weight: 800; color: #f59e0b;">₦0</span>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      
-      <!-- VIEW: Interactive Bed Board (Wards) -->
+<!-- VIEW: Interactive Bed Board (Wards) -->
       <div id="wardsView" class="emr-view hidden" style="width: 95%; max-width: 1600px; margin: 0 auto; align-self: center; padding: 32px 48px; display: flex; flex-direction: column; flex: 1; background: transparent;">
         <!-- Header -->
         <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px; padding: 0 16px;">
@@ -1685,7 +1014,7 @@
     async function saveNursingNote(type) {
         const patientId = document.getElementById('np-mpi').innerText;
         const admissionId = document.getElementById('currentAdmissionId').value;
-        const token = sessionStorage.getItem('ehr_creds');
+        const token = sessionStorage.getItem('staff_token');
         
         let payload = { patientId, admissionId };
         
@@ -1733,7 +1062,7 @@
         switchWorkstationTab('vitals');
 
         try {
-            const token = sessionStorage.getItem('ehr_creds');
+            const token = sessionStorage.getItem('staff_token');
             // Fetch EMR Encounters (secure EMR API)
             const res = await fetch(`/api/v2/emr/encounters?patientId=${patientId}`, { headers: { "Authorization": `Bearer ${token}` }});
             if (!res.ok) throw new Error("Encounters fetch failed");
@@ -1886,9 +1215,9 @@
     // --- ROLE BASED ACCESS CONTROL (RBAC) ---
     function setEmrRole(role) {
         const accessMap = {
-            'admin': ['triageView', 'clinicsDashboardView', 'wardsView', 'pharmacyView', 'labView', 'radView', 'billingView', 'recordsMainView'],
-            'physician': ['clinicsDashboardView', 'wardsView'],
-            'doctor': ['clinicsDashboardView', 'wardsView'], // legacy support
+            'admin': ['triageView', 'consultationView', 'wardsView', 'pharmacyView', 'labView', 'radView', 'billingView', 'recordsMainView'],
+            'physician': ['consultationView', 'wardsView'],
+            'doctor': ['consultationView', 'wardsView'], // legacy support
             'nurse': ['triageView', 'wardsView'],
             'pharmacist': ['pharmacyView'],
             'pharmacy': ['pharmacyView'],
@@ -1961,7 +1290,7 @@
         const diagnosis = document.getElementById('wa-diagnosis').value || 'Walk-In Admission';
         if (!patientId) { alert("Patient ID is required."); return; }
         
-        const token = sessionStorage.getItem('ehr_creds');
+        const token = sessionStorage.getItem('staff_token');
 
         try {
             const res = await fetch('/api/v2/emr/admissions/request', {
@@ -2063,7 +1392,7 @@
       
       try {
         // Fetch all patients and mock a queue for this specific department
-        const token = sessionStorage.getItem('ehr_creds');
+        const token = sessionStorage.getItem('staff_token');
         const res = await fetch('/api/v2/patients', { headers: { 'Authorization': `Bearer ${token}` } });
         if(!res.ok) throw new Error("API failed");
         const allPatients = await res.json();
@@ -2193,7 +1522,7 @@
 
     async function loadBilling() {
       try {
-        const token = sessionStorage.getItem('ehr_creds');
+        const token = sessionStorage.getItem('staff_token');
         const res = await fetch('/api/v2/billing', { headers: { 'Authorization': `Bearer ${token}` } });
         if(!res.ok) return;
         let bills = await res.json();
@@ -2264,7 +1593,7 @@
     }
 
     async function updateBillStatus(id, newStatus) {
-      const token = sessionStorage.getItem('ehr_creds');
+      const token = sessionStorage.getItem('staff_token');
       await fetch(`/api/v2/billing/status`, {
         method: 'POST', // The backend route expects POST for status update in this codebase
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -2278,7 +1607,7 @@
 
     async function loadReferrals() {
       try {
-        const token = sessionStorage.getItem('ehr_creds');
+        const token = sessionStorage.getItem('staff_token');
         const res = await fetch('/api/v2/referrals', { headers: { 'Authorization': `Bearer ${token}` } });
         if(!res.ok) return;
         const refs = await res.json();
@@ -2329,7 +1658,7 @@
     }
 
     async function updateReferral(id, newStatus) {
-      const token = sessionStorage.getItem('ehr_creds');
+      const token = sessionStorage.getItem('staff_token');
       await fetch(`/api/v2/referrals/${id}/status`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -2364,7 +1693,7 @@
 
     async function loadRecordsData() {
       try {
-        const token = sessionStorage.getItem('ehr_creds');
+        const token = sessionStorage.getItem('staff_token');
         const res = await fetch('/api/v2/patients', { headers: { 'Authorization': `Bearer ${token}` } });
         if(!res.ok) return;
         const patients = await res.json();
@@ -2531,7 +1860,7 @@
     let autoSaveTimer = null;
     
     document.addEventListener("DOMContentLoaded", () => {
-      let token = sessionStorage.getItem("ehr_creds") || localStorage.getItem("ehr_admin_token");
+      let token = sessionStorage.getItem("staff_token") || localStorage.getItem("ehr_admin_token");
       if (!token) {
         window.location.href = "command.html";
         return;
@@ -2653,7 +1982,7 @@
         return;
       }
       
-      const token = sessionStorage.getItem("ehr_creds");
+      const token = sessionStorage.getItem("staff_token");
       try {
         const res = await fetch(`/api/v2/mpi/search?q=${encodeURIComponent(q)}`, {
           headers: { "Authorization": `Bearer ${token}` }
@@ -2688,7 +2017,7 @@
       
       if (!name || !dob) { alert("Name and DOB required"); return; }
       
-      const token = sessionStorage.getItem("ehr_creds");
+      const token = sessionStorage.getItem("staff_token");
       try {
         const res = await fetch(`/api/v2/mpi/register`, {
           method: "POST",
@@ -2755,7 +2084,7 @@
     }
 
     async function loadTimeline(patientId) {
-      const token = sessionStorage.getItem("ehr_creds");
+      const token = sessionStorage.getItem("staff_token");
       try {
         const res = await fetch(`/api/v2/emr/encounters?patientId=${patientId}`, {
           headers: { "Authorization": `Bearer ${token}` }
@@ -2816,11 +2145,11 @@
       if(this.classList.contains("active")) {
         recognition.stop();
         this.classList.remove("active");
-        this.innerHTML = "<i data-lucide="mic" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Dictate";
+        this.innerHTML = `<i data-lucide="mic" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Dictate`;
       } else {
         recognition.start();
         this.classList.add("active");
-        this.innerHTML = "<i data-lucide="octagon" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Stop";
+        this.innerHTML = `<i data-lucide="octagon" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Stop`;
       }
     });
 
@@ -2837,7 +2166,7 @@
       // true robust highlighting requires complex Range mapping. 
       // For this isolated implementation, we'll focus on the AI chips which satisfy Nodes Q-U.
       
-      const token = sessionStorage.getItem("ehr_creds");
+      const token = sessionStorage.getItem("staff_token");
       try {
         const res = await fetch(`/api/v2/emr/ai/suggest`, {
           method: "POST",
@@ -2898,7 +2227,7 @@ Plan:
       const rxMatches = [...text.matchAll(/Rx:\s*([A-Za-z0-9\s-]+)/g)];
       const prescriptions = rxMatches.map(m => m[1].trim());
       
-      const token = sessionStorage.getItem("ehr_creds");
+      const token = sessionStorage.getItem("staff_token");
       
       // Node X: Isolated Inventory Check
       if(prescriptions.length > 0) {
@@ -2962,7 +2291,7 @@ Plan:
     }
     
     async function commitEncounter(payload) {
-      const token = sessionStorage.getItem("ehr_creds");
+      const token = sessionStorage.getItem("staff_token");
       try {
         const res = await fetch(`/api/v2/emr/encounters/finalize`, {
           method: "POST",
@@ -3303,7 +2632,7 @@ Plan:
   function applyRbac(role) {
     let allowedViews = globalPermissions[role] || [];
     if (allowedViews.includes("all") || role === 'admin' || role === 'super_admin') {
-      allowedViews = ['omniBar', 'triageView', 'clinicsDashboardView', 'wardsView', 'pharmacyView', 'labView', 'radView', 'billingView', 'recordsMainView', 'postEncounterView', 'workspace'];
+      allowedViews = ['omniBar', 'triageView', 'consultationView', 'wardsView', 'pharmacyView', 'labView', 'radView', 'billingView', 'recordsMainView', 'postEncounterView', 'workspace'];
     }
     
     // Hide all sidebar buttons first
