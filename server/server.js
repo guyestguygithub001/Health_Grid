@@ -3,6 +3,26 @@ const fs   = require("fs");
 const path = require("path");
 const zlib = require("zlib");
 
+// Manually parse and load .env file if it exists
+const envPath = path.join(__dirname, "..", ".env");
+if (fs.existsSync(envPath)) {
+  const envContent = fs.readFileSync(envPath, "utf8");
+  envContent.split(/\r?\n/).forEach(line => {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith("#")) {
+      const firstEquals = trimmed.indexOf("=");
+      if (firstEquals !== -1) {
+        const key = trimmed.substring(0, firstEquals).trim();
+        const value = trimmed.substring(firstEquals + 1).trim().replace(/^["']|["']$/g, "");
+        if (key && process.env[key] === undefined) {
+          process.env[key] = value;
+        }
+      }
+    }
+  });
+}
+
+
 // ─── PostgreSQL Database + New Patient API ────────────────────
 const db = require('./db-postgres');
 const { handlePatientApi: handlePatientApiV2 } = require('./patient-api');
@@ -1340,11 +1360,11 @@ async function handlePatientApi(req, res, url) {
   }
   
   
-  if (req.method === "GET" && pathname === "/api/v2/permissions") {
+  if (req.method === "GET" && url.pathname === "/api/v2/permissions") {
     sendJson(res, 200, data.permissions || {});
     return;
   }
-  if (req.method === "POST" && pathname === "/api/v2/admin/permissions") {
+  if (req.method === "POST" && url.pathname === "/api/v2/admin/permissions") {
     const body = await collectBody(req);
     // Overwrite the permissions matrix
     data.permissions = body;
@@ -1559,7 +1579,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     // ── 2. Patient & Staff Auth API (PostgreSQL-backed) ─────────────────
-    if (pathname.startsWith(PUBLIC_API) || pathname.startsWith("/api/v2/auth/") || pathname.startsWith(DOCTOR_API) || pathname.startsWith("/api/v2/patients")) {
+    if (pathname.startsWith(PUBLIC_API) || pathname.startsWith("/api/v2/auth/") || pathname.startsWith(DOCTOR_API) || pathname.startsWith("/api/v2/patients") || pathname.startsWith("/api/v2/patient")) {
       const body = ['POST','PUT','PATCH'].includes(req.method) ? await collectBody(req) : {};
         req._precollectedBody = body;
       const handled = await handlePatientApiV2(req, res, url, body);

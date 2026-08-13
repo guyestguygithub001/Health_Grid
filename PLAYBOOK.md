@@ -18,3 +18,8 @@ urse, pharmacist, dmin). Make sure you pass the Bearer token in the Authorizati
 - **Environment Vars**: Copy .env.example to .env. Ensure .env is in .gitignore so you don't leak DB creds again.
 
 *Last updated by: lead_dev*
+
+## 4. Pitch Demo State Architecture (EMRState)
+- **Concept**: For live software pitches where backends might not be fully seeded with edge cases, we use an in-memory EMRState global JS object in emr.html.
+- **Function**: It allows data to flow seamlessly between isolated DOM modules. For example, when a nurse clicks Save Vitals in the Triage module, it updates EMRState.vitals. When a doctor selects that patient in the Consultation module, the script reads EMRState.vitals and populates the UI instantly.
+- **Scope**: Used for Vitals, Pharmacy Orders, Lab Requests, and Radiology Scans.

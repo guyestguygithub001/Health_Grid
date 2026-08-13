@@ -132,7 +132,7 @@
     <!-- Ultra-Clean Light Sidebar with Toggle -->
     <nav id="emrSidebar" class="emr-sidebar">
       <div style="display: flex; align-items: center; margin-bottom: 32px; padding: 0 8px;">
-        <button onclick="document.getElementById('emrSidebar').classList.toggle('sidebar-expanded')" style="background:transparent; border:none; font-size:24px; cursor:pointer; margin-right: 16px;" title="Toggle Sidebar">☰</button>
+        <button onclick="document.getElementById('emrSidebar').classList.toggle('sidebar-expanded')" style="background:transparent; border:none; font-size:24px; cursor:pointer; margin-right: 16px; display: flex; align-items: center; justify-content: center; color: #4b5563; padding: 4px;" title="Toggle Sidebar"><i data-lucide="menu" style="width: 24px; height: 24px;"></i></button>
         <div class="nav-text" style="color: #0284c7; font-weight: 800; font-size: 24px; letter-spacing: -1px; margin-left: 0;">EMR Unit</div>
       </div>
       
@@ -201,11 +201,17 @@
           <div id="searchResults" style="margin-top: 16px;"></div>
           
           <div id="quickRegisterForm" class="hidden" style="margin-top: 24px; text-align: left; border-top: 1px solid #e5e7eb; padding-top: 24px;">
-            <input type="text" id="regName" class="form-input" placeholder="Full Name">
-            <input type="date" id="regDob" class="form-input">
-            <select id="regGender" class="form-input"><option value="Male">Male</option><option value="Female">Female</option></select>
-            <input type="tel" id="regPhone" class="form-input" placeholder="Phone Number">
-            <button onclick="submitQuickRegister()" class="btn btn-primary">Register &amp; Load</button>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+              <input type="text" id="regName" class="form-input" placeholder="Full Name" style="grid-column: span 2;">
+              <input type="date" id="regDob" class="form-input" title="Date of Birth">
+              <input type="number" id="regAge" class="form-input" placeholder="Age">
+              <select id="regGender" class="form-input"><option value="Male">Male</option><option value="Female">Female</option></select>
+              <input type="text" id="regTribe" class="form-input" placeholder="Tribe / Ethnicity">
+              <input type="tel" id="regPhone" class="form-input" placeholder="Phone Number">
+              <input type="text" id="regNationality" class="form-input" placeholder="Nationality" value="Nigerian">
+              <input type="text" id="regAddress" class="form-input" placeholder="Residential Address" style="grid-column: span 2;">
+            </div>
+            <button onclick="submitQuickRegister()" class="btn btn-primary" style="width: 100%;">Register &amp; Load</button>
           </div>
         </div>
       </div>
@@ -368,7 +374,32 @@
           .clinic-btn:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-color: #cbd5e1; }
         </style>
         
-        <script>
+        
+      <!-- VIEW: Records Unit (MPI) -->
+      <div id="recordsMainView" class="emr-view hidden" style="width: 95%; max-width: 1600px; margin: 0 auto; padding: 32px 48px; display: flex; flex-direction: column; flex: 1;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+          <div>
+            <h1 style="font-size:32px;font-weight:800;letter-spacing:-0.02em;margin:0;color:#0f172a;"><i data-lucide="folder" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Health Records Unit (MPI)</h1>
+            <p style="color:#6b7280;font-size:16px;margin-top:8px;">Live feed of all registered patients in the facility.</p>
+          </div>
+          <button onclick="fetchRecordsQueue()" style="background:#4f46e5;color:white;border:none;padding:12px 24px;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;box-shadow:0 4px 6px rgba(79,70,229,0.2);">Refresh Records</button>
+        </div>
+        
+        <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; flex: 1; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+          <div style="padding: 16px 24px; border-bottom: 1px solid #e2e8f0; background: #f8fafc; font-weight: 700; color: #334155; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.5fr 1fr; gap: 16px;">
+            <div>Patient Name</div>
+            <div>Patient ID</div>
+            <div>Demographics</div>
+            <div>Contact Info</div>
+            <div>Registration Date</div>
+          </div>
+          <div id="recordsQueue" style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; background: #f8fafc;">
+            <!-- Dynamically populated via fetchRecordsQueue -->
+          </div>
+        </div>
+      </div>
+
+<script>
           function showClinicCategory(catId) {
             document.getElementById('clinicsCategoriesGrid').style.display = 'none';
             document.getElementById('clinicsUnitsContainer').style.display = 'block';
@@ -464,11 +495,12 @@
 </div>
 
 <script>
-function selectConsultationPatient(id, name, temp, bp) {
+function selectConsultationPatient(id, name, temp, bp, encounterId) {
     document.getElementById('consultationEmptyState').style.display = 'none';
     document.getElementById('activeConsultationPane').style.display = 'flex';
     document.getElementById('consultPatientName').innerText = name;
     document.getElementById('consultPatientId').innerText = id;
+    document.getElementById('activeConsultationPane').dataset.encounterId = encounterId || '';
     
     let finalTemp = temp;
     let finalBp = bp;
@@ -481,13 +513,11 @@ function selectConsultationPatient(id, name, temp, bp) {
     }
     
     document.getElementById('consultTemp').innerText = finalTemp;
-    document.getElementById('consultBp').innerText = finalBp + (hrStr !== '--' ? ' | HR: ' + hrStr : '');
-    document.querySelectorAll('#activeConsultationPane textarea, #activeConsultationPane input').forEach(el => el.value = '');
-    lucide.createIcons();
+    document.getElementById('consultBp').innerText = finalBp;
 }
-
 async function dischargeConsultation() {
     const patientId = document.getElementById('consultPatientId').innerText;
+    const encounterId = document.getElementById('activeConsultationPane').dataset.encounterId;
     if(!patientId) return alert("Select a patient first.");
     
     // Gather form data
@@ -495,22 +525,31 @@ async function dischargeConsultation() {
     const notes = document.querySelector('#activeConsultationPane textarea:nth-of-type(2)')?.value || "";
     const icd11 = document.querySelector('#activeConsultationPane input')?.value || "";
 
+    // Orders (Lab & Rx)
+    const labs = Array.from(document.getElementById('labOrdersList')?.children || []).map(li => li.innerText.replace('', '').trim());
+    const rx = Array.from(document.getElementById('rxOrdersList')?.children || []).map(li => li.innerText.replace('', '').trim());
+
     try {
         const token = sessionStorage.getItem('staff_token');
-        const res = await fetch('/api/v2/emr/encounters/finalize', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify({ patientId, chiefComplaint, notes, icd11 })
+        const res = await window.API.finalizeConsultation({ 
+            encounterId, 
+            patientId, 
+            chiefComplaint, 
+            notes: { text: notes }, 
+            icd11Code: icd11,
+            labOrders: labs.length ? labs : undefined,
+            prescriptions: rx.length ? rx : undefined
         });
-        if(res.ok) {
-            alert(`Encounter finalized for ${patientId} and sent to Billing! Patient discharged.`);
-            document.getElementById('activeConsultationPane').style.display = 'none';
-            document.getElementById('consultationEmptyState').style.display = 'flex';
-        } else {
-            alert('Failed to finalize encounter.');
-        }
+        
+        showToast(`Encounter finalized for ${patientId}. Orders sent.`);
+        document.getElementById('activeConsultationPane').style.display = 'none';
+        document.getElementById('consultationEmptyState').style.display = 'flex';
+        
+        // Refresh queue
+        fetchDoctorQueue(document.getElementById('consultationTitle').innerText.replace(' Consultation', ''));
     } catch(e) {
-        alert('Connection error. Is server running?');
+        console.error(e);
+        alert('Failed to finalize encounter. Is server running?');
     }
 }
 </script>
@@ -535,51 +574,7 @@ async function dischargeConsultation() {
               Waiting Queue
               <span style="background: #ef4444; color: white; border-radius: 999px; padding: 2px 8px; font-size: 12px;">3</span>
             </div>
-            <div style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;">
-              
-              <!-- Patient Card 1 -->
-              <div onclick="selectTriagePatient('PT-889', 'Musa Ibrahim', '45 yrs', 'Male')" class="triage-card" style="padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1; background: white; cursor: pointer; transition: all 0.2s;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <div style="font-weight: 700; color: #0f172a; font-size: 15px;">Musa Ibrahim</div>
-                  <div style="font-size: 12px; color: #64748b; font-weight: 600;">PT-889</div>
-                </div>
-                <div style="display: flex; gap: 12px; font-size: 13px; color: #475569; margin-bottom: 12px;">
-                  <span>45 yrs</span><span>���</span><span>Male</span>
-                </div>
-                <div style="font-size: 12px; font-weight: 600; color: #ef4444; display: flex; align-items: center; gap: 4px;">
-                  <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#ef4444;"></span> Chest Pain
-                </div>
-              </div>
-
-              <!-- Patient Card 2 -->
-              <div onclick="selectTriagePatient('PT-902', 'Ngozi Okafor', '28 yrs', 'Female')" class="triage-card" style="padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1; background: white; cursor: pointer; transition: all 0.2s;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <div style="font-weight: 700; color: #0f172a; font-size: 15px;">Ngozi Okafor</div>
-                  <div style="font-size: 12px; color: #64748b; font-weight: 600;">PT-902</div>
-                </div>
-                <div style="display: flex; gap: 12px; font-size: 13px; color: #475569; margin-bottom: 12px;">
-                  <span>28 yrs</span><span>���</span><span>Female</span>
-                </div>
-                <div style="font-size: 12px; font-weight: 600; color: #f59e0b; display: flex; align-items: center; gap: 4px;">
-                  <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#f59e0b;"></span> Fever, Nausea
-                </div>
-              </div>
-
-              <!-- Patient Card 3 -->
-              <div onclick="selectTriagePatient('PT-915', 'Tunde Bakare', '62 yrs', 'Male')" class="triage-card" style="padding: 16px; border-radius: 12px; border: 1px solid #cbd5e1; background: white; cursor: pointer; transition: all 0.2s;">
-                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                  <div style="font-weight: 700; color: #0f172a; font-size: 15px;">Tunde Bakare</div>
-                  <div style="font-size: 12px; color: #64748b; font-weight: 600;">PT-915</div>
-                </div>
-                <div style="display: flex; gap: 12px; font-size: 13px; color: #475569; margin-bottom: 12px;">
-                  <span>62 yrs</span><span>���</span><span>Male</span>
-                </div>
-                <div style="font-size: 12px; font-weight: 600; color: #3b82f6; display: flex; align-items: center; gap: 4px;">
-                  <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background:#3b82f6;"></span> Routine Checkup
-                </div>
-              </div>
-
-            </div>
+            <div id="triagePendingQueue" style="flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px;"></div>
           </div>
 
           <!-- Assessment Pane -->
@@ -688,15 +683,17 @@ async function dischargeConsultation() {
         </style>
         
         <script>
-          function selectTriagePatient(id, name, age, gender) {
+          function selectTriagePatient(id, name, age, gender, encounterId) {
             document.getElementById('triageEmptyState').style.display = 'none';
             document.getElementById('triageFormContainer').style.display = 'flex';
             document.getElementById('triagePatientName').innerText = name;
-            document.getElementById('triagePatientDetails').innerText = `${id} ��� ${age} ��� ${gender}`;
+            document.getElementById('triagePatientDetails').innerText = `${id} | ${age} | ${gender}`;
+            document.getElementById('vitalsForm').dataset.encounterId = encounterId || '';
+            document.getElementById('vitalsForm').dataset.patientId = id || '';
             document.getElementById('vitalsForm').reset();
             
-            // Reset priority UI
-            document.querySelector('input[value="routine"]').checked = true;
+            const r = document.querySelector('input[value="routine"]');
+            if(r) r.checked = true;
           }
           
           function cancelTriage() {
@@ -704,20 +701,19 @@ async function dischargeConsultation() {
             document.getElementById('triageEmptyState').style.display = 'flex';
           }
           
-          function submitVitals(e) {
+          async function submitVitals(e) {
             e.preventDefault();
             const btn = e.target.querySelector('button[type="submit"]');
             const ogText = btn.innerText;
             btn.innerText = 'Saving...';
             btn.style.opacity = '0.7';
             
-            // Extract values
             const inputs = e.target.querySelectorAll('input[type="number"]');
-            const patientStr = document.getElementById('triagePatientDetails').innerText; 
-            const patientId = patientStr.split(' ')[0];
+            const encounterId = e.target.dataset.encounterId;
+            const patientId = e.target.dataset.patientId;
             
-            if(inputs.length >= 7 && patientId) {
-                EMRState.vitals[patientId] = {
+            if(inputs.length >= 7 && encounterId) {
+                const vitals = {
                     bpSys: inputs[0].value,
                     bpDia: inputs[1].value,
                     hr: inputs[2].value,
@@ -728,7 +724,21 @@ async function dischargeConsultation() {
                 };
                 
                 // Keep it globally accessible for other views
-                console.log("Vitals updated in EMRState for", patientId, EMRState.vitals[patientId]);
+                if(typeof EMRState !== 'undefined') EMRState.vitals[patientId] = vitals;
+                
+                // Send to API
+                try {
+                  await window.API.updateRecord('encounters', encounterId, {
+                    vitals,
+                    status: 'Awaiting Consultation',
+                    unit: 'Consultation'
+                  });
+                  // Refresh triage queue
+                  fetchTriageQueue();
+                } catch(err) {
+                  console.error('Failed to save vitals', err);
+                }
+
             }
 
             setTimeout(() => {
@@ -1857,24 +1867,44 @@ async function dischargeConsultation() {
     async function submitQuickRegister() {
       const name = document.getElementById("regName").value;
       const dob = document.getElementById("regDob").value;
+      const age = document.getElementById("regAge").value;
       const gender = document.getElementById("regGender").value;
+      const tribe = document.getElementById("regTribe").value;
       const phone = document.getElementById("regPhone").value;
+      const nationality = document.getElementById("regNationality").value;
+      const address = document.getElementById("regAddress").value;
       
-      if (!name || !dob) { alert("Name and DOB required"); return; }
+      if (!name) { alert("Name is required"); return; }
+      if (!phone) { alert("Phone is required"); return; }
       
-      const token = sessionStorage.getItem("staff_token");
+      const newPatientData = {
+          name: name,
+          dob: dob,
+          age: age,
+          sex: gender,
+          lga: tribe,
+          phone: phone,
+          nationality: nationality,
+          address: address
+      };
+      
       try {
-        const res = await fetch(`/api/v2/mpi/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-          body: JSON.stringify({ name, dob, gender, phone })
-        });
-        const data = await res.json();
-        if (data.success) {
-          loadPatient(data.patient);
+        const data = await window.API.registerPatient(newPatientData);
+        if (data.ok || data.success) {
+          showToast("Patient registered successfully!");
+          document.getElementById('quickRegisterForm').classList.add('hidden');
+          // Load them into the context if available
+          if(typeof loadPatient === 'function') loadPatient(data.patient || data.data);
+          
+          // Refresh records and triage if they are listening
+          if(typeof fetchRecordsQueue === 'function') fetchRecordsQueue();
+          if(typeof fetchTriageQueue === 'function') fetchTriageQueue();
+        } else {
+          alert("Registration failed: " + (data.error || "Unknown error"));
         }
       } catch (err) {
         console.error(err);
+        alert("Registration failed. Is the server running?");
       }
     }
 
@@ -1883,59 +1913,73 @@ async function dischargeConsultation() {
     // ----------------------------------------------------
     async function loadPatient(patient) {
       window.EMRContext.patient = patient;
-      switchEmrView('workspace');
       
-      document.getElementById("patName").textContent = patient.name;
-      document.getElementById("patDetails").textContent = `${patient.id} | DOB: ${patient.dob || 'Unknown'} | ${patient.gender || ''}`;
+      const patNameEl = document.getElementById('patName');
+      if (patNameEl) patNameEl.textContent = patient.name;
       
-      document.getElementById("composer").innerHTML = "";
-      document.getElementById("aiChips").innerHTML = "";
+      const patDetailsEl = document.getElementById('patDetails');
+      if (patDetailsEl) patDetailsEl.textContent = `${patient.id} | DOB: ${patient.dob || 'Unknown'} | ${patient.gender || ''}`;
+      
+      const composerEl = document.getElementById('composer');
+      if (composerEl) composerEl.innerHTML = '';
+      
+      const aiChipsEl = document.getElementById('aiChips');
+      if (aiChipsEl) aiChipsEl.innerHTML = '';
       
       const draft = localStorage.getItem(`emr_draft_${patient.id}`);
-      if (draft) {
-        if(confirm("Restore unsaved draft?")) {
-          document.getElementById("composer").innerText = draft;
+      if (draft && composerEl) {
+        if(confirm('Restore unsaved draft?')) {
+          composerEl.innerText = draft;
         } else {
           localStorage.removeItem(`emr_draft_${patient.id}`);
         }
       }
       
-      document.getElementById("composer").focus();
+      if (composerEl) composerEl.focus();
       
-      // Node N: Auto-save scratchpad
-      if(autoSaveTimer) clearInterval(autoSaveTimer);
+      if(typeof autoSaveTimer !== 'undefined' && autoSaveTimer) clearInterval(autoSaveTimer);
       autoSaveTimer = setInterval(() => {
-        const text = document.getElementById("composer").innerText;
+        const text = document.getElementById('composer') ? document.getElementById('composer').innerText : '';
         if(text.trim()) localStorage.setItem(`emr_draft_${patient.id}`, text);
       }, 3000);
       
-      // Setup Composer NLP Listener
-      document.getElementById("composer").addEventListener("input", () => {
-        clearTimeout(nlpTimer);
-        nlpTimer = setTimeout(triggerNLPEngine, 2000);
-      });
+      const composerNode = document.getElementById('composer');
+      if (composerNode) {
+        composerNode.addEventListener('input', () => {
+          if (typeof nlpTimer !== 'undefined') clearTimeout(nlpTimer);
+          nlpTimer = setTimeout(typeof triggerNLPEngine === 'function' ? triggerNLPEngine : () => {}, 2000);
+        });
+      }
       
-      await loadTimeline(patient.id);
+      try {
+        if(typeof loadTimeline === 'function') await loadTimeline(patient.id);
+      } catch (err) {
+        console.warn('Timeline not available');
+      }
     }
-    
+
     function exitEncounter() {
-      if(!confirm("Are you sure you want to cancel this encounter? Unsaved notes will be lost.")) return;
-      if(autoSaveTimer) clearInterval(autoSaveTimer);
+      if(!confirm('Are you sure you want to cancel this encounter? Unsaved notes will be lost.')) return;
+      if(typeof autoSaveTimer !== 'undefined' && autoSaveTimer) clearInterval(autoSaveTimer);
       window.EMRContext.patient = null;
-      document.getElementById("mpiSearch").value = "";
-      document.getElementById("searchResults").innerHTML = "";
-      document.getElementById("quickRegisterForm").classList.add("hidden");
-      showOmniBar();
+      const searchBox = document.getElementById('mpiSearch');
+      if (searchBox) searchBox.value = '';
+      const searchRes = document.getElementById('searchResults');
+      if (searchRes) searchRes.innerHTML = '';
+      const quickReg = document.getElementById('quickRegisterForm');
+      if (quickReg) quickReg.classList.add('hidden');
+      if(typeof showOmniBar === 'function') showOmniBar();
     }
 
     async function loadTimeline(patientId) {
-      const token = sessionStorage.getItem("staff_token");
+      const token = sessionStorage.getItem('staff_token');
       try {
         const res = await fetch(`/api/v2/emr/encounters?patientId=${patientId}`, {
-          headers: { "Authorization": `Bearer ${token}` }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
-        const feed = document.getElementById("timelineFeed");
+        const feed = document.getElementById('timelineFeed');
+        if(!feed) return;
         if (data.encounters && data.encounters.length > 0) {
           feed.innerHTML = data.encounters.map(e => `
             <div class="timeline-item" style="${e.type === 'Nursing Note' ? 'border-left-color: #0ea5e9;' : ''}">
@@ -2464,6 +2508,149 @@ Plan:
 
 <script>
   // --- GLOBAL EMR STATE (MOCK DB FOR DEMO) ---
+  
+  // --- EMR API CLIENT ---
+  window.API = {
+    async registerPatient(data) {
+      const res = await fetch('/api/v2/patient/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+      return res.json();
+    },
+    async createEncounter(data) {
+      const res = await fetch('/api/v2/encounters', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+      return res.json();
+    },
+    async getPatients() {
+      const res = await fetch('/api/v2/mpi/search?q=');
+      return res.json();
+    },
+    async getEncounters() {
+      const res = await fetch('/api/v2/encounters');
+      return res.json();
+    },
+    async updateRecord(collection, id, fields) {
+      const res = await fetch('/api/v2/update-record', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({collection, id, fields}) });
+      return res.json();
+    },
+    async finalizeConsultation(data) {
+      const res = await fetch('/api/v2/emr/encounters/finalize', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data) });
+      return res.json();
+    }
+  };
+
+  async function fetchRecordsQueue() {
+    const q = document.getElementById('recordsQueue');
+    if (!q) return;
+    
+    try {
+      // Fetch all patients from backend
+      const res = await fetch('/api/v2/mpi/search?q=');
+      const data = await res.json();
+      
+      q.innerHTML = '';
+      if (!data.results || data.results.length === 0) {
+        q.innerHTML = '<div style="padding: 48px; text-align: center; color: #94a3b8; font-size: 16px;">No patients found in database.</div>';
+        return;
+      }
+      
+      // Sort by latest registered (approximate using ID descending)
+      const patients = data.results.sort((a,b) => b.id.localeCompare(a.id));
+      
+      patients.forEach(pt => {
+        const item = document.createElement('div');
+        item.style = 'padding: 16px 24px; border-bottom: 1px solid #e2e8f0; background: white; display: grid; grid-template-columns: 1.5fr 1fr 1fr 1.5fr 1fr; gap: 16px; align-items: center; transition: background 0.2s;';
+        item.onmouseover = () => item.style.background = '#f8fafc';
+        item.onmouseout = () => item.style.background = 'white';
+        
+        item.innerHTML = `
+          <div style="font-weight: 700; color: #0f172a; font-size: 15px;">${pt.name}</div>
+          <div style="font-family: monospace; color: #4f46e5; font-weight: 600;">${pt.id}</div>
+          <div style="font-size: 14px; color: #475569;">${pt.age || '-'} yrs &bull; ${pt.gender || '-'}</div>
+          <div style="font-size: 14px; color: #475569;">${pt.phone || 'No Phone'}<br><span style="font-size: 12px; color: #94a3b8;">${pt.address || ''}</span></div>
+          <div style="font-size: 13px; color: #64748b;">${pt.registeredAt ? new Date(pt.registeredAt).toLocaleString() : '-'}</div>
+        `;
+        q.appendChild(item);
+      });
+    } catch (e) {
+      console.error('Failed to fetch records', e);
+      q.innerHTML = '<div style="padding: 48px; text-align: center; color: #ef4444; font-size: 16px;">Failed to connect to database.</div>';
+    }
+  }
+
+
+  async function fetchTriageQueue() {
+    try {
+      const encounters = await window.API.getEncounters();
+      const triageList = encounters.filter(e => e.status === 'Awaiting Triage' || e.unit === 'Triage');
+      renderTriageQueue(triageList);
+    } catch (e) {
+      console.error('Failed to fetch triage queue', e);
+    }
+  }
+
+  function renderTriageQueue(list) {
+    const q = document.getElementById('triagePendingQueue');
+    if (!q) return;
+    q.innerHTML = '';
+    if (list.length === 0) {
+      q.innerHTML = '<div style="padding: 24px; text-align: center; color: #94a3b8; font-size: 14px;">No patients in queue</div>';
+      return;
+    }
+    list.forEach(enc => {
+      const item = document.createElement('div');
+      item.className = 'queue-item';
+      item.innerHTML = `
+          <div class="q-time">Wait: ${Math.floor((Date.now() - new Date(enc.date).getTime())/60000) || 0}m</div>
+          <div class="q-info">
+            <strong>${enc.patientId}</strong>
+            <span>Encounter ${enc.id} &bull; ${enc.status}</span>
+          </div>
+          <div class="q-action">
+            <button onclick="selectTriagePatient('${enc.patientId}', '${enc.patientId}', '30', 'Unknown', '${enc.id}')">Review</button>
+          </div>
+      `;
+      q.appendChild(item);
+    });
+  }
+
+  async function fetchDoctorQueue(unitFilter) {
+    try {
+      const encounters = await window.API.getEncounters();
+      let docList = encounters.filter(e => e.status === 'Awaiting Consultation');
+      if (unitFilter && unitFilter !== 'Consultation') {
+        docList = docList.filter(e => e.unit === unitFilter || e.unit === 'Consultation');
+      }
+      renderDoctorQueue(docList);
+    } catch (e) {
+      console.error('Failed to fetch doctor queue', e);
+    }
+  }
+
+  function renderDoctorQueue(list) {
+    const q = document.getElementById('consultationQueue');
+    if (!q) return;
+    q.innerHTML = '';
+    if (list.length === 0) {
+      q.innerHTML = '<div style="padding: 24px; text-align: center; color: #94a3b8; font-size: 14px;">No patients waiting</div>';
+      return;
+    }
+    list.forEach(enc => {
+      const item = document.createElement('div');
+      item.onclick = () => selectConsultationPatient(enc.patientId, enc.patientId, enc.vitals?.temp || '--', enc.vitals?.bpSys ? enc.vitals.bpSys+'/'+enc.vitals.bpDia : '--', enc.id);
+      item.style = 'padding: 12px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 12px; cursor: pointer; transition: 0.2s; background: white;';
+      item.innerHTML = `
+          <div style="font-weight: 700; font-size: 15px; color: #0f172a;">${enc.patientId}</div>
+          <div style="font-size: 13px; color: #64748b; margin-top: 4px;">Encounter ${enc.id} | Unit: ${enc.unit || 'OPD'}</div>
+      `;
+      q.appendChild(item);
+    });
+  }
+
+  window.openConsultationWorkspace = function(unitName) {
+    switchEmrView('consultationView');
+    document.getElementById('consultationTitle').innerText = unitName + ' Consultation';
+    fetchDoctorQueue(unitName);
+  };
+
   const EMRState = {
     vitals: {}, // patientId -> { bp, temp, hr, resp, spo2, bmi }
     orders: {
@@ -2732,36 +2919,35 @@ setInterval(function() {
 </div>
 
 <script>
-function submitWalkinTriage() {
+async function submitWalkinTriage() {
     const name = document.getElementById('triageWalkinName').value;
     const age = document.getElementById('triageWalkinAge').value || '30';
     const gender = document.getElementById('triageWalkinGender').value;
+    const tribe = document.getElementById('triageWalkinTribe').value || '';
+    const nationality = document.getElementById('triageWalkinNationality').value || 'Nigerian';
     if (!name) return alert('Name is required.');
     
-    const id = 'PT' + Math.floor(1000 + Math.random() * 9000);
+    // Register Patient
+    const regRes = await window.API.registerPatient({
+      name, age, sex: gender, phone: '000-000-0000', lga: tribe, community: nationality
+    });
+    if (!regRes.ok) return alert('Registration failed');
     
-    const q = document.getElementById('triagePendingQueue');
-    const item = document.createElement('div');
-    item.className = 'queue-item';
-    item.innerHTML = `
-        <div class="q-time">Now</div>
-        <div class="q-info">
-          <strong>${name}</strong>
-          <span>${id} &bull; ${age} Yrs &bull; ${gender}</span>
-        </div>
-        <div class="q-action">
-          <button onclick="selectTriagePatient('${id}', '${name}', '${age}', '${gender}')">Review</button>
-        </div>
-    `;
-    // Insert at beginning
-    if(q.firstChild) q.insertBefore(item, q.firstChild);
-    else q.appendChild(item);
+    // Create Encounter
+    await window.API.createEncounter({
+      patientId: regRes.patient.id,
+      unit: 'Triage',
+      status: 'Awaiting Triage',
+      chiefComplaint: 'Walk-in'
+    });
     
     document.getElementById('addTriagePatientModal').style.display = 'none';
     document.getElementById('triageWalkinName').value = '';
     document.getElementById('triageWalkinAge').value = '';
     document.getElementById('triageWalkinNationality').value = 'Nigerian';
     document.getElementById('triageWalkinTribe').value = '';
+    
+    fetchTriageQueue();
 }
 </script>
 </body></html>
