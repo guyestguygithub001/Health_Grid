@@ -216,17 +216,65 @@
         </div>
       </div>
       <!-- VIEW: Appointment Requests (Doctor-side portal booking management) -->
-            <!-- VIEW: Inpatient Wards -->
-      <div id="wardsView" class="emr-view hidden" style="width: 100%; max-width: 1200px; margin: 0 auto; padding: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;">
-        <div style="background: white; border-radius: 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); border: 1px solid #f1f5f9; padding: 64px; text-align: center; width: 100%; max-width: 600px;">
-          <div style="background: #eff6ff; width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; color: #3b82f6;">
-            <i data-lucide="bed" style="width: 40px; height: 40px;"></i>
+                  <!-- VIEW: Inpatient Wards -->
+      <div id="wardsView" class="emr-view hidden" style="width: 100%; max-width: 1600px; margin: 0 auto; padding: 32px 48px; display: flex; flex-direction: column; flex: 1;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+          <div>
+            <h1 style="font-size:32px;font-weight:800;letter-spacing:-0.02em;margin:0;color:#0f172a;"><i data-lucide="bed" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Inpatient Wards</h1>
+            <p style="color:#6b7280;font-size:16px;margin-top:8px;">Live management of bed allocations and patient admissions across all departments.</p>
           </div>
-          <h2 style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 0 0 12px 0;">Inpatient Wards</h2>
-          <p style="color: #64748b; font-size: 16px; margin: 0 0 32px 0; line-height: 1.6;">The Wards Management module is currently being provisioned. Once online, you will be able to manage bed allocations, inpatient nursing logs, and ward rounds.</p>
-          <button style="background: #3b82f6; color: white; border: none; border-radius: 12px; padding: 14px 28px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2); transition: all 0.2s;" onclick="alert('Module provisioning in progress')">Notify Me When Ready</button>
+          <div style="display: flex; gap: 12px; align-items: center;">
+            <div style="display: flex; gap: 16px; background: white; padding: 12px 24px; border-radius: 12px; border: 1px solid #e2e8f0; font-size: 14px; font-weight: 600;">
+                <div><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;margin-right:6px;"></span>Available: <span id="wardsAvailableCount">0</span></div>
+                <div><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-right:6px;"></span>Occupied: <span id="wardsOccupiedCount">0</span></div>
+            </div>
+            <button onclick="fetchLiveWards()" style="background:#0B5E7E;color:white;border:none;padding:12px 24px;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;box-shadow:0 4px 6px rgba(11, 94, 126,0.2);"><i data-lucide="refresh-cw" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i> Refresh</button>
+          </div>
+        </div>
+        
+        <div id="wardsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 24px; overflow-y: auto; padding-bottom: 48px;">
+          <!-- Ward Cards Injected Here -->
+          <div style="color:#9ca3af;text-align:center;padding:48px;grid-column: 1 / -1;">Loading wards database...</div>
         </div>
       </div>
+      
+      <!-- ADMIT PATIENT MODAL -->
+      <div id="admitPatientModal" class="hidden" style="position: fixed; inset: 0; background: rgba(15,23,42,0.6); display: none; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(4px);">
+        <div style="background: white; border-radius: 20px; width: 500px; max-width: 90%; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+          <div style="background: #3b82f6; padding: 24px; color: white; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h3 style="margin: 0; font-size: 20px; font-weight: 800;">Admit Patient</h3>
+              <p id="admitModalSubtitle" style="margin: 4px 0 0 0; font-size: 13px; opacity: 0.9;">Ward Name • Bed ID</p>
+            </div>
+            <button onclick="document.getElementById('admitPatientModal').classList.add('hidden'); document.getElementById('admitPatientModal').style.display='none';" style="background: transparent; border: none; color: white; font-size: 28px; cursor: pointer; opacity: 0.8; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.8'">×</button>
+          </div>
+          <div style="padding: 32px;">
+            <input type="hidden" id="admitWardId">
+            <input type="hidden" id="admitBedId">
+            
+            <div style="margin-bottom: 24px;">
+              <label style="display: block; font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 8px;">Select Patient to Admit</label>
+              <div style="position: relative;">
+                <i data-lucide="search" style="position: absolute; left: 14px; top: 14px; color: #94a3b8; width: 18px; height: 18px;"></i>
+                <input type="text" id="admitSearchInput" placeholder="Search by Name or ID..." onkeyup="searchPatientForAdmission(this.value)" autocomplete="off" style="width: 100%; padding: 14px 14px 14px 40px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 15px; outline: none; transition: border-color 0.2s; box-sizing: border-box;" onfocus="this.style.borderColor='#3b82f6'" onblur="this.style.borderColor='#e2e8f0'">
+              </div>
+            </div>
+            
+            <div id="admitSearchResults" style="max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 12px; display: none; background: #f8fafc;">
+            </div>
+            
+            <div id="selectedAdmitPatient" class="hidden" style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 16px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; margin-top: 16px;">
+              <div>
+                <div style="font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; margin-bottom: 4px;">Patient Selected</div>
+                <div id="selectedAdmitName" style="font-weight: 700; color: #14532d; font-size: 16px;">--</div>
+                <div id="selectedAdmitId" style="font-size: 13px; color: #166534;">--</div>
+              </div>
+              <button onclick="confirmAdmission()" style="background: #22c55e; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; box-shadow: 0 2px 4px rgba(34,197,94,0.2);">Confirm</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       <!-- VIEW: Pharmacy -->
       <div id="pharmacyView" class="emr-view hidden" style="width: 100%; max-width: 1200px; margin: 0 auto; padding: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1;">
@@ -2589,6 +2637,18 @@ Plan:
     },
     async createEncounter(data) {
       const res = await fetch('/api/v2/encounters', { method: 'POST', headers: this._headers(), body: JSON.stringify(data) });
+      return res.json();
+    },
+    async getWards() {
+      const res = await fetch('/api/v2/wards', { headers: { 'Authorization': 'Bearer ' + sessionStorage.getItem('staff_token') } });
+      return res.json();
+    },
+    async admitPatient(wardId, bedId, patientId) {
+      const res = await fetch('/api/v2/wards/admit', { method: 'POST', headers: this._headers(), body: JSON.stringify({wardId, bedId, patientId}) });
+      return res.json();
+    },
+    async dischargePatient(wardId, bedId) {
+      const res = await fetch('/api/v2/wards/discharge', { method: 'POST', headers: this._headers(), body: JSON.stringify({wardId, bedId}) });
       return res.json();
     },
     async getPatients() {

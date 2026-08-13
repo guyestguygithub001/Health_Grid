@@ -1,0 +1,118 @@
+{
+  "wards": [
+    {
+      "id": "A&E",
+      "name": "Accident & Emergency",
+      "category": "Primary & Emergency",
+      "capacity": 10,
+      "beds": [
+        { "bedId": "A&E-01", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "A&E-02", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "A&E-03", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "A&E-04", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "A&E-05", "status": "available", "patientId": null, "admittedAt": null }
+      ]
+    },
+    {
+      "id": "EPU",
+      "name": "Emergency Pediatric Unit",
+      "category": "Primary & Emergency",
+      "capacity": 8,
+      "beds": [
+        { "bedId": "EPU-01", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "EPU-02", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "EPU-03", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "EPU-04", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "EPU-05", "status": "available", "patientId": null, "admittedAt": null }
+      ]
+    },
+    {
+      "id": "MED-M",
+      "name": "Male Medical Ward",
+      "category": "General Care",
+      "capacity": 12,
+      "beds": [
+        { "bedId": "MMW-01", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MMW-02", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MMW-03", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MMW-04", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MMW-05", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MMW-06", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MMW-07", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MMW-08", "status": "available", "patientId": null, "admittedAt": null }
+      ]
+    },
+    {
+      "id": "MED-F",
+      "name": "Female Medical Ward",
+      "category": "General Care",
+      "capacity": 12,
+      "beds": [
+        { "bedId": "FMW-01", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "FMW-02", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "FMW-03", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "FMW-04", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "FMW-05", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "FMW-06", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "FMW-07", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "FMW-08", "status": "available", "patientId": null, "admittedAt": null }
+      ]
+    },
+    {
+      "id": "SURG",
+      "name": "Surgical Ward",
+      "category": "Surgical & Procedures",
+      "capacity": 10,
+      "beds": [
+        { "bedId": "SURG-01", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "SURG-02", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "SURG-03", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "SURG-04", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "SURG-05", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "SURG-06", "status": "available", "patientId": null, "admittedAt": null }
+      ]
+    },
+    {
+      "id": "MAT",
+      "name": "Maternity Ward",
+      "category": "Women & Children",
+      "capacity": 15,
+      "beds": [
+        { "bedId": "MAT-01", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MAT-02", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MAT-03", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MAT-04", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MAT-05", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MAT-06", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MAT-07", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "MAT-08", "status": "available", "patientId": null, "admittedAt": null }
+      ]
+    },
+    {
+      "id": "PED",
+      "name": "Pediatrics Ward",
+      "category": "Women & Children",
+      "capacity": 12,
+      "beds": [
+        { "bedId": "PED-01", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "PED-02", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "PED-03", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "PED-04", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "PED-05", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "PED-06", "status": "available", "patientId": null, "admittedAt": null }
+      ]
+    },
+    {
+      "id": "PSY",
+      "name": "Psychiatry Ward",
+      "category": "Mental & Allied Health",
+      "capacity": 8,
+      "beds": [
+        { "bedId": "PSY-01", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "PSY-02", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "PSY-03", "status": "available", "patientId": null, "admittedAt": null },
+        { "bedId": "PSY-04", "status": "available", "patientId": null, "admittedAt": null }
+      ]
+    }
+  ]
+}
