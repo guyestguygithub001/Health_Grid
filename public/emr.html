@@ -1884,7 +1884,7 @@ async function dischargeConsultation() {
       } else if (viewId === 'billingView') {
         if(typeof loadBilling === 'function') { loadBilling(); billingInterval = setInterval(loadBilling, 8000); }
       } else if (viewId === 'recordsMainView') {
-        if(typeof loadRecordsData === 'function') { loadRecordsData(); }
+        if(typeof fetchRecordsQueue === 'function') { fetchRecordsQueue(); }
       }
     }
 
