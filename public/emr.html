@@ -137,7 +137,7 @@
       </div>
       
       <div style="display: flex; flex-direction: column; width: 100%;">
-        <button class="nav-btn active" onclick="switchEmrView('omniBar')" title="Search / Home"><span><i data-lucide="search" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Omni-Bar / Search</span></button>
+        <button class="nav-btn active" onclick="switchEmrView('omniBar')" title="Front Desk & Records"><span><i data-lucide="users" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Front Desk & Records</span></button>
         <button class="nav-btn" onclick="switchEmrView('triageView')" data-target-view="triageView" title="Triage &amp; Vitals"><span><i data-lucide="activity" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Triage &amp; Vitals</span></button>
         <button class="nav-btn" onclick="switchEmrView('clinicsDashboardView')" data-target-view="clinicsDashboardView" title="Outpatient Clinics"><span><i data-lucide="plus-circle" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span><span class="nav-text">Outpatient Clinics</span></button>
         <button class="nav-btn" onclick="switchEmrView('wardsView')" data-target-view="wardsView" title="Inpatient Wards"><span><i data-lucide="bed" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i>️</span><span class="nav-text">Inpatient Wards</span></button>
@@ -186,7 +186,7 @@
       <!-- VIEW 1: Omni-Bar -->
       <div id="omniBar" class="emr-view hidden" style="width: 100%; max-width: 800px; margin: 0 auto; align-self: center; padding: 32px 48px; display: flex; flex-direction: column; flex: 1; background: transparent; justify-content: flex-start; align-items: center; margin-top: 10vh;">
         <div class="search-card" style="width: 100%; max-width: 800px; margin: 0 auto;">
-          <h1 style="text-align: center; margin-bottom: 32px; font-size: 32px; font-weight: 800; letter-spacing: -0.02em;">Omni-Bar</h1>
+          <h1 style="text-align: center; margin-bottom: 32px; font-size: 32px; font-weight: 800; letter-spacing: -0.02em;">Front Desk & Records</h1>
           <div class="search-input-wrapper">
             <span class="icon-btn"><i data-lucide="search" style="width: 1em; height: 1em; display: inline-block; vertical-align: middle;"></i></span>
             <input type="text" id="mpiSearch" placeholder="Search patient by name or ID..." oninput="debounceSearch()">
@@ -195,6 +195,8 @@
           </div>
           <div style="text-align: center; margin-top: 12px;">
             <a href="javascript:void(0)" onclick="toggleQuickRegister()" style="color: #0B5E7E; font-size: 14px; text-decoration: none; font-weight: bold;">+ New Patient</a>
+            <span style="color: #cbd5e1; margin: 0 12px;">|</span>
+            <a href="javascript:void(0)" onclick="switchEmrView('recordsMainView')" style="color: #4f46e5; font-size: 14px; text-decoration: none; font-weight: bold;"><i data-lucide="folder-open" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle; margin-right: 4px;"></i>Active Patient Queue</a>
           </div>
           
           <div id="searchResults" style="margin-top: 16px;"></div>
